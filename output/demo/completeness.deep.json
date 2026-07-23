@@ -1,0 +1,4751 @@
+{
+  "generated_at": "2026-07-17T17:17:01",
+  "schema_version": "1.1.0-layered-parsing",
+  "summary": {
+    "slopes": 13,
+    "average_risk_data_completeness": 0.477,
+    "ready": 0,
+    "not_ready": 13
+  },
+  "reports": [
+    {
+      "slope_id": "slope_9c334c52ab83",
+      "label": "G209 K2388+976-K2389+036 左侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.4,
+      "risk_readiness": "not_ready",
+      "blocking_count": 12,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_height_m",
+        "slope_gradient_deg",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-001"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2388+976-K2389+036左侧危岩体"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2388+976"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2389+036"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2388976
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2389036
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "左侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS01",
+            "x": 356065.841,
+            "y": 3314980.333,
+            "z": 546.208,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0056",
+            "bbox": [
+              623.04,
+              611.79,
+              1106.52,
+              631.52
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS02",
+            "x": 356144.584,
+            "y": 3314935.788,
+            "z": 551.97,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0057",
+            "bbox": [
+              853.44,
+              627.87,
+              1103.88,
+              639.56
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 60.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "逆向坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    },
+    {
+      "slope_id": "slope_6fede6d3c6d4",
+      "label": "G209 K2391+966-K2392+030 右侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.4,
+      "risk_readiness": "not_ready",
+      "blocking_count": 12,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_height_m",
+        "slope_gradient_deg",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-002"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2391+966-K2392+030右侧危岩体"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2391+966"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2392+030"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2391966
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2392030
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "右侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS19",
+            "x": 358670.181,
+            "y": 3315226.901,
+            "z": 637.244,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0019",
+            "bbox": [
+              86.52,
+              253.23,
+              572.64,
+              273.08
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS20",
+            "x": 358721.807,
+            "y": 3315306.364,
+            "z": 640.666,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0021",
+            "bbox": [
+              319.56,
+              269.31,
+              572.64,
+              281.0
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 64.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "逆向坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    },
+    {
+      "slope_id": "slope_31b230e0d44e",
+      "label": "G209 K2397+685-K2397+760 右侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.5,
+      "risk_readiness": "not_ready",
+      "blocking_count": 10,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-003"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2397+685-K2397+760右侧危岩体"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2397+685"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2397+760"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2397685
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2397760
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "右侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS03",
+            "x": 360466.306,
+            "y": 3315415.861,
+            "z": 718.747,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0059",
+            "bbox": [
+              623.04,
+              643.95,
+              1106.52,
+              663.68
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS04",
+            "x": 360433.296,
+            "y": 3315342.485,
+            "z": 717.212,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0060",
+            "bbox": [
+              853.44,
+              660.03,
+              1106.52,
+              671.72
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 30.0
+          }
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 75.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 68.0,
+            "slope_gradient_max_deg": 80.0
+          }
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "逆向坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    },
+    {
+      "slope_id": "slope_6f32d2c65dea",
+      "label": "G209 K2398+300-K2398+439 右侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.5,
+      "risk_readiness": "not_ready",
+      "blocking_count": 10,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-004"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2398+300-439右侧危岩体"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2398+300"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2398+439"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2398300
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2398439
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "右侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS05",
+            "x": 360374.454,
+            "y": 3314746.532,
+            "z": 713.348,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0062",
+            "bbox": [
+              623.04,
+              676.23,
+              1106.52,
+              695.96
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS06",
+            "x": 360337.713,
+            "y": 3314662.129,
+            "z": 709.446,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0064",
+            "bbox": [
+              853.44,
+              692.31,
+              1106.52,
+              704.0
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 40.0
+          }
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 139.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 70.0,
+            "slope_gradient_max_deg": 80.0
+          }
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "切向坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    },
+    {
+      "slope_id": "slope_a6c40fa126a9",
+      "label": "G209 K2401+227-K2401+307 右侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.5,
+      "risk_readiness": "not_ready",
+      "blocking_count": 10,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-005"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2401+227-K2401+307右侧危岩体"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2401+227"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2401+307"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2401227
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2401307
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "右侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS07",
+            "x": 361227.758,
+            "y": 3312930.114,
+            "z": 706.138,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0067",
+            "bbox": [
+              623.04,
+              708.39,
+              1106.52,
+              728.12
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS08",
+            "x": 361308.836,
+            "y": 3312924.648,
+            "z": 708.078,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0068",
+            "bbox": [
+              853.44,
+              724.47,
+              1106.52,
+              736.16
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 40.0
+          }
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 80.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 70.0,
+            "slope_gradient_max_deg": 80.0
+          }
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "切向坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    },
+    {
+      "slope_id": "slope_5764884573e9",
+      "label": "G209 K2402+458-K2402+500 右侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.45,
+      "risk_readiness": "not_ready",
+      "blocking_count": 11,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "deformation_observation",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-006"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2402+458-K2402+500右侧危岩体"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2402+458"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2402+500"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2402458
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2402500
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "右侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS09",
+            "x": 361266.355,
+            "y": 3311813.522,
+            "z": 685.651,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0003",
+            "bbox": [
+              89.16,
+              92.19,
+              572.64,
+              111.92
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS10",
+            "x": 361294.796,
+            "y": 3311749.175,
+            "z": 683.194,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0004",
+            "bbox": [
+              319.56,
+              108.27,
+              572.64,
+              119.96
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 20.0,
+            "slope_height_max_m": 30.0
+          }
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 42.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 63.0,
+            "slope_gradient_max_deg": 75.0
+          }
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "逆向坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    },
+    {
+      "slope_id": "slope_8520155ef46d",
+      "label": "G209 K2402+780-K2402+826 右侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.5,
+      "risk_readiness": "not_ready",
+      "blocking_count": 10,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-007"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2402+780-K2402+826右侧危岩体"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2402+780"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2402+826"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2402780
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2402826
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "右侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS11",
+            "x": 361477.831,
+            "y": 3311542.611,
+            "z": 689.779,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0006",
+            "bbox": [
+              89.16,
+              124.35,
+              572.64,
+              144.08
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS12",
+            "x": 361445.0,
+            "y": 3311473.138,
+            "z": 691.807,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0008",
+            "bbox": [
+              319.56,
+              140.43,
+              572.64,
+              152.12
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 45.0
+          }
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 46.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 55.0,
+            "slope_gradient_max_deg": 75.0
+          }
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "逆向坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    },
+    {
+      "slope_id": "slope_13dd155bc76d",
+      "label": "G209 K2410+330-K2410+445 左侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.5,
+      "risk_readiness": "not_ready",
+      "blocking_count": 10,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-008"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2410+330-K2410+445左侧危岩体"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2410+330"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2410+445"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2410330
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2410445
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "左侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS13",
+            "x": 359595.009,
+            "y": 3304752.274,
+            "z": 804.042,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0009",
+            "bbox": [
+              89.16,
+              156.63,
+              572.64,
+              176.36
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS14",
+            "x": 359659.65,
+            "y": 3304761.649,
+            "z": 800.102,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0011",
+            "bbox": [
+              319.56,
+              172.71,
+              572.64,
+              184.4
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 40.0,
+            "slope_height_max_m": 65.0
+          }
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 115.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 63.0,
+            "slope_gradient_max_deg": 72.0
+          }
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "切向坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    },
+    {
+      "slope_id": "slope_15bf907dcd25",
+      "label": "G209 K2412+602-K2412+664 右侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.5,
+      "risk_readiness": "not_ready",
+      "blocking_count": 10,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-009"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2412+602-K2412+664右侧不稳定边坡"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2412+602"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2412+664"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2412602
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2412664
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "右侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS15",
+            "x": 359138.396,
+            "y": 3304012.571,
+            "z": 693.15,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0012",
+            "bbox": [
+              89.16,
+              188.79,
+              570.0,
+              208.52
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS16",
+            "x": 359104.321,
+            "y": 3303932.314,
+            "z": 691.414,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0014",
+            "bbox": [
+              319.56,
+              204.87,
+              572.64,
+              216.56
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 40.0
+          }
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 62.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 53.0,
+            "slope_gradient_max_deg": 68.0
+          }
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "逆向坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    },
+    {
+      "slope_id": "slope_f0d43c9a0f88",
+      "label": "G209 K2429+580-K2429+668 左侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.45,
+      "risk_readiness": "not_ready",
+      "blocking_count": 11,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "deformation_observation",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-010"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2429+580-K2429+668左侧危岩体"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2429+580"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2429+668"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2429580
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2429668
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "左侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS25",
+            "x": 354085.55,
+            "y": 3290701.322,
+            "z": 557.209,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0030",
+            "bbox": [
+              86.52,
+              349.83,
+              572.64,
+              369.68
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS26",
+            "x": 354117.274,
+            "y": 3290567.032,
+            "z": 562.983,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0031",
+            "bbox": [
+              319.56,
+              365.91,
+              572.64,
+              377.6
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 50.0,
+            "slope_height_max_m": 50.0
+          }
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 88.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 80.0,
+            "slope_gradient_max_deg": 90.0
+          }
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "斜交坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    },
+    {
+      "slope_id": "slope_f17815f5c07c",
+      "label": "G209 K2434+460-K2434+585 左侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.5,
+      "risk_readiness": "not_ready",
+      "blocking_count": 10,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-011"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2434+460-K2434+585左侧危岩体"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2434+460"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2434+585"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2434460
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2434585
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "左侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS17",
+            "x": 355905.344,
+            "y": 3287581.588,
+            "z": 543.13,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0016",
+            "bbox": [
+              89.16,
+              220.95,
+              570.0,
+              240.8
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS18",
+            "x": 355939.342,
+            "y": 3287491.78,
+            "z": 544.332,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0017",
+            "bbox": [
+              319.56,
+              237.03,
+              572.64,
+              248.72
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 40.0,
+            "slope_height_max_m": 60.0
+          }
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 125.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 80.0,
+            "slope_gradient_max_deg": 90.0
+          }
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "斜交坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    },
+    {
+      "slope_id": "slope_468e24cdd04c",
+      "label": "G209 K2435+310-K2435+430 左侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.5,
+      "risk_readiness": "not_ready",
+      "blocking_count": 10,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-012"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2435+310-K2435+430左侧危岩体"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2435+310"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2435+430"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2435310
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2435430
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "左侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS21",
+            "x": 356233.467,
+            "y": 3286951.281,
+            "z": 558.613,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0023",
+            "bbox": [
+              86.52,
+              285.39,
+              572.64,
+              305.24
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS22",
+            "x": 356278.599,
+            "y": 3286808.685,
+            "z": 557.971,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0024",
+            "bbox": [
+              319.56,
+              301.47,
+              572.64,
+              313.16
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 40.0,
+            "slope_height_max_m": 40.0
+          }
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 120.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 80.0,
+            "slope_gradient_max_deg": 90.0
+          }
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "切向坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    },
+    {
+      "slope_id": "slope_44e3c4d31e79",
+      "label": "G209 K2435+820-K2435+900 左侧边坡",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "risk_data_completeness": 0.5,
+      "risk_readiness": "not_ready",
+      "blocking_count": 10,
+      "blocking_items": [
+        "slope_type",
+        "material_nature",
+        "slope_aspect_deg",
+        "overall_slope_deformation_severity",
+        "groundwater",
+        "rainfall",
+        "protection_condition",
+        "maintenance",
+        "exposure",
+        "risk_rules"
+      ],
+      "fields": [
+        {
+          "code": "slope_id",
+          "label_zh": "边坡稳定编号",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209-AUTO-013"
+        },
+        {
+          "code": "source_alias",
+          "label_zh": "原资料名称",
+          "group": "identity",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2435+820-K2435+900左侧危岩体"
+        },
+        {
+          "code": "route_code_cache",
+          "label_zh": "路线编号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "G209"
+        },
+        {
+          "code": "start_station_raw",
+          "label_zh": "起点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2435+820"
+        },
+        {
+          "code": "end_station_raw",
+          "label_zh": "止点桩号",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "K2435+900"
+        },
+        {
+          "code": "start_station_m",
+          "label_zh": "标准化起点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2435820
+        },
+        {
+          "code": "end_station_m",
+          "label_zh": "标准化止点里程",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": 2435900
+        },
+        {
+          "code": "side",
+          "label_zh": "左右侧",
+          "group": "location",
+          "requirement": "core_required",
+          "status": "available",
+          "value": "左侧"
+        },
+        {
+          "code": "coordinate_crs",
+          "label_zh": "坐标参考系",
+          "group": "location",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
+        },
+        {
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS23",
+            "x": 356531.29,
+            "y": 3286626.457,
+            "z": 551.853,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0026",
+            "bbox": [
+              86.52,
+              317.55,
+              572.64,
+              337.4
+            ]
+          }
+        },
+        {
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "group": "location",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": {
+            "point_no": "GPS24",
+            "x": 356641.005,
+            "y": 3286638.316,
+            "z": 553.423,
+            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0027",
+            "bbox": [
+              319.56,
+              333.63,
+              572.64,
+              345.32
+            ]
+          }
+        },
+        {
+          "code": "slope_type",
+          "label_zh": "路堤/路堑",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "material_nature",
+          "label_zh": "土质/岩质/土岩混合",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_height_min_m",
+            "slope_height_max_m"
+          ],
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 50.0,
+            "slope_height_max_m": 50.0
+          }
+        },
+        {
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": 80.0
+        },
+        {
+          "code": "slope_gradient_deg",
+          "label_zh": "坡度",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "alternative_fields": [
+            "slope_gradient_min_deg",
+            "slope_gradient_max_deg"
+          ],
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 80.0,
+            "slope_gradient_max_deg": 90.0
+          }
+        },
+        {
+          "code": "slope_aspect_deg",
+          "label_zh": "坡向",
+          "group": "geometry",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "slope_structure_code",
+          "label_zh": "斜坡结构",
+          "group": "geometry",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": "顺向坡"
+        },
+        {
+          "code": "river_relation",
+          "previous_code": "river_relative_position",
+          "label_zh": "临河关系",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "group": "environment",
+          "requirement": "optional",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "overall_slope_deformation_severity",
+          "previous_code": "overall_damage_severity",
+          "label_zh": "边坡总体变形严重程度",
+          "group": "deformation",
+          "requirement": "risk_required",
+          "status": "missing",
+          "value": null
+        },
+        {
+          "code": "lithology",
+          "label_zh": "岩性",
+          "domain": "geology",
+          "relation": "HAS_LITHOLOGY",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "stratum",
+          "label_zh": "地层",
+          "domain": "geology",
+          "relation": "HAS_STRATUM",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "structural_plane",
+          "label_zh": "结构面",
+          "domain": "geology",
+          "relation": "DEVELOPS_STRUCTURAL_PLANE",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "hazard_body",
+          "label_zh": "灾害体/隐患体",
+          "domain": "hazard",
+          "relation": "CONTAINS_HAZARD_BODY",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "deformation_observation",
+          "label_zh": "近期变形巡检",
+          "domain": "deformation",
+          "relation": "HAS_DEFORMATION_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "groundwater",
+          "label_zh": "近期地下水",
+          "domain": "environment",
+          "relation": "HAS_GROUNDWATER_OBSERVATION",
+          "requirement": "risk_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "rainfall",
+          "label_zh": "近期降雨",
+          "domain": "environment",
+          "relation": "AFFECTED_BY_RAINFALL_EVENT",
+          "requirement": "scenario_required",
+          "interface": "/api/environment/latest",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "protection_design",
+          "label_zh": "防护设计",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_DESIGN",
+          "requirement": "conditional_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "protection_condition",
+          "label_zh": "防护设施现状",
+          "domain": "protection",
+          "relation": "HAS_PROTECTION_INSPECTION",
+          "requirement": "risk_required",
+          "interface": "/api/inspections",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "maintenance",
+          "label_zh": "养护历史",
+          "domain": "maintenance",
+          "relation": "HAS_MAINTENANCE_EVENT",
+          "requirement": "risk_required",
+          "interface": "/api/maintenance/events",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "monitoring",
+          "label_zh": "监测数据",
+          "domain": "monitoring",
+          "relation": "HAS_MONITORING_PROGRAM",
+          "requirement": "recommended",
+          "interface": "/api/monitoring/observations",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "stability",
+          "label_zh": "稳定性分析",
+          "domain": "analysis",
+          "relation": "HAS_STABILITY_ANALYSIS",
+          "requirement": "risk_required",
+          "status": "available",
+          "value": null
+        },
+        {
+          "code": "exposure",
+          "label_zh": "暴露对象与后果",
+          "domain": "risk",
+          "relation": "THREATENS",
+          "requirement": "risk_required",
+          "interface": "/api/exposure",
+          "status": "interface_reserved",
+          "value": null
+        },
+        {
+          "code": "risk_rules",
+          "label_zh": "已发布风险规则",
+          "domain": "risk",
+          "global": true,
+          "requirement": "risk_required",
+          "interface": "/api/risk/rules",
+          "status": "interface_reserved",
+          "value": null
+        }
+      ]
+    }
+  ]
+}

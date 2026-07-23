@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>关系图谱 - SlopeKG</title>
+    <link rel="stylesheet" href="./pages.css?v=20260712-1" />
+    <link rel="stylesheet" href="./styles.css?v=20260711-1" />
+  </head>
+  <body>
+    <header class="site-header"><div class="site-header-inner">
+      <a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a>
+      <nav class="site-nav"><a href="./index.html">总览</a><a href="./pdf-ingestion.html">PDF解析</a><a href="./slopes.html">边坡档案</a><a class="active" href="./graph.html">关系图谱</a><a href="./data-status.html">数据与接口</a><a href="./risk.html">风险研判</a></nav>
+    </div></header>
+    <div class="app-shell graph-page-shell">
+      <aside class="sidebar">
+        <div class="brand-block"><h1>公路边坡关系图谱</h1><p id="metaSummary">加载中...</p></div>
+        <div class="pipeline-card"><div class="section-title">流水线</div><div class="pipeline-grid" id="pipelineStats"></div><a class="pipeline-link" href="./pdf-ingestion.html">添加PDF或查看解析进度</a><div id="pipelineMessage" class="pipeline-message">后端状态读取中...</div></div>
+        <div class="toolbar"><label class="field-label" for="searchInput">检索</label><input id="searchInput" type="search" placeholder="桩号、岩性、防护、图号"/></div>
+        <div class="segmented" role="group" aria-label="图谱视图"><button class="segment active" data-mode="all" type="button">全图</button><button class="segment" data-mode="hazard" type="button">边坡</button><button class="segment" data-mode="measure" type="button">防护</button></div>
+        <label class="display-toggle"><input id="presentationToggle" type="checkbox" checked/><span>精简展示</span></label>
+        <div class="filter-block"><div class="field-label">节点类型</div><div id="typeFilters" class="check-list"></div></div>
+        <div class="hazard-block"><div class="section-title">候选边坡</div><div id="hazardList" class="hazard-list"></div></div>
+        <div class="hazard-block"><div class="section-title">OCR队列</div><div id="ocrList" class="ocr-list"></div></div>
+      </aside>
+      <main class="graph-panel">
+        <header class="topbar"><div><div id="routeSummary" class="eyebrow">正在读取路线范围</div><h2 id="viewTitle">边坡中心图谱</h2></div><div class="topbar-actions"><div class="zoom-controls"><span id="zoomValue" class="zoom-value">100%</span><button id="zoomFitBtn" type="button" onclick="window.slopeKgZoomFit && window.slopeKgZoomFit()">适配</button><button id="zoomCenterBtn" type="button" onclick="window.slopeKgCenterSelected && window.slopeKgCenterSelected()">定位</button></div><button id="resetBtn" type="button">重置视图</button><a href="/output/demo/share/SlopeKG_成果展示_离线版.html" download>离线HTML</a><a href="/output/demo/graph/demo.graphml" download>GraphML</a><a href="/output/demo/web/data/demo_graph.json" download>JSON</a></div></header>
+        <section class="graph-data-warning">当前为历史资料基线图谱。黄色“待审核”、缺失字段和未知设施状态不会被视为已确认事实。</section>
+        <section class="metrics" id="metrics"></section><section class="canvas-wrap"><svg id="graphSvg" role="img" aria-label="知识图谱"></svg><div id="emptyState" class="empty-state" hidden>没有匹配的节点</div></section>
+      </main>
+      <aside class="detail-panel"><div class="section-title">详情</div><div id="detail" class="detail-content"><p>选择一个节点查看属性、关系和证据。</p></div></aside>
+    </div>
+    <script src="./app.js?v=20260721-1"></script>
+  </body>
+</html>

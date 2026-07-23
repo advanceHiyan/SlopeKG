@@ -1,0 +1,19 @@
+pandas>=2.2
+pyarrow>=16
+networkx>=3.3
+pydantic>=2.8
+typer>=0.12
+rich>=13.7
+pillow>=10.4
+pypdf>=6.0
+pdfplumber>=0.11
+pymupdf>=1.24
+openpyxl>=3.1
+python-docx>=1.1
+rapidfuzz>=3.9
+
+# OCR stack for Chinese scanned PDFs, table screenshots, and drawing title blocks.
+# If PaddlePaddle installation is slow or platform-specific, install it following
+# the official PaddlePaddle selector, then install paddleocr.
+paddleocr>=2.8
+paddlepaddle>=2.6

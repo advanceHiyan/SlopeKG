@@ -1,0 +1,12 @@
+data/rawPDF/
+output/demo/cache/
+.tmp/
+.secrets/
+.pytest_cache/
+__MACOSX/
+.DS_Store
+Thumbs.db
+*.key
+*.pem
+__pycache__/
+*.pyc

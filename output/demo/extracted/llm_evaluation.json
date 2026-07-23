@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "model": "deepseek-v4-flash",
+  "prompt_version": "slope-semantic-v5-complete-sections-evidence",
+  "candidates": 13,
+  "passed": 13,
+  "pass_rate": 1.0,
+  "verified_quotes": 116,
+  "submitted_quotes": 116,
+  "evidence_quote_precision": 1.0,
+  "field_evidence_coverage": 1.0,
+  "api_calls": 0,
+  "cache_hits": 13,
+  "cache_revalidated": 0,
+  "supplemental_calls": 0,
+  "section_gaps_detected": 4,
+  "section_gaps_resolved": 0,
+  "failures": 0
+}

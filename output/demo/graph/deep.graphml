@@ -1,0 +1,2323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+<key id="label" for="all" attr.name="label" attr.type="string"/>
+<key id="type" for="node" attr.name="type" attr.type="string"/>
+<key id="relation" for="edge" attr.name="relation" attr.type="string"/>
+<graph id="SlopeKG" edgedefault="directed">
+  <node id="project_c00ef77f1e59">
+    <data key="label">G209 边坡资料自动抽取项目</data>
+    <data key="type">Project</data>
+  </node>
+  <node id="route_08de9e29eee4">
+    <data key="label">G209 K2388+976-K2435+900</data>
+    <data key="type">RouteSegment</data>
+  </node>
+  <node id="doc_2021地质灾害评估规范_bec0e0f5e5">
+    <data key="label">2021地质灾害评估规范</data>
+    <data key="type">Document</data>
+  </node>
+  <node id="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="label">G209-2388.976-2435.900-其他文件-185255</data>
+    <data key="type">Document</data>
+  </node>
+  <node id="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="label">G209-2388.976-2435.900-施工图设计文件-185203</data>
+    <data key="type">Document</data>
+  </node>
+  <node id="doc_滑坡分类等_30956ae8da">
+    <data key="label">滑坡分类等</data>
+    <data key="type">Document</data>
+  </node>
+  <node id="slope_9c334c52ab83">
+    <data key="label">G209 K2388+976-K2389+036 左侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="lithology_c90dff0d5691">
+    <data key="label">页岩</data>
+    <data key="type">Lithology</data>
+  </node>
+  <node id="lithology_97a8385e5d43">
+    <data key="label">灰岩</data>
+    <data key="type">Lithology</data>
+  </node>
+  <node id="stratum_c87915b5045a">
+    <data key="label">三叠系大冶组</data>
+    <data key="type">Stratum</data>
+  </node>
+  <node id="hazard_body_9c334c52ab83">
+    <data key="label">K2388+976-K2389+036 危岩体</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_9c334c52ab83">
+    <data key="label">K2388+976-K2389+036 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="hazard_type_0ad06a3d1b6d">
+    <data key="label">崩塌</data>
+    <data key="type">HazardType</data>
+  </node>
+  <node id="factor_5c0419429c56">
+    <data key="label">地形地貌</data>
+    <data key="type">CausalFactor</data>
+  </node>
+  <node id="factor_71b816f6c636">
+    <data key="label">地层岩性</data>
+    <data key="type">CausalFactor</data>
+  </node>
+  <node id="factor_13cfdf6598e4">
+    <data key="label">降雨</data>
+    <data key="type">CausalFactor</data>
+  </node>
+  <node id="plane_da960c67c435">
+    <data key="label">K2388+976-K2389+036 坡面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_6f9232549f78">
+    <data key="label">K2388+976-K2389+036 岩层面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_2362c70efa17">
+    <data key="label">K2388+976-K2389+036 L1</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_bd7f61b34deb">
+    <data key="label">K2388+976-K2389+036 L2</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_type_d7062be35064">
+    <data key="label">坡面清危</data>
+    <data key="type">ProtectionType</data>
+  </node>
+  <node id="protection_work_7d5e3ebcb31a">
+    <data key="label">K2388+976-K2389+036 坡面清危（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_type_1163b9963883">
+    <data key="label">挂网锚喷</data>
+    <data key="type">ProtectionType</data>
+  </node>
+  <node id="protection_work_1f757cf67aef">
+    <data key="label">K2388+976-K2389+036 挂网锚喷（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_5020bcdba548">
+    <data key="label">K2388+976-K2389+036 治理设计 Fs=1.318</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_6557b869fa32">
+    <data key="label">K2388+976-K2389+036 天然 Fs=1.24</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_66ac32557a86">
+    <data key="label">K2388+976-K2389+036 暴雨 Fs=1.05</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_b8d615ff760c">
+    <data key="label">K2388+976-K2389+036 治理前 Fs=None</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="terrain_74ae5689fb78">
+    <data key="label">K2388+976-K2389+036 地形地貌</data>
+    <data key="type">TerrainSetting</data>
+  </node>
+  <node id="deformation_6a2648026d8f">
+    <data key="label">K2388+976-K2389+036 崩塌</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="deformation_49c86b914c41">
+    <data key="label">K2388+976-K2389+036 危岩体</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="deformation_60d67cbc2d09">
+    <data key="label">K2388+976-K2389+036 危岩体</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="hydrology_b88897198c59">
+    <data key="label">K2388+976-K2389+036 降雨</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="slope_6fede6d3c6d4">
+    <data key="label">G209 K2391+966-K2392+030 右侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="hazard_body_6fede6d3c6d4">
+    <data key="label">K2391+966-K2392+030 危岩体</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_6fede6d3c6d4">
+    <data key="label">K2391+966-K2392+030 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="plane_ecb5c7a64ac8">
+    <data key="label">K2391+966-K2392+030 L1</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_92a24cb95d17">
+    <data key="label">K2391+966-K2392+030 L2</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_929bd49b0491">
+    <data key="label">K2391+966-K2392+030 L3</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_a7f6fc2426d9">
+    <data key="label">K2391+966-K2392+030 L4</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_work_4d7d86065589">
+    <data key="label">K2391+966-K2392+030 坡面清危（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_work_f66634a19ff1">
+    <data key="label">K2391+966-K2392+030 挂网锚喷（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_2687f1f36f3a">
+    <data key="label">K2391+966-K2392+030 天然工况 Fs=1.14</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_29b6910970fb">
+    <data key="label">K2391+966-K2392+030 暴雨工况 Fs=1.04</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_830cb3d21fd4">
+    <data key="label">K2391+966-K2392+030 治理设计 Fs=1.305</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_b67bae36a58a">
+    <data key="label">K2391+966-K2392+030 天然工况 Fs=1.14</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_d4f45ca15e86">
+    <data key="label">K2391+966-K2392+030 暴雨工况 Fs=1.04</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_3c4e262bd0c3">
+    <data key="label">K2391+966-K2392+030 天然工况(单个危岩体) Fs=1.18</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_b5b02977e3d2">
+    <data key="label">K2391+966-K2392+030 饱和工况(单个危岩体) Fs=1.05</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="terrain_0bb14a0e6325">
+    <data key="label">K2391+966-K2392+030 地形地貌</data>
+    <data key="type">TerrainSetting</data>
+  </node>
+  <node id="deformation_0bcdc99453a0">
+    <data key="label">K2391+966-K2392+030 崩塌</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="hydrology_757e481b79fb">
+    <data key="label">K2391+966-K2392+030 降雨</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="slope_31b230e0d44e">
+    <data key="label">G209 K2397+685-K2397+760 右侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="lithology_73a88036b311">
+    <data key="label">砂质页岩</data>
+    <data key="type">Lithology</data>
+  </node>
+  <node id="stratum_e275728dead6">
+    <data key="label">志留系纱帽群（S3sh）</data>
+    <data key="type">Stratum</data>
+  </node>
+  <node id="hazard_body_31b230e0d44e">
+    <data key="label">K2397+685-K2397+760 危岩体</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_31b230e0d44e">
+    <data key="label">K2397+685-K2397+760 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="plane_798392210d40">
+    <data key="label">K2397+685-K2397+760 坡面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_a68ec8e11182">
+    <data key="label">K2397+685-K2397+760 岩层面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_1c64b7f1fa0a">
+    <data key="label">K2397+685-K2397+760 L1</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_d64813bf5bc9">
+    <data key="label">K2397+685-K2397+760 L2</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_work_3c07eb32ca54">
+    <data key="label">K2397+685-K2397+760 坡面清危（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_work_bc027486bf6c">
+    <data key="label">K2397+685-K2397+760 挂网锚喷（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_83f1fa1926a0">
+    <data key="label">K2397+685-K2397+760 治理设计 Fs=1.325</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_ac290d2804b0">
+    <data key="label">K2397+685-K2397+760 天然 Fs=None</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_2e8a79752cff">
+    <data key="label">K2397+685-K2397+760 治理后 Fs=1.325</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="terrain_868c33833e2c">
+    <data key="label">K2397+685-K2397+760 地形地貌</data>
+    <data key="type">TerrainSetting</data>
+  </node>
+  <node id="deformation_c2c7c85d327a">
+    <data key="label">K2397+685-K2397+760 垮塌</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="hydrology_0f8269f05d35">
+    <data key="label">K2397+685-K2397+760 降雨</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="protection_record_dc65ac0a9ac7">
+    <data key="label">K2397+685-K2397+760 坡面清危</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_89cafb55d15d">
+    <data key="label">K2397+685-K2397+760 挂网锚喷</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="slope_6f32d2c65dea">
+    <data key="label">G209 K2398+300-K2398+439 右侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="hazard_body_6f32d2c65dea">
+    <data key="label">K2398+300-K2398+439 危岩体</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_6f32d2c65dea">
+    <data key="label">K2398+300-K2398+439 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="factor_f8ea920a45a9">
+    <data key="label">岩体结构</data>
+    <data key="type">CausalFactor</data>
+  </node>
+  <node id="plane_ce2839b495a1">
+    <data key="label">K2398+300-K2398+439 坡面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_work_378827141a7b">
+    <data key="label">K2398+300-K2398+439 坡面清危（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_work_8b0bae484605">
+    <data key="label">K2398+300-K2398+439 挂网锚喷（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_dd9c6fc1794e">
+    <data key="label">K2398+300-K2398+439 治理设计 Fs=1.324</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_02f39834658a">
+    <data key="label">K2398+300-K2398+439 天然 Fs=None</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_5755c7d8d386">
+    <data key="label">K2398+300-K2398+439 暴雨 Fs=None</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_76911f5b8e78">
+    <data key="label">K2398+300-K2398+439 治理后 Fs=1.324</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="terrain_242a36bb23c6">
+    <data key="label">K2398+300-K2398+439 地形地貌</data>
+    <data key="type">TerrainSetting</data>
+  </node>
+  <node id="deformation_6e2032c825ef">
+    <data key="label">K2398+300-K2398+439 垮塌</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="deformation_724a39311126">
+    <data key="label">K2398+300-K2398+439 滑塌</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="hydrology_1c82c7924c4f">
+    <data key="label">K2398+300-K2398+439 降雨</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="slope_a6c40fa126a9">
+    <data key="label">G209 K2401+227-K2401+307 右侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="hazard_body_a6c40fa126a9">
+    <data key="label">K2401+227-K2401+307 危岩体</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_a6c40fa126a9">
+    <data key="label">K2401+227-K2401+307 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="plane_c77110cb804a">
+    <data key="label">K2401+227-K2401+307 坡面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_723ce59d929d">
+    <data key="label">K2401+227-K2401+307 岩层面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_a3ae67c582a8">
+    <data key="label">K2401+227-K2401+307 L1</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_8acdb4fae690">
+    <data key="label">K2401+227-K2401+307 L2</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_work_b60ec9d64b88">
+    <data key="label">K2401+227-K2401+307 坡面清危（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_work_543abd67f8f1">
+    <data key="label">K2401+227-K2401+307 挂网锚喷（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_d58152e05e6b">
+    <data key="label">K2401+227-K2401+307 治理设计 Fs=1.313</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_cfe0055d6baf">
+    <data key="label">K2401+227-K2401+307 天然 Fs=None</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_7f47d8722d8f">
+    <data key="label">K2401+227-K2401+307 治理后 Fs=1.313</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="terrain_767c5cc01811">
+    <data key="label">K2401+227-K2401+307 地形地貌</data>
+    <data key="type">TerrainSetting</data>
+  </node>
+  <node id="deformation_34ba563b47d2">
+    <data key="label">K2401+227-K2401+307 崩塌变形</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="deformation_7c046e9f88a6">
+    <data key="label">K2401+227-K2401+307 崩塌掉块</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="deformation_6eb9b3217781">
+    <data key="label">K2401+227-K2401+307 崩塌掉块</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="hydrology_f8a9a1d5ef8c">
+    <data key="label">K2401+227-K2401+307 降雨</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="hydrology_810158a48317">
+    <data key="label">K2401+227-K2401+307 降雨入渗</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="protection_record_4f69b9a25385">
+    <data key="label">K2401+227-K2401+307 坡面清危</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_dabb7cd7dd15">
+    <data key="label">K2401+227-K2401+307 挂网锚喷</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="slope_5764884573e9">
+    <data key="label">G209 K2402+458-K2402+500 右侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="hazard_body_5764884573e9">
+    <data key="label">K2402+458-K2402+500 危岩体</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_5764884573e9">
+    <data key="label">K2402+458-K2402+500 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="plane_6d041f222858">
+    <data key="label">K2402+458-K2402+500 坡面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_a7066eb2fa52">
+    <data key="label">K2402+458-K2402+500 岩层面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_06740416952e">
+    <data key="label">K2402+458-K2402+500 L1</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_ecc362f5d71e">
+    <data key="label">K2402+458-K2402+500 L2</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_7cd2b79ec211">
+    <data key="label">K2402+458-K2402+500 L3</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_work_3e83cf07db9b">
+    <data key="label">K2402+458-K2402+500 坡面清危（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_work_b24ac1487a9c">
+    <data key="label">K2402+458-K2402+500 挂网锚喷（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_0fbc707888c0">
+    <data key="label">K2402+458-K2402+500 治理设计 Fs=1.321</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_42e8c1b0f82f">
+    <data key="label">K2402+458-K2402+500 天然 Fs=1.21</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_e6dc37d99464">
+    <data key="label">K2402+458-K2402+500 暴雨 Fs=1.12</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_3389179e647f">
+    <data key="label">K2402+458-K2402+500 整体边坡 Fs=None</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="terrain_7df3bfadddc6">
+    <data key="label">K2402+458-K2402+500 地形地貌</data>
+    <data key="type">TerrainSetting</data>
+  </node>
+  <node id="protection_record_300667e52196">
+    <data key="label">K2402+458-K2402+500 坡面清危</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_64cd3e7a5f16">
+    <data key="label">K2402+458-K2402+500 挂网锚喷</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_5a773de59088">
+    <data key="label">K2402+458-K2402+500 收脚挡墙</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_1b683fad062f">
+    <data key="label">K2402+458-K2402+500 截排水沟</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="slope_8520155ef46d">
+    <data key="label">G209 K2402+780-K2402+826 右侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="stratum_fd75de24c754">
+    <data key="label">志留系（S）</data>
+    <data key="type">Stratum</data>
+  </node>
+  <node id="hazard_body_8520155ef46d">
+    <data key="label">K2402+780-K2402+826 危岩体</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_8520155ef46d">
+    <data key="label">K2402+780-K2402+826 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="plane_3ea3413e6f77">
+    <data key="label">K2402+780-K2402+826 坡面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_a7fe52e0a668">
+    <data key="label">K2402+780-K2402+826 岩层面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_725b3e1405ad">
+    <data key="label">K2402+780-K2402+826 L1</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_6f9bb057f624">
+    <data key="label">K2402+780-K2402+826 L2</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_work_780f627e2398">
+    <data key="label">K2402+780-K2402+826 坡面清危（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_work_4975e63c9b61">
+    <data key="label">K2402+780-K2402+826 挂网锚喷（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_26cc2aebb656">
+    <data key="label">K2402+780-K2402+826 治理设计 Fs=1.312</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_f1e863c00ce3">
+    <data key="label">K2402+780-K2402+826 整体边坡 Fs=None</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_d40c4ae896be">
+    <data key="label">K2402+780-K2402+826 局部 Fs=None</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="deformation_e9bf6d3d711e">
+    <data key="label">K2402+780-K2402+826 局部滑塌</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="deformation_55845feced48">
+    <data key="label">K2402+780-K2402+826 拉裂缝</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="hydrology_e6c24a30ddcd">
+    <data key="label">K2402+780-K2402+826 降雨</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="protection_record_cdf5bbbb59d1">
+    <data key="label">K2402+780-K2402+826 坡面清危</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_383218304bf7">
+    <data key="label">K2402+780-K2402+826 挂网锚喷</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_f321040e8d79">
+    <data key="label">K2402+780-K2402+826 矮挡墙</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="slope_13dd155bc76d">
+    <data key="label">G209 K2410+330-K2410+445 左侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="stratum_5c16d04ad4df">
+    <data key="label">志留系（S2lr）</data>
+    <data key="type">Stratum</data>
+  </node>
+  <node id="hazard_body_13dd155bc76d">
+    <data key="label">K2410+330-K2410+445 危岩体</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_13dd155bc76d">
+    <data key="label">K2410+330-K2410+445 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="plane_56296ed37339">
+    <data key="label">K2410+330-K2410+445 坡面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_35f28332b2d7">
+    <data key="label">K2410+330-K2410+445 岩层面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_5396495851f3">
+    <data key="label">K2410+330-K2410+445 L1</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_093df5445324">
+    <data key="label">K2410+330-K2410+445 L2</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_2cb54015eac6">
+    <data key="label">K2410+330-K2410+445 L3</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_work_180e1c88fa08">
+    <data key="label">K2410+330-K2410+445 坡面清危（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_work_f054a2a3b82a">
+    <data key="label">K2410+330-K2410+445 挂网锚喷（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_c3e542eee1e9">
+    <data key="label">K2410+330-K2410+445 治理设计 Fs=1.356</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_d38b68b645c8">
+    <data key="label">K2410+330-K2410+445 天然 Fs=1.3</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_4cc8c64476d4">
+    <data key="label">K2410+330-K2410+445 饱和 Fs=1.1</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_491f9d95296c">
+    <data key="label">K2410+330-K2410+445 整体 Fs=None</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="terrain_e05c2b3ff628">
+    <data key="label">K2410+330-K2410+445 地形地貌</data>
+    <data key="type">TerrainSetting</data>
+  </node>
+  <node id="deformation_4f8cdc759392">
+    <data key="label">K2410+330-K2410+445 崩塌落石</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="deformation_cacad6567e6f">
+    <data key="label">K2410+330-K2410+445 崩塌剥落</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="hydrology_487c9b04b3fc">
+    <data key="label">K2410+330-K2410+445 降雨</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="protection_record_1cc33ad1380a">
+    <data key="label">K2410+330-K2410+445 坡面清危</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_7a32323ffd21">
+    <data key="label">K2410+330-K2410+445 挂网锚喷</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_adaafee7e1cd">
+    <data key="label">K2410+330-K2410+445 锚杆+植生袋+挡墙</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="slope_15bf907dcd25">
+    <data key="label">G209 K2412+602-K2412+664 右侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="lithology_73232c4717ee">
+    <data key="label">含砾粉质黏土</data>
+    <data key="type">Lithology</data>
+  </node>
+  <node id="hazard_body_15bf907dcd25">
+    <data key="label">K2412+602-K2412+664 不稳定边坡</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_15bf907dcd25">
+    <data key="label">K2412+602-K2412+664 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="plane_9765289b1ac0">
+    <data key="label">K2412+602-K2412+664 坡面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_8701755a2fbc">
+    <data key="label">K2412+602-K2412+664 岩层面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_a01d6e0c939e">
+    <data key="label">K2412+602-K2412+664 节理1</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_c260518385aa">
+    <data key="label">K2412+602-K2412+664 节理2</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_work_cad727e798b7">
+    <data key="label">K2412+602-K2412+664 挂网锚喷（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_type_7a39fd164119">
+    <data key="label">框架锚杆</data>
+    <data key="type">ProtectionType</data>
+  </node>
+  <node id="protection_work_43ee03cfaef2">
+    <data key="label">K2412+602-K2412+664 框架锚杆（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_type_e7057cdef303">
+    <data key="label">放坡</data>
+    <data key="type">ProtectionType</data>
+  </node>
+  <node id="protection_work_73db9fa3c48f">
+    <data key="label">K2412+602-K2412+664 放坡（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_f9f9588aadc8">
+    <data key="label">K2412+602-K2412+664 天然工况 Fs=1.14</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_4787d41d942e">
+    <data key="label">K2412+602-K2412+664 暴雨工况 Fs=1.04</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_597dde315062">
+    <data key="label">K2412+602-K2412+664 治理设计 Fs=1.237</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_7185c2300cd1">
+    <data key="label">K2412+602-K2412+664 治理设计 Fs=1.131</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="terrain_d75975148239">
+    <data key="label">K2412+602-K2412+664 地形地貌</data>
+    <data key="type">TerrainSetting</data>
+  </node>
+  <node id="deformation_9354a8b55a08">
+    <data key="label">K2412+602-K2412+664 裂缝</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="hydrology_09aaebf37ebb">
+    <data key="label">K2412+602-K2412+664 降雨</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="slope_f0d43c9a0f88">
+    <data key="label">G209 K2429+580-K2429+668 左侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="stratum_a6368c4ec328">
+    <data key="label">三叠系（T2j）</data>
+    <data key="type">Stratum</data>
+  </node>
+  <node id="hazard_body_f0d43c9a0f88">
+    <data key="label">K2429+580-K2429+668 危岩体</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_f0d43c9a0f88">
+    <data key="label">K2429+580-K2429+668 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="factor_02b8ddd1b0fb">
+    <data key="label">降雨软化</data>
+    <data key="type">CausalFactor</data>
+  </node>
+  <node id="factor_301859412a54">
+    <data key="label">重力作用</data>
+    <data key="type">CausalFactor</data>
+  </node>
+  <node id="factor_e5d71a1b5b0b">
+    <data key="label">节理裂隙发育</data>
+    <data key="type">CausalFactor</data>
+  </node>
+  <node id="factor_f70b00a37911">
+    <data key="label">不利结构面组合</data>
+    <data key="type">CausalFactor</data>
+  </node>
+  <node id="plane_d43c5ea97147">
+    <data key="label">K2429+580-K2429+668 岩层面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_c2df68430897">
+    <data key="label">K2429+580-K2429+668 L1</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_work_a937f7c320ed">
+    <data key="label">K2429+580-K2429+668 坡面清危（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_type_c20ef627b5d7">
+    <data key="label">主动防护网</data>
+    <data key="type">ProtectionType</data>
+  </node>
+  <node id="protection_work_e6d8e49364b8">
+    <data key="label">K2429+580-K2429+668 主动防护网（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_type_806565496d83">
+    <data key="label">局部单独锚杆</data>
+    <data key="type">ProtectionType</data>
+  </node>
+  <node id="protection_work_855e175511ed">
+    <data key="label">K2429+580-K2429+668 局部单独锚杆（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_d449fdb474ea">
+    <data key="label">K2429+580-K2429+668 治理设计 Fs=1.317</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_4673e5df3b0b">
+    <data key="label">K2429+580-K2429+668 天然 Fs=1.24</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_e0b7a2c7911c">
+    <data key="label">K2429+580-K2429+668 饱和 Fs=1.11</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_5d9d5b659452">
+    <data key="label">K2429+580-K2429+668 天然 Fs=1.28</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_310b94f7555b">
+    <data key="label">K2429+580-K2429+668 饱水 Fs=1.16</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="terrain_744ffd12f0cf">
+    <data key="label">K2429+580-K2429+668 地形地貌</data>
+    <data key="type">TerrainSetting</data>
+  </node>
+  <node id="slope_f17815f5c07c">
+    <data key="label">G209 K2434+460-K2434+585 左侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="hazard_body_f17815f5c07c">
+    <data key="label">K2434+460-K2434+585 危岩体</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_f17815f5c07c">
+    <data key="label">K2434+460-K2434+585 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="factor_5204a440941f">
+    <data key="label">岩体破碎</data>
+    <data key="type">CausalFactor</data>
+  </node>
+  <node id="factor_3640f006513a">
+    <data key="label">地表水汇集</data>
+    <data key="type">CausalFactor</data>
+  </node>
+  <node id="plane_ad0d8ad195c7">
+    <data key="label">K2434+460-K2434+585 坡面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_ce39723189b6">
+    <data key="label">K2434+460-K2434+585 岩层面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_baf385c2c1d3">
+    <data key="label">K2434+460-K2434+585 L1</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_0f59b0d1676e">
+    <data key="label">K2434+460-K2434+585 L2</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_work_fe4f9bac47f9">
+    <data key="label">K2434+460-K2434+585 坡面清危（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_work_74bf6fa21207">
+    <data key="label">K2434+460-K2434+585 挂网锚喷（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_08bd2eb92a76">
+    <data key="label">K2434+460-K2434+585 治理设计 Fs=1.326</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_c1df7fd6e803">
+    <data key="label">K2434+460-K2434+585 天然 Fs=1.23</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_c2b2f35f8e59">
+    <data key="label">K2434+460-K2434+585 饱和 Fs=1.06</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_0f2d0add8730">
+    <data key="label">K2434+460-K2434+585 天然 Fs=1.24</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_1892c4bc006b">
+    <data key="label">K2434+460-K2434+585 饱和 Fs=1.11</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="terrain_1cf90824f3fb">
+    <data key="label">K2434+460-K2434+585 地形地貌</data>
+    <data key="type">TerrainSetting</data>
+  </node>
+  <node id="deformation_8e60044a349b">
+    <data key="label">K2434+460-K2434+585 崩塌落石</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="deformation_eb832351f0ed">
+    <data key="label">K2434+460-K2434+585 滴水</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="hydrology_7ef97932c028">
+    <data key="label">K2434+460-K2434+585 地表水</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="hydrology_a072943d4c45">
+    <data key="label">K2434+460-K2434+585 汇水</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="hydrology_91fa9047bab4">
+    <data key="label">K2434+460-K2434+585 降雨</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="protection_record_364488610be3">
+    <data key="label">K2434+460-K2434+585 坡面清危</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_20b6117e5bb5">
+    <data key="label">K2434+460-K2434+585 主动防护网</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_b4d32d9ddfe0">
+    <data key="label">K2434+460-K2434+585 局部单独锚杆</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_fc146d026971">
+    <data key="label">K2434+460-K2434+585 挂网锚喷</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_079d86b42fe2">
+    <data key="label">K2434+460-K2434+585 混凝土挂网喷锚+排水系统</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="slope_468e24cdd04c">
+    <data key="label">G209 K2435+310-K2435+430 左侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="hazard_body_468e24cdd04c">
+    <data key="label">K2435+310-K2435+430 危岩体</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_468e24cdd04c">
+    <data key="label">K2435+310-K2435+430 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="plane_ec21d0763aaa">
+    <data key="label">K2435+310-K2435+430 坡面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_work_d8e20345b0b0">
+    <data key="label">K2435+310-K2435+430 坡面清危（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_work_9bf8ec38346c">
+    <data key="label">K2435+310-K2435+430 挂网锚喷（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_0bf67f78d821">
+    <data key="label">K2435+310-K2435+430 治理设计 Fs=1.316</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_e9546dac7530">
+    <data key="label">K2435+310-K2435+430 治理前 Fs=None</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="terrain_fdaf42999496">
+    <data key="label">K2435+310-K2435+430 地形地貌</data>
+    <data key="type">TerrainSetting</data>
+  </node>
+  <node id="deformation_0ad34dec44a4">
+    <data key="label">K2435+310-K2435+430 崩塌</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="deformation_584a6dadfd2a">
+    <data key="label">K2435+310-K2435+430 落石</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="hydrology_0bde16d05042">
+    <data key="label">K2435+310-K2435+430 地表水</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="hydrology_0d10423348f9">
+    <data key="label">K2435+310-K2435+430 降雨</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <node id="protection_record_bbf9e69133c1">
+    <data key="label">K2435+310-K2435+430 坡面清危</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_f01d5de11c29">
+    <data key="label">K2435+310-K2435+430 挂网锚喷</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_6b20fa2a074a">
+    <data key="label">K2435+310-K2435+430 截水沟</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_record_2e889f4ccab1">
+    <data key="label">K2435+310-K2435+430 急流槽</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="slope_44e3c4d31e79">
+    <data key="label">G209 K2435+820-K2435+900 左侧边坡</data>
+    <data key="type">Slope</data>
+  </node>
+  <node id="hazard_body_44e3c4d31e79">
+    <data key="label">K2435+820-K2435+900 危岩体</data>
+    <data key="type">HazardBody</data>
+  </node>
+  <node id="hazard_assessment_44e3c4d31e79">
+    <data key="label">K2435+820-K2435+900 灾害类型自动识别</data>
+    <data key="type">HazardSusceptibilityAssessment</data>
+  </node>
+  <node id="factor_c1af6d252622">
+    <data key="label">顺向坡</data>
+    <data key="type">CausalFactor</data>
+  </node>
+  <node id="plane_d57dfc6a28d5">
+    <data key="label">K2435+820-K2435+900 坡面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_70976b16d7b6">
+    <data key="label">K2435+820-K2435+900 岩层面</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_40274935aeab">
+    <data key="label">K2435+820-K2435+900 L1</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_78c9cf50a442">
+    <data key="label">K2435+820-K2435+900 L2</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_f2984df382f7">
+    <data key="label">K2435+820-K2435+900 YC-L1</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_3660349880ea">
+    <data key="label">K2435+820-K2435+900 YC-L2</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="plane_00bc4e779e20">
+    <data key="label">K2435+820-K2435+900 L1-L2</data>
+    <data key="type">StructuralPlane</data>
+  </node>
+  <node id="protection_work_e66734d7a800">
+    <data key="label">K2435+820-K2435+900 坡面清危（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_work_5f120579d141">
+    <data key="label">K2435+820-K2435+900 主动防护网（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="protection_work_c610c842d8e5">
+    <data key="label">K2435+820-K2435+900 局部单独锚杆（设计）</data>
+    <data key="type">ProtectionWork</data>
+  </node>
+  <node id="stability_7276447c06c2">
+    <data key="label">K2435+820-K2435+900 治理设计 Fs=1.518</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_586b481024d5">
+    <data key="label">K2435+820-K2435+900 天然 Fs=1.22</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_7493c9999973">
+    <data key="label">K2435+820-K2435+900 饱水 Fs=1.14</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_1fbf5bebc2bf">
+    <data key="label">K2435+820-K2435+900 天然 Fs=1.2</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_9a7cf161bf52">
+    <data key="label">K2435+820-K2435+900 饱水 Fs=1.06</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_68ba61bb8534">
+    <data key="label">K2435+820-K2435+900 天然 Fs=1.23</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="stability_922f9d258b62">
+    <data key="label">K2435+820-K2435+900 饱水 Fs=1.13</data>
+    <data key="type">StabilityAnalysis</data>
+  </node>
+  <node id="terrain_b3bf8a6b179e">
+    <data key="label">K2435+820-K2435+900 地形地貌</data>
+    <data key="type">TerrainSetting</data>
+  </node>
+  <node id="deformation_cd3a377e6c2f">
+    <data key="label">K2435+820-K2435+900 掉块</data>
+    <data key="type">DeformationObservation</data>
+  </node>
+  <node id="hydrology_ea722c179173">
+    <data key="label">K2435+820-K2435+900 降雨</data>
+    <data key="type">HydrologyObservation</data>
+  </node>
+  <edge id="e0001" source="project_c00ef77f1e59" target="route_08de9e29eee4">
+    <data key="relation">HAS_ROUTE_SEGMENT</data>
+  </edge>
+  <edge id="e0002" source="project_c00ef77f1e59" target="doc_2021地质灾害评估规范_bec0e0f5e5">
+    <data key="relation">HAS_DOCUMENT</data>
+  </edge>
+  <edge id="e0003" source="project_c00ef77f1e59" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">HAS_DOCUMENT</data>
+  </edge>
+  <edge id="e0004" source="project_c00ef77f1e59" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">HAS_DOCUMENT</data>
+  </edge>
+  <edge id="e0005" source="project_c00ef77f1e59" target="doc_滑坡分类等_30956ae8da">
+    <data key="relation">HAS_DOCUMENT</data>
+  </edge>
+  <edge id="e0006" source="route_08de9e29eee4" target="slope_9c334c52ab83">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0007" source="slope_9c334c52ab83" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0008" source="slope_9c334c52ab83" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0009" source="slope_9c334c52ab83" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0010" source="slope_9c334c52ab83" target="lithology_c90dff0d5691">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0011" source="slope_9c334c52ab83" target="lithology_97a8385e5d43">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0012" source="slope_9c334c52ab83" target="stratum_c87915b5045a">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0013" source="slope_9c334c52ab83" target="hazard_body_9c334c52ab83">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0014" source="slope_9c334c52ab83" target="hazard_assessment_9c334c52ab83">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0015" source="hazard_assessment_9c334c52ab83" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0016" source="slope_9c334c52ab83" target="factor_5c0419429c56">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0017" source="slope_9c334c52ab83" target="factor_71b816f6c636">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0018" source="slope_9c334c52ab83" target="factor_13cfdf6598e4">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0019" source="slope_9c334c52ab83" target="plane_da960c67c435">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0020" source="slope_9c334c52ab83" target="plane_6f9232549f78">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0021" source="slope_9c334c52ab83" target="plane_2362c70efa17">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0022" source="slope_9c334c52ab83" target="plane_bd7f61b34deb">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0023" source="slope_9c334c52ab83" target="protection_work_7d5e3ebcb31a">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0024" source="protection_work_7d5e3ebcb31a" target="protection_type_d7062be35064">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0025" source="slope_9c334c52ab83" target="protection_work_1f757cf67aef">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0026" source="protection_work_1f757cf67aef" target="protection_type_1163b9963883">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0027" source="slope_9c334c52ab83" target="stability_5020bcdba548">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0028" source="slope_9c334c52ab83" target="stability_6557b869fa32">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0029" source="slope_9c334c52ab83" target="stability_66ac32557a86">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0030" source="slope_9c334c52ab83" target="stability_b8d615ff760c">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0031" source="slope_9c334c52ab83" target="terrain_74ae5689fb78">
+    <data key="relation">HAS_TERRAIN_SETTING</data>
+  </edge>
+  <edge id="e0032" source="slope_9c334c52ab83" target="deformation_6a2648026d8f">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0033" source="slope_9c334c52ab83" target="deformation_49c86b914c41">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0034" source="slope_9c334c52ab83" target="deformation_60d67cbc2d09">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0035" source="slope_9c334c52ab83" target="hydrology_b88897198c59">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0036" source="route_08de9e29eee4" target="slope_6fede6d3c6d4">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0037" source="slope_6fede6d3c6d4" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0038" source="slope_6fede6d3c6d4" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0039" source="slope_6fede6d3c6d4" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0040" source="slope_6fede6d3c6d4" target="lithology_97a8385e5d43">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0041" source="slope_6fede6d3c6d4" target="lithology_c90dff0d5691">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0042" source="slope_6fede6d3c6d4" target="stratum_c87915b5045a">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0043" source="slope_6fede6d3c6d4" target="hazard_body_6fede6d3c6d4">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0044" source="slope_6fede6d3c6d4" target="hazard_assessment_6fede6d3c6d4">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0045" source="hazard_assessment_6fede6d3c6d4" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0046" source="slope_6fede6d3c6d4" target="factor_5c0419429c56">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0047" source="slope_6fede6d3c6d4" target="factor_71b816f6c636">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0048" source="slope_6fede6d3c6d4" target="factor_13cfdf6598e4">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0049" source="slope_6fede6d3c6d4" target="plane_ecb5c7a64ac8">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0050" source="slope_6fede6d3c6d4" target="plane_92a24cb95d17">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0051" source="slope_6fede6d3c6d4" target="plane_929bd49b0491">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0052" source="slope_6fede6d3c6d4" target="plane_a7f6fc2426d9">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0053" source="slope_6fede6d3c6d4" target="protection_work_4d7d86065589">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0054" source="protection_work_4d7d86065589" target="protection_type_d7062be35064">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0055" source="slope_6fede6d3c6d4" target="protection_work_f66634a19ff1">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0056" source="protection_work_f66634a19ff1" target="protection_type_1163b9963883">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0057" source="slope_6fede6d3c6d4" target="stability_2687f1f36f3a">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0058" source="slope_6fede6d3c6d4" target="stability_29b6910970fb">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0059" source="slope_6fede6d3c6d4" target="stability_830cb3d21fd4">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0060" source="slope_6fede6d3c6d4" target="stability_b67bae36a58a">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0061" source="slope_6fede6d3c6d4" target="stability_d4f45ca15e86">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0062" source="slope_6fede6d3c6d4" target="stability_3c4e262bd0c3">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0063" source="slope_6fede6d3c6d4" target="stability_b5b02977e3d2">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0064" source="slope_6fede6d3c6d4" target="terrain_0bb14a0e6325">
+    <data key="relation">HAS_TERRAIN_SETTING</data>
+  </edge>
+  <edge id="e0065" source="slope_6fede6d3c6d4" target="deformation_0bcdc99453a0">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0066" source="slope_6fede6d3c6d4" target="hydrology_757e481b79fb">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0067" source="route_08de9e29eee4" target="slope_31b230e0d44e">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0068" source="slope_31b230e0d44e" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0069" source="slope_31b230e0d44e" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0070" source="slope_31b230e0d44e" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0071" source="slope_31b230e0d44e" target="lithology_73a88036b311">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0072" source="slope_31b230e0d44e" target="lithology_c90dff0d5691">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0073" source="slope_31b230e0d44e" target="stratum_e275728dead6">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0074" source="slope_31b230e0d44e" target="hazard_body_31b230e0d44e">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0075" source="slope_31b230e0d44e" target="hazard_assessment_31b230e0d44e">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0076" source="hazard_assessment_31b230e0d44e" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0077" source="slope_31b230e0d44e" target="factor_13cfdf6598e4">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0078" source="slope_31b230e0d44e" target="plane_798392210d40">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0079" source="slope_31b230e0d44e" target="plane_a68ec8e11182">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0080" source="slope_31b230e0d44e" target="plane_1c64b7f1fa0a">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0081" source="slope_31b230e0d44e" target="plane_d64813bf5bc9">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0082" source="slope_31b230e0d44e" target="protection_work_3c07eb32ca54">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0083" source="protection_work_3c07eb32ca54" target="protection_type_d7062be35064">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0084" source="slope_31b230e0d44e" target="protection_work_bc027486bf6c">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0085" source="protection_work_bc027486bf6c" target="protection_type_1163b9963883">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0086" source="slope_31b230e0d44e" target="stability_83f1fa1926a0">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0087" source="slope_31b230e0d44e" target="stability_ac290d2804b0">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0088" source="slope_31b230e0d44e" target="stability_2e8a79752cff">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0089" source="slope_31b230e0d44e" target="terrain_868c33833e2c">
+    <data key="relation">HAS_TERRAIN_SETTING</data>
+  </edge>
+  <edge id="e0090" source="slope_31b230e0d44e" target="deformation_c2c7c85d327a">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0091" source="slope_31b230e0d44e" target="hydrology_0f8269f05d35">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0092" source="slope_31b230e0d44e" target="protection_record_dc65ac0a9ac7">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0093" source="slope_31b230e0d44e" target="protection_record_89cafb55d15d">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0094" source="route_08de9e29eee4" target="slope_6f32d2c65dea">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0095" source="slope_6f32d2c65dea" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0096" source="slope_6f32d2c65dea" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0097" source="slope_6f32d2c65dea" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0098" source="slope_6f32d2c65dea" target="lithology_73a88036b311">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0099" source="slope_6f32d2c65dea" target="lithology_c90dff0d5691">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0100" source="slope_6f32d2c65dea" target="stratum_e275728dead6">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0101" source="slope_6f32d2c65dea" target="hazard_body_6f32d2c65dea">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0102" source="slope_6f32d2c65dea" target="hazard_assessment_6f32d2c65dea">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0103" source="hazard_assessment_6f32d2c65dea" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0104" source="slope_6f32d2c65dea" target="factor_5c0419429c56">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0105" source="slope_6f32d2c65dea" target="factor_71b816f6c636">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0106" source="slope_6f32d2c65dea" target="factor_f8ea920a45a9">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0107" source="slope_6f32d2c65dea" target="factor_13cfdf6598e4">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0108" source="slope_6f32d2c65dea" target="plane_ce2839b495a1">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0109" source="slope_6f32d2c65dea" target="protection_work_378827141a7b">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0110" source="protection_work_378827141a7b" target="protection_type_d7062be35064">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0111" source="slope_6f32d2c65dea" target="protection_work_8b0bae484605">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0112" source="protection_work_8b0bae484605" target="protection_type_1163b9963883">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0113" source="slope_6f32d2c65dea" target="stability_dd9c6fc1794e">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0114" source="slope_6f32d2c65dea" target="stability_02f39834658a">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0115" source="slope_6f32d2c65dea" target="stability_5755c7d8d386">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0116" source="slope_6f32d2c65dea" target="stability_76911f5b8e78">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0117" source="slope_6f32d2c65dea" target="terrain_242a36bb23c6">
+    <data key="relation">HAS_TERRAIN_SETTING</data>
+  </edge>
+  <edge id="e0118" source="slope_6f32d2c65dea" target="deformation_6e2032c825ef">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0119" source="slope_6f32d2c65dea" target="deformation_724a39311126">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0120" source="slope_6f32d2c65dea" target="hydrology_1c82c7924c4f">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0121" source="route_08de9e29eee4" target="slope_a6c40fa126a9">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0122" source="slope_a6c40fa126a9" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0123" source="slope_a6c40fa126a9" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0124" source="slope_a6c40fa126a9" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0125" source="slope_a6c40fa126a9" target="lithology_73a88036b311">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0126" source="slope_a6c40fa126a9" target="stratum_e275728dead6">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0127" source="slope_a6c40fa126a9" target="hazard_body_a6c40fa126a9">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0128" source="slope_a6c40fa126a9" target="hazard_assessment_a6c40fa126a9">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0129" source="hazard_assessment_a6c40fa126a9" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0130" source="slope_a6c40fa126a9" target="factor_5c0419429c56">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0131" source="slope_a6c40fa126a9" target="factor_71b816f6c636">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0132" source="slope_a6c40fa126a9" target="factor_f8ea920a45a9">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0133" source="slope_a6c40fa126a9" target="factor_13cfdf6598e4">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0134" source="slope_a6c40fa126a9" target="plane_c77110cb804a">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0135" source="slope_a6c40fa126a9" target="plane_723ce59d929d">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0136" source="slope_a6c40fa126a9" target="plane_a3ae67c582a8">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0137" source="slope_a6c40fa126a9" target="plane_8acdb4fae690">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0138" source="slope_a6c40fa126a9" target="protection_work_b60ec9d64b88">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0139" source="protection_work_b60ec9d64b88" target="protection_type_d7062be35064">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0140" source="slope_a6c40fa126a9" target="protection_work_543abd67f8f1">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0141" source="protection_work_543abd67f8f1" target="protection_type_1163b9963883">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0142" source="slope_a6c40fa126a9" target="stability_d58152e05e6b">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0143" source="slope_a6c40fa126a9" target="stability_cfe0055d6baf">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0144" source="slope_a6c40fa126a9" target="stability_7f47d8722d8f">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0145" source="slope_a6c40fa126a9" target="terrain_767c5cc01811">
+    <data key="relation">HAS_TERRAIN_SETTING</data>
+  </edge>
+  <edge id="e0146" source="slope_a6c40fa126a9" target="deformation_34ba563b47d2">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0147" source="slope_a6c40fa126a9" target="deformation_7c046e9f88a6">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0148" source="slope_a6c40fa126a9" target="deformation_6eb9b3217781">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0149" source="slope_a6c40fa126a9" target="hydrology_f8a9a1d5ef8c">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0150" source="slope_a6c40fa126a9" target="hydrology_810158a48317">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0151" source="slope_a6c40fa126a9" target="protection_record_4f69b9a25385">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0152" source="slope_a6c40fa126a9" target="protection_record_dabb7cd7dd15">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0153" source="route_08de9e29eee4" target="slope_5764884573e9">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0154" source="slope_5764884573e9" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0155" source="slope_5764884573e9" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0156" source="slope_5764884573e9" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0157" source="slope_5764884573e9" target="lithology_c90dff0d5691">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0158" source="slope_5764884573e9" target="lithology_73a88036b311">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0159" source="slope_5764884573e9" target="stratum_e275728dead6">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0160" source="slope_5764884573e9" target="hazard_body_5764884573e9">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0161" source="slope_5764884573e9" target="hazard_assessment_5764884573e9">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0162" source="hazard_assessment_5764884573e9" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0163" source="slope_5764884573e9" target="factor_71b816f6c636">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0164" source="slope_5764884573e9" target="factor_13cfdf6598e4">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0165" source="slope_5764884573e9" target="plane_6d041f222858">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0166" source="slope_5764884573e9" target="plane_a7066eb2fa52">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0167" source="slope_5764884573e9" target="plane_06740416952e">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0168" source="slope_5764884573e9" target="plane_ecc362f5d71e">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0169" source="slope_5764884573e9" target="plane_7cd2b79ec211">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0170" source="slope_5764884573e9" target="protection_work_3e83cf07db9b">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0171" source="protection_work_3e83cf07db9b" target="protection_type_d7062be35064">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0172" source="slope_5764884573e9" target="protection_work_b24ac1487a9c">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0173" source="protection_work_b24ac1487a9c" target="protection_type_1163b9963883">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0174" source="slope_5764884573e9" target="stability_0fbc707888c0">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0175" source="slope_5764884573e9" target="stability_42e8c1b0f82f">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0176" source="slope_5764884573e9" target="stability_e6dc37d99464">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0177" source="slope_5764884573e9" target="stability_3389179e647f">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0178" source="slope_5764884573e9" target="terrain_7df3bfadddc6">
+    <data key="relation">HAS_TERRAIN_SETTING</data>
+  </edge>
+  <edge id="e0179" source="slope_5764884573e9" target="protection_record_300667e52196">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0180" source="slope_5764884573e9" target="protection_record_64cd3e7a5f16">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0181" source="slope_5764884573e9" target="protection_record_5a773de59088">
+    <data key="relation">HAS_EXISTING_PROTECTION</data>
+  </edge>
+  <edge id="e0182" source="slope_5764884573e9" target="protection_record_1b683fad062f">
+    <data key="relation">HAS_EXISTING_PROTECTION</data>
+  </edge>
+  <edge id="e0183" source="route_08de9e29eee4" target="slope_8520155ef46d">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0184" source="slope_8520155ef46d" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0185" source="slope_8520155ef46d" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0186" source="slope_8520155ef46d" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0187" source="slope_8520155ef46d" target="lithology_73a88036b311">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0188" source="slope_8520155ef46d" target="stratum_fd75de24c754">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0189" source="slope_8520155ef46d" target="hazard_body_8520155ef46d">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0190" source="slope_8520155ef46d" target="hazard_assessment_8520155ef46d">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0191" source="hazard_assessment_8520155ef46d" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0192" source="slope_8520155ef46d" target="factor_5c0419429c56">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0193" source="slope_8520155ef46d" target="factor_71b816f6c636">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0194" source="slope_8520155ef46d" target="factor_13cfdf6598e4">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0195" source="slope_8520155ef46d" target="plane_3ea3413e6f77">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0196" source="slope_8520155ef46d" target="plane_a7fe52e0a668">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0197" source="slope_8520155ef46d" target="plane_725b3e1405ad">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0198" source="slope_8520155ef46d" target="plane_6f9bb057f624">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0199" source="slope_8520155ef46d" target="protection_work_780f627e2398">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0200" source="protection_work_780f627e2398" target="protection_type_d7062be35064">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0201" source="slope_8520155ef46d" target="protection_work_4975e63c9b61">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0202" source="protection_work_4975e63c9b61" target="protection_type_1163b9963883">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0203" source="slope_8520155ef46d" target="stability_26cc2aebb656">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0204" source="slope_8520155ef46d" target="stability_f1e863c00ce3">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0205" source="slope_8520155ef46d" target="stability_d40c4ae896be">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0206" source="slope_8520155ef46d" target="deformation_e9bf6d3d711e">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0207" source="slope_8520155ef46d" target="deformation_55845feced48">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0208" source="slope_8520155ef46d" target="hydrology_e6c24a30ddcd">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0209" source="slope_8520155ef46d" target="protection_record_cdf5bbbb59d1">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0210" source="slope_8520155ef46d" target="protection_record_383218304bf7">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0211" source="slope_8520155ef46d" target="protection_record_f321040e8d79">
+    <data key="relation">HAS_EXISTING_PROTECTION</data>
+  </edge>
+  <edge id="e0212" source="route_08de9e29eee4" target="slope_13dd155bc76d">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0213" source="slope_13dd155bc76d" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0214" source="slope_13dd155bc76d" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0215" source="slope_13dd155bc76d" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0216" source="slope_13dd155bc76d" target="lithology_73a88036b311">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0217" source="slope_13dd155bc76d" target="lithology_c90dff0d5691">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0218" source="slope_13dd155bc76d" target="stratum_5c16d04ad4df">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0219" source="slope_13dd155bc76d" target="hazard_body_13dd155bc76d">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0220" source="slope_13dd155bc76d" target="hazard_assessment_13dd155bc76d">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0221" source="hazard_assessment_13dd155bc76d" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0222" source="slope_13dd155bc76d" target="factor_5c0419429c56">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0223" source="slope_13dd155bc76d" target="factor_71b816f6c636">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0224" source="slope_13dd155bc76d" target="factor_13cfdf6598e4">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0225" source="slope_13dd155bc76d" target="plane_56296ed37339">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0226" source="slope_13dd155bc76d" target="plane_35f28332b2d7">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0227" source="slope_13dd155bc76d" target="plane_5396495851f3">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0228" source="slope_13dd155bc76d" target="plane_093df5445324">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0229" source="slope_13dd155bc76d" target="plane_2cb54015eac6">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0230" source="slope_13dd155bc76d" target="protection_work_180e1c88fa08">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0231" source="protection_work_180e1c88fa08" target="protection_type_d7062be35064">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0232" source="slope_13dd155bc76d" target="protection_work_f054a2a3b82a">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0233" source="protection_work_f054a2a3b82a" target="protection_type_1163b9963883">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0234" source="slope_13dd155bc76d" target="stability_c3e542eee1e9">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0235" source="slope_13dd155bc76d" target="stability_d38b68b645c8">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0236" source="slope_13dd155bc76d" target="stability_4cc8c64476d4">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0237" source="slope_13dd155bc76d" target="stability_491f9d95296c">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0238" source="slope_13dd155bc76d" target="terrain_e05c2b3ff628">
+    <data key="relation">HAS_TERRAIN_SETTING</data>
+  </edge>
+  <edge id="e0239" source="slope_13dd155bc76d" target="deformation_4f8cdc759392">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0240" source="slope_13dd155bc76d" target="deformation_cacad6567e6f">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0241" source="slope_13dd155bc76d" target="hydrology_487c9b04b3fc">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0242" source="slope_13dd155bc76d" target="protection_record_1cc33ad1380a">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0243" source="slope_13dd155bc76d" target="protection_record_7a32323ffd21">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0244" source="slope_13dd155bc76d" target="protection_record_adaafee7e1cd">
+    <data key="relation">HAS_EXISTING_PROTECTION</data>
+  </edge>
+  <edge id="e0245" source="route_08de9e29eee4" target="slope_15bf907dcd25">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0246" source="slope_15bf907dcd25" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0247" source="slope_15bf907dcd25" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0248" source="slope_15bf907dcd25" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0249" source="slope_15bf907dcd25" target="lithology_73a88036b311">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0250" source="slope_15bf907dcd25" target="lithology_c90dff0d5691">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0251" source="slope_15bf907dcd25" target="lithology_73232c4717ee">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0252" source="slope_15bf907dcd25" target="stratum_5c16d04ad4df">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0253" source="slope_15bf907dcd25" target="hazard_body_15bf907dcd25">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0254" source="slope_15bf907dcd25" target="hazard_assessment_15bf907dcd25">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0255" source="hazard_assessment_15bf907dcd25" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0256" source="slope_15bf907dcd25" target="factor_5c0419429c56">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0257" source="slope_15bf907dcd25" target="factor_71b816f6c636">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0258" source="slope_15bf907dcd25" target="factor_13cfdf6598e4">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0259" source="slope_15bf907dcd25" target="plane_9765289b1ac0">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0260" source="slope_15bf907dcd25" target="plane_8701755a2fbc">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0261" source="slope_15bf907dcd25" target="plane_a01d6e0c939e">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0262" source="slope_15bf907dcd25" target="plane_c260518385aa">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0263" source="slope_15bf907dcd25" target="protection_work_cad727e798b7">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0264" source="protection_work_cad727e798b7" target="protection_type_1163b9963883">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0265" source="slope_15bf907dcd25" target="protection_work_43ee03cfaef2">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0266" source="protection_work_43ee03cfaef2" target="protection_type_7a39fd164119">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0267" source="slope_15bf907dcd25" target="protection_work_73db9fa3c48f">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0268" source="protection_work_73db9fa3c48f" target="protection_type_e7057cdef303">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0269" source="slope_15bf907dcd25" target="stability_f9f9588aadc8">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0270" source="slope_15bf907dcd25" target="stability_4787d41d942e">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0271" source="slope_15bf907dcd25" target="stability_597dde315062">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0272" source="slope_15bf907dcd25" target="stability_7185c2300cd1">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0273" source="slope_15bf907dcd25" target="terrain_d75975148239">
+    <data key="relation">HAS_TERRAIN_SETTING</data>
+  </edge>
+  <edge id="e0274" source="slope_15bf907dcd25" target="deformation_9354a8b55a08">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0275" source="slope_15bf907dcd25" target="hydrology_09aaebf37ebb">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0276" source="route_08de9e29eee4" target="slope_f0d43c9a0f88">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0277" source="slope_f0d43c9a0f88" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0278" source="slope_f0d43c9a0f88" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0279" source="slope_f0d43c9a0f88" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0280" source="slope_f0d43c9a0f88" target="lithology_97a8385e5d43">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0281" source="slope_f0d43c9a0f88" target="stratum_a6368c4ec328">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0282" source="slope_f0d43c9a0f88" target="hazard_body_f0d43c9a0f88">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0283" source="slope_f0d43c9a0f88" target="hazard_assessment_f0d43c9a0f88">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0284" source="hazard_assessment_f0d43c9a0f88" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0285" source="slope_f0d43c9a0f88" target="factor_02b8ddd1b0fb">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0286" source="slope_f0d43c9a0f88" target="factor_301859412a54">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0287" source="slope_f0d43c9a0f88" target="factor_e5d71a1b5b0b">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0288" source="slope_f0d43c9a0f88" target="factor_f70b00a37911">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0289" source="slope_f0d43c9a0f88" target="plane_d43c5ea97147">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0290" source="slope_f0d43c9a0f88" target="plane_c2df68430897">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0291" source="slope_f0d43c9a0f88" target="protection_work_a937f7c320ed">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0292" source="protection_work_a937f7c320ed" target="protection_type_d7062be35064">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0293" source="slope_f0d43c9a0f88" target="protection_work_e6d8e49364b8">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0294" source="protection_work_e6d8e49364b8" target="protection_type_c20ef627b5d7">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0295" source="slope_f0d43c9a0f88" target="protection_work_855e175511ed">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0296" source="protection_work_855e175511ed" target="protection_type_806565496d83">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0297" source="slope_f0d43c9a0f88" target="stability_d449fdb474ea">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0298" source="slope_f0d43c9a0f88" target="stability_4673e5df3b0b">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0299" source="slope_f0d43c9a0f88" target="stability_e0b7a2c7911c">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0300" source="slope_f0d43c9a0f88" target="stability_5d9d5b659452">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0301" source="slope_f0d43c9a0f88" target="stability_310b94f7555b">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0302" source="slope_f0d43c9a0f88" target="terrain_744ffd12f0cf">
+    <data key="relation">HAS_TERRAIN_SETTING</data>
+  </edge>
+  <edge id="e0303" source="route_08de9e29eee4" target="slope_f17815f5c07c">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0304" source="slope_f17815f5c07c" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0305" source="slope_f17815f5c07c" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0306" source="slope_f17815f5c07c" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0307" source="slope_f17815f5c07c" target="lithology_97a8385e5d43">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0308" source="slope_f17815f5c07c" target="stratum_a6368c4ec328">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0309" source="slope_f17815f5c07c" target="hazard_body_f17815f5c07c">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0310" source="slope_f17815f5c07c" target="hazard_assessment_f17815f5c07c">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0311" source="hazard_assessment_f17815f5c07c" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0312" source="slope_f17815f5c07c" target="factor_e5d71a1b5b0b">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0313" source="slope_f17815f5c07c" target="factor_5204a440941f">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0314" source="slope_f17815f5c07c" target="factor_f70b00a37911">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0315" source="slope_f17815f5c07c" target="factor_02b8ddd1b0fb">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0316" source="slope_f17815f5c07c" target="factor_301859412a54">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0317" source="slope_f17815f5c07c" target="factor_3640f006513a">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0318" source="slope_f17815f5c07c" target="plane_ad0d8ad195c7">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0319" source="slope_f17815f5c07c" target="plane_ce39723189b6">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0320" source="slope_f17815f5c07c" target="plane_baf385c2c1d3">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0321" source="slope_f17815f5c07c" target="plane_0f59b0d1676e">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0322" source="slope_f17815f5c07c" target="protection_work_fe4f9bac47f9">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0323" source="protection_work_fe4f9bac47f9" target="protection_type_d7062be35064">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0324" source="slope_f17815f5c07c" target="protection_work_74bf6fa21207">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0325" source="protection_work_74bf6fa21207" target="protection_type_1163b9963883">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0326" source="slope_f17815f5c07c" target="stability_08bd2eb92a76">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0327" source="slope_f17815f5c07c" target="stability_c1df7fd6e803">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0328" source="slope_f17815f5c07c" target="stability_c2b2f35f8e59">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0329" source="slope_f17815f5c07c" target="stability_0f2d0add8730">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0330" source="slope_f17815f5c07c" target="stability_1892c4bc006b">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0331" source="slope_f17815f5c07c" target="terrain_1cf90824f3fb">
+    <data key="relation">HAS_TERRAIN_SETTING</data>
+  </edge>
+  <edge id="e0332" source="slope_f17815f5c07c" target="deformation_8e60044a349b">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0333" source="slope_f17815f5c07c" target="deformation_eb832351f0ed">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0334" source="slope_f17815f5c07c" target="hydrology_7ef97932c028">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0335" source="slope_f17815f5c07c" target="hydrology_a072943d4c45">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0336" source="slope_f17815f5c07c" target="hydrology_91fa9047bab4">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0337" source="slope_f17815f5c07c" target="protection_record_364488610be3">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0338" source="slope_f17815f5c07c" target="protection_record_20b6117e5bb5">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0339" source="slope_f17815f5c07c" target="protection_record_b4d32d9ddfe0">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0340" source="slope_f17815f5c07c" target="protection_record_fc146d026971">
+    <data key="relation">HAS_EXISTING_PROTECTION</data>
+  </edge>
+  <edge id="e0341" source="slope_f17815f5c07c" target="protection_record_079d86b42fe2">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0342" source="route_08de9e29eee4" target="slope_468e24cdd04c">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0343" source="slope_468e24cdd04c" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0344" source="slope_468e24cdd04c" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0345" source="slope_468e24cdd04c" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0346" source="slope_468e24cdd04c" target="lithology_97a8385e5d43">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0347" source="slope_468e24cdd04c" target="stratum_a6368c4ec328">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0348" source="slope_468e24cdd04c" target="hazard_body_468e24cdd04c">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0349" source="slope_468e24cdd04c" target="hazard_assessment_468e24cdd04c">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0350" source="hazard_assessment_468e24cdd04c" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0351" source="slope_468e24cdd04c" target="factor_5c0419429c56">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0352" source="slope_468e24cdd04c" target="factor_71b816f6c636">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0353" source="slope_468e24cdd04c" target="factor_f8ea920a45a9">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0354" source="slope_468e24cdd04c" target="factor_13cfdf6598e4">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0355" source="slope_468e24cdd04c" target="plane_ec21d0763aaa">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0356" source="slope_468e24cdd04c" target="protection_work_d8e20345b0b0">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0357" source="protection_work_d8e20345b0b0" target="protection_type_d7062be35064">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0358" source="slope_468e24cdd04c" target="protection_work_9bf8ec38346c">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0359" source="protection_work_9bf8ec38346c" target="protection_type_1163b9963883">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0360" source="slope_468e24cdd04c" target="stability_0bf67f78d821">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0361" source="slope_468e24cdd04c" target="stability_e9546dac7530">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0362" source="slope_468e24cdd04c" target="terrain_fdaf42999496">
+    <data key="relation">HAS_TERRAIN_SETTING</data>
+  </edge>
+  <edge id="e0363" source="slope_468e24cdd04c" target="deformation_0ad34dec44a4">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0364" source="slope_468e24cdd04c" target="deformation_584a6dadfd2a">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0365" source="slope_468e24cdd04c" target="hydrology_0bde16d05042">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0366" source="slope_468e24cdd04c" target="hydrology_0d10423348f9">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+  <edge id="e0367" source="slope_468e24cdd04c" target="protection_record_bbf9e69133c1">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0368" source="slope_468e24cdd04c" target="protection_record_f01d5de11c29">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0369" source="slope_468e24cdd04c" target="protection_record_6b20fa2a074a">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0370" source="slope_468e24cdd04c" target="protection_record_2e889f4ccab1">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0371" source="route_08de9e29eee4" target="slope_44e3c4d31e79">
+    <data key="relation">HAS_SLOPE</data>
+  </edge>
+  <edge id="e0372" source="slope_44e3c4d31e79" target="project_c00ef77f1e59">
+    <data key="relation">BELONGS_TO_PROJECT</data>
+  </edge>
+  <edge id="e0373" source="slope_44e3c4d31e79" target="doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0374" source="slope_44e3c4d31e79" target="doc_g209_2388_976_2435_900_施工图设计_20ba9aa705">
+    <data key="relation">RECORDED_IN</data>
+  </edge>
+  <edge id="e0375" source="slope_44e3c4d31e79" target="lithology_97a8385e5d43">
+    <data key="relation">HAS_LITHOLOGY</data>
+  </edge>
+  <edge id="e0376" source="slope_44e3c4d31e79" target="stratum_a6368c4ec328">
+    <data key="relation">HAS_STRATUM</data>
+  </edge>
+  <edge id="e0377" source="slope_44e3c4d31e79" target="hazard_body_44e3c4d31e79">
+    <data key="relation">CONTAINS_HAZARD_BODY</data>
+  </edge>
+  <edge id="e0378" source="slope_44e3c4d31e79" target="hazard_assessment_44e3c4d31e79">
+    <data key="relation">HAS_SUSCEPTIBILITY_ASSESSMENT</data>
+  </edge>
+  <edge id="e0379" source="hazard_assessment_44e3c4d31e79" target="hazard_type_0ad06a3d1b6d">
+    <data key="relation">FOR_HAZARD_TYPE</data>
+  </edge>
+  <edge id="e0380" source="slope_44e3c4d31e79" target="factor_e5d71a1b5b0b">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0381" source="slope_44e3c4d31e79" target="factor_5204a440941f">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0382" source="slope_44e3c4d31e79" target="factor_c1af6d252622">
+    <data key="relation">INFLUENCED_BY</data>
+  </edge>
+  <edge id="e0383" source="slope_44e3c4d31e79" target="plane_d57dfc6a28d5">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0384" source="slope_44e3c4d31e79" target="plane_70976b16d7b6">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0385" source="slope_44e3c4d31e79" target="plane_40274935aeab">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0386" source="slope_44e3c4d31e79" target="plane_78c9cf50a442">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0387" source="slope_44e3c4d31e79" target="plane_f2984df382f7">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0388" source="slope_44e3c4d31e79" target="plane_3660349880ea">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0389" source="slope_44e3c4d31e79" target="plane_00bc4e779e20">
+    <data key="relation">DEVELOPS_STRUCTURAL_PLANE</data>
+  </edge>
+  <edge id="e0390" source="slope_44e3c4d31e79" target="protection_work_e66734d7a800">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0391" source="protection_work_e66734d7a800" target="protection_type_d7062be35064">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0392" source="slope_44e3c4d31e79" target="protection_work_5f120579d141">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0393" source="protection_work_5f120579d141" target="protection_type_c20ef627b5d7">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0394" source="slope_44e3c4d31e79" target="protection_work_c610c842d8e5">
+    <data key="relation">HAS_PROTECTION_DESIGN</data>
+  </edge>
+  <edge id="e0395" source="protection_work_c610c842d8e5" target="protection_type_806565496d83">
+    <data key="relation">INSTANCE_OF</data>
+  </edge>
+  <edge id="e0396" source="slope_44e3c4d31e79" target="stability_7276447c06c2">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0397" source="slope_44e3c4d31e79" target="stability_586b481024d5">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0398" source="slope_44e3c4d31e79" target="stability_7493c9999973">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0399" source="slope_44e3c4d31e79" target="stability_1fbf5bebc2bf">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0400" source="slope_44e3c4d31e79" target="stability_9a7cf161bf52">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0401" source="slope_44e3c4d31e79" target="stability_68ba61bb8534">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0402" source="slope_44e3c4d31e79" target="stability_922f9d258b62">
+    <data key="relation">HAS_STABILITY_ANALYSIS</data>
+  </edge>
+  <edge id="e0403" source="slope_44e3c4d31e79" target="terrain_b3bf8a6b179e">
+    <data key="relation">HAS_TERRAIN_SETTING</data>
+  </edge>
+  <edge id="e0404" source="slope_44e3c4d31e79" target="deformation_cd3a377e6c2f">
+    <data key="relation">HAS_DEFORMATION_OBSERVATION</data>
+  </edge>
+  <edge id="e0405" source="slope_44e3c4d31e79" target="hydrology_ea722c179173">
+    <data key="relation">HAS_HYDROLOGY_OBSERVATION</data>
+  </edge>
+</graph>
+</graphml>

@@ -1,0 +1,453 @@
+{
+  "schema_name": "slope_risk_knowledge_graph",
+  "schema_version": "1.1.0-layered-parsing",
+  "status": "draft_for_review",
+  "node_types": {
+    "Project": {
+      "label_zh": "项目",
+      "category": "organization"
+    },
+    "RouteSegment": {
+      "label_zh": "路线段",
+      "category": "organization"
+    },
+    "Slope": {
+      "label_zh": "边坡",
+      "category": "core"
+    },
+    "HazardBody": {
+      "label_zh": "灾害体/隐患体",
+      "category": "hazard"
+    },
+    "HazardType": {
+      "label_zh": "灾害类型",
+      "category": "taxonomy"
+    },
+    "HazardSusceptibilityAssessment": {
+      "label_zh": "易感性评价",
+      "category": "assessment"
+    },
+    "Lithology": {
+      "label_zh": "岩性",
+      "category": "geology"
+    },
+    "Stratum": {
+      "label_zh": "地层",
+      "category": "geology"
+    },
+    "StructuralPlane": {
+      "label_zh": "结构面",
+      "category": "geology"
+    },
+    "TerrainSetting": {
+      "label_zh": "地形地貌",
+      "category": "environment"
+    },
+    "CausalFactor": {
+      "label_zh": "影响因素",
+      "category": "hazard"
+    },
+    "ProtectionType": {
+      "label_zh": "防护类型",
+      "category": "taxonomy"
+    },
+    "ProtectionWork": {
+      "label_zh": "防护工程",
+      "category": "protection"
+    },
+    "DeformationObservation": {
+      "label_zh": "变形现象",
+      "category": "deformation"
+    },
+    "HydrologyObservation": {
+      "label_zh": "水文现象",
+      "category": "environment"
+    },
+    "UpliftObservation": {
+      "label_zh": "隆起观测",
+      "category": "deformation"
+    },
+    "SeepageObservation": {
+      "label_zh": "管涌/渗水观测",
+      "category": "deformation"
+    },
+    "FacilityDamageObservation": {
+      "label_zh": "设施损毁观测",
+      "category": "deformation"
+    },
+    "VegetationSurvey": {
+      "label_zh": "植被调查",
+      "category": "environment"
+    },
+    "MonitoringProgram": {
+      "label_zh": "监测方案",
+      "category": "monitoring"
+    },
+    "StabilityAnalysis": {
+      "label_zh": "稳定性分析",
+      "category": "analysis"
+    },
+    "Drawing": {
+      "label_zh": "图纸",
+      "category": "evidence"
+    },
+    "Document": {
+      "label_zh": "文档",
+      "category": "evidence"
+    },
+    "Standard": {
+      "label_zh": "规范",
+      "category": "rule"
+    },
+    "RiskRule": {
+      "label_zh": "风险规则",
+      "category": "rule"
+    },
+    "RiskAssessment": {
+      "label_zh": "风险评估",
+      "category": "assessment"
+    },
+    "ExposureObject": {
+      "label_zh": "暴露对象",
+      "category": "risk"
+    }
+  },
+  "relation_types": {
+    "HAS_ROUTE_SEGMENT": {
+      "label_zh": "包含路线段"
+    },
+    "HAS_SLOPE": {
+      "label_zh": "包含边坡"
+    },
+    "BELONGS_TO_PROJECT": {
+      "label_zh": "属于项目"
+    },
+    "CONTAINS_HAZARD_BODY": {
+      "label_zh": "包含灾害体"
+    },
+    "HAS_SUSCEPTIBILITY_ASSESSMENT": {
+      "label_zh": "具有易感性评价"
+    },
+    "FOR_HAZARD_TYPE": {
+      "label_zh": "针对灾害类型"
+    },
+    "HAS_LITHOLOGY": {
+      "label_zh": "具有岩性"
+    },
+    "HAS_STRATUM": {
+      "label_zh": "具有地层"
+    },
+    "DEVELOPS_STRUCTURAL_PLANE": {
+      "label_zh": "发育结构面"
+    },
+    "HAS_TERRAIN_SETTING": {
+      "label_zh": "具有地形地貌"
+    },
+    "INFLUENCED_BY": {
+      "label_zh": "受影响于"
+    },
+    "HAS_PROTECTION_DESIGN": {
+      "label_zh": "具有防护设计"
+    },
+    "HAS_EXISTING_PROTECTION": {
+      "label_zh": "具有既有防护"
+    },
+    "INSTANCE_OF": {
+      "label_zh": "实例类型"
+    },
+    "HAS_STABILITY_ANALYSIS": {
+      "label_zh": "具有稳定性分析"
+    },
+    "SHOWN_IN": {
+      "label_zh": "显示于图纸"
+    },
+    "IN_DOCUMENT": {
+      "label_zh": "位于文档"
+    },
+    "RECORDED_IN": {
+      "label_zh": "记录于文档"
+    },
+    "SUPPORTED_BY": {
+      "label_zh": "证据支持"
+    },
+    "HAS_DOCUMENT": {
+      "label_zh": "具有资料文档"
+    },
+    "HAS_DEFORMATION_OBSERVATION": {
+      "label_zh": "具有变形观测"
+    },
+    "HAS_HYDROLOGY_OBSERVATION": {
+      "label_zh": "具有水文观测"
+    },
+    "HAS_PROTECTION_INSPECTION": {
+      "label_zh": "具有防护设施检查"
+    },
+    "AFFECTS_PROTECTION_WORK": {
+      "label_zh": "损毁对象"
+    },
+    "HAS_VEGETATION_SURVEY": {
+      "label_zh": "具有植被调查"
+    },
+    "HAS_MONITORING_PROGRAM": {
+      "label_zh": "具有监测方案"
+    }
+  },
+  "slope_fields": [
+    {
+      "code": "slope_id",
+      "label_zh": "边坡稳定编号",
+      "group": "identity",
+      "requirement": "core_required"
+    },
+    {
+      "code": "source_alias",
+      "label_zh": "原资料名称",
+      "group": "identity",
+      "requirement": "core_required"
+    },
+    {
+      "code": "route_code_cache",
+      "label_zh": "路线编号",
+      "group": "location",
+      "requirement": "core_required"
+    },
+    {
+      "code": "start_station_raw",
+      "label_zh": "起点桩号",
+      "group": "location",
+      "requirement": "core_required"
+    },
+    {
+      "code": "end_station_raw",
+      "label_zh": "止点桩号",
+      "group": "location",
+      "requirement": "core_required"
+    },
+    {
+      "code": "start_station_m",
+      "label_zh": "标准化起点里程",
+      "group": "location",
+      "requirement": "core_required"
+    },
+    {
+      "code": "end_station_m",
+      "label_zh": "标准化止点里程",
+      "group": "location",
+      "requirement": "core_required"
+    },
+    {
+      "code": "side",
+      "label_zh": "左右侧",
+      "group": "location",
+      "requirement": "core_required"
+    },
+    {
+      "code": "coordinate_crs",
+      "label_zh": "坐标参考系",
+      "group": "location",
+      "requirement": "conditional_required"
+    },
+    {
+      "code": "start_coordinate",
+      "label_zh": "起点坐标",
+      "group": "location",
+      "requirement": "risk_required"
+    },
+    {
+      "code": "end_coordinate",
+      "label_zh": "止点坐标",
+      "group": "location",
+      "requirement": "risk_required"
+    },
+    {
+      "code": "slope_type",
+      "label_zh": "路堤/路堑",
+      "group": "geometry",
+      "requirement": "risk_required"
+    },
+    {
+      "code": "material_nature",
+      "label_zh": "土质/岩质/土岩混合",
+      "group": "geometry",
+      "requirement": "risk_required"
+    },
+    {
+      "code": "slope_height_m",
+      "label_zh": "坡高",
+      "group": "geometry",
+      "requirement": "risk_required",
+      "alternative_fields": [
+        "slope_height_min_m",
+        "slope_height_max_m"
+      ]
+    },
+    {
+      "code": "slope_length_m",
+      "label_zh": "坡长",
+      "group": "geometry",
+      "requirement": "risk_required"
+    },
+    {
+      "code": "slope_gradient_deg",
+      "label_zh": "坡度",
+      "group": "geometry",
+      "requirement": "risk_required",
+      "alternative_fields": [
+        "slope_gradient_min_deg",
+        "slope_gradient_max_deg"
+      ]
+    },
+    {
+      "code": "slope_aspect_deg",
+      "label_zh": "坡向",
+      "group": "geometry",
+      "requirement": "risk_required"
+    },
+    {
+      "code": "slope_structure_code",
+      "label_zh": "斜坡结构",
+      "group": "geometry",
+      "requirement": "conditional_required"
+    },
+    {
+      "code": "river_relation",
+      "previous_code": "river_relative_position",
+      "label_zh": "临河关系",
+      "group": "environment",
+      "requirement": "optional"
+    },
+    {
+      "code": "vegetation_condition",
+      "label_zh": "植被情况",
+      "group": "environment",
+      "requirement": "optional"
+    },
+    {
+      "code": "overall_slope_deformation_severity",
+      "previous_code": "overall_damage_severity",
+      "label_zh": "边坡总体变形严重程度",
+      "group": "deformation",
+      "requirement": "risk_required"
+    }
+  ],
+  "domain_checks": [
+    {
+      "code": "lithology",
+      "label_zh": "岩性",
+      "domain": "geology",
+      "relation": "HAS_LITHOLOGY",
+      "requirement": "risk_required"
+    },
+    {
+      "code": "stratum",
+      "label_zh": "地层",
+      "domain": "geology",
+      "relation": "HAS_STRATUM",
+      "requirement": "risk_required"
+    },
+    {
+      "code": "structural_plane",
+      "label_zh": "结构面",
+      "domain": "geology",
+      "relation": "DEVELOPS_STRUCTURAL_PLANE",
+      "requirement": "risk_required"
+    },
+    {
+      "code": "hazard_body",
+      "label_zh": "灾害体/隐患体",
+      "domain": "hazard",
+      "relation": "CONTAINS_HAZARD_BODY",
+      "requirement": "conditional_required"
+    },
+    {
+      "code": "deformation_observation",
+      "label_zh": "近期变形巡检",
+      "domain": "deformation",
+      "relation": "HAS_DEFORMATION_OBSERVATION",
+      "requirement": "risk_required",
+      "interface": "/api/inspections"
+    },
+    {
+      "code": "groundwater",
+      "label_zh": "近期地下水",
+      "domain": "environment",
+      "relation": "HAS_GROUNDWATER_OBSERVATION",
+      "requirement": "risk_required",
+      "interface": "/api/environment/latest"
+    },
+    {
+      "code": "rainfall",
+      "label_zh": "近期降雨",
+      "domain": "environment",
+      "relation": "AFFECTED_BY_RAINFALL_EVENT",
+      "requirement": "scenario_required",
+      "interface": "/api/environment/latest"
+    },
+    {
+      "code": "protection_design",
+      "label_zh": "防护设计",
+      "domain": "protection",
+      "relation": "HAS_PROTECTION_DESIGN",
+      "requirement": "conditional_required"
+    },
+    {
+      "code": "protection_condition",
+      "label_zh": "防护设施现状",
+      "domain": "protection",
+      "relation": "HAS_PROTECTION_INSPECTION",
+      "requirement": "risk_required",
+      "interface": "/api/inspections"
+    },
+    {
+      "code": "maintenance",
+      "label_zh": "养护历史",
+      "domain": "maintenance",
+      "relation": "HAS_MAINTENANCE_EVENT",
+      "requirement": "risk_required",
+      "interface": "/api/maintenance/events"
+    },
+    {
+      "code": "monitoring",
+      "label_zh": "监测数据",
+      "domain": "monitoring",
+      "relation": "HAS_MONITORING_PROGRAM",
+      "requirement": "recommended",
+      "interface": "/api/monitoring/observations"
+    },
+    {
+      "code": "stability",
+      "label_zh": "稳定性分析",
+      "domain": "analysis",
+      "relation": "HAS_STABILITY_ANALYSIS",
+      "requirement": "risk_required"
+    },
+    {
+      "code": "exposure",
+      "label_zh": "暴露对象与后果",
+      "domain": "risk",
+      "relation": "THREATENS",
+      "requirement": "risk_required",
+      "interface": "/api/exposure"
+    },
+    {
+      "code": "risk_rules",
+      "label_zh": "已发布风险规则",
+      "domain": "risk",
+      "global": true,
+      "requirement": "risk_required",
+      "interface": "/api/risk/rules"
+    }
+  ],
+  "attribute_dictionary": {
+    "path": "/api/attribute-dictionary",
+    "schema_version": "0.2.0",
+    "status": "feedback_updated"
+  },
+  "missing_value_semantics": [
+    "present",
+    "absent",
+    "unknown",
+    "not_observed",
+    "not_applicable"
+  ]
+}

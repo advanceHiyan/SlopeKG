@@ -1,0 +1,97 @@
+from __future__ import annotations
+
+import re
+from datetime import datetime
+from typing import Any
+
+
+STATION_PATTERN = re.compile(r"^K\d+\+\d{3}-K\d+\+\d{3}$")
+
+
+def evaluate_automatic_pipeline(
+    extracted: dict[str, Any],
+    semantic_summary: dict[str, Any],
+    graph: dict[str, Any],
+) -> dict[str, Any]:
+    slopes = extracted.get("slopes", [])
+    total = len(slopes)
+    stations = [row.get("station") for row in slopes]
+    valid_stations = sum(bool(STATION_PATTERN.match(str(value or ""))) for value in stations)
+    unique_stations = len(set(stations))
+    slope_keys = [(str(row.get("route_code") or "ROUTE"), row.get("station")) for row in slopes]
+    unique_slope_keys = len(set(slope_keys))
+    multi_source = sum(len(row.get("sources", [])) >= 2 for row in slopes)
+    assertions = graph.get("property_assertions", [])
+    with_evidence = sum(bool(row.get("evidence")) for row in assertions)
+    node_ids = [row["id"] for row in graph.get("nodes", [])]
+    node_set = set(node_ids)
+    dangling_edges = sum(edge.get("source") not in node_set or edge.get("target") not in node_set for edge in graph.get("edges", []))
+    incoming_or_outgoing = {value for edge in graph.get("edges", []) for value in [edge.get("source"), edge.get("target")]}
+    orphan_nodes = sum(node["type"] not in {"Project"} and node["id"] not in incoming_or_outgoing for node in graph.get("nodes", []))
+    coverage = {
+        "registry": field_coverage(slopes, "source_alias"),
+        "coordinates": field_coverage(slopes, "start_coordinate"),
+        "treatment": field_coverage(slopes, "safety_factor_pairs"),
+        "geometry": field_coverage(slopes, "slope_height_min_m"),
+        "lithology": field_coverage(slopes, "lithology_terms"),
+        "stratum": field_coverage(slopes, "stratum_terms"),
+        "multi_source": ratio_metric(multi_source, total),
+    }
+    gates = {
+        "slope_discovery_nonempty": total > 0,
+        "station_syntax_valid": valid_stations == total and total > 0,
+        "route_station_identity_unique": unique_slope_keys == total and total > 0,
+        "registry_coverage_at_least_95pct": coverage["registry"]["coverage"] >= 0.95,
+        "coordinate_coverage_at_least_80pct": coverage["coordinates"]["coverage"] >= 0.80,
+        "treatment_coverage_at_least_80pct": coverage["treatment"]["coverage"] >= 0.80,
+        "assertion_evidence_coverage_at_least_95pct": (with_evidence / len(assertions) if assertions else 0) >= 0.95,
+        "graph_has_no_dangling_edges": dangling_edges == 0,
+        "graph_has_no_orphan_nodes": orphan_nodes == 0,
+    }
+    if semantic_summary.get("enabled"):
+        gates["semantic_pass_rate_at_least_90pct"] = float(semantic_summary.get("pass_rate") or 0) >= 0.90
+        gates["semantic_field_evidence_at_least_80pct"] = float(semantic_summary.get("field_evidence_coverage") or 0) >= 0.80
+    return {
+        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "evaluation_mode": "automatic_internal_quality_no_manual_seed",
+        "manual_seed_used": False,
+        "discovery": {
+            "slopes": total,
+            "valid_station_syntax": valid_stations,
+            "unique_stations": unique_stations,
+            "unique_slope_keys": unique_slope_keys,
+            "multi_source_slopes": multi_source,
+        },
+        "automatic_coverage": coverage,
+        "semantic": semantic_summary,
+        "evidence": {
+            "assertions": len(assertions),
+            "assertions_with_evidence": with_evidence,
+            "coverage": round(with_evidence / len(assertions), 4) if assertions else 0,
+        },
+        "graph_integrity": {
+            "nodes": len(node_ids),
+            "duplicate_node_ids": len(node_ids) - len(node_set),
+            "edges": len(graph.get("edges", [])),
+            "dangling_edges": dangling_edges,
+            "orphan_nodes": orphan_nodes,
+        },
+        "quality_gates": gates,
+        "quality_gate_pass_rate": round(sum(gates.values()) / len(gates), 4),
+        "parser": extracted.get("stats", {}),
+        "accuracy_status": "requires_independent_gold_set_for_periodic_audit",
+        "limitations": [
+            "运行时不依赖人工种子；内部指标衡量覆盖、证据和一致性，不等同于真实语义准确率。",
+            "独立人工金标准仅用于定期离线审计，不参与生产图谱生成。",
+            "扫描页OCR引擎不可用时会降级到原生文本和其他文档来源，并显式记录缺口。",
+        ],
+    }
+
+
+def field_coverage(rows: list[dict[str, Any]], field: str) -> dict[str, Any]:
+    available = sum(row.get(field) not in (None, "", [], {}) for row in rows)
+    return ratio_metric(available, len(rows))
+
+
+def ratio_metric(available: int, total: int) -> dict[str, Any]:
+    return {"available": available, "total": total, "coverage": round(available / total, 4) if total else 0}

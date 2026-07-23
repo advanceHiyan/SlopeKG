@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SlopeKG 边坡风险知识图谱</title>
+    <link rel="stylesheet" href="./pages.css?v=20260717-1" />
+  </head>
+  <body class="portal-body" data-page="dashboard">
+    <header class="site-header"><div class="site-header-inner">
+      <a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a>
+      <nav class="site-nav"><a class="active" href="./index.html">总览</a><a href="./pdf-ingestion.html">PDF解析</a><a href="./slopes.html">边坡档案</a><a href="./graph.html">关系图谱</a><a href="./data-status.html">数据与接口</a><a href="./risk.html">风险研判</a></nav>
+    </div></header>
+    <main class="page-main">
+      <div class="page-heading"><div><h1>项目总览</h1><p>系统从原始工程PDF自动发现候选边坡并构建历史基线图谱，不依赖固定路线或固定报告模板。动态监测、养护现状和正式风险规则尚未接入。</p></div></div>
+      <div class="notice">页面中的“缺失”表示当前系统没有有效数据，不代表现场不存在该现象；“接口已预留”表示数据结构和接入位置已经确定，但数据源尚未连接。</div>
+      <section id="dashboardMetrics" class="grid metrics-grid"><div class="loading">加载中…</div></section>
+      <section class="grid two-col" style="margin-top:16px">
+        <div class="card"><h2>功能入口</h2><div class="feature-grid">
+          <a class="feature-link" href="./pdf-ingestion.html"><strong>PDF解析</strong><span>添加工程PDF，查看逐页解析、抽取和图谱生成的后台任务进度。</span></a>
+          <a class="feature-link" href="./slopes.html"><strong>边坡档案</strong><span>查看自动发现的候选边坡、基础属性、缺失项和关联数据。</span></a>
+          <a class="feature-link" href="./graph.html"><strong>关系图谱</strong><span>查看边坡、灾害体、地质、防护设计、稳定性和证据关系。</span></a>
+          <a class="feature-link" href="./data-status.html"><strong>数据与接口</strong><span>查看数据完整性、待接入数据源和已预留接口。</span></a>
+          <a class="feature-link" href="./risk.html"><strong>风险研判</strong><span>检查风险研判就绪度；正式评估当前保持阻断。</span></a>
+          <a class="feature-link" href="/output/demo/share/SlopeKG_成果展示_离线版.html" download><strong>离线成果HTML</strong><span>下载单文件展示版，可直接发送给交通部研究院，双击即可离线查看。</span></a>
+        </div></div>
+        <div class="card"><h2>当前边界</h2><div id="dashboardBoundary" class="detail-list"><div class="loading">加载中…</div></div></div>
+      </section>
+      <section class="card export-card" style="margin-top:16px">
+        <div><h2>导出离线成果</h2><p class="section-subtitle">生成一个无需联网和后台服务的HTML文件，可直接发送给交通部研究院。</p></div>
+        <div class="export-controls">
+          <label><span>文件名</span><input id="exportFileName" type="text" maxlength="120" value="SlopeKG_成果展示" placeholder="请输入导出文件名" /></label>
+          <label><span>图谱版本</span><select id="exportGraphMode"><option value="active">当前图谱</option><option value="basic">基础图谱</option><option value="deep">深度图谱（需单独更新）</option></select></label>
+          <button id="exportStandaloneBtn" class="button" type="button">生成并下载HTML</button>
+          <a id="exportDownloadLink" class="button secondary export-download" hidden download>再次下载</a>
+        </div>
+        <div id="exportStatus" class="form-help">无需填写 .html 后缀；非法文件名字符会自动替换。</div>
+      </section>
+    </main>
+    <script src="./api.js?v=20260711-1"></script><script src="./portal.js?v=20260721-1"></script>
+  </body>
+</html>

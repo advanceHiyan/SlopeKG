@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PDF解析 - SlopeKG</title>
+    <link rel="stylesheet" href="./pages.css?v=20260714-1" />
+  </head>
+  <body class="portal-body" data-page="pdf-ingestion">
+    <header class="site-header"><div class="site-header-inner">
+      <a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a>
+      <nav class="site-nav"><a href="./index.html">总览</a><a class="active" href="./pdf-ingestion.html">PDF解析</a><a href="./slopes.html">边坡档案</a><a href="./graph.html">关系图谱</a><a href="./data-status.html">数据与接口</a><a href="./risk.html">风险研判</a></nav>
+    </div></header>
+    <main class="page-main">
+      <div class="page-heading"><div><h1>PDF解析与信息提取</h1><p>基础解析可完全独立运行；深度解析在基础产物上可选调用 DeepSeek，补充复杂语义并逐条校验证据。</p></div><button id="refreshBtn" class="button secondary" type="button">刷新状态</button></div>
+      <div class="notice info">上传的PDF保存在项目原始资料目录，该目录不会提交到 Git。系统不依赖人工种子即可运行；“已上传”不等于“已解析”，请以任务完成状态和文档清单为准。</div>
+
+      <section id="ingestMetrics" class="grid metrics-grid"><div class="loading">加载中…</div></section>
+
+      <section class="grid ingest-layout">
+        <div class="card">
+          <h2>添加PDF</h2>
+          <div id="dropZone" class="pdf-drop-zone" tabindex="0" role="button" aria-label="选择或拖入PDF文件">
+            <strong>拖入PDF，或点击选择文件</strong>
+            <span>支持多文件；单个文件不超过256 MB，本次请求不超过512 MB</span>
+            <input id="pdfInput" type="file" accept="application/pdf,.pdf" multiple hidden />
+          </div>
+          <div id="selectedFiles" class="selected-files"><div class="detail-empty">尚未选择文件。</div></div>
+          <div class="ingest-options">
+            <label><span>本次最多执行OCR页数</span><input id="ocrPages" type="number" min="0" max="1000" value="1000" /></label>
+            <label class="check-option"><input id="forceOcr" type="checkbox" /><span>重新执行已处理过的OCR任务</span></label>
+          </div>
+          <p class="form-help">OCR值为0时仍会完成逐页分类并生成待处理队列；原生文本页和可解析表格不会无条件使用OCR。深度解析不会覆盖基础图谱，两套结果分别保存。</p>
+          <div class="action-row"><button id="uploadOnlyBtn" class="button" type="button" disabled>上传并自动更新</button><button id="uploadRunBtn" class="button" type="button" disabled hidden>上传并基础解析</button><button id="rerunBtn" class="button ghost" type="button">基础解析全部资料</button><button id="reextractBtn" class="button ghost" type="button">基于现有文本重新抽取</button><button id="deepRunBtn" class="button secondary" type="button">基于基础结果深度解析</button></div>
+        </div>
+
+        <aside class="card job-card">
+          <div class="card-title-row"><h2>处理任务</h2><span id="jobStatus" class="badge">暂无任务</span></div>
+          <div class="job-progress-head"><strong id="jobPercent">0%</strong><span id="jobStage">等待开始</span></div>
+          <div class="job-progress-track" role="progressbar" aria-label="PDF处理进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="jobProgressBar"></span></div>
+          <p id="jobMessage" class="job-message">选择PDF上传，或重新解析目录中的全部资料。</p>
+          <div id="jobDetails" class="detail-list compact"><div class="detail-row"><small>说明</small>任务在后台运行，离开本页面不会中断。</div></div>
+          <div id="jobError" class="notice error" hidden></div>
+        </aside>
+      </section>
+
+      <section class="card" style="margin-top:16px">
+        <div class="card-title-row"><div><h2>PDF资料与解析状态</h2><p class="section-subtitle">逐份显示页型、原生文本块、表格和OCR队列；缺失项会明确标记。</p></div><span id="documentSummary" class="badge">加载中</span></div>
+        <div class="table-wrap"><table class="data-table document-table"><thead><tr><th>文件</th><th>大小</th><th>类型 / 页数</th><th>逐页策略</th><th>抽取产物</th><th>状态</th></tr></thead><tbody id="documentRows"><tr><td colspan="6">加载中…</td></tr></tbody></table></div>
+      </section>
+    </main>
+    <script src="./api.js?v=20260714-1"></script><script src="./pdf-ingestion.js?v=20260721-1"></script>
+  </body>
+</html>

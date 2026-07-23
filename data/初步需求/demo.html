@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>边坡知识图谱演示</title>
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: #0f1419;
+      color: #e8eaed;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 16px 24px;
+      background: linear-gradient(135deg, #1a2332 0%, #0f1419 100%);
+      border-bottom: 1px solid #2d3748;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #63b3ed;
+    }
+    header p {
+      font-size: 0.85rem;
+      color: #a0aec0;
+      margin-top: 4px;
+    }
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #cbd5e0;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    #graph {
+      flex: 1;
+      background: radial-gradient(ellipse at center, #1a202c 0%, #0f1419 70%);
+    }
+    aside {
+      width: 300px;
+      background: #1a2332;
+      border-left: 1px solid #2d3748;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    aside h2 {
+      font-size: 0.95rem;
+      color: #63b3ed;
+      margin-bottom: 12px;
+    }
+    #node-detail {
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: #cbd5e0;
+    }
+    #node-detail .label { color: #a0aec0; }
+    #node-detail .value { color: #e8eaed; font-weight: 500; }
+    .tree-section {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #2d3748;
+    }
+    .tree-section h3 {
+      font-size: 0.85rem;
+      color: #68d391;
+      margin-bottom: 8px;
+    }
+    .tree {
+      font-size: 0.8rem;
+      line-height: 1.8;
+      color: #a0aec0;
+    }
+    .tree ul { list-style: none; padding-left: 16px; }
+    .tree > ul { padding-left: 0; }
+    .tree .root { color: #f6ad55; font-weight: 600; }
+    .tree .cat { color: #63b3ed; }
+    .tree .val { color: #68d391; }
+    footer {
+      padding: 8px 24px;
+      background: #1a2332;
+      border-top: 1px solid #2d3748;
+      font-size: 0.75rem;
+      color: #718096;
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      main { flex-direction: column; }
+      aside { width: 100%; max-height: 40vh; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>边坡知识图谱演示</h1>
+      <p>以边坡为根节点，层级展示属性、子属性及关联关系 · 点击节点查看详情</p>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot" style="background:#f6ad55"></span>边坡（根节点）</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#63b3ed"></span>属性类别</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#68d391"></span>属性值</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#fc8181"></span>灾害类型</div>
+    </div>
+  </header>
+
+  <main>
+    <div id="graph"></div>
+    <aside>
+      <h2>节点详情</h2>
+      <div id="node-detail">
+        <p class="label">提示</p>
+        <p class="value">点击图谱中的任意节点，查看其类型、层级和关联信息。</p>
+      </div>
+      <div class="tree-section">
+        <h3>层级结构预览</h3>
+        <div class="tree" id="tree-view"></div>
+      </div>
+    </aside>
+  </main>
+
+  <footer>演示数据：G212线K105+200边坡 · 属性字段参考边坡知识图谱建设规范</footer>
+
+  <script>
+    const COLORS = {
+      root:     { bg: '#f6ad55', border: '#dd6b20', font: '#1a202c' },
+      category: { bg: '#4299e1', border: '#2b6cb0', font: '#fff' },
+      value:    { bg: '#48bb78', border: '#2f855a', font: '#fff' },
+      disaster: { bg: '#fc8181', border: '#c53030', font: '#fff' }
+    };
+
+    const kgData = {
+      "meta": {"title": "边坡知识图谱演示"},
+      "nodes": [
+        {"id": "slope_001", "label": "G212线K105+200边坡", "type": "边坡", "level": 0, "group": "root"},
+        {"id": "attr_basic", "label": "基本信息", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_geo_class", "label": "边坡岩土分类", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_topo", "label": "地形地貌", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_stratum", "label": "地层", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_lithology", "label": "岩性", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_structure", "label": "结构", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_hydro", "label": "水文", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_meteo", "label": "气象", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_env", "label": "环境", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_disaster", "label": "边坡灾害性质", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_seismic", "label": "地震参数", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_protection", "label": "防护工程", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_history", "label": "灾害历史", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_maintenance", "label": "养护历史", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "attr_stability", "label": "稳定性分析结果", "type": "属性类别", "level": 1, "group": "category"},
+        {"id": "val_id", "label": "编号: BP-2024-001", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_location", "label": "位置: 甘肃省兰州市榆中县", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_rock_soil", "label": "岩质边坡", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_slope_angle", "label": "坡度: 32°", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_slope_height", "label": "坡高: 45m", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_geometry", "label": "几何结构: 顺向坡", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_slope_length", "label": "坡长: 120m", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_stratum_1", "label": "第四系填土层", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_stratum_2", "label": "侏罗系砂岩层", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_lithology", "label": "中细粒砂岩", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_structure", "label": "层状结构，节理发育", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_gw_level", "label": "地下水位: 8m", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_gw_type", "label": "地下水性质: 孔隙水", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_water_system", "label": "水系: 沟谷发育", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_precipitation", "label": "降水: 年均850mm", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_temperature", "label": "气温: 年均12°C", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_permafrost", "label": "永冻层厚度: 无", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_vegetation", "label": "植被情况: 稀疏灌木", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_landslide", "label": "滑坡", "type": "灾害类型", "level": 2, "group": "disaster"},
+        {"id": "val_collapse", "label": "崩塌", "type": "灾害类型", "level": 2, "group": "disaster"},
+        {"id": "val_seismic", "label": "抗震设防烈度: VII度", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_protection", "label": "锚杆格构梁 + 被动防护网", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_history_1", "label": "2019年小型滑坡", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_history_2", "label": "2022年裂缝发育", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_maintenance", "label": "2023年锚杆加固处置", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_fs", "label": "安全系数 Fs = 1.15", "type": "属性值", "level": 2, "group": "value"},
+        {"id": "val_stability_level", "label": "稳定状态: 基本稳定", "type": "属性值", "level": 2, "group": "value"}
+      ],
+      "edges": [
+        {"from": "slope_001", "to": "attr_basic", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_geo_class", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_topo", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_stratum", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_lithology", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_structure", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_hydro", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_meteo", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_env", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_disaster", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_seismic", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_protection", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_history", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_maintenance", "label": "具有属性"},
+        {"from": "slope_001", "to": "attr_stability", "label": "具有属性"},
+        {"from": "attr_basic", "to": "val_id", "label": "包含"},
+        {"from": "attr_basic", "to": "val_location", "label": "包含"},
+        {"from": "attr_geo_class", "to": "val_rock_soil", "label": "分类为"},
+        {"from": "attr_topo", "to": "val_slope_angle", "label": "包含"},
+        {"from": "attr_topo", "to": "val_slope_height", "label": "包含"},
+        {"from": "attr_topo", "to": "val_geometry", "label": "包含"},
+        {"from": "attr_topo", "to": "val_slope_length", "label": "包含"},
+        {"from": "attr_stratum", "to": "val_stratum_1", "label": "包含"},
+        {"from": "attr_stratum", "to": "val_stratum_2", "label": "包含"},
+        {"from": "attr_lithology", "to": "val_lithology", "label": "为"},
+        {"from": "attr_structure", "to": "val_structure", "label": "为"},
+        {"from": "attr_hydro", "to": "val_gw_level", "label": "包含"},
+        {"from": "attr_hydro", "to": "val_gw_type", "label": "包含"},
+        {"from": "attr_hydro", "to": "val_water_system", "label": "包含"},
+        {"from": "attr_meteo", "to": "val_precipitation", "label": "包含"},
+        {"from": "attr_meteo", "to": "val_temperature", "label": "包含"},
+        {"from": "attr_meteo", "to": "val_permafrost", "label": "包含"},
+        {"from": "attr_env", "to": "val_vegetation", "label": "包含"},
+        {"from": "attr_disaster", "to": "val_landslide", "label": "可能为"},
+        {"from": "attr_disaster", "to": "val_collapse", "label": "可能为"},
+        {"from": "attr_seismic", "to": "val_seismic", "label": "包含"},
+        {"from": "attr_protection", "to": "val_protection", "label": "采用"},
+        {"from": "attr_history", "to": "val_history_1", "label": "记录"},
+        {"from": "attr_history", "to": "val_history_2", "label": "记录"},
+        {"from": "attr_maintenance", "to": "val_maintenance", "label": "记录"},
+        {"from": "attr_stability", "to": "val_fs", "label": "包含"},
+        {"from": "attr_stability", "to": "val_stability_level", "label": "包含"}
+      ]
+    };
+
+    function buildVisNodes(nodes) {
+      return nodes.map(n => {
+        const c = COLORS[n.group] || COLORS.value;
+        const size = n.level === 0 ? 28 : n.level === 1 ? 18 : 12;
+        return {
+          id: n.id,
+          label: n.label,
+          title: `${n.type}\n层级: ${n.level}`,
+          color: { background: c.bg, border: c.border, highlight: { background: c.bg, border: '#fff' } },
+          font: { color: c.font, size: n.level === 0 ? 14 : 11 },
+          size,
+          shape: n.level === 0 ? 'dot' : 'dot',
+          ...n
+        };
+      });
+    }
+
+    function buildVisEdges(edges) {
+      return edges.map((e, i) => ({
+        id: i,
+        from: e.from,
+        to: e.to,
+        label: e.label,
+        arrows: 'to',
+        color: { color: '#4a5568', highlight: '#63b3ed' },
+        font: { color: '#718096', size: 9, strokeWidth: 0, align: 'middle' },
+        smooth: { type: 'cubicBezier', forceDirection: 'vertical', roundness: 0.4 }
+      }));
+    }
+
+    const nodeMap = Object.fromEntries(kgData.nodes.map(n => [n.id, n]));
+    const childrenMap = {};
+    kgData.edges.forEach(e => {
+      if (!childrenMap[e.from]) childrenMap[e.from] = [];
+      childrenMap[e.from].push({ id: e.to, rel: e.label });
+    });
+
+    function renderTree() {
+      function buildTreeHtml(nodeId, cls) {
+        const node = nodeMap[nodeId];
+        if (!node) return '';
+        const children = childrenMap[nodeId] || [];
+        let html = `<li class="${cls}">${node.label}`;
+        if (children.length) {
+          html += '<ul>' + children.map(c => buildTreeHtml(c.id, c.id.startsWith('attr_') ? 'cat' : 'val')).join('') + '</ul>';
+        }
+        return html + '</li>';
+      }
+      document.getElementById('tree-view').innerHTML = '<ul>' + buildTreeHtml('slope_001', 'root') + '</ul>';
+    }
+
+    function showNodeDetail(nodeId) {
+      const node = nodeMap[nodeId];
+      if (!node) return;
+      const parents = kgData.edges.filter(e => e.to === nodeId).map(e => ({
+        rel: e.label,
+        node: nodeMap[e.from]
+      }));
+      const children = (childrenMap[nodeId] || []).map(c => ({
+        rel: c.rel,
+        node: nodeMap[c.id]
+      }));
+
+      let html = `
+        <p><span class="label">名称：</span><span class="value">${node.label}</span></p>
+        <p><span class="label">类型：</span><span class="value">${node.type}</span></p>
+        <p><span class="label">层级：</span><span class="value">L${node.level}</span></p>
+      `;
+      if (parents.length) {
+        html += '<p class="label" style="margin-top:10px">上级关联：</p><ul style="padding-left:16px">';
+        parents.forEach(p => { html += `<li>${p.rel} ← ${p.node.label}</li>`; });
+        html += '</ul>';
+      }
+      if (children.length) {
+        html += '<p class="label" style="margin-top:10px">下级关联：</p><ul style="padding-left:16px">';
+        children.forEach(c => { html += `<li>${c.rel} → ${c.node.label}</li>`; });
+        html += '</ul>';
+      }
+      document.getElementById('node-detail').innerHTML = html;
+    }
+
+    const container = document.getElementById('graph');
+    const data = {
+      nodes: new vis.DataSet(buildVisNodes(kgData.nodes)),
+      edges: new vis.DataSet(buildVisEdges(kgData.edges))
+    };
+    const options = {
+      layout: {
+        hierarchical: {
+          enabled: true,
+          direction: 'UD',
+          sortMethod: 'directed',
+          levelSeparation: 90,
+          nodeSpacing: 140,
+          treeSpacing: 180
+        }
+      },
+      physics: { enabled: false },
+      interaction: { hover: true, tooltipDelay: 100, zoomView: true, dragView: true },
+      nodes: { borderWidth: 2 },
+      edges: { width: 1 }
+    };
+
+    const network = new vis.Network(container, data, options);
+    network.on('click', params => {
+      if (params.nodes.length) showNodeDetail(params.nodes[0]);
+    });
+
+    renderTree();
+    showNodeDetail('slope_001');
+    network.focus('slope_001', { scale: 0.85, animation: true });
+  </script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+{
+  "updated_at": "2026-07-21T21:06:15",
+  "status_counts": {
+    "implemented": 18,
+    "reserved_not_connected": 5,
+    "reserved_waiting_approval": 1,
+    "reserved_blocked": 1
+  },
+  "interfaces": [
+    {
+      "path": "/api/documents",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "ingestion",
+      "description": "PDF资料清单、解析状态和逐页策略统计"
+    },
+    {
+      "path": "/api/documents/upload",
+      "method": "POST",
+      "status": "implemented",
+      "domain": "ingestion",
+      "description": "安全上传一个或多个PDF，自动校验类型、大小并避免覆盖同名文件"
+    },
+    {
+      "path": "/api/pipeline/jobs",
+      "method": "POST",
+      "status": "implemented",
+      "domain": "ingestion",
+      "description": "按 parse_mode=basic|deep 启动基础解析或可选深度解析任务"
+    },
+    {
+      "path": "/api/pipeline/jobs/{job_id}",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "ingestion",
+      "description": "查询后台任务真实阶段、进度、结果和错误"
+    },
+    {
+      "path": "/api/pipeline/jobs/latest",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "ingestion",
+      "description": "恢复当前服务进程中的最近一次解析任务"
+    },
+    {
+      "path": "/api/export/standalone",
+      "method": "POST",
+      "status": "implemented",
+      "domain": "export",
+      "description": "按自定义文件名导出单文件离线HTML，可选择基础、深度或当前图谱"
+    },
+    {
+      "path": "/api/slopes",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "slope",
+      "description": "边坡列表及当前基础档案"
+    },
+    {
+      "path": "/api/slopes/{slope_id}",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "slope",
+      "description": "单边坡、邻接节点、关系和证据"
+    },
+    {
+      "path": "/api/schema",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "schema",
+      "description": "节点、关系和边坡字段 Schema"
+    },
+    {
+      "path": "/api/attribute-dictionary",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "schema",
+      "description": "交通部研究院反馈版边坡属性数据字典 v0.2"
+    },
+    {
+      "path": "/api/interfaces",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "schema",
+      "description": "接口状态注册表"
+    },
+    {
+      "path": "/api/evaluation",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "quality",
+      "description": "自动抽取回归评测与解析覆盖指标"
+    },
+    {
+      "path": "/api/extracted/slopes",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "extraction",
+      "description": "从PDF原生版面自动抽取的候选边坡数据"
+    },
+    {
+      "path": "/api/assertions",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "evidence",
+      "description": "带证据和置信度的候选属性断言"
+    },
+    {
+      "path": "/api/extracted/llm-candidates",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "extraction",
+      "description": "大模型复杂关系候选；始终保持待人工复核状态"
+    },
+    {
+      "path": "/api/completeness",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "quality",
+      "description": "全部边坡的数据完整性报告"
+    },
+    {
+      "path": "/api/completeness/{slope_id}",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "quality",
+      "description": "单边坡缺失项和风险就绪度"
+    },
+    {
+      "path": "/api/monitoring/observations",
+      "method": "GET",
+      "status": "reserved_not_connected",
+      "domain": "monitoring",
+      "description": "位移、裂缝、地下水、孔压等监测数据"
+    },
+    {
+      "path": "/api/environment/latest",
+      "method": "GET",
+      "status": "reserved_not_connected",
+      "domain": "environment",
+      "description": "近期降雨、气温、冻融和地下水"
+    },
+    {
+      "path": "/api/maintenance/events",
+      "method": "GET",
+      "status": "reserved_not_connected",
+      "domain": "maintenance",
+      "description": "养护、维修、清危和加固历史"
+    },
+    {
+      "path": "/api/inspections",
+      "method": "GET",
+      "status": "reserved_not_connected",
+      "domain": "inspection",
+      "description": "裂缝、滑塌、渗水和设施状态巡检"
+    },
+    {
+      "path": "/api/exposure",
+      "method": "GET",
+      "status": "reserved_not_connected",
+      "domain": "risk",
+      "description": "交通量、人员和重要设施等暴露数据"
+    },
+    {
+      "path": "/api/risk/rules",
+      "method": "GET",
+      "status": "reserved_waiting_approval",
+      "domain": "risk",
+      "description": "经交通部研究院确认的风险规则和版本"
+    },
+    {
+      "path": "/api/risk/readiness",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "risk",
+      "description": "风险研判前的数据就绪检查"
+    },
+    {
+      "path": "/api/risk/assess",
+      "method": "POST",
+      "status": "reserved_blocked",
+      "domain": "risk",
+      "description": "正式风险研判；规则确认和动态数据接入前保持阻断"
+    }
+  ]
+}

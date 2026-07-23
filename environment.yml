@@ -1,0 +1,24 @@
+name: slopekg
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pandas>=2.2
+  - pyarrow>=16
+  - networkx>=3.3
+  - pydantic>=2.8
+  - typer>=0.12
+  - rich>=13.7
+  - pillow>=10.4
+  - poppler
+  - pip:
+      - pypdf>=6.0
+      - pdfplumber>=0.11
+      - pymupdf>=1.24
+      - openpyxl>=3.1
+      - python-docx>=1.1
+      - paddleocr>=2.8
+      - paddlepaddle>=2.6
+      - rapidfuzz>=3.9

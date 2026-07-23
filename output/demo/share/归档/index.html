@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1f36" />
+    <title>地质灾害危险性评估专家库</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside class="app-sidebar">
+      <a class="brand" href="#top" aria-label="返回页面顶部">
+        <span class="brand-mark"><i></i><i></i><i></i></span>
+        <span>
+          <strong>路安专家库</strong>
+          <small>EXPERT KNOWLEDGE BASE</small>
+        </span>
+      </a>
+
+      <div class="sidebar-caption">知识中心</div>
+      <nav class="section-nav" aria-label="专家库导航">
+        <a class="active" href="#rules">
+          <span class="nav-icon">规</span>
+          <span class="nav-copy"><b>规则库</b><small>规范条款与评估要求</small></span>
+          <em id="ruleNavCount">--</em>
+        </a>
+        <a href="#formulas">
+          <span class="nav-icon formula-icon">ƒ</span>
+          <span class="nav-copy"><b>公式判据</b><small>公式、阈值与分级条件</small></span>
+          <em id="formulaNavCount">--</em>
+        </a>
+        <a href="#sources">
+          <span class="nav-icon source-icon">源</span>
+          <span class="nav-copy"><b>数据源</b><small>规范文件与入库状态</small></span>
+          <em id="sourceNavCount">--</em>
+        </a>
+      </nav>
+
+      <div class="sidebar-status">
+        <div><span></span> 数据管道运行正常</div>
+        <small>更新于 <b id="syncDate">--</b></small>
+      </div>
+    </aside>
+
+    <div class="app-shell" id="top">
+      <header class="topbar">
+        <div class="breadcrumb"><span>知识工程</span><i>/</i><b>地质灾害专家库</b></div>
+        <div class="source-pill"><span></span> GB/T 40112—2021</div>
+      </header>
+
+      <main class="page">
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">GEOLOGICAL HAZARD ASSESSMENT</div>
+            <h1>地质灾害危险性评估专家库</h1>
+            <p>面向工程评估的规范规则、定量判据与来源证据，内容统一整理自 GB/T 40112—2021。</p>
+          </div>
+          <label class="search-box">
+            <span class="search-icon"></span>
+            <input id="globalSearch" type="search" placeholder="搜索规则、灾种、条款或关键词…" />
+            <kbd>⌘ K</kbd>
+          </label>
+        </section>
+
+        <section class="stats-grid" aria-label="专家库统计">
+          <article class="stat-card blue">
+            <div class="stat-top"><span class="stat-icon">规</span><small>规则数量</small></div>
+            <strong id="ruleCount">--</strong>
+            <p>按条款、列表项和表格区块整理</p>
+          </article>
+          <article class="stat-card amber">
+            <div class="stat-top"><span class="stat-icon">ƒx</span><small>公式与定量判据</small></div>
+            <strong id="formulaCount">--</strong>
+            <p>稳定系数、坡度、概率与分级阈值</p>
+          </article>
+          <article class="stat-card green">
+            <div class="stat-top"><span class="stat-icon">源</span><small>数据源</small></div>
+            <strong id="sourceCount">--</strong>
+            <p id="sourceInfo">正在加载数据源…</p>
+          </article>
+        </section>
+
+        <section class="content-panel" id="rules">
+          <div class="panel-heading">
+            <div>
+              <div class="eyebrow">RULE LIBRARY</div>
+              <h2>规范规则</h2>
+              <p>点击任意规则，在右侧查看未省略的完整 OCR 原文和来源定位。</p>
+            </div>
+            <span class="review-badge"><i></i> OCR 待复核</span>
+          </div>
+          <div class="filter-row" id="ruleFilters"></div>
+          <div class="rule-list" id="ruleList"></div>
+          <div class="rule-pagination" id="rulePagination"></div>
+        </section>
+
+        <section class="content-panel" id="formulas">
+          <div class="panel-heading">
+            <div>
+              <div class="eyebrow">FORMULAS &amp; CRITERIA</div>
+              <h2>公式与定量判据</h2>
+              <p>从国标表格和条文中提取的公式、范围、概率及分级阈值。</p>
+            </div>
+            <span class="count-badge" id="formulaSectionCount">-- 条</span>
+          </div>
+          <div class="formula-list" id="formulaList"></div>
+        </section>
+
+        <section class="content-panel" id="sources">
+          <div class="panel-heading">
+            <div>
+              <div class="eyebrow">DATA SOURCE</div>
+              <h2>数据源</h2>
+              <p>专家库当前只采用一份国家标准，所有内容保留 PDF 页码定位。</p>
+            </div>
+            <span class="count-badge">唯一来源</span>
+          </div>
+          <div class="source-list" id="sourceList"></div>
+        </section>
+
+        <footer class="footer-note">
+          <span>自动整理内容不等同于已审定条文，正式工程应用前须核对原规范。</span>
+          <b>PIPELINE V1.0</b>
+        </footer>
+      </main>
+    </div>
+
+    <div class="drawer-backdrop" id="modalBackdrop" aria-hidden="true">
+      <aside class="detail-drawer" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <header class="drawer-header">
+          <div>
+            <div class="modal-kicker" id="modalKicker">RULE DETAIL</div>
+            <h2 id="modalTitle">规则详情</h2>
+          </div>
+          <button class="modal-close" id="modalClose" aria-label="关闭详情">×</button>
+        </header>
+        <div class="drawer-body" id="modalBody"></div>
+      </aside>
+    </div>
+
+    <script src="knowledge-base.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

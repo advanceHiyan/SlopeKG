@@ -1,0 +1,908 @@
+{
+  "schema_name": "high_slope_attribute_data_dictionary",
+  "schema_version": "0.1.0",
+  "naming_convention": "snake_case",
+  "source": {
+    "title": "边坡属性表",
+    "normalized_from": "Word表格及10条批注",
+    "known_issues": [
+      "原表中编号23复用于3个子字段（是否有防护工程、排水设施类型、防护设施类型）",
+      "原表中编号43同时用于填报人和填报时间；建议填报时间规范化为44或完全改用稳定字段编码",
+      "批注8缺少commentRangeStart/commentRangeEnd，仅有commentReference；结合所在段落位置，推断对应“贯通度下拉选项”",
+      "若干下拉选项未在正文或批注中给出枚举值，统一标记为TODO_CONFIRM_ENUM"
+    ]
+  },
+  "sections": [
+    {
+      "code": "location_info",
+      "label_zh": "位置信息",
+      "fields": [
+        {
+          "source_no": 1,
+          "code": "route_name",
+          "label_zh": "路线名称",
+          "data_type": "string",
+          "ui_control": "input",
+          "required": false
+        },
+        {
+          "source_no": 2,
+          "code": "route_code",
+          "label_zh": "路线编号",
+          "data_type": "string",
+          "ui_control": "input",
+          "required": false
+        },
+        {
+          "source_no": 3,
+          "code": "slope_name",
+          "label_zh": "高边坡名称",
+          "data_type": "string",
+          "ui_control": "input",
+          "required": false
+        },
+        {
+          "source_no": 4,
+          "code": "slope_code",
+          "label_zh": "高边坡编号",
+          "data_type": "string",
+          "ui_control": "input",
+          "required": false
+        },
+        {
+          "source_no": 5,
+          "code": "start_station",
+          "label_zh": "起点桩号",
+          "data_type": "string",
+          "ui_control": "input",
+          "required": false,
+          "format_hint": "Kxx+xxx"
+        },
+        {
+          "source_no": 6,
+          "code": "end_station",
+          "label_zh": "止点桩号",
+          "data_type": "string",
+          "ui_control": "input",
+          "required": false,
+          "format_hint": "Kxx+xxx"
+        },
+        {
+          "source_no": 7,
+          "code": "start_coordinate",
+          "label_zh": "起点坐标",
+          "data_type": "object",
+          "ui_control": "input",
+          "required": false,
+          "fields": [
+            {
+              "code": "x_or_longitude",
+              "label_zh": "X或经度",
+              "data_type": "number"
+            },
+            {
+              "code": "y_or_latitude",
+              "label_zh": "Y或纬度",
+              "data_type": "number"
+            },
+            {
+              "code": "crs",
+              "label_zh": "坐标参考系",
+              "data_type": "string"
+            }
+          ],
+          "note": "原表未明确坐标系及经纬度/平面坐标格式，入库时必须同时记录CRS"
+        },
+        {
+          "source_no": 8,
+          "code": "end_coordinate",
+          "label_zh": "止点坐标",
+          "data_type": "object",
+          "ui_control": "input",
+          "required": false,
+          "fields": [
+            {
+              "code": "x_or_longitude",
+              "label_zh": "X或经度",
+              "data_type": "number"
+            },
+            {
+              "code": "y_or_latitude",
+              "label_zh": "Y或纬度",
+              "data_type": "number"
+            },
+            {
+              "code": "crs",
+              "label_zh": "坐标参考系",
+              "data_type": "string"
+            }
+          ],
+          "note": "原表未明确坐标系及经纬度/平面坐标格式，入库时必须同时记录CRS"
+        },
+        {
+          "source_no": 9,
+          "code": "road_slope_relation",
+          "label_zh": "路坡关系",
+          "data_type": "enum",
+          "ui_control": "radio",
+          "required": false,
+          "enum": [
+            "上行",
+            "下行"
+          ]
+        },
+        {
+          "source_no": 10,
+          "code": "road_grade",
+          "label_zh": "公路等级",
+          "data_type": "enum",
+          "ui_control": "select",
+          "required": false,
+          "enum": [
+            "高速公路",
+            "一级公路",
+            "二级公路",
+            "三级公路",
+            "四级公路"
+          ]
+        },
+        {
+          "source_no": 11,
+          "code": "maintenance_unit_name",
+          "label_zh": "管养单位名称",
+          "data_type": "string",
+          "ui_control": "input",
+          "required": false
+        },
+        {
+          "source_no": 12,
+          "code": "construction_year",
+          "label_zh": "建造年度",
+          "data_type": "integer",
+          "ui_control": "input",
+          "required": false,
+          "constraints": {
+            "minimum": 1900,
+            "maximum_expression": "current_year"
+          }
+        },
+        {
+          "source_no": 13,
+          "code": "administrative_division",
+          "label_zh": "行政区划",
+          "data_type": "object",
+          "ui_control": "input",
+          "required": false,
+          "fields": [
+            {
+              "code": "province",
+              "label_zh": "省/自治区/直辖市",
+              "data_type": "string",
+              "note": "原表未列出，但建议补充"
+            },
+            {
+              "code": "city",
+              "label_zh": "市",
+              "data_type": "string"
+            },
+            {
+              "code": "county_or_district",
+              "label_zh": "县/区",
+              "data_type": "string"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "basic_info",
+      "label_zh": "基本信息",
+      "fields": [
+        {
+          "source_no": 14,
+          "code": "slope_type",
+          "label_zh": "边坡类型",
+          "data_type": "enum",
+          "ui_control": "radio",
+          "required": false,
+          "enum": [
+            "路堤",
+            "路堑"
+          ]
+        },
+        {
+          "source_no": 15,
+          "code": "slope_height_m",
+          "label_zh": "坡高",
+          "data_type": "number",
+          "ui_control": "input",
+          "required": false,
+          "unit": "m",
+          "constraints": {
+            "minimum": 0
+          }
+        },
+        {
+          "source_no": 16,
+          "code": "slope_length_m",
+          "label_zh": "坡长",
+          "data_type": "number",
+          "ui_control": "input",
+          "required": false,
+          "unit": "m",
+          "constraints": {
+            "minimum": 0
+          }
+        },
+        {
+          "source_no": 17,
+          "code": "slope_gradient",
+          "label_zh": "坡度",
+          "data_type": "object",
+          "ui_control": "input",
+          "required": false,
+          "fields": [
+            {
+              "code": "value",
+              "label_zh": "数值",
+              "data_type": "number"
+            },
+            {
+              "code": "unit",
+              "label_zh": "表达方式",
+              "data_type": "enum",
+              "enum": [
+                "degree",
+                "ratio",
+                "percent"
+              ]
+            }
+          ],
+          "note": "建议不要仅存字符串，需区分角度、坡比和百分比"
+        },
+        {
+          "source_no": 18,
+          "code": "material_nature",
+          "label_zh": "性质",
+          "data_type": "enum",
+          "ui_control": "radio",
+          "required": false,
+          "enum": [
+            "土质",
+            "岩质",
+            "土岩混合"
+          ]
+        },
+        {
+          "source_no": 19,
+          "code": "slope_structure",
+          "label_zh": "斜坡结构",
+          "data_type": "enum",
+          "ui_control": "select",
+          "required": false,
+          "enum": [
+            "顺向坡",
+            "斜向坡",
+            "横向坡",
+            "逆向坡"
+          ],
+          "condition": "material_nature in ['岩质','土岩混合']",
+          "source_comment": "岩质坡进行选择：顺向坡、斜向坡、横向坡、逆向坡"
+        },
+        {
+          "source_no": 20,
+          "code": "river_relative_position",
+          "label_zh": "边坡与河流位置",
+          "data_type": "string",
+          "ui_control": "input",
+          "required": false,
+          "status": "TODO_CONFIRM_ENUM",
+          "note": "正文无候选值"
+        },
+        {
+          "source_no": 21,
+          "code": "vegetation_condition",
+          "label_zh": "植被情况",
+          "data_type": "string",
+          "ui_control": "input",
+          "required": false,
+          "status": "TODO_CONFIRM_ENUM",
+          "note": "正文无候选值"
+        },
+        {
+          "source_no": 22,
+          "code": "engineering_geological_group",
+          "label_zh": "工程地质岩组",
+          "data_type": "enum",
+          "ui_control": "select",
+          "required": false,
+          "enum": [
+            "坚硬岩体侵入岩组",
+            "坚硬、较坚硬熔岩岩组",
+            "坚硬、较坚硬的块状中等变质岩组",
+            "较坚硬层状、薄层状中浅变质岩组",
+            "软硬相间的层、薄层状砂、砂砾、泥页岩岩组",
+            "脆弱的层、薄层状砂、砾、泥岩岩组",
+            "软硬相间薄层状片状砂页岩岩组",
+            "坚硬、较坚硬层状灰岩、大理岩、白云岩岩组",
+            "坚硬、较坚硬层状、薄层状碳酸盐岩变质岩岩组",
+            "软硬相间层状碳酸盐岩、碎屑岩岩组",
+            "卵砾类土",
+            "粘性土和砂类土",
+            "胀缩土",
+            "冻土",
+            "黄土",
+            "风积砂"
+          ],
+          "source_comment": "批注给出16个岩土体类别；正文中的“岩性、产状”建议拆分，产状不应混在岩组枚举中"
+        },
+        {
+          "source_no": "23a",
+          "code": "protection_engineering.has_protection",
+          "label_zh": "是否有防护工程",
+          "data_type": "boolean",
+          "ui_control": "radio",
+          "required": false
+        },
+        {
+          "source_no": "23b",
+          "code": "protection_engineering.drainage_facility_types",
+          "label_zh": "排水设施类型",
+          "data_type": "array<enum>",
+          "ui_control": "multi_select",
+          "required": false,
+          "enum": [
+            "边沟",
+            "截水沟",
+            "排水沟",
+            "跌水与急流槽",
+            "暗沟",
+            "渗井及排水隧洞",
+            "斜仰排水孔",
+            "其他"
+          ],
+          "condition": "protection_engineering.has_protection == true",
+          "unique_items": true,
+          "source_comment": "可多选"
+        },
+        {
+          "source_no": "23c",
+          "code": "protection_engineering.protection_facility_types",
+          "label_zh": "防护设施类型",
+          "data_type": "enum_or_array",
+          "ui_control": "select",
+          "required": false,
+          "enum": [
+            "坡面防护",
+            "沿河防护",
+            "支挡设施"
+          ],
+          "condition": "protection_engineering.has_protection == true",
+          "status": "TODO_CONFIRM_CARDINALITY",
+          "note": "原表未说明单选或多选"
+        },
+        {
+          "source_no": 24,
+          "code": "disaster_history",
+          "label_zh": "是否发生过灾害",
+          "data_type": "object",
+          "ui_control": "group",
+          "required": false,
+          "fields": [
+            {
+              "code": "has_disaster",
+              "label_zh": "是否发生过灾害",
+              "data_type": "boolean",
+              "ui_control": "radio"
+            },
+            {
+              "code": "disaster_types",
+              "label_zh": "灾害类型",
+              "data_type": "array<enum>",
+              "ui_control": "multi_select",
+              "enum": [
+                "崩塌",
+                "滑坡",
+                "泥石流",
+                "塌陷",
+                "局部变形",
+                "其他"
+              ],
+              "condition": "has_disaster == true"
+            },
+            {
+              "code": "latest_occurrence_date",
+              "label_zh": "灾害最近发生时间",
+              "data_type": "date",
+              "condition": "has_disaster == true"
+            },
+            {
+              "code": "occurrence_frequency",
+              "label_zh": "灾害发生频次",
+              "data_type": "string",
+              "condition": "has_disaster == true",
+              "status": "TODO_DEFINE_FORMAT"
+            }
+          ],
+          "source_comment": "灾害类型：崩塌、滑坡、泥石流、塌陷、局部变形、其他"
+        },
+        {
+          "source_no": 25,
+          "code": "maintenance_history",
+          "label_zh": "是否养护",
+          "data_type": "object",
+          "ui_control": "group",
+          "required": false,
+          "fields": [
+            {
+              "code": "has_maintenance",
+              "label_zh": "是否养护",
+              "data_type": "boolean",
+              "ui_control": "radio"
+            },
+            {
+              "code": "maintenance_content",
+              "label_zh": "养护内容",
+              "data_type": "string",
+              "condition": "has_maintenance == true"
+            },
+            {
+              "code": "latest_maintenance_date",
+              "label_zh": "最近养护时间",
+              "data_type": "date",
+              "condition": "has_maintenance == true"
+            }
+          ]
+        },
+        {
+          "source_no": 26,
+          "code": "technical_condition_grade",
+          "label_zh": "技术状况评定等级",
+          "data_type": "integer",
+          "ui_control": "select",
+          "required": false,
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "display_map": {
+            "1": "1类",
+            "2": "2类",
+            "3": "3类",
+            "4": "4类",
+            "5": "5类"
+          }
+        },
+        {
+          "source_no": 27,
+          "code": "seismic_fortification_level",
+          "label_zh": "抗震设防等级",
+          "data_type": "enum",
+          "ui_control": "select",
+          "required": false,
+          "enum": [
+            "<0.05g或6度以下",
+            "0.05g或6度",
+            "0.10g、0.15g或7度",
+            "0.20g、0.30g或8度",
+            "≥0.40g或9度及以上"
+          ],
+          "source_comment": "批注替代正文中笼统的5-9级"
+        },
+        {
+          "source_no": 28,
+          "code": "flood_control_standard",
+          "label_zh": "防洪标准",
+          "data_type": "enum",
+          "ui_control": "select",
+          "required": false,
+          "enum": [
+            "10年一遇",
+            "20年一遇",
+            "30年一遇",
+            "50年一遇",
+            "100年一遇",
+            "其他"
+          ],
+          "source_comment": "批注明确为10/20/30/50/100年一遇及其他；覆盖正文中的300、200等疑似错误值"
+        }
+      ]
+    },
+    {
+      "code": "deformation_info",
+      "label_zh": "变形情况",
+      "fields": [
+        {
+          "source_no": 29,
+          "code": "traffic_condition",
+          "label_zh": "断通情况",
+          "data_type": "enum",
+          "ui_control": "radio",
+          "required": false,
+          "enum": [
+            "交通中断",
+            "半幅通过",
+            "双向通行"
+          ]
+        },
+        {
+          "source_no": 30,
+          "code": "cracks",
+          "label_zh": "裂缝",
+          "data_type": "object",
+          "ui_control": "repeatable_group",
+          "required": false,
+          "fields": [
+            {
+              "code": "exists",
+              "label_zh": "有无裂缝",
+              "data_type": "boolean",
+              "ui_control": "radio"
+            },
+            {
+              "code": "items",
+              "label_zh": "裂缝列表",
+              "data_type": "array<object>",
+              "condition": "exists == true",
+              "item_fields": [
+                {
+                  "code": "location",
+                  "label_zh": "位置",
+                  "data_type": "string"
+                },
+                {
+                  "code": "width_mm",
+                  "label_zh": "宽度",
+                  "data_type": "number",
+                  "unit": "mm"
+                },
+                {
+                  "code": "length_m",
+                  "label_zh": "长度",
+                  "data_type": "number",
+                  "unit": "m"
+                },
+                {
+                  "code": "orientation",
+                  "label_zh": "产状",
+                  "data_type": "object",
+                  "fields": [
+                    {
+                      "code": "dip_direction",
+                      "label_zh": "倾向",
+                      "data_type": "string",
+                      "ui_control": "input"
+                    },
+                    {
+                      "code": "dip_angle_deg",
+                      "label_zh": "倾角",
+                      "data_type": "number",
+                      "unit": "degree",
+                      "constraints": {
+                        "minimum": 0,
+                        "maximum": 90
+                      }
+                    }
+                  ]
+                },
+                {
+                  "code": "morphology",
+                  "label_zh": "形态",
+                  "data_type": "string"
+                },
+                {
+                  "code": "filling_condition",
+                  "label_zh": "充填情况",
+                  "data_type": "string",
+                  "ui_control": "input"
+                },
+                {
+                  "code": "penetration_degree",
+                  "label_zh": "贯通度",
+                  "data_type": "string",
+                  "ui_control": "input"
+                }
+              ]
+            }
+          ],
+          "source_comment": [
+            "产状改为填写倾向、倾角，不用下拉",
+            "充填情况：无需下拉，填写",
+            "贯通度：批注8锚点缺失，结合位置推断为无需下拉、填写"
+          ]
+        },
+        {
+          "source_no": 31,
+          "code": "collapses",
+          "label_zh": "滑塌",
+          "data_type": "object",
+          "ui_control": "repeatable_group",
+          "required": false,
+          "fields": [
+            {
+              "code": "exists",
+              "label_zh": "有无滑塌",
+              "data_type": "boolean",
+              "ui_control": "radio"
+            },
+            {
+              "code": "items",
+              "label_zh": "滑塌列表",
+              "data_type": "array<object>",
+              "condition": "exists == true",
+              "item_fields": [
+                {
+                  "code": "location",
+                  "label_zh": "位置",
+                  "data_type": "string"
+                },
+                {
+                  "code": "volume_m3",
+                  "label_zh": "方量",
+                  "data_type": "number",
+                  "unit": "m3"
+                },
+                {
+                  "code": "extent",
+                  "label_zh": "范围",
+                  "data_type": "string"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "source_no": 32,
+          "code": "uplifts",
+          "label_zh": "隆起",
+          "data_type": "object",
+          "ui_control": "repeatable_group",
+          "required": false,
+          "fields": [
+            {
+              "code": "exists",
+              "label_zh": "有无隆起",
+              "data_type": "boolean",
+              "ui_control": "radio"
+            },
+            {
+              "code": "items",
+              "label_zh": "隆起列表",
+              "data_type": "array<object>",
+              "condition": "exists == true",
+              "item_fields": [
+                {
+                  "code": "location",
+                  "label_zh": "位置",
+                  "data_type": "string"
+                },
+                {
+                  "code": "scale",
+                  "label_zh": "规模",
+                  "data_type": "string",
+                  "ui_control": "select",
+                  "status": "TODO_CONFIRM_ENUM"
+                },
+                {
+                  "code": "nature",
+                  "label_zh": "性质",
+                  "data_type": "string",
+                  "ui_control": "select",
+                  "status": "TODO_CONFIRM_ENUM"
+                },
+                {
+                  "code": "relative_position",
+                  "label_zh": "相对位置",
+                  "data_type": "string",
+                  "ui_control": "select",
+                  "status": "TODO_CONFIRM_ENUM"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "source_no": 33,
+          "code": "piping_or_seepage",
+          "label_zh": "管涌、渗水",
+          "data_type": "object",
+          "ui_control": "repeatable_group",
+          "required": false,
+          "fields": [
+            {
+              "code": "exists",
+              "label_zh": "有无管涌/渗水",
+              "data_type": "boolean",
+              "ui_control": "radio"
+            },
+            {
+              "code": "items",
+              "label_zh": "管涌/渗水列表",
+              "data_type": "array<object>",
+              "condition": "exists == true",
+              "item_fields": [
+                {
+                  "code": "location",
+                  "label_zh": "位置",
+                  "data_type": "string"
+                },
+                {
+                  "code": "scale",
+                  "label_zh": "规模",
+                  "data_type": "string",
+                  "ui_control": "select",
+                  "status": "TODO_CONFIRM_ENUM"
+                },
+                {
+                  "code": "turbidity",
+                  "label_zh": "浑浊程度",
+                  "data_type": "string",
+                  "ui_control": "select",
+                  "status": "TODO_CONFIRM_ENUM"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "source_no": 34,
+          "code": "facility_damages",
+          "label_zh": "设施损毁",
+          "data_type": "object",
+          "ui_control": "repeatable_group",
+          "required": false,
+          "fields": [
+            {
+              "code": "exists",
+              "label_zh": "有无设施损毁",
+              "data_type": "boolean",
+              "ui_control": "radio"
+            },
+            {
+              "code": "items",
+              "label_zh": "设施损毁列表",
+              "data_type": "array<object>",
+              "condition": "exists == true",
+              "item_fields": [
+                {
+                  "code": "location",
+                  "label_zh": "位置",
+                  "data_type": "string"
+                },
+                {
+                  "code": "damage_type",
+                  "label_zh": "类型",
+                  "data_type": "string",
+                  "ui_control": "select",
+                  "status": "TODO_CONFIRM_ENUM"
+                },
+                {
+                  "code": "severity",
+                  "label_zh": "严重程度",
+                  "data_type": "string",
+                  "ui_control": "select",
+                  "status": "TODO_CONFIRM_ENUM_OR_REUSE_OVERALL"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "source_no": 35,
+          "code": "overall_damage_severity",
+          "label_zh": "损毁严重程度",
+          "data_type": "enum",
+          "ui_control": "select",
+          "required": false,
+          "enum": [
+            "基本完好",
+            "轻微破坏",
+            "中等破坏",
+            "严重破坏",
+            "毁坏"
+          ],
+          "source_comment": "批注明确枚举值",
+          "note": "需确认该字段是边坡总体损毁等级，还是用于第34项每条设施损毁的严重程度"
+        }
+      ]
+    },
+    {
+      "code": "monitoring_info",
+      "label_zh": "监测情况",
+      "fields": [
+        {
+          "source_no": 36,
+          "code": "monitoring.has_monitoring",
+          "label_zh": "是否有监测",
+          "data_type": "boolean",
+          "ui_control": "radio",
+          "required": false
+        },
+        {
+          "source_no": 37,
+          "code": "monitoring.content",
+          "label_zh": "监测内容",
+          "data_type": "array<string>",
+          "ui_control": "tags",
+          "required": false,
+          "condition": "monitoring.has_monitoring == true",
+          "status": "TEMPORARY_FIELD"
+        },
+        {
+          "source_no": 38,
+          "code": "monitoring.location_links",
+          "label_zh": "监测位置",
+          "data_type": "array<uri>",
+          "ui_control": "link_list",
+          "required": false,
+          "condition": "monitoring.has_monitoring == true",
+          "status": "TEMPORARY_FIELD"
+        },
+        {
+          "source_no": 39,
+          "code": "monitoring.data_links",
+          "label_zh": "监测数据",
+          "data_type": "array<uri>",
+          "ui_control": "link_list",
+          "required": false,
+          "condition": "monitoring.has_monitoring == true",
+          "status": "TEMPORARY_FIELD"
+        }
+      ]
+    },
+    {
+      "code": "other_info",
+      "label_zh": "其他",
+      "fields": [
+        {
+          "source_no": 40,
+          "code": "conclusion",
+          "label_zh": "结论",
+          "data_type": "string",
+          "ui_control": "textarea",
+          "required": false
+        },
+        {
+          "source_no": 41,
+          "code": "remarks",
+          "label_zh": "备注",
+          "data_type": "string",
+          "ui_control": "textarea",
+          "required": false
+        },
+        {
+          "source_no": 42,
+          "code": "photos",
+          "label_zh": "照片",
+          "data_type": "array<file_ref>",
+          "ui_control": "file_upload",
+          "required": false,
+          "accepted_types": [
+            "image/*"
+          ]
+        },
+        {
+          "source_no": 43,
+          "code": "reporter_name",
+          "label_zh": "填报人",
+          "data_type": "string",
+          "ui_control": "input",
+          "required": false
+        },
+        {
+          "source_no": "43-duplicate",
+          "code": "reported_at",
+          "label_zh": "填报时间",
+          "data_type": "datetime",
+          "ui_control": "datetime_picker",
+          "required": false,
+          "normalized_source_no": 44,
+          "note": "原表与填报人重复编号43"
+        }
+      ]
+    }
+  ]
+}

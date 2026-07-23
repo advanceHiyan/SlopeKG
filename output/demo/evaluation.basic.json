@@ -1,0 +1,115 @@
+{
+  "generated_at": "2026-07-21T21:06:15",
+  "evaluation_mode": "automatic_internal_quality_no_manual_seed",
+  "manual_seed_used": false,
+  "discovery": {
+    "slopes": 63,
+    "valid_station_syntax": 63,
+    "unique_stations": 63,
+    "unique_slope_keys": 63,
+    "multi_source_slopes": 61
+  },
+  "automatic_coverage": {
+    "registry": {
+      "available": 63,
+      "total": 63,
+      "coverage": 1.0
+    },
+    "coordinates": {
+      "available": 13,
+      "total": 63,
+      "coverage": 0.2063
+    },
+    "treatment": {
+      "available": 13,
+      "total": 63,
+      "coverage": 0.2063
+    },
+    "geometry": {
+      "available": 11,
+      "total": 63,
+      "coverage": 0.1746
+    },
+    "lithology": {
+      "available": 59,
+      "total": 63,
+      "coverage": 0.9365
+    },
+    "stratum": {
+      "available": 34,
+      "total": 63,
+      "coverage": 0.5397
+    },
+    "multi_source": {
+      "available": 61,
+      "total": 63,
+      "coverage": 0.9683
+    }
+  },
+  "semantic": {
+    "enabled": false,
+    "model": "deepseek-v4-flash",
+    "prompt_version": "slope-semantic-v5-complete-sections-evidence",
+    "candidates": 0,
+    "passed": 0,
+    "pass_rate": null,
+    "verified_quotes": 0,
+    "submitted_quotes": 0,
+    "evidence_quote_precision": null,
+    "field_evidence_coverage": null
+  },
+  "evidence": {
+    "assertions": 692,
+    "assertions_with_evidence": 692,
+    "coverage": 1.0
+  },
+  "graph_integrity": {
+    "nodes": 279,
+    "duplicate_node_ids": 0,
+    "edges": 845,
+    "dangling_edges": 0,
+    "orphan_nodes": 0
+  },
+  "quality_gates": {
+    "slope_discovery_nonempty": true,
+    "station_syntax_valid": true,
+    "route_station_identity_unique": true,
+    "registry_coverage_at_least_95pct": true,
+    "coordinate_coverage_at_least_80pct": false,
+    "treatment_coverage_at_least_80pct": false,
+    "assertion_evidence_coverage_at_least_95pct": true,
+    "graph_has_no_dangling_edges": true,
+    "graph_has_no_orphan_nodes": true
+  },
+  "quality_gate_pass_rate": 0.7778,
+  "parser": {
+    "registry_rows": 63,
+    "registry_rows_by_route": {
+      "G209": 13,
+      "G318": 13,
+      "G344": 1,
+      "G347": 9,
+      "G351": 27
+    },
+    "coordinate_rows": 13,
+    "treatment_rows": 13,
+    "geometry_rows": 11,
+    "section_fact_rows": 61,
+    "assertions": 692,
+    "page_type_counts": {
+      "scanned": 75,
+      "mixed": 7,
+      "table": 190,
+      "native_text": 47,
+      "drawing": 329,
+      "blank": 3
+    },
+    "native_bbox_coverage": 1.0
+  },
+  "accuracy_status": "requires_independent_gold_set_for_periodic_audit",
+  "limitations": [
+    "运行时不依赖人工种子；内部指标衡量覆盖、证据和一致性，不等同于真实语义准确率。",
+    "独立人工金标准仅用于定期离线审计，不参与生产图谱生成。",
+    "扫描页OCR引擎不可用时会降级到原生文本和其他文档来源，并显式记录缺口。"
+  ]
+}

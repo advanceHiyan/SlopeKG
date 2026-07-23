@@ -1,0 +1,254 @@
+{
+  "updated_at": "2026-07-21T21:06:15",
+  "parse_mode": "basic",
+  "publication_stage": "completed",
+  "base_layer_available": true,
+  "deep_layer_available": false,
+  "deep_layer_stale": true,
+  "dependencies": {
+    "pypdf": true,
+    "pdfplumber": true,
+    "pymupdf": true,
+    "paddleocr": true,
+    "paddlepaddle": true,
+    "pandas": true,
+    "networkx": true,
+    "pdftoppm": "C:\\Users\\aba15\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override\\pdftoppm.CMD"
+  },
+  "llm": {
+    "provider": "deepseek",
+    "recommended_model": "deepseek-v4-flash",
+    "enabled": false,
+    "key_available": true,
+    "key_source": "project_secret_file",
+    "max_output_tokens": 393216,
+    "note": "大模型是可选深度解析层；基础解析可独立运行，只有通过原文证据校验的深度候选才会进入深度图谱。",
+    "run": {
+      "enabled": false,
+      "model": "deepseek-v4-flash",
+      "prompt_version": "slope-semantic-v5-complete-sections-evidence",
+      "candidates": 0,
+      "passed": 0,
+      "pass_rate": null,
+      "verified_quotes": 0,
+      "submitted_quotes": 0,
+      "evidence_quote_precision": null,
+      "field_evidence_coverage": null
+    }
+  },
+  "parsed": {
+    "documents": 9,
+    "pages": 651,
+    "text_blocks": 10665,
+    "tables": 248,
+    "ocr_tasks": 410,
+    "ocr_results": 0,
+    "ocr_status_counts": {
+      "pending": 410
+    }
+  },
+  "graph": {
+    "nodes": 279,
+    "edges": 845,
+    "evidence": 163,
+    "node_type_counts": {
+      "Project": 1,
+      "RouteSegment": 5,
+      "Document": 9,
+      "Slope": 63,
+      "Lithology": 10,
+      "Stratum": 4,
+      "HazardBody": 62,
+      "HazardSusceptibilityAssessment": 62,
+      "HazardType": 2,
+      "CausalFactor": 8,
+      "ProtectionType": 6,
+      "ProtectionWork": 29,
+      "StabilityAnalysis": 18
+    },
+    "edge_type_counts": {
+      "HAS_ROUTE_SEGMENT": 5,
+      "HAS_DOCUMENT": 9,
+      "HAS_SLOPE": 63,
+      "BELONGS_TO_PROJECT": 63,
+      "RECORDED_IN": 76,
+      "HAS_LITHOLOGY": 129,
+      "HAS_STRATUM": 44,
+      "CONTAINS_HAZARD_BODY": 62,
+      "HAS_SUSCEPTIBILITY_ASSESSMENT": 62,
+      "FOR_HAZARD_TYPE": 55,
+      "INFLUENCED_BY": 201,
+      "HAS_PROTECTION_DESIGN": 29,
+      "INSTANCE_OF": 29,
+      "HAS_STABILITY_ANALYSIS": 18
+    }
+  },
+  "completeness": {
+    "slopes": 63,
+    "average_risk_data_completeness": 0.172,
+    "ready": 0,
+    "not_ready": 63
+  },
+  "extracted": {
+    "registry_rows": 63,
+    "registry_rows_by_route": {
+      "G209": 13,
+      "G318": 13,
+      "G344": 1,
+      "G347": 9,
+      "G351": 27
+    },
+    "coordinate_rows": 13,
+    "treatment_rows": 13,
+    "geometry_rows": 11,
+    "section_fact_rows": 61,
+    "assertions": 692,
+    "page_type_counts": {
+      "scanned": 75,
+      "mixed": 7,
+      "table": 190,
+      "native_text": 47,
+      "drawing": 329,
+      "blank": 3
+    },
+    "native_bbox_coverage": 1.0
+  },
+  "evaluation": {
+    "generated_at": "2026-07-21T21:06:15",
+    "evaluation_mode": "automatic_internal_quality_no_manual_seed",
+    "manual_seed_used": false,
+    "discovery": {
+      "slopes": 63,
+      "valid_station_syntax": 63,
+      "unique_stations": 63,
+      "unique_slope_keys": 63,
+      "multi_source_slopes": 61
+    },
+    "automatic_coverage": {
+      "registry": {
+        "available": 63,
+        "total": 63,
+        "coverage": 1.0
+      },
+      "coordinates": {
+        "available": 13,
+        "total": 63,
+        "coverage": 0.2063
+      },
+      "treatment": {
+        "available": 13,
+        "total": 63,
+        "coverage": 0.2063
+      },
+      "geometry": {
+        "available": 11,
+        "total": 63,
+        "coverage": 0.1746
+      },
+      "lithology": {
+        "available": 59,
+        "total": 63,
+        "coverage": 0.9365
+      },
+      "stratum": {
+        "available": 34,
+        "total": 63,
+        "coverage": 0.5397
+      },
+      "multi_source": {
+        "available": 61,
+        "total": 63,
+        "coverage": 0.9683
+      }
+    },
+    "semantic": {
+      "enabled": false,
+      "model": "deepseek-v4-flash",
+      "prompt_version": "slope-semantic-v5-complete-sections-evidence",
+      "candidates": 0,
+      "passed": 0,
+      "pass_rate": null,
+      "verified_quotes": 0,
+      "submitted_quotes": 0,
+      "evidence_quote_precision": null,
+      "field_evidence_coverage": null
+    },
+    "evidence": {
+      "assertions": 692,
+      "assertions_with_evidence": 692,
+      "coverage": 1.0
+    },
+    "graph_integrity": {
+      "nodes": 279,
+      "duplicate_node_ids": 0,
+      "edges": 845,
+      "dangling_edges": 0,
+      "orphan_nodes": 0
+    },
+    "quality_gates": {
+      "slope_discovery_nonempty": true,
+      "station_syntax_valid": true,
+      "route_station_identity_unique": true,
+      "registry_coverage_at_least_95pct": true,
+      "coordinate_coverage_at_least_80pct": false,
+      "treatment_coverage_at_least_80pct": false,
+      "assertion_evidence_coverage_at_least_95pct": true,
+      "graph_has_no_dangling_edges": true,
+      "graph_has_no_orphan_nodes": true
+    },
+    "quality_gate_pass_rate": 0.7778,
+    "parser": {
+      "registry_rows": 63,
+      "registry_rows_by_route": {
+        "G209": 13,
+        "G318": 13,
+        "G344": 1,
+        "G347": 9,
+        "G351": 27
+      },
+      "coordinate_rows": 13,
+      "treatment_rows": 13,
+      "geometry_rows": 11,
+      "section_fact_rows": 61,
+      "assertions": 692,
+      "page_type_counts": {
+        "scanned": 75,
+        "mixed": 7,
+        "table": 190,
+        "native_text": 47,
+        "drawing": 329,
+        "blank": 3
+      },
+      "native_bbox_coverage": 1.0
+    },
+    "accuracy_status": "requires_independent_gold_set_for_periodic_audit",
+    "limitations": [
+      "运行时不依赖人工种子；内部指标衡量覆盖、证据和一致性，不等同于真实语义准确率。",
+      "独立人工金标准仅用于定期离线审计，不参与生产图谱生成。",
+      "扫描页OCR引擎不可用时会降级到原生文本和其他文档来源，并显式记录缺口。"
+    ]
+  },
+  "outputs": {
+    "graph_json": "output\\demo\\web\\data\\demo_graph.json",
+    "basic_graph_json": "output\\demo\\web\\data\\basic_graph.json",
+    "deep_graph_json": "output\\demo\\web\\data\\deep_graph.json",
+    "graphml": "output\\demo\\graph\\demo.graphml",
+    "parsed_dir": "output\\demo\\parsed",
+    "assets_dir": "output\\demo\\assets",
+    "schema_json": "output\\demo\\schema.json",
+    "completeness_json": "output\\demo\\completeness.json",
+    "interfaces_json": "output\\demo\\interfaces.json",
+    "extracted_dir": "output\\demo\\extracted",
+    "evaluation_json": "output\\demo\\evaluation.json",
+    "standalone_html": "output\\demo\\share\\SlopeKG_成果展示_离线版.html"
+  },
+  "standalone_export": {
+    "output": "D:\\project\\VScode\\SlopeKG\\output\\demo\\share\\SlopeKG_成果展示_离线版.html",
+    "bytes": 1168610,
+    "sha256": "026cb40fc34cf9ec8f1961ba734295b96b121c8920df5245424697000452a4c2",
+    "graph_mode": "active",
+    "nodes": 279,
+    "edges": 845,
+    "evidence": 163
+  }
+}

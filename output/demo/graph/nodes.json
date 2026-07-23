@@ -1,0 +1,5170 @@
+[
+  {
+    "id": "project_a4804d910393",
+    "label": "多路线边坡资料自动抽取项目",
+    "type": "Project",
+    "summary": "",
+    "props": {
+      "generation_basis": "submitted_documents",
+      "route_codes": [
+        "G209",
+        "G318",
+        "G344",
+        "G347",
+        "G351"
+      ]
+    }
+  },
+  {
+    "id": "route_08de9e29eee4",
+    "label": "G209 K2388+976-K2435+900",
+    "type": "RouteSegment",
+    "summary": "",
+    "props": {
+      "route_code": "G209",
+      "start_station_m": 2388976,
+      "end_station_m": 2435900
+    }
+  },
+  {
+    "id": "route_07ae5e0e4ba7",
+    "label": "G318 K1440+378-K1506+700",
+    "type": "RouteSegment",
+    "summary": "",
+    "props": {
+      "route_code": "G318",
+      "start_station_m": 1440378,
+      "end_station_m": 1506700
+    }
+  },
+  {
+    "id": "route_39a1643b01f7",
+    "label": "G344 K1022+605-K1022+663",
+    "type": "RouteSegment",
+    "summary": "",
+    "props": {
+      "route_code": "G344",
+      "start_station_m": 1022605,
+      "end_station_m": 1022663
+    }
+  },
+  {
+    "id": "route_f3f8af12ec23",
+    "label": "G347 K1124+560-K1373+690",
+    "type": "RouteSegment",
+    "summary": "",
+    "props": {
+      "route_code": "G347",
+      "start_station_m": 1124560,
+      "end_station_m": 1373690
+    }
+  },
+  {
+    "id": "route_f7916dfa82b4",
+    "label": "G351 K1570+950-K1625+800",
+    "type": "RouteSegment",
+    "summary": "",
+    "props": {
+      "route_code": "G351",
+      "start_station_m": 1570950,
+      "end_station_m": 1625800
+    }
+  },
+  {
+    "id": "doc_2021地质灾害评估规范_bec0e0f5e5",
+    "label": "2021地质灾害评估规范",
+    "type": "Document",
+    "summary": "",
+    "props": {
+      "kind": "规范",
+      "file": "2021地质灾害评估规范.pdf",
+      "path": "data\\rawPDF\\2021地质灾害评估规范.pdf",
+      "pages": 43,
+      "parser": "pymupdf_layout+pypdf_fallback"
+    }
+  },
+  {
+    "id": "doc_g209_2388_976_2435_900_其他文件__00b1bcf8d2",
+    "label": "G209-2388.976-2435.900-其他文件-185255",
+    "type": "Document",
+    "summary": "",
+    "props": {
+      "kind": "勘察报告",
+      "file": "G209-2388.976-2435.900-其他文件-185255.pdf",
+      "path": "data\\rawPDF\\G209-2388.976-2435.900-其他文件-185255.pdf",
+      "pages": 75,
+      "parser": "pymupdf_layout+pypdf_fallback"
+    }
+  },
+  {
+    "id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705",
+    "label": "G209-2388.976-2435.900-施工图设计文件-185203",
+    "type": "Document",
+    "summary": "",
+    "props": {
+      "kind": "施工图",
+      "file": "G209-2388.976-2435.900-施工图设计文件-185203.pdf",
+      "path": "data\\rawPDF\\G209-2388.976-2435.900-施工图设计文件-185203.pdf",
+      "pages": 127,
+      "parser": "pymupdf_layout+pypdf_fallback"
+    }
+  },
+  {
+    "id": "doc_g318_1440_378_1506_700_其他文件__db43a4ee79",
+    "label": "G318-1440.378-1506.700-其他文件-183700",
+    "type": "Document",
+    "summary": "",
+    "props": {
+      "kind": "勘察报告",
+      "file": "G318-1440.378-1506.700-其他文件-183700.pdf",
+      "path": "data\\rawPDF\\G318-1440.378-1506.700-其他文件-183700.pdf",
+      "pages": 88,
+      "parser": "pymupdf_layout+pypdf_fallback"
+    }
+  },
+  {
+    "id": "doc_g344_1015_070_1024_170_其他文件__50558b8dc3",
+    "label": "G344-1015.070-1024.170-其他文件-081608(1)",
+    "type": "Document",
+    "summary": "",
+    "props": {
+      "kind": "勘察报告",
+      "file": "G344-1015.070-1024.170-其他文件-081608(1).pdf",
+      "path": "data\\rawPDF\\G344-1015.070-1024.170-其他文件-081608(1).pdf",
+      "pages": 32,
+      "parser": "pymupdf_layout+pypdf_fallback"
+    }
+  },
+  {
+    "id": "doc_g347_1124_365_1125_337_其他文件__906c01325a",
+    "label": "G347-1124.365-1125.337-其他文件-183447",
+    "type": "Document",
+    "summary": "",
+    "props": {
+      "kind": "勘察报告",
+      "file": "G347-1124.365-1125.337-其他文件-183447.pdf",
+      "path": "data\\rawPDF\\G347-1124.365-1125.337-其他文件-183447.pdf",
+      "pages": 33,
+      "parser": "pymupdf_layout+pypdf_fallback"
+    }
+  },
+  {
+    "id": "doc_g347_1361_560_1373_690_其他文件__af1510db3f",
+    "label": "G347-1361.560-1373.690-其他文件-113751(1)",
+    "type": "Document",
+    "summary": "",
+    "props": {
+      "kind": "勘察报告",
+      "file": "G347-1361.560-1373.690-其他文件-113751(1).pdf",
+      "path": "data\\rawPDF\\G347-1361.560-1373.690-其他文件-113751(1).pdf",
+      "pages": 81,
+      "parser": "pymupdf_layout+pypdf_fallback"
+    }
+  },
+  {
+    "id": "doc_g351_1570_950_1625_800_其他文件__0e09162c3c",
+    "label": "G351-1570.950-1625.800-其他文件-185055",
+    "type": "Document",
+    "summary": "",
+    "props": {
+      "kind": "勘察报告",
+      "file": "G351-1570.950-1625.800-其他文件-185055.pdf",
+      "path": "data\\rawPDF\\G351-1570.950-1625.800-其他文件-185055.pdf",
+      "pages": 152,
+      "parser": "pymupdf_layout+pypdf_fallback"
+    }
+  },
+  {
+    "id": "doc_滑坡分类等_30956ae8da",
+    "label": "滑坡分类等",
+    "type": "Document",
+    "summary": "",
+    "props": {
+      "kind": "资料",
+      "file": "滑坡分类等.pdf",
+      "path": "data\\rawPDF\\滑坡分类等.pdf",
+      "pages": 20,
+      "parser": "pymupdf_layout+pypdf_fallback"
+    }
+  },
+  {
+    "id": "slope_e5e1ce313fdc",
+    "label": "G209 K2388+976-K2389+036 左侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌",
+    "props": {
+      "slope_id": "G209-AUTO-001",
+      "source_no": 1,
+      "source_alias": "K2388+976-K2389+036左侧危岩体",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2388+976",
+      "end_station_raw": "K2389+036",
+      "start_station_m": 2388976,
+      "end_station_m": 2389036,
+      "side": "左侧",
+      "slope_length_m": 60.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": {
+        "point_no": "GPS01",
+        "x": 356065.841,
+        "y": 3314980.333,
+        "z": 546.208,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0056",
+        "bbox": [
+          623.04,
+          611.79,
+          1106.52,
+          631.52
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS02",
+        "x": 356144.584,
+        "y": 3314935.788,
+        "z": 551.97,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0057",
+        "bbox": [
+          853.44,
+          627.87,
+          1103.88,
+          639.56
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": "逆向坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "lithology_c90dff0d5691",
+    "label": "页岩",
+    "type": "Lithology",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "lithology_97a8385e5d43",
+    "label": "灰岩",
+    "type": "Lithology",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "lithology_73a88036b311",
+    "label": "砂质页岩",
+    "type": "Lithology",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "lithology_6afd3089d9df",
+    "label": "块石土",
+    "type": "Lithology",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "stratum_d1299c71da53",
+    "label": "三叠系",
+    "type": "Stratum",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "stratum_08f12cacfaa0",
+    "label": "志留系",
+    "type": "Stratum",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "stratum_b6d36779fead",
+    "label": "纱帽群",
+    "type": "Stratum",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "hazard_body_9c334c52ab83",
+    "label": "K2388+976-K2389+036 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_9c334c52ab83",
+    "label": "K2388+976-K2389+036 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "hazard_type_0ad06a3d1b6d",
+    "label": "崩塌",
+    "type": "HazardType",
+    "summary": "",
+    "props": {}
+  },
+  {
+    "id": "factor_9a81cc84f4dc",
+    "label": "节理裂隙",
+    "type": "CausalFactor",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "factor_13cfdf6598e4",
+    "label": "降雨",
+    "type": "CausalFactor",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "factor_792868068e4b",
+    "label": "风化",
+    "type": "CausalFactor",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "factor_2b4a404c4e1e",
+    "label": "人工开挖",
+    "type": "CausalFactor",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "protection_type_d7062be35064",
+    "label": "坡面清危",
+    "type": "ProtectionType",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危"
+    }
+  },
+  {
+    "id": "protection_work_7d5e3ebcb31a",
+    "label": "K2388+976-K2389+036 坡面清危（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_type_1163b9963883",
+    "label": "挂网锚喷",
+    "type": "ProtectionType",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "挂网锚喷"
+    }
+  },
+  {
+    "id": "protection_work_1f757cf67aef",
+    "label": "K2388+976-K2389+036 挂网锚喷（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "挂网锚喷",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_5020bcdba548",
+    "label": "K2388+976-K2389+036 治理设计 Fs=1.318",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.318,
+      "required_fs": 1.3,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_9a50219723d5",
+    "label": "G209 K2391+966-K2392+030 右侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌",
+    "props": {
+      "slope_id": "G209-AUTO-002",
+      "source_no": 9,
+      "source_alias": "K2391+966-K2392+030右侧危岩体",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2391+966",
+      "end_station_raw": "K2392+030",
+      "start_station_m": 2391966,
+      "end_station_m": 2392030,
+      "side": "右侧",
+      "slope_length_m": 64.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": {
+        "point_no": "GPS19",
+        "x": 358670.181,
+        "y": 3315226.901,
+        "z": 637.244,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0019",
+        "bbox": [
+          86.52,
+          253.23,
+          572.64,
+          273.08
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS20",
+        "x": 358721.807,
+        "y": 3315306.364,
+        "z": 640.666,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0021",
+        "bbox": [
+          319.56,
+          269.31,
+          572.64,
+          281.0
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": "逆向坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_6fede6d3c6d4",
+    "label": "K2391+966-K2392+030 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_6fede6d3c6d4",
+    "label": "K2391+966-K2392+030 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "factor_51a38c54efcc",
+    "label": "褶皱构造",
+    "type": "CausalFactor",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "protection_work_4d7d86065589",
+    "label": "K2391+966-K2392+030 坡面清危（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_work_f66634a19ff1",
+    "label": "K2391+966-K2392+030 挂网锚喷（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "挂网锚喷",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_2687f1f36f3a",
+    "label": "K2391+966-K2392+030 天然工况 Fs=1.14",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "天然工况",
+      "fs": 1.14,
+      "required_fs": null,
+      "status": "基本稳定",
+      "analysis_scope": "现状边坡",
+      "source_kind": "定量计算",
+      "value_source": "deterministic_survey_sentence_extraction"
+    }
+  },
+  {
+    "id": "stability_29b6910970fb",
+    "label": "K2391+966-K2392+030 暴雨工况 Fs=1.04",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "暴雨工况",
+      "fs": 1.04,
+      "required_fs": null,
+      "status": "欠稳定",
+      "analysis_scope": "现状边坡",
+      "source_kind": "定量计算",
+      "value_source": "deterministic_survey_sentence_extraction"
+    }
+  },
+  {
+    "id": "stability_830cb3d21fd4",
+    "label": "K2391+966-K2392+030 治理设计 Fs=1.305",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.305,
+      "required_fs": 1.3,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_21c46d27aa93",
+    "label": "G209 K2397+685-K2397+760 右侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌、落石",
+    "props": {
+      "slope_id": "G209-AUTO-003",
+      "source_no": 2,
+      "source_alias": "K2397+685-K2397+760右侧危岩体",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2397+685",
+      "end_station_raw": "K2397+760",
+      "start_station_m": 2397685,
+      "end_station_m": 2397760,
+      "side": "右侧",
+      "slope_length_m": 75.0,
+      "slope_height_min_m": 30.0,
+      "slope_height_max_m": 30.0,
+      "slope_height_raw": "30.0m",
+      "slope_gradient_min_deg": 68.0,
+      "slope_gradient_max_deg": 80.0,
+      "slope_gradient_raw": "68.0-80.0°",
+      "start_coordinate": {
+        "point_no": "GPS03",
+        "x": 360466.306,
+        "y": 3315415.861,
+        "z": 718.747,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0059",
+        "bbox": [
+          623.04,
+          643.95,
+          1106.52,
+          663.68
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS04",
+        "x": 360433.296,
+        "y": 3315342.485,
+        "z": 717.212,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0060",
+        "bbox": [
+          853.44,
+          660.03,
+          1106.52,
+          671.72
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": "逆向坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_31b230e0d44e",
+    "label": "K2397+685-K2397+760 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_31b230e0d44e",
+    "label": "K2397+685-K2397+760 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "protection_work_3c07eb32ca54",
+    "label": "K2397+685-K2397+760 坡面清危（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_work_bc027486bf6c",
+    "label": "K2397+685-K2397+760 挂网锚喷（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "挂网锚喷",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_83f1fa1926a0",
+    "label": "K2397+685-K2397+760 治理设计 Fs=1.325",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.325,
+      "required_fs": 1.3,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_65d7ffa50f96",
+    "label": "G209 K2398+300-K2398+439 右侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌、落石",
+    "props": {
+      "slope_id": "G209-AUTO-004",
+      "source_no": 3,
+      "source_alias": "K2398+300-439右侧危岩体",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2398+300",
+      "end_station_raw": "K2398+439",
+      "start_station_m": 2398300,
+      "end_station_m": 2398439,
+      "side": "右侧",
+      "slope_length_m": 139.0,
+      "slope_height_min_m": 30.0,
+      "slope_height_max_m": 40.0,
+      "slope_height_raw": "30.0-40.0m",
+      "slope_gradient_min_deg": 70.0,
+      "slope_gradient_max_deg": 80.0,
+      "slope_gradient_raw": "70.0-80.0°",
+      "start_coordinate": {
+        "point_no": "GPS05",
+        "x": 360374.454,
+        "y": 3314746.532,
+        "z": 713.348,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0062",
+        "bbox": [
+          623.04,
+          676.23,
+          1106.52,
+          695.96
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS06",
+        "x": 360337.713,
+        "y": 3314662.129,
+        "z": 709.446,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0064",
+        "bbox": [
+          853.44,
+          692.31,
+          1106.52,
+          704.0
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "lithology_2a5905e1c7cf",
+    "label": "碎石土",
+    "type": "Lithology",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "hazard_body_6f32d2c65dea",
+    "label": "K2398+300-K2398+439 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_6f32d2c65dea",
+    "label": "K2398+300-K2398+439 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "protection_work_378827141a7b",
+    "label": "K2398+300-K2398+439 坡面清危（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_work_8b0bae484605",
+    "label": "K2398+300-K2398+439 挂网锚喷（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "挂网锚喷",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_dd9c6fc1794e",
+    "label": "K2398+300-K2398+439 治理设计 Fs=1.324",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.324,
+      "required_fs": 1.3,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_9a9c99c18bdc",
+    "label": "G209 K2401+227-K2401+307 右侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌",
+    "props": {
+      "slope_id": "G209-AUTO-005",
+      "source_no": 4,
+      "source_alias": "K2401+227-K2401+307右侧危岩体",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2401+227",
+      "end_station_raw": "K2401+307",
+      "start_station_m": 2401227,
+      "end_station_m": 2401307,
+      "side": "右侧",
+      "slope_length_m": 80.0,
+      "slope_height_min_m": 30.0,
+      "slope_height_max_m": 40.0,
+      "slope_height_raw": "30.0-40.0m",
+      "slope_gradient_min_deg": 70.0,
+      "slope_gradient_max_deg": 80.0,
+      "slope_gradient_raw": "70.0-80.0°",
+      "start_coordinate": {
+        "point_no": "GPS07",
+        "x": 361227.758,
+        "y": 3312930.114,
+        "z": 706.138,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0067",
+        "bbox": [
+          623.04,
+          708.39,
+          1106.52,
+          728.12
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS08",
+        "x": 361308.836,
+        "y": 3312924.648,
+        "z": 708.078,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0068",
+        "bbox": [
+          853.44,
+          724.47,
+          1106.52,
+          736.16
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_a6c40fa126a9",
+    "label": "K2401+227-K2401+307 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_a6c40fa126a9",
+    "label": "K2401+227-K2401+307 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "protection_work_b60ec9d64b88",
+    "label": "K2401+227-K2401+307 坡面清危（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_work_543abd67f8f1",
+    "label": "K2401+227-K2401+307 挂网锚喷（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "挂网锚喷",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_d58152e05e6b",
+    "label": "K2401+227-K2401+307 治理设计 Fs=1.313",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.313,
+      "required_fs": 1.3,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_8094966fa4fc",
+    "label": "G209 K2402+458-K2402+500 右侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌、落石",
+    "props": {
+      "slope_id": "G209-AUTO-006",
+      "source_no": 5,
+      "source_alias": "K2402+458-K2402+500右侧危岩体",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2402+458",
+      "end_station_raw": "K2402+500",
+      "start_station_m": 2402458,
+      "end_station_m": 2402500,
+      "side": "右侧",
+      "slope_length_m": 42.0,
+      "slope_height_min_m": 20.0,
+      "slope_height_max_m": 30.0,
+      "slope_height_raw": "20.0-30.0m",
+      "slope_gradient_min_deg": 63.0,
+      "slope_gradient_max_deg": 75.0,
+      "slope_gradient_raw": "63.0-75.0°",
+      "start_coordinate": {
+        "point_no": "GPS09",
+        "x": 361266.355,
+        "y": 3311813.522,
+        "z": 685.651,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0003",
+        "bbox": [
+          89.16,
+          92.19,
+          572.64,
+          111.92
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS10",
+        "x": 361294.796,
+        "y": 3311749.175,
+        "z": 683.194,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0004",
+        "bbox": [
+          319.56,
+          108.27,
+          572.64,
+          119.96
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": "逆向坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_5764884573e9",
+    "label": "K2402+458-K2402+500 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_5764884573e9",
+    "label": "K2402+458-K2402+500 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "protection_work_3e83cf07db9b",
+    "label": "K2402+458-K2402+500 坡面清危（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_work_b24ac1487a9c",
+    "label": "K2402+458-K2402+500 挂网锚喷（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "挂网锚喷",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_0fbc707888c0",
+    "label": "K2402+458-K2402+500 治理设计 Fs=1.321",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.321,
+      "required_fs": 1.3,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_824364ee2512",
+    "label": "G209 K2402+780-K2402+826 右侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌、落石",
+    "props": {
+      "slope_id": "G209-AUTO-007",
+      "source_no": 6,
+      "source_alias": "K2402+780-K2402+826右侧危岩体",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2402+780",
+      "end_station_raw": "K2402+826",
+      "start_station_m": 2402780,
+      "end_station_m": 2402826,
+      "side": "右侧",
+      "slope_length_m": 46.0,
+      "slope_height_min_m": 30.0,
+      "slope_height_max_m": 45.0,
+      "slope_height_raw": "30.0-45.0m",
+      "slope_gradient_min_deg": 55.0,
+      "slope_gradient_max_deg": 75.0,
+      "slope_gradient_raw": "55.0-75.0°",
+      "start_coordinate": {
+        "point_no": "GPS11",
+        "x": 361477.831,
+        "y": 3311542.611,
+        "z": 689.779,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0006",
+        "bbox": [
+          89.16,
+          124.35,
+          572.64,
+          144.08
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS12",
+        "x": 361445.0,
+        "y": 3311473.138,
+        "z": 691.807,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0008",
+        "bbox": [
+          319.56,
+          140.43,
+          572.64,
+          152.12
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": "逆向坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_8520155ef46d",
+    "label": "K2402+780-K2402+826 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_8520155ef46d",
+    "label": "K2402+780-K2402+826 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "protection_work_780f627e2398",
+    "label": "K2402+780-K2402+826 坡面清危（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_work_4975e63c9b61",
+    "label": "K2402+780-K2402+826 挂网锚喷（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "挂网锚喷",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_26cc2aebb656",
+    "label": "K2402+780-K2402+826 治理设计 Fs=1.312",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.312,
+      "required_fs": 1.3,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_d46369018569",
+    "label": "G209 K2410+330-K2410+445 左侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌、落石",
+    "props": {
+      "slope_id": "G209-AUTO-008",
+      "source_no": 7,
+      "source_alias": "K2410+330-K2410+445左侧危岩体",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2410+330",
+      "end_station_raw": "K2410+445",
+      "start_station_m": 2410330,
+      "end_station_m": 2410445,
+      "side": "左侧",
+      "slope_length_m": 115.0,
+      "slope_height_min_m": 40.0,
+      "slope_height_max_m": 65.0,
+      "slope_height_raw": "40.0-65.0m",
+      "slope_gradient_min_deg": 63.0,
+      "slope_gradient_max_deg": 72.0,
+      "slope_gradient_raw": "63.0-72.0°",
+      "start_coordinate": {
+        "point_no": "GPS13",
+        "x": 359595.009,
+        "y": 3304752.274,
+        "z": 804.042,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0009",
+        "bbox": [
+          89.16,
+          156.63,
+          572.64,
+          176.36
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS14",
+        "x": 359659.65,
+        "y": 3304761.649,
+        "z": 800.102,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0011",
+        "bbox": [
+          319.56,
+          172.71,
+          572.64,
+          184.4
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_13dd155bc76d",
+    "label": "K2410+330-K2410+445 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_13dd155bc76d",
+    "label": "K2410+330-K2410+445 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "factor_282093e575a8",
+    "label": "地表水",
+    "type": "CausalFactor",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "factor_2cc51f32549e",
+    "label": "地下水",
+    "type": "CausalFactor",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "protection_work_180e1c88fa08",
+    "label": "K2410+330-K2410+445 坡面清危（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_work_f054a2a3b82a",
+    "label": "K2410+330-K2410+445 挂网锚喷（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "挂网锚喷",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_c3e542eee1e9",
+    "label": "K2410+330-K2410+445 治理设计 Fs=1.356",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.356,
+      "required_fs": 1.3,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_77e03b742162",
+    "label": "G209 K2412+602-K2412+664 右侧边坡",
+    "type": "Slope",
+    "summary": "不稳定边坡",
+    "props": {
+      "slope_id": "G209-AUTO-009",
+      "source_no": 8,
+      "source_alias": "K2412+602-K2412+664右侧不稳定边坡",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2412+602",
+      "end_station_raw": "K2412+664",
+      "start_station_m": 2412602,
+      "end_station_m": 2412664,
+      "side": "右侧",
+      "slope_length_m": 62.0,
+      "slope_height_min_m": 30.0,
+      "slope_height_max_m": 40.0,
+      "slope_height_raw": "30.0-40.0m",
+      "slope_gradient_min_deg": 53.0,
+      "slope_gradient_max_deg": 68.0,
+      "slope_gradient_raw": "53.0-68.0°",
+      "start_coordinate": {
+        "point_no": "GPS15",
+        "x": 359138.396,
+        "y": 3304012.571,
+        "z": 693.15,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0012",
+        "bbox": [
+          89.16,
+          188.79,
+          570.0,
+          208.52
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS16",
+        "x": 359104.321,
+        "y": 3303932.314,
+        "z": 691.414,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0014",
+        "bbox": [
+          319.56,
+          204.87,
+          572.64,
+          216.56
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": "逆向坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "lithology_aac76a60b862",
+    "label": "黏土",
+    "type": "Lithology",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "hazard_body_15bf907dcd25",
+    "label": "K2412+602-K2412+664 不稳定边坡",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "不稳定边坡",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_15bf907dcd25",
+    "label": "K2412+602-K2412+664 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "protection_work_cad727e798b7",
+    "label": "K2412+602-K2412+664 挂网锚喷（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "挂网锚喷",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_type_7a39fd164119",
+    "label": "框架锚杆",
+    "type": "ProtectionType",
+    "summary": "",
+    "props": {
+      "category": "支挡设施",
+      "subtype": "框架锚杆"
+    }
+  },
+  {
+    "id": "protection_work_43ee03cfaef2",
+    "label": "K2412+602-K2412+664 框架锚杆（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "支挡设施",
+      "subtype": "框架锚杆",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_type_e7057cdef303",
+    "label": "放坡",
+    "type": "ProtectionType",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "放坡"
+    }
+  },
+  {
+    "id": "protection_work_73db9fa3c48f",
+    "label": "K2412+602-K2412+664 放坡（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "放坡",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_f9f9588aadc8",
+    "label": "K2412+602-K2412+664 天然工况 Fs=1.14",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "天然工况",
+      "fs": 1.14,
+      "required_fs": null,
+      "status": "基本稳定",
+      "analysis_scope": "现状边坡",
+      "source_kind": "定量计算",
+      "value_source": "deterministic_survey_sentence_extraction"
+    }
+  },
+  {
+    "id": "stability_4787d41d942e",
+    "label": "K2412+602-K2412+664 暴雨工况 Fs=1.04",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "暴雨工况",
+      "fs": 1.04,
+      "required_fs": null,
+      "status": "欠稳定",
+      "analysis_scope": "现状边坡",
+      "source_kind": "定量计算",
+      "value_source": "deterministic_survey_sentence_extraction"
+    }
+  },
+  {
+    "id": "stability_597dde315062",
+    "label": "K2412+602-K2412+664 治理设计 Fs=1.237",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.237,
+      "required_fs": 1.15,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "stability_7185c2300cd1",
+    "label": "K2412+602-K2412+664 治理设计 Fs=1.131",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.131,
+      "required_fs": 1.05,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_9c1b0e6902ee",
+    "label": "G209 K2429+580-K2429+668 左侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌",
+    "props": {
+      "slope_id": "G209-AUTO-010",
+      "source_no": 10,
+      "source_alias": "K2429+580-K2429+668左侧危岩体",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2429+580",
+      "end_station_raw": "K2429+668",
+      "start_station_m": 2429580,
+      "end_station_m": 2429668,
+      "side": "左侧",
+      "slope_length_m": 88.0,
+      "slope_height_min_m": 50.0,
+      "slope_height_max_m": 50.0,
+      "slope_height_raw": "50.0m",
+      "slope_gradient_min_deg": 80.0,
+      "slope_gradient_max_deg": 90.0,
+      "slope_gradient_raw": "80.0-90.0°",
+      "start_coordinate": {
+        "point_no": "GPS25",
+        "x": 354085.55,
+        "y": 3290701.322,
+        "z": 557.209,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0030",
+        "bbox": [
+          86.52,
+          349.83,
+          572.64,
+          369.68
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS26",
+        "x": 354117.274,
+        "y": 3290567.032,
+        "z": 562.983,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0031",
+        "bbox": [
+          319.56,
+          365.91,
+          572.64,
+          377.6
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": "逆向坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_f0d43c9a0f88",
+    "label": "K2429+580-K2429+668 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_f0d43c9a0f88",
+    "label": "K2429+580-K2429+668 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "protection_work_a937f7c320ed",
+    "label": "K2429+580-K2429+668 坡面清危（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_type_c20ef627b5d7",
+    "label": "主动防护网",
+    "type": "ProtectionType",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "主动防护网"
+    }
+  },
+  {
+    "id": "protection_work_e6d8e49364b8",
+    "label": "K2429+580-K2429+668 主动防护网（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "主动防护网",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_type_806565496d83",
+    "label": "局部单独锚杆",
+    "type": "ProtectionType",
+    "summary": "",
+    "props": {
+      "category": "支挡设施",
+      "subtype": "局部单独锚杆"
+    }
+  },
+  {
+    "id": "protection_work_855e175511ed",
+    "label": "K2429+580-K2429+668 局部单独锚杆（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "支挡设施",
+      "subtype": "局部单独锚杆",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_d449fdb474ea",
+    "label": "K2429+580-K2429+668 治理设计 Fs=1.317",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.317,
+      "required_fs": 1.3,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_ab0303ec8592",
+    "label": "G209 K2434+460-K2434+585 左侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌",
+    "props": {
+      "slope_id": "G209-AUTO-011",
+      "source_no": 11,
+      "source_alias": "K2434+460-K2434+585左侧危岩体",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2434+460",
+      "end_station_raw": "K2434+585",
+      "start_station_m": 2434460,
+      "end_station_m": 2434585,
+      "side": "左侧",
+      "slope_length_m": 125.0,
+      "slope_height_min_m": 40.0,
+      "slope_height_max_m": 60.0,
+      "slope_height_raw": "40.0-60.0m",
+      "slope_gradient_min_deg": 80.0,
+      "slope_gradient_max_deg": 90.0,
+      "slope_gradient_raw": "80.0-90.0°",
+      "start_coordinate": {
+        "point_no": "GPS17",
+        "x": 355905.344,
+        "y": 3287581.588,
+        "z": 543.13,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0016",
+        "bbox": [
+          89.16,
+          220.95,
+          570.0,
+          240.8
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS18",
+        "x": 355939.342,
+        "y": 3287491.78,
+        "z": 544.332,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0017",
+        "bbox": [
+          319.56,
+          237.03,
+          572.64,
+          248.72
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": "反倾坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_f17815f5c07c",
+    "label": "K2434+460-K2434+585 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_f17815f5c07c",
+    "label": "K2434+460-K2434+585 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "protection_work_fe4f9bac47f9",
+    "label": "K2434+460-K2434+585 坡面清危（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_work_74bf6fa21207",
+    "label": "K2434+460-K2434+585 挂网锚喷（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "挂网锚喷",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_08bd2eb92a76",
+    "label": "K2434+460-K2434+585 治理设计 Fs=1.326",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.326,
+      "required_fs": 1.3,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_f87ca36b7244",
+    "label": "G209 K2435+310-K2435+430 左侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌",
+    "props": {
+      "slope_id": "G209-AUTO-012",
+      "source_no": 12,
+      "source_alias": "K2435+310-K2435+430左侧危岩体",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2435+310",
+      "end_station_raw": "K2435+430",
+      "start_station_m": 2435310,
+      "end_station_m": 2435430,
+      "side": "左侧",
+      "slope_length_m": 120.0,
+      "slope_height_min_m": 40.0,
+      "slope_height_max_m": 40.0,
+      "slope_height_raw": "40.0m",
+      "slope_gradient_min_deg": 80.0,
+      "slope_gradient_max_deg": 90.0,
+      "slope_gradient_raw": "80.0-90.0°",
+      "start_coordinate": {
+        "point_no": "GPS21",
+        "x": 356233.467,
+        "y": 3286951.281,
+        "z": 558.613,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0023",
+        "bbox": [
+          86.52,
+          285.39,
+          572.64,
+          305.24
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS22",
+        "x": 356278.599,
+        "y": 3286808.685,
+        "z": 557.971,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0024",
+        "bbox": [
+          319.56,
+          301.47,
+          572.64,
+          313.16
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": "斜交坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_468e24cdd04c",
+    "label": "K2435+310-K2435+430 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_468e24cdd04c",
+    "label": "K2435+310-K2435+430 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "protection_work_d8e20345b0b0",
+    "label": "K2435+310-K2435+430 坡面清危（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_work_9bf8ec38346c",
+    "label": "K2435+310-K2435+430 挂网锚喷（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "挂网锚喷",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_0bf67f78d821",
+    "label": "K2435+310-K2435+430 治理设计 Fs=1.316",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.316,
+      "required_fs": 1.3,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_3d565a2b89fa",
+    "label": "G209 K2435+820-K2435+900 左侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌",
+    "props": {
+      "slope_id": "G209-AUTO-013",
+      "source_no": 13,
+      "source_alias": "K2435+820-K2435+900左侧危岩体",
+      "route_code_cache": "G209",
+      "start_station_raw": "K2435+820",
+      "end_station_raw": "K2435+900",
+      "start_station_m": 2435820,
+      "end_station_m": 2435900,
+      "side": "左侧",
+      "slope_length_m": 80.0,
+      "slope_height_min_m": 50.0,
+      "slope_height_max_m": 50.0,
+      "slope_height_raw": "50.0m",
+      "slope_gradient_min_deg": 80.0,
+      "slope_gradient_max_deg": 90.0,
+      "slope_gradient_raw": "80.0-90.0°",
+      "start_coordinate": {
+        "point_no": "GPS23",
+        "x": 356531.29,
+        "y": 3286626.457,
+        "z": 551.853,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0026",
+        "bbox": [
+          86.52,
+          317.55,
+          572.64,
+          337.4
+        ]
+      },
+      "end_coordinate": {
+        "point_no": "GPS24",
+        "x": 356641.005,
+        "y": 3286638.316,
+        "z": 553.423,
+        "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0027",
+        "bbox": [
+          319.56,
+          333.63,
+          572.64,
+          345.32
+        ]
+      },
+      "coordinate_crs": "CGCS2000（国家2000坐标系，3度带具体参数待核验）",
+      "slope_structure_code": "顺向坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_44e3c4d31e79",
+    "label": "K2435+820-K2435+900 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_44e3c4d31e79",
+    "label": "K2435+820-K2435+900 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "protection_work_e66734d7a800",
+    "label": "K2435+820-K2435+900 坡面清危（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "坡面清危",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_work_5f120579d141",
+    "label": "K2435+820-K2435+900 主动防护网（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "坡面防护",
+      "subtype": "主动防护网",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "protection_work_c610c842d8e5",
+    "label": "K2435+820-K2435+900 局部单独锚杆（设计）",
+    "type": "ProtectionWork",
+    "summary": "",
+    "props": {
+      "category": "支挡设施",
+      "subtype": "局部单独锚杆",
+      "implementation_status": "documented_design_current_status_unknown",
+      "current_condition": "unknown"
+    }
+  },
+  {
+    "id": "stability_7276447c06c2",
+    "label": "K2435+820-K2435+900 治理设计 Fs=1.518",
+    "type": "StabilityAnalysis",
+    "summary": "",
+    "props": {
+      "condition": "治理设计工况",
+      "fs": 1.518,
+      "required_fs": 1.5,
+      "status": "满足要求",
+      "value_source": "deterministic_table_extraction"
+    }
+  },
+  {
+    "id": "slope_ca5273ec86ff",
+    "label": "G318 K1440+378-K1440+454 右侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌、落石",
+    "props": {
+      "slope_id": "G318-AUTO-014",
+      "source_no": 1,
+      "source_alias": "K1440+378-K1440+454段右侧危岩体",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1440+378",
+      "end_station_raw": "K1440+454",
+      "start_station_m": 1440378,
+      "end_station_m": 1440454,
+      "side": "右侧",
+      "slope_length_m": 76.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "逆向坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_4545baefce38",
+    "label": "K1440+378-K1440+454 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_4545baefce38",
+    "label": "K1440+378-K1440+454 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_11f1d35ce474",
+    "label": "G318 K1443+425-K1443+445 左侧边坡",
+    "type": "Slope",
+    "summary": "路基垮塌",
+    "props": {
+      "slope_id": "G318-AUTO-015",
+      "source_no": 11,
+      "source_alias": "K1443+425-445左侧路基垮塌",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1443+425",
+      "end_station_raw": "K1443+445",
+      "start_station_m": 1443425,
+      "end_station_m": 1443445,
+      "side": "左侧",
+      "slope_length_m": 20.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_81dfcf6c1247",
+    "label": "K1443+425-K1443+445 路基垮塌",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "路基垮塌",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_81dfcf6c1247",
+    "label": "K1443+425-K1443+445 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_440895bd3278",
+    "label": "G318 K1453+105-K1453+220 右侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、落石",
+    "props": {
+      "slope_id": "G318-AUTO-016",
+      "source_no": 2,
+      "source_alias": "K1453+105-K1453+220段右侧危岩体",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1453+105",
+      "end_station_raw": "K1453+220",
+      "start_station_m": 1453105,
+      "end_station_m": 1453220,
+      "side": "右侧",
+      "slope_length_m": 115.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "逆向坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_968cab3eb3c9",
+    "label": "K1453+105-K1453+220 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_968cab3eb3c9",
+    "label": "K1453+105-K1453+220 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_93c899c05026",
+    "label": "G318 K1455+580-K1455+610 右侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌、落石",
+    "props": {
+      "slope_id": "G318-AUTO-017",
+      "source_no": 3,
+      "source_alias": "K1455+580-K1455+610段右侧危岩体",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1455+580",
+      "end_station_raw": "K1455+610",
+      "start_station_m": 1455580,
+      "end_station_m": 1455610,
+      "side": "右侧",
+      "slope_length_m": 30.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_f7aa87168389",
+    "label": "K1455+580-K1455+610 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_f7aa87168389",
+    "label": "K1455+580-K1455+610 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_7be7c3d49c76",
+    "label": "G318 K1456+455-K1456+585 右侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、落石",
+    "props": {
+      "slope_id": "G318-AUTO-018",
+      "source_no": 4,
+      "source_alias": "K1456+455-K1456+585段右侧危岩体",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1456+455",
+      "end_station_raw": "K1456+585",
+      "start_station_m": 1456455,
+      "end_station_m": 1456585,
+      "side": "右侧",
+      "slope_length_m": 130.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "lithology_2cfdf7eef1a4",
+    "label": "堆积体",
+    "type": "Lithology",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "lithology_f8da62321db4",
+    "label": "粘土",
+    "type": "Lithology",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "hazard_body_c3f17fe1acda",
+    "label": "K1456+455-K1456+585 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_c3f17fe1acda",
+    "label": "K1456+455-K1456+585 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "factor_6183562d68c9",
+    "label": "道路开挖",
+    "type": "CausalFactor",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "slope_e1cbe7a81de7",
+    "label": "G318 K1457+219-K1457+295 右侧边坡",
+    "type": "Slope",
+    "summary": "不稳定边坡",
+    "props": {
+      "slope_id": "G318-AUTO-019",
+      "source_no": 5,
+      "source_alias": "K1457+219-K1457+295段右侧不稳定边坡",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1457+219",
+      "end_station_raw": "K1457+295",
+      "start_station_m": 1457219,
+      "end_station_m": 1457295,
+      "side": "右侧",
+      "slope_length_m": 76.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_038d7909bc1d",
+    "label": "K1457+219-K1457+295 不稳定边坡",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "不稳定边坡",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_038d7909bc1d",
+    "label": "K1457+219-K1457+295 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_afe66db02108",
+    "label": "G318 K1481+860-K1481+967 左侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、落石",
+    "props": {
+      "slope_id": "G318-AUTO-020",
+      "source_no": 6,
+      "source_alias": "K1481+860-K1481+967左侧危岩体",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1481+860",
+      "end_station_raw": "K1481+967",
+      "start_station_m": 1481860,
+      "end_station_m": 1481967,
+      "side": "左侧",
+      "slope_length_m": 107.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_aa2d77508894",
+    "label": "K1481+860-K1481+967 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_aa2d77508894",
+    "label": "K1481+860-K1481+967 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_2b9e12d060a5",
+    "label": "G318 K1482+237-K1482+283 左侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌、落石",
+    "props": {
+      "slope_id": "G318-AUTO-021",
+      "source_no": 7,
+      "source_alias": "K1482+237-K1482+283左侧危岩体",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1482+237",
+      "end_station_raw": "K1482+283",
+      "start_station_m": 1482237,
+      "end_station_m": 1482283,
+      "side": "左侧",
+      "slope_length_m": 46.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_60e8da322080",
+    "label": "K1482+237-K1482+283 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_60e8da322080",
+    "label": "K1482+237-K1482+283 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_495865b2cbd0",
+    "label": "G318 K1494+700-K1494+780 右侧边坡",
+    "type": "Slope",
+    "summary": "滑坡",
+    "props": {
+      "slope_id": "G318-AUTO-022",
+      "source_no": 12,
+      "source_alias": "K1494+700-K1494+780右侧滑坡",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1494+700",
+      "end_station_raw": "K1494+780",
+      "start_station_m": 1494700,
+      "end_station_m": 1494780,
+      "side": "右侧",
+      "slope_length_m": 80.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_3593ef201fbc",
+    "label": "K1494+700-K1494+780 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_3593ef201fbc",
+    "label": "K1494+700-K1494+780 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "滑坡"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "hazard_type_9d06d159b0dd",
+    "label": "滑坡",
+    "type": "HazardType",
+    "summary": "",
+    "props": {}
+  },
+  {
+    "id": "slope_681e8e770ac7",
+    "label": "G318 K1496+180-K1496+325 左侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌、落石",
+    "props": {
+      "slope_id": "G318-AUTO-023",
+      "source_no": 8,
+      "source_alias": "K1496+180-K1496+325左侧危岩体",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1496+180",
+      "end_station_raw": "K1496+325",
+      "start_station_m": 1496180,
+      "end_station_m": 1496325,
+      "side": "左侧",
+      "slope_length_m": 145.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_04431d3cf86c",
+    "label": "K1496+180-K1496+325 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_04431d3cf86c",
+    "label": "K1496+180-K1496+325 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_8b0b5530e61b",
+    "label": "G318 K1496+736-K1496+912 左侧边坡",
+    "type": "Slope",
+    "summary": "危岩体、崩塌、落石",
+    "props": {
+      "slope_id": "G318-AUTO-024",
+      "source_no": 9,
+      "source_alias": "K1496+736-K1496+912左侧危岩体",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1496+736",
+      "end_station_raw": "K1496+912",
+      "start_station_m": 1496736,
+      "end_station_m": 1496912,
+      "side": "左侧",
+      "slope_length_m": 176.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_579ad8d033cf",
+    "label": "K1496+736-K1496+912 危岩体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "危岩体",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_579ad8d033cf",
+    "label": "K1496+736-K1496+912 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_0a38ad23efe9",
+    "label": "G318 K1498+340-K1498+421 左侧边坡",
+    "type": "Slope",
+    "summary": "顺层坡滑移",
+    "props": {
+      "slope_id": "G318-AUTO-025",
+      "source_no": 10,
+      "source_alias": "K1498+340-K1498+421左侧顺层边坡",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1498+340",
+      "end_station_raw": "K1498+421",
+      "start_station_m": 1498340,
+      "end_station_m": 1498421,
+      "side": "左侧",
+      "slope_length_m": 81.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "slope_07d578fe1f49",
+    "label": "G318 K1506+670-K1506+700 右侧边坡",
+    "type": "Slope",
+    "summary": "路基垮塌",
+    "props": {
+      "slope_id": "G318-AUTO-026",
+      "source_no": 13,
+      "source_alias": "K1506+670-1506+700右侧路基垮塌",
+      "route_code_cache": "G318",
+      "start_station_raw": "K1506+670",
+      "end_station_raw": "K1506+700",
+      "start_station_m": 1506670,
+      "end_station_m": 1506700,
+      "side": "右侧",
+      "slope_length_m": 30.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": "顺层坡",
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "stratum_67b871452711",
+    "label": "第四系",
+    "type": "Stratum",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "hazard_body_77040659dc99",
+    "label": "K1506+670-K1506+700 路基垮塌",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "路基垮塌",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_77040659dc99",
+    "label": "K1506+670-K1506+700 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_302296c1eb92",
+    "label": "G344 K1022+605-K1022+663 边坡",
+    "type": "Slope",
+    "summary": "滑坡",
+    "props": {
+      "slope_id": "G344-AUTO-027",
+      "source_no": null,
+      "source_alias": "K1022+605-K1022+663 滑坡",
+      "route_code_cache": "G344",
+      "start_station_raw": "K1022+605",
+      "end_station_raw": "K1022+663",
+      "start_station_m": 1022605,
+      "end_station_m": 1022663,
+      "side": null,
+      "slope_length_m": 120.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.94,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_9a22d643cb75",
+    "label": "K1022+605-K1022+663 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_9a22d643cb75",
+    "label": "K1022+605-K1022+663 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "滑坡"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_79a0f7944299",
+    "label": "G347 K1124+560-K1125+330 左侧边坡",
+    "type": "Slope",
+    "summary": "崩塌、落石",
+    "props": {
+      "slope_id": "G347-AUTO-028",
+      "source_no": null,
+      "source_alias": "K1124+560-K1125+330 崩塌、落石",
+      "route_code_cache": "G347",
+      "start_station_raw": "K1124+560",
+      "end_station_raw": "K1125+330",
+      "start_station_m": 1124560,
+      "end_station_m": 1125330,
+      "side": "左侧",
+      "slope_length_m": 770.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.94,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_06ebf2fc3645",
+    "label": "K1124+560-K1125+330 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_06ebf2fc3645",
+    "label": "K1124+560-K1125+330 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_d3aadd3ed4d2",
+    "label": "G347 K1361+560-K1361+710 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G347-AUTO-029",
+      "source_no": 1,
+      "source_alias": "K1361+560~K1361+710",
+      "route_code_cache": "G347",
+      "start_station_raw": "K1361+560",
+      "end_station_raw": "K1361+710",
+      "start_station_m": 1361560,
+      "end_station_m": 1361710,
+      "side": null,
+      "slope_length_m": 150.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_8b19646ba7d0",
+    "label": "K1361+560-K1361+710 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_8b19646ba7d0",
+    "label": "K1361+560-K1361+710 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_f0dddf9c13e1",
+    "label": "G347 K1362+280-K1363+180 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G347-AUTO-030",
+      "source_no": 2,
+      "source_alias": "K1362+280~K1363+180",
+      "route_code_cache": "G347",
+      "start_station_raw": "K1362+280",
+      "end_station_raw": "K1363+180",
+      "start_station_m": 1362280,
+      "end_station_m": 1363180,
+      "side": null,
+      "slope_length_m": 900.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_51e02446adb3",
+    "label": "K1362+280-K1363+180 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_51e02446adb3",
+    "label": "K1362+280-K1363+180 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_1be59023b934",
+    "label": "G347 K1365+300-K1365+400 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G347-AUTO-031",
+      "source_no": 3,
+      "source_alias": "K1365+300~K1365+400",
+      "route_code_cache": "G347",
+      "start_station_raw": "K1365+300",
+      "end_station_raw": "K1365+400",
+      "start_station_m": 1365300,
+      "end_station_m": 1365400,
+      "side": null,
+      "slope_length_m": 100.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_3814359ddeb4",
+    "label": "K1365+300-K1365+400 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_3814359ddeb4",
+    "label": "K1365+300-K1365+400 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_7423aacde848",
+    "label": "G347 K1367+145-K1367+300 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G347-AUTO-032",
+      "source_no": 4,
+      "source_alias": "K1367+145~K1367+300",
+      "route_code_cache": "G347",
+      "start_station_raw": "K1367+145",
+      "end_station_raw": "K1367+300",
+      "start_station_m": 1367145,
+      "end_station_m": 1367300,
+      "side": null,
+      "slope_length_m": 155.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_a88d6beacf06",
+    "label": "K1367+145-K1367+300 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_a88d6beacf06",
+    "label": "K1367+145-K1367+300 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_2d1206bd5743",
+    "label": "G347 K1367+585-K1367+640 边坡",
+    "type": "Slope",
+    "summary": "路基下沉",
+    "props": {
+      "slope_id": "G347-AUTO-033",
+      "source_no": 5,
+      "source_alias": "K1367+585~K1367+640",
+      "route_code_cache": "G347",
+      "start_station_raw": "K1367+585",
+      "end_station_raw": "K1367+640",
+      "start_station_m": 1367585,
+      "end_station_m": 1367640,
+      "side": null,
+      "slope_length_m": 55.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_94c240e41e1b",
+    "label": "K1367+585-K1367+640 路基下沉",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "路基下沉",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_94c240e41e1b",
+    "label": "K1367+585-K1367+640 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_3f7b91717a7c",
+    "label": "G347 K1367+630-K1367+700 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G347-AUTO-034",
+      "source_no": 6,
+      "source_alias": "K1367+630~K1367+700",
+      "route_code_cache": "G347",
+      "start_station_raw": "K1367+630",
+      "end_station_raw": "K1367+700",
+      "start_station_m": 1367630,
+      "end_station_m": 1367700,
+      "side": null,
+      "slope_length_m": 70.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "lithology_79b9fef366d6",
+    "label": "泥岩",
+    "type": "Lithology",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "hazard_body_8105120f1187",
+    "label": "K1367+630-K1367+700 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_8105120f1187",
+    "label": "K1367+630-K1367+700 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_f8d88a11add4",
+    "label": "G347 K1368+485-K1368+750 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G347-AUTO-035",
+      "source_no": 7,
+      "source_alias": "K1368+485~K1368+750",
+      "route_code_cache": "G347",
+      "start_station_raw": "K1368+485",
+      "end_station_raw": "K1368+750",
+      "start_station_m": 1368485,
+      "end_station_m": 1368750,
+      "side": null,
+      "slope_length_m": 265.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_ff3dfe452ef6",
+    "label": "K1368+485-K1368+750 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_ff3dfe452ef6",
+    "label": "K1368+485-K1368+750 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_8946c7c4e9df",
+    "label": "G347 K1373+480-K1373+690 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G347-AUTO-036",
+      "source_no": 8,
+      "source_alias": "K1373+480~K1373+690",
+      "route_code_cache": "G347",
+      "start_station_raw": "K1373+480",
+      "end_station_raw": "K1373+690",
+      "start_station_m": 1373480,
+      "end_station_m": 1373690,
+      "side": null,
+      "slope_length_m": 210.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_db906a2bb21e",
+    "label": "K1373+480-K1373+690 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_db906a2bb21e",
+    "label": "K1373+480-K1373+690 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_5285062cc20b",
+    "label": "G351 K1570+950-K1571+020 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-037",
+      "source_no": 1,
+      "source_alias": "K1570+950～K1571+020",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1570+950",
+      "end_station_raw": "K1571+020",
+      "start_station_m": 1570950,
+      "end_station_m": 1571020,
+      "side": null,
+      "slope_length_m": 70.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_55b83b5dced8",
+    "label": "K1570+950-K1571+020 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_55b83b5dced8",
+    "label": "K1570+950-K1571+020 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_cc68f4538f2e",
+    "label": "G351 K1573+520-K1573+560 边坡",
+    "type": "Slope",
+    "summary": "滑坡",
+    "props": {
+      "slope_id": "G351-AUTO-038",
+      "source_no": 24,
+      "source_alias": "K1573+520-K1573+560",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1573+520",
+      "end_station_raw": "K1573+560",
+      "start_station_m": 1573520,
+      "end_station_m": 1573560,
+      "side": null,
+      "slope_length_m": 40.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.985,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "lithology_01dda0b1bd75",
+    "label": "砂岩",
+    "type": "Lithology",
+    "summary": "",
+    "props": {
+      "extraction_method": "deterministic_dictionary"
+    }
+  },
+  {
+    "id": "hazard_body_f8cf4cc4e4f1",
+    "label": "K1573+520-K1573+560 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_f8cf4cc4e4f1",
+    "label": "K1573+520-K1573+560 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "滑坡"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_cdda608d0008",
+    "label": "G351 K1574+500-K1574+600 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-039",
+      "source_no": 2,
+      "source_alias": "K1574+500～K1574+600",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1574+500",
+      "end_station_raw": "K1574+600",
+      "start_station_m": 1574500,
+      "end_station_m": 1574600,
+      "side": null,
+      "slope_length_m": 100.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_66b9eaa40e8f",
+    "label": "K1574+500-K1574+600 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_66b9eaa40e8f",
+    "label": "K1574+500-K1574+600 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_8adbefcc3aa1",
+    "label": "G351 K1574+800-K1574+860 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-040",
+      "source_no": 3,
+      "source_alias": "K1574+800～K1574+860",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1574+800",
+      "end_station_raw": "K1574+860",
+      "start_station_m": 1574800,
+      "end_station_m": 1574860,
+      "side": null,
+      "slope_length_m": 60.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_b1cd12144755",
+    "label": "K1574+800-K1574+860 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_b1cd12144755",
+    "label": "K1574+800-K1574+860 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_d36d047e310d",
+    "label": "G351 K1576+120-K1576+180 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-041",
+      "source_no": 4,
+      "source_alias": "K1576+120～K1576+180",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1576+120",
+      "end_station_raw": "K1576+180",
+      "start_station_m": 1576120,
+      "end_station_m": 1576180,
+      "side": null,
+      "slope_length_m": 60.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_62d38a689bf1",
+    "label": "K1576+120-K1576+180 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_62d38a689bf1",
+    "label": "K1576+120-K1576+180 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_8ddafc6da9ba",
+    "label": "G351 K1576+410-K1576+470 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-042",
+      "source_no": 5,
+      "source_alias": "K1576+410～K1576+470",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1576+410",
+      "end_station_raw": "K1576+470",
+      "start_station_m": 1576410,
+      "end_station_m": 1576470,
+      "side": null,
+      "slope_length_m": 60.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_f4cbdb14093a",
+    "label": "K1576+410-K1576+470 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_f4cbdb14093a",
+    "label": "K1576+410-K1576+470 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_c8fa627637c7",
+    "label": "G351 K1576+550-K1576+600 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-043",
+      "source_no": 6,
+      "source_alias": "K1576+550～K1576+600",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1576+550",
+      "end_station_raw": "K1576+600",
+      "start_station_m": 1576550,
+      "end_station_m": 1576600,
+      "side": null,
+      "slope_length_m": 50.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_e1176e88d9c5",
+    "label": "K1576+550-K1576+600 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_e1176e88d9c5",
+    "label": "K1576+550-K1576+600 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_b96528945946",
+    "label": "G351 K1576+710-K1576+780 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-044",
+      "source_no": 7,
+      "source_alias": "K1576+710～K1576+780",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1576+710",
+      "end_station_raw": "K1576+780",
+      "start_station_m": 1576710,
+      "end_station_m": 1576780,
+      "side": null,
+      "slope_length_m": 70.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_2069b8d746ed",
+    "label": "K1576+710-K1576+780 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_2069b8d746ed",
+    "label": "K1576+710-K1576+780 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_684e77dd3d24",
+    "label": "G351 K1577+140-K1577+200 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-045",
+      "source_no": 8,
+      "source_alias": "K1577+140～K1577+200",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1577+140",
+      "end_station_raw": "K1577+200",
+      "start_station_m": 1577140,
+      "end_station_m": 1577200,
+      "side": null,
+      "slope_length_m": 60.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_c2ac15a94d68",
+    "label": "K1577+140-K1577+200 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_c2ac15a94d68",
+    "label": "K1577+140-K1577+200 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_78cf5feb50d8",
+    "label": "G351 K1577+800-K1577+860 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-046",
+      "source_no": 9,
+      "source_alias": "K1577+800～K1577+860",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1577+800",
+      "end_station_raw": "K1577+860",
+      "start_station_m": 1577800,
+      "end_station_m": 1577860,
+      "side": null,
+      "slope_length_m": 60.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_284429248071",
+    "label": "K1577+800-K1577+860 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_284429248071",
+    "label": "K1577+800-K1577+860 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_b6f97bee48c3",
+    "label": "G351 K1578+130-K1578+250 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-047",
+      "source_no": 10,
+      "source_alias": "K1578+130～K1578+250",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1578+130",
+      "end_station_raw": "K1578+250",
+      "start_station_m": 1578130,
+      "end_station_m": 1578250,
+      "side": null,
+      "slope_length_m": 120.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_997977cc7a1d",
+    "label": "K1578+130-K1578+250 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_997977cc7a1d",
+    "label": "K1578+130-K1578+250 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_e9f491202caf",
+    "label": "G351 K1578+460-K1578+550 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-048",
+      "source_no": 11,
+      "source_alias": "K1578+460～K1578+550",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1578+460",
+      "end_station_raw": "K1578+550",
+      "start_station_m": 1578460,
+      "end_station_m": 1578550,
+      "side": null,
+      "slope_length_m": 90.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_6263d452a115",
+    "label": "K1578+460-K1578+550 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_6263d452a115",
+    "label": "K1578+460-K1578+550 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_03e3e1261eb8",
+    "label": "G351 K1578+920-K1578+960 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-049",
+      "source_no": 12,
+      "source_alias": "K1578+920～K1578+960",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1578+920",
+      "end_station_raw": "K1578+960",
+      "start_station_m": 1578920,
+      "end_station_m": 1578960,
+      "side": null,
+      "slope_length_m": 40.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_19a80ace0e1b",
+    "label": "K1578+920-K1578+960 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_19a80ace0e1b",
+    "label": "K1578+920-K1578+960 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_329cb0a54d88",
+    "label": "G351 K1579+450-K1579+550 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-050",
+      "source_no": 13,
+      "source_alias": "K1579+450～K1579+550",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1579+450",
+      "end_station_raw": "K1579+550",
+      "start_station_m": 1579450,
+      "end_station_m": 1579550,
+      "side": null,
+      "slope_length_m": 100.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_485da2f3b264",
+    "label": "K1579+450-K1579+550 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_485da2f3b264",
+    "label": "K1579+450-K1579+550 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_83208894646b",
+    "label": "G351 K1580+270-K1580+320 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-051",
+      "source_no": 14,
+      "source_alias": "K1580+270～K1580+320",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1580+270",
+      "end_station_raw": "K1580+320",
+      "start_station_m": 1580270,
+      "end_station_m": 1580320,
+      "side": null,
+      "slope_length_m": 50.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_2ba07ec579ec",
+    "label": "K1580+270-K1580+320 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_2ba07ec579ec",
+    "label": "K1580+270-K1580+320 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_1cb8a6c052ae",
+    "label": "G351 K1580+440-K1580+560 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-052",
+      "source_no": 15,
+      "source_alias": "K1580+440～K1580+560",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1580+440",
+      "end_station_raw": "K1580+560",
+      "start_station_m": 1580440,
+      "end_station_m": 1580560,
+      "side": null,
+      "slope_length_m": 120.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.995,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_d6c89e5623d3",
+    "label": "K1580+440-K1580+560 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_d6c89e5623d3",
+    "label": "K1580+440-K1580+560 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_170733957fb3",
+    "label": "G351 K1581+600-K1581+800 边坡",
+    "type": "Slope",
+    "summary": "潜在不稳定边坡",
+    "props": {
+      "slope_id": "G351-AUTO-053",
+      "source_no": 26,
+      "source_alias": "K1581+600-K1581+800",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1581+600",
+      "end_station_raw": "K1581+800",
+      "start_station_m": 1581600,
+      "end_station_m": 1581800,
+      "side": null,
+      "slope_length_m": 200.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.985,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_a049ecd3c87c",
+    "label": "K1581+600-K1581+800 潜在不稳定边坡",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "潜在不稳定边坡",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_a049ecd3c87c",
+    "label": "K1581+600-K1581+800 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_479cab0c2310",
+    "label": "G351 K1583+150-K1583+300 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-054",
+      "source_no": 16,
+      "source_alias": "K1583+150-K1583+300",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1583+150",
+      "end_station_raw": "K1583+300",
+      "start_station_m": 1583150,
+      "end_station_m": 1583300,
+      "side": null,
+      "slope_length_m": 150.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.985,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_932d06eab91c",
+    "label": "K1583+150-K1583+300 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_932d06eab91c",
+    "label": "K1583+150-K1583+300 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_c9a87cda538b",
+    "label": "G351 K1587+700-K1587+800 边坡",
+    "type": "Slope",
+    "summary": "滑坡",
+    "props": {
+      "slope_id": "G351-AUTO-055",
+      "source_no": 25,
+      "source_alias": "K1587+700-K1587+800",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1587+700",
+      "end_station_raw": "K1587+800",
+      "start_station_m": 1587700,
+      "end_station_m": 1587800,
+      "side": null,
+      "slope_length_m": 100.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.985,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_c1ab1c79ec8e",
+    "label": "K1587+700-K1587+800 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_c1ab1c79ec8e",
+    "label": "K1587+700-K1587+800 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "滑坡"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_515baf62282b",
+    "label": "G351 K1593+600-K1593+700 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-056",
+      "source_no": 17,
+      "source_alias": "K1593+600-K1593+700",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1593+600",
+      "end_station_raw": "K1593+700",
+      "start_station_m": 1593600,
+      "end_station_m": 1593700,
+      "side": null,
+      "slope_length_m": 100.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.985,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_cb46015dc281",
+    "label": "K1593+600-K1593+700 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_cb46015dc281",
+    "label": "K1593+600-K1593+700 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_0ad192e07c07",
+    "label": "G351 K1613+100-K1613+400 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-057",
+      "source_no": 18,
+      "source_alias": "K1613+100-K1613+400",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1613+100",
+      "end_station_raw": "K1613+400",
+      "start_station_m": 1613100,
+      "end_station_m": 1613400,
+      "side": null,
+      "slope_length_m": 300.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.985,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_37fbdaa3575a",
+    "label": "K1613+100-K1613+400 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_37fbdaa3575a",
+    "label": "K1613+100-K1613+400 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_8729d819494b",
+    "label": "G351 K1617+780-K1617+820 边坡",
+    "type": "Slope",
+    "summary": "潜在不稳定边坡",
+    "props": {
+      "slope_id": "G351-AUTO-058",
+      "source_no": 27,
+      "source_alias": "K1617+780-K1617+820",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1617+780",
+      "end_station_raw": "K1617+820",
+      "start_station_m": 1617780,
+      "end_station_m": 1617820,
+      "side": null,
+      "slope_length_m": 40.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.985,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_d22dc83e9ec2",
+    "label": "K1617+780-K1617+820 潜在不稳定边坡",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": "潜在不稳定边坡",
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_d22dc83e9ec2",
+    "label": "K1617+780-K1617+820 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_f9b43db4bc8c",
+    "label": "G351 K1619+300-K1619+350 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-059",
+      "source_no": 19,
+      "source_alias": "K1619+300-K1619+350",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1619+300",
+      "end_station_raw": "K1619+350",
+      "start_station_m": 1619300,
+      "end_station_m": 1619350,
+      "side": null,
+      "slope_length_m": 50.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.985,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_0782b10d1bda",
+    "label": "K1619+300-K1619+350 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_0782b10d1bda",
+    "label": "K1619+300-K1619+350 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_92b3c8373c58",
+    "label": "G351 K1624+890-K1624+940 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-060",
+      "source_no": 20,
+      "source_alias": "K1624+890-K1624+940",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1624+890",
+      "end_station_raw": "K1624+940",
+      "start_station_m": 1624890,
+      "end_station_m": 1624940,
+      "side": null,
+      "slope_length_m": 50.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.985,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_7c5e0b6793b9",
+    "label": "K1624+890-K1624+940 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_7c5e0b6793b9",
+    "label": "K1624+890-K1624+940 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_af81e4f67a18",
+    "label": "G351 K1625+600-K1625+700 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-061",
+      "source_no": 22,
+      "source_alias": "K1625+600-K1625+700",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1625+600",
+      "end_station_raw": "K1625+700",
+      "start_station_m": 1625600,
+      "end_station_m": 1625700,
+      "side": null,
+      "slope_length_m": 100.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.985,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_e4a30422784f",
+    "label": "K1625+600-K1625+700 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_e4a30422784f",
+    "label": "K1625+600-K1625+700 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_9c23e5151964",
+    "label": "G351 K1625+740-K1625+800 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-062",
+      "source_no": 23,
+      "source_alias": "K1625+740-K1625+800",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1625+740",
+      "end_station_raw": "K1625+800",
+      "start_station_m": 1625740,
+      "end_station_m": 1625800,
+      "side": null,
+      "slope_length_m": 60.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.985,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_03f3b11a02fe",
+    "label": "K1625+740-K1625+800 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_03f3b11a02fe",
+    "label": "K1625+740-K1625+800 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  },
+  {
+    "id": "slope_c339ed592f96",
+    "label": "G351 K1625+980-K1625+030 边坡",
+    "type": "Slope",
+    "summary": "崩塌",
+    "props": {
+      "slope_id": "G351-AUTO-063",
+      "source_no": 21,
+      "source_alias": "K1625+980-K1625+030",
+      "route_code_cache": "G351",
+      "start_station_raw": "K1625+980",
+      "end_station_raw": "K1625+030",
+      "start_station_m": 1625980,
+      "end_station_m": 1625030,
+      "side": null,
+      "slope_length_m": 50.0,
+      "slope_height_min_m": null,
+      "slope_height_max_m": null,
+      "slope_height_raw": null,
+      "slope_gradient_min_deg": null,
+      "slope_gradient_max_deg": null,
+      "slope_gradient_raw": null,
+      "start_coordinate": null,
+      "end_coordinate": null,
+      "coordinate_crs": null,
+      "slope_structure_code": null,
+      "mechanism_summary": null,
+      "protection_rationale": null,
+      "entity_resolution_status": "automatically_resolved_by_station_range",
+      "review_status": "automatic_evidence_validated_not_human_reviewed",
+      "data_status": "fully_automatic_document_extraction",
+      "automatic_extraction": {
+        "deterministic_confidence": 0.985,
+        "semantic_used": false,
+        "human_seed_used": false
+      }
+    }
+  },
+  {
+    "id": "hazard_body_3966163d7227",
+    "label": "K1625+980-K1625+030 灾害体",
+    "type": "HazardBody",
+    "summary": "",
+    "props": {
+      "body_type": null,
+      "failure_modes": []
+    }
+  },
+  {
+    "id": "hazard_assessment_3966163d7227",
+    "label": "K1625+980-K1625+030 灾害类型自动识别",
+    "type": "HazardSusceptibilityAssessment",
+    "summary": "",
+    "props": {
+      "candidate_hazard_types": [
+        "崩塌"
+      ],
+      "method": "document_semantic_extraction",
+      "level": "未进行易感性分级"
+    }
+  }
+]
