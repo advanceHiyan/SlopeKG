@@ -1,5 +1,70 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>风险研判 - SlopeKG</title><link rel="stylesheet" href="./pages.css?v=20260711-1"/></head>
-<body class="portal-body" data-page="risk"><header class="site-header"><div class="site-header-inner"><a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a><nav class="site-nav"><a href="./index.html">总览</a><a href="./pdf-ingestion.html">PDF解析</a><a href="./slopes.html">边坡档案</a><a href="./graph.html">关系图谱</a><a href="./data-status.html">数据与接口</a><a class="active" href="./risk.html">风险研判</a></nav></div></header>
-<main class="page-main"><div class="page-heading"><div><h1>风险研判就绪检查</h1><p>当前页面只检查数据条件，不输出正式风险等级。正式风险规则、动态数据与人工审核流程接入前，评估接口保持阻断。</p></div></div><div class="notice">历史设计安全系数不能直接代表当前安全状态；缺少近期巡检、降雨、地下水、防护设施现状和暴露对象时，不应强行给出风险等级。</div>
-<section class="card"><div class="filters"><select id="riskSlopeSelect"><option value="">选择边坡</option></select><button id="checkRiskBtn" class="button" type="button">检查就绪度</button><button class="button" type="button" disabled title="正式规则尚未确认">正式评估（暂未开放）</button></div><div id="riskResult" class="detail-empty">请选择边坡进行就绪度检查。</div></section><section class="card" style="margin-top:16px"><h2>全局阻断条件</h2><div id="globalBlocking" class="detail-list"><div class="loading">加载中…</div></div></section></main>
-<script src="./api.js?v=20260711-1"></script><script src="./portal.js?v=20260721-1"></script></body></html>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>风险研判 - SlopeKG</title>
+  <link rel="stylesheet" href="./pages.css?v=20260728-1"/>
+</head>
+<body class="portal-body" data-page="risk">
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a>
+      <nav class="site-nav">
+        <a href="./index.html">总览</a><a href="./pdf-ingestion.html">PDF解析</a>
+        <a href="./slopes.html">边坡档案</a><a href="./graph.html">关系图谱</a>
+        <a href="./rules.html">规则库</a><a href="./data-status.html">数据与接口</a>
+        <a class="active" href="./risk.html">风险研判</a>
+      </nav>
+    </div>
+  </header>
+  <main class="page-main">
+    <div class="page-heading">
+      <div>
+        <h1>宏观风险筛查与复核排序</h1>
+        <p>利用现有灾害体、坡高坡度、稳定性工况和异常迹象安排现场复核优先级。结果不是正式风险等级，也不预测具体失稳时间。</p>
+      </div>
+      <span class="badge pending">规则筛查 v1</span>
+    </div>
+    <section class="card export-card" style="margin-bottom:16px">
+      <div>
+        <h2>导出风险研判离线版</h2>
+        <p class="section-subtitle">生成可单独发送的单文件 HTML，内含筛查结果、原文证据、缺失数据与交互筛选，无需部署环境。</p>
+        <p id="riskExportStatus" class="form-help">文件名可自定义；系统自动补充 .html 后缀。</p>
+      </div>
+      <div class="export-controls">
+        <label>文件名<input id="riskExportFileName" value="SlopeKG_风险研判_离线版" maxlength="120"/></label>
+        <button id="exportRiskBtn" class="button" type="button">导出并下载</button>
+        <a id="riskExportDownloadLink" class="export-download" hidden>下载已生成文件</a>
+      </div>
+    </section>
+    <div class="notice">P1–P4 表示人工复核顺序，不是高、中、低风险。点击任一边坡后，右侧顶部会优先显示“为了进一步判断风险值，建议补充的数据”。缺失值不会按安全值处理。</div>
+    <section id="riskMetrics" class="grid metrics-grid"><div class="loading">加载中…</div></section>
+    <section class="risk-layout">
+      <article class="card">
+        <div class="filters">
+          <input id="riskSearch" type="search" placeholder="搜索路线、桩号、灾害类型"/>
+          <select id="riskPriorityFilter">
+            <option value="">全部优先级</option>
+            <option value="P1">P1 优先复核</option><option value="P2">P2 重点复核</option>
+            <option value="P3">P3 常规复核</option><option value="P4">P4 资料补录</option>
+          </select>
+        </div>
+        <div class="table-wrap risk-table-wrap">
+          <table class="data-table risk-table">
+            <thead><tr><th>优先级</th><th>边坡</th><th>灾害资料</th><th>稳定性关注</th><th>风险信息具备情况</th></tr></thead>
+            <tbody id="riskRows"><tr><td colspan="5">加载中…</td></tr></tbody>
+          </table>
+        </div>
+      </article>
+      <aside id="riskDetail" class="card detail-empty">选择一个边坡查看命中依据、证据、缺失数据和复核建议。</aside>
+    </section>
+    <section class="card" style="margin-top:16px">
+      <h2>正式风险结论的边界</h2>
+      <div id="riskBoundary" class="boundary-grid"><div class="loading">加载中…</div></div>
+    </section>
+  </main>
+  <script src="./api.js?v=20260711-1"></script>
+  <script src="./portal.js?v=20260728-1"></script>
+</body>
+</html>

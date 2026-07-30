@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 
-from slopekg.pipeline import DemoPipeline  # noqa: E402
+from slopekg.pipeline import DemoPipeline, PipelineAlreadyRunningError  # noqa: E402
 
 
 def main() -> None:
@@ -22,13 +22,16 @@ def main() -> None:
     parser.add_argument("--llm-model", default="deepseek-v4-flash")
     parser.add_argument("--reuse-parsed", action="store_true", help="Reuse existing PDF sidecars; only rerun extraction and graph generation")
     args = parser.parse_args()
-    state = DemoPipeline().run(
-        ocr_pages=args.ocr_pages,
-        force_ocr=args.force_ocr,
-        parse_mode="deep" if args.deep and not args.no_llm else args.mode,
-        llm_model=args.llm_model,
-        reuse_parsed=args.reuse_parsed,
-    )
+    try:
+        state = DemoPipeline().run(
+            ocr_pages=args.ocr_pages,
+            force_ocr=args.force_ocr,
+            parse_mode="deep" if args.deep and not args.no_llm else args.mode,
+            llm_model=args.llm_model,
+            reuse_parsed=args.reuse_parsed,
+        )
+    except PipelineAlreadyRunningError as exc:
+        parser.error(str(exc))
     print(json.dumps(state, ensure_ascii=False, indent=2))
 
 

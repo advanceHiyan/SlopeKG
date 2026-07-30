@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-21T21:06:15",
+  "generated_at": "2026-07-27T17:53:36",
   "evaluation_mode": "automatic_internal_quality_no_manual_seed",
   "manual_seed_used": false,
   "discovery": {
@@ -7,7 +7,7 @@
     "valid_station_syntax": 63,
     "unique_stations": 63,
     "unique_slope_keys": 63,
-    "multi_source_slopes": 61
+    "multi_source_slopes": 59
   },
   "automatic_coverage": {
     "registry": {
@@ -26,30 +26,75 @@
       "coverage": 0.2063
     },
     "geometry": {
-      "available": 11,
+      "available": 38,
       "total": 63,
-      "coverage": 0.1746
+      "coverage": 0.6032
+    },
+    "slope_type": {
+      "available": 28,
+      "total": 63,
+      "coverage": 0.4444
+    },
+    "material_nature": {
+      "available": 55,
+      "total": 63,
+      "coverage": 0.873
+    },
+    "slope_aspect": {
+      "available": 23,
+      "total": 63,
+      "coverage": 0.3651
+    },
+    "slope_structure": {
+      "available": 25,
+      "total": 63,
+      "coverage": 0.3968
     },
     "lithology": {
+      "available": 55,
+      "total": 63,
+      "coverage": 0.873
+    },
+    "stratum": {
+      "available": 31,
+      "total": 63,
+      "coverage": 0.4921
+    },
+    "structural_plane": {
+      "available": 31,
+      "total": 63,
+      "coverage": 0.4921
+    },
+    "vegetation": {
+      "available": 25,
+      "total": 63,
+      "coverage": 0.3968
+    },
+    "historical_deformation": {
+      "available": 54,
+      "total": 63,
+      "coverage": 0.8571
+    },
+    "hydrology_baseline": {
+      "available": 38,
+      "total": 63,
+      "coverage": 0.6032
+    },
+    "stability": {
+      "available": 18,
+      "total": 63,
+      "coverage": 0.2857
+    },
+    "multi_source": {
       "available": 59,
       "total": 63,
       "coverage": 0.9365
-    },
-    "stratum": {
-      "available": 34,
-      "total": 63,
-      "coverage": 0.5397
-    },
-    "multi_source": {
-      "available": 61,
-      "total": 63,
-      "coverage": 0.9683
     }
   },
   "semantic": {
     "enabled": false,
     "model": "deepseek-v4-flash",
-    "prompt_version": "slope-semantic-v5-complete-sections-evidence",
+    "prompt_version": "slope-semantic-v6-static-fields-continuation-evidence",
     "candidates": 0,
     "passed": 0,
     "pass_rate": null,
@@ -59,16 +104,21 @@
     "field_evidence_coverage": null
   },
   "evidence": {
-    "assertions": 692,
-    "assertions_with_evidence": 692,
+    "assertions": 1122,
+    "assertions_with_evidence": 1122,
     "coverage": 1.0
   },
   "graph_integrity": {
-    "nodes": 279,
+    "nodes": 1061,
     "duplicate_node_ids": 0,
-    "edges": 845,
+    "edges": 1661,
     "dangling_edges": 0,
     "orphan_nodes": 0
+  },
+  "temporal_integrity": {
+    "historical_observations": 505,
+    "with_explicit_temporal_boundary": 505,
+    "coverage": 1.0
   },
   "quality_gates": {
     "slope_discovery_nonempty": true,
@@ -78,10 +128,13 @@
     "coordinate_coverage_at_least_80pct": false,
     "treatment_coverage_at_least_80pct": false,
     "assertion_evidence_coverage_at_least_95pct": true,
+    "geometry_coverage_at_least_50pct": true,
+    "structural_plane_coverage_at_least_40pct": true,
+    "historical_observation_temporal_boundary_complete": true,
     "graph_has_no_dangling_edges": true,
     "graph_has_no_orphan_nodes": true
   },
-  "quality_gate_pass_rate": 0.7778,
+  "quality_gate_pass_rate": 0.8333,
   "parser": {
     "registry_rows": 63,
     "registry_rows_by_route": {
@@ -94,8 +147,8 @@
     "coordinate_rows": 13,
     "treatment_rows": 13,
     "geometry_rows": 11,
-    "section_fact_rows": 61,
-    "assertions": 692,
+    "section_fact_rows": 59,
+    "assertions": 1122,
     "page_type_counts": {
       "scanned": 75,
       "mixed": 7,

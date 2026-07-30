@@ -44,7 +44,24 @@ const typeLabels = {
   Document: "文档",
   StabilityAnalysis: "稳定性分析",
   StructuralPlane: "结构面",
+  DeformationObservation: "历史变形记录",
+  HydrologyObservation: "历史水文记录",
+  TerrainSetting: "地形地貌",
+  VegetationSurvey: "植被调查",
 };
+
+const compactHiddenTypes = new Set([
+  "DeformationObservation",
+  "HydrologyObservation",
+  "StructuralPlane",
+  "StabilityAnalysis",
+  "ProtectionType",
+  "HazardSusceptibilityAssessment",
+  "CausalFactor",
+  "TerrainSetting",
+  "VegetationSurvey",
+  "Drawing",
+]);
 
 const nodeColors = {
   Project: "#0f7b6c",
@@ -58,6 +75,10 @@ const nodeColors = {
   Document: "#52606d",
   StabilityAnalysis: "#b53b4a",
   StructuralPlane: "#99702a",
+  DeformationObservation: "#a07162",
+  HydrologyObservation: "#4b82a8",
+  TerrainSetting: "#6f8d61",
+  VegetationSurvey: "#5d9366",
   Lithology: "#23836d",
   Stratum: "#23836d",
   CausalFactor: "#777f88",
@@ -265,14 +286,20 @@ function formatStatusCounts(counts) {
 function renderMetrics() {
   const stats = state.graph.meta.stats;
   const hazards = state.graph.nodes.filter((n) => n.type === "Slope").length;
-  const measures = state.graph.nodes.filter((n) => n.type === "ProtectionWork").length;
   const visible = visibleGraph();
   $("#metrics").innerHTML = [
     metric(stats.nodes, "节点"),
     metric(stats.edges, "关系"),
     metric(hazards, "候选边坡"),
-    metric(`${visible.nodes.length}/${measures}`, "展示/防护工程"),
+    metric(`${visible.nodes.length}/${stats.nodes}`, "显示/全部节点"),
   ].join("");
+  const hidden = Math.max(0, stats.nodes - visible.nodes.length);
+  const hint = $("#presentationHint");
+  if (hint) {
+    hint.textContent = state.presentationMode && !state.search
+      ? `默认折叠 ${hidden} 个次要节点；取消勾选即可显示全部。`
+      : "次要节点已显示，可通过节点类型继续筛选。";
+  }
 }
 
 function metric(value, label) {
@@ -408,7 +435,7 @@ function passesPresentationFilter(node, options = {}) {
   if (state.search) return true;
   if (options.forceKeepSelected && node.id === state.selectedNodeId) return true;
   if (node.id === state.activeHazardId) return true;
-  return !["Drawing", "StabilityAnalysis", "StructuralPlane", "ProtectionType", "HazardSusceptibilityAssessment"].includes(node.type);
+  return !compactHiddenTypes.has(node.type);
 }
 
 function connectedIds(nodeId) {

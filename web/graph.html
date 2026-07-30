@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>关系图谱 - SlopeKG</title>
     <link rel="stylesheet" href="./pages.css?v=20260712-1" />
-    <link rel="stylesheet" href="./styles.css?v=20260711-1" />
+    <link rel="stylesheet" href="./styles.css?v=20260727-2" />
   </head>
   <body>
     <header class="site-header"><div class="site-header-inner">
       <a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a>
-      <nav class="site-nav"><a href="./index.html">总览</a><a href="./pdf-ingestion.html">PDF解析</a><a href="./slopes.html">边坡档案</a><a class="active" href="./graph.html">关系图谱</a><a href="./data-status.html">数据与接口</a><a href="./risk.html">风险研判</a></nav>
+      <nav class="site-nav"><a href="./index.html">总览</a><a href="./pdf-ingestion.html">PDF解析</a><a href="./slopes.html">边坡档案</a><a class="active" href="./graph.html">关系图谱</a><a href="./rules.html">规则库</a><a href="./data-status.html">数据与接口</a><a href="./risk.html">风险研判</a></nav>
     </div></header>
     <div class="app-shell graph-page-shell">
       <aside class="sidebar">
@@ -18,7 +18,8 @@
         <div class="pipeline-card"><div class="section-title">流水线</div><div class="pipeline-grid" id="pipelineStats"></div><a class="pipeline-link" href="./pdf-ingestion.html">添加PDF或查看解析进度</a><div id="pipelineMessage" class="pipeline-message">后端状态读取中...</div></div>
         <div class="toolbar"><label class="field-label" for="searchInput">检索</label><input id="searchInput" type="search" placeholder="桩号、岩性、防护、图号"/></div>
         <div class="segmented" role="group" aria-label="图谱视图"><button class="segment active" data-mode="all" type="button">全图</button><button class="segment" data-mode="hazard" type="button">边坡</button><button class="segment" data-mode="measure" type="button">防护</button></div>
-        <label class="display-toggle"><input id="presentationToggle" type="checkbox" checked/><span>精简展示</span></label>
+        <label class="display-toggle"><input id="presentationToggle" type="checkbox" checked/><span>隐藏次要小节点（推荐）</span></label>
+        <div id="presentationHint" class="display-toggle-hint">正在统计折叠节点...</div>
         <div class="filter-block"><div class="field-label">节点类型</div><div id="typeFilters" class="check-list"></div></div>
         <div class="hazard-block"><div class="section-title">候选边坡</div><div id="hazardList" class="hazard-list"></div></div>
         <div class="hazard-block"><div class="section-title">OCR队列</div><div id="ocrList" class="ocr-list"></div></div>
@@ -30,6 +31,6 @@
       </main>
       <aside class="detail-panel"><div class="section-title">详情</div><div id="detail" class="detail-content"><p>选择一个节点查看属性、关系和证据。</p></div></aside>
     </div>
-    <script src="./app.js?v=20260721-1"></script>
+    <script src="./app.js?v=20260727-2"></script>
   </body>
 </html>

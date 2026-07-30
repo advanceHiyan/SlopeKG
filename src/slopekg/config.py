@@ -24,6 +24,7 @@ class DemoPaths:
     web_data_dir: Path = OUTPUT_DIR / "web" / "data"
     assets_dir: Path = OUTPUT_DIR / "assets"
     extracted_dir: Path = OUTPUT_DIR / "extracted"
+    rules_dir: Path = OUTPUT_DIR / "rules"
     cache_dir: Path = CACHE_DIR
     web_dir: Path = WEB_DIR
     attribute_dictionary_file: Path = ATTRIBUTE_DICTIONARY_FILE
@@ -68,6 +69,14 @@ class DemoPaths:
     def evaluation_json(self) -> Path:
         return self.output_dir / "evaluation.json"
 
+    @property
+    def rules_json(self) -> Path:
+        return self.rules_dir / "rule_library.json"
+
+    @property
+    def rules_state_json(self) -> Path:
+        return self.rules_dir / "state.json"
+
 
 PATHS = DemoPaths()
 
@@ -95,4 +104,3 @@ def configure_runtime_cache() -> Path:
     os.environ.setdefault("FLAGS_enable_pir_in_executor", "0")
     tempfile.tempdir = str(temp_dir)
     return CACHE_DIR
-

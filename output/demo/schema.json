@@ -99,6 +99,18 @@
       "label_zh": "规范",
       "category": "rule"
     },
+    "StandardClause": {
+      "label_zh": "规范条文",
+      "category": "rule"
+    },
+    "Formula": {
+      "label_zh": "计算公式",
+      "category": "rule"
+    },
+    "ThresholdTable": {
+      "label_zh": "阈值表",
+      "category": "rule"
+    },
     "RiskRule": {
       "label_zh": "风险规则",
       "category": "rule"
@@ -190,6 +202,18 @@
     },
     "HAS_MONITORING_PROGRAM": {
       "label_zh": "具有监测方案"
+    },
+    "CONTAINS_CLAUSE": {
+      "label_zh": "包含条文"
+    },
+    "DEFINES_FORMULA": {
+      "label_zh": "定义公式"
+    },
+    "DEFINES_THRESHOLD_TABLE": {
+      "label_zh": "定义阈值表"
+    },
+    "DEFINES_RULE": {
+      "label_zh": "定义规则"
     }
   },
   "slope_fields": [

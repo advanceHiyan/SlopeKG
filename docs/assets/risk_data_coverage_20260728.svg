@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="640" viewBox="0 0 1080 640" role="img" aria-labelledby="title desc">
+  <title id="title">SlopeKG主要风险数据覆盖情况</title>
+  <desc id="desc">展示63个边坡中边坡清单、几何参数、土岩属性、斜坡结构、岩性、地层、结构面、防护设计、稳定性工况、历史变形、历史水文和近期变形巡检的覆盖百分比。</desc>
+  <rect width="1080" height="640" rx="18" fill="#f7faf9"/>
+  <text x="48" y="54" fill="#173335" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="25" font-weight="700">主要风险数据覆盖情况</text>
+  <text x="48" y="82" fill="#68797b" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="14">统计基数：63 个边坡；覆盖率表示资料中已识别到该类信息，不代表已完成现状核验</text>
+  <g font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="14">
+    <g transform="translate(0,112)"><text x="48" y="16" fill="#304447">边坡清单</text><rect x="195" y="2" width="770" height="18" rx="9" fill="#e3eaea"/><rect x="195" y="2" width="770" height="18" rx="9" fill="#168274"/><text x="985" y="16" fill="#173335" font-weight="700">100%</text></g>
+    <g transform="translate(0,153)"><text x="48" y="16" fill="#304447">几何参数</text><rect x="195" y="2" width="770" height="18" rx="9" fill="#e3eaea"/><rect x="195" y="2" width="547" height="18" rx="9" fill="#2b9487"/><text x="985" y="16" fill="#173335" font-weight="700">71%</text></g>
+    <g transform="translate(0,194)"><text x="48" y="16" fill="#304447">土质 / 岩质属性</text><rect x="195" y="2" width="770" height="18" rx="9" fill="#e3eaea"/><rect x="195" y="2" width="670" height="18" rx="9" fill="#238b7e"/><text x="985" y="16" fill="#173335" font-weight="700">87%</text></g>
+    <g transform="translate(0,235)"><text x="48" y="16" fill="#304447">斜坡结构</text><rect x="195" y="2" width="770" height="18" rx="9" fill="#e3eaea"/><rect x="195" y="2" width="516" height="18" rx="9" fill="#399b90"/><text x="985" y="16" fill="#173335" font-weight="700">67%</text></g>
+    <g transform="translate(0,276)"><text x="48" y="16" fill="#304447">岩性</text><rect x="195" y="2" width="770" height="18" rx="9" fill="#e3eaea"/><rect x="195" y="2" width="708" height="18" rx="9" fill="#1d887a"/><text x="985" y="16" fill="#173335" font-weight="700">92%</text></g>
+    <g transform="translate(0,317)"><text x="48" y="16" fill="#304447">地层</text><rect x="195" y="2" width="770" height="18" rx="9" fill="#e3eaea"/><rect x="195" y="2" width="562" height="18" rx="9" fill="#2f968b"/><text x="985" y="16" fill="#173335" font-weight="700">73%</text></g>
+    <g transform="translate(0,358)"><text x="48" y="16" fill="#304447">结构面</text><rect x="195" y="2" width="770" height="18" rx="9" fill="#e3eaea"/><rect x="195" y="2" width="462" height="18" rx="9" fill="#4aa49a"/><text x="985" y="16" fill="#173335" font-weight="700">60%</text></g>
+    <g transform="translate(0,399)"><text x="48" y="16" fill="#304447">防护设计</text><rect x="195" y="2" width="770" height="18" rx="9" fill="#e3eaea"/><rect x="195" y="2" width="339" height="18" rx="9" fill="#c38a35"/><text x="985" y="16" fill="#173335" font-weight="700">44%</text></g>
+    <g transform="translate(0,440)"><text x="48" y="16" fill="#304447">稳定性工况</text><rect x="195" y="2" width="770" height="18" rx="9" fill="#e3eaea"/><rect x="195" y="2" width="354" height="18" rx="9" fill="#bd8231"/><text x="985" y="16" fill="#173335" font-weight="700">46%</text></g>
+    <g transform="translate(0,481)"><text x="48" y="16" fill="#304447">历史变形资料</text><rect x="195" y="2" width="770" height="18" rx="9" fill="#e3eaea"/><rect x="195" y="2" width="693" height="18" rx="9" fill="#218a7d"/><text x="985" y="16" fill="#173335" font-weight="700">90%</text></g>
+    <g transform="translate(0,522)"><text x="48" y="16" fill="#304447">历史水文资料</text><rect x="195" y="2" width="770" height="18" rx="9" fill="#e3eaea"/><rect x="195" y="2" width="578" height="18" rx="9" fill="#2e9589"/><text x="985" y="16" fill="#173335" font-weight="700">75%</text></g>
+    <g transform="translate(0,563)"><text x="48" y="16" fill="#304447">近期变形巡检</text><rect x="195" y="2" width="770" height="18" rx="9" fill="#e3eaea"/><circle cx="204" cy="11" r="9" fill="#b23c4b"/><text x="985" y="16" fill="#b23c4b" font-weight="700">0%</text></g>
+  </g>
+  <text x="48" y="620" fill="#9a5d17" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="13">当前最明显的短板不是历史资料，而是带日期的近期巡检、监测与触发因素数据。</text>
+</svg>

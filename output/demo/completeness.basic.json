@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-07-21T21:06:15",
+  "generated_at": "2026-07-27T17:53:36",
   "schema_version": "1.1.0-layered-parsing",
   "summary": {
     "slopes": 63,
-    "average_risk_data_completeness": 0.172,
+    "average_risk_data_completeness": 0.325,
     "ready": 0,
     "not_ready": 63
   },
@@ -13,17 +13,12 @@
       "label": "G209 K2388+976-K2389+036 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.3,
+      "risk_data_completeness": 0.55,
       "risk_readiness": "not_ready",
-      "blocking_count": 14,
+      "blocking_count": 9,
       "blocking_items": [
         "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -158,8 +153,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -170,8 +165,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 28.0,
+            "slope_height_max_m": 28.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -190,16 +188,19 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 55.0,
+            "slope_gradient_max_deg": 63.0
+          }
         },
         {
           "code": "slope_aspect_deg",
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 201
         },
         {
           "code": "slope_structure_code",
@@ -223,8 +224,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "坡体基岩裸露，地层为三叠系大冶组 （T1dy）页岩夹灰岩，上坡体为硬质灰岩，坡脚位置为软质页岩，岩层产状6º∠24º，整体为逆向 坡，发育两组节理裂隙，L1 产状226º∠75º，分布3-4 条/m，延伸长度约2-3m",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -259,7 +265,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -376,17 +382,12 @@
       "label": "G209 K2391+966-K2392+030 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.3,
+      "risk_data_completeness": 0.55,
       "risk_readiness": "not_ready",
-      "blocking_count": 14,
+      "blocking_count": 9,
       "blocking_items": [
         "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -521,8 +522,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -533,8 +534,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 30.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -553,16 +557,19 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 80.0,
+            "slope_gradient_max_deg": 90.0
+          }
         },
         {
           "code": "slope_aspect_deg",
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 318
         },
         {
           "code": "slope_structure_code",
@@ -586,8 +593,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "坡体基岩裸露，地层为三叠系大冶组灰岩夹页岩，小里程侧岩层产状 151º∠63º，整体为逆向坡，发育两组节理裂隙，L1 产状44º∠39º，分布2-3 条/m，延伸长度约10-50cm",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -622,7 +634,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -739,15 +751,11 @@
       "label": "G209 K2397+685-K2397+760 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.6,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 8,
       "blocking_items": [
-        "slope_type",
-        "material_nature",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -874,16 +882,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土岩混合"
         },
         {
           "code": "slope_height_m",
@@ -928,8 +936,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 120
         },
         {
           "code": "slope_structure_code",
@@ -989,7 +997,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -1106,15 +1114,11 @@
       "label": "G209 K2398+300-K2398+439 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.6,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 8,
       "blocking_items": [
-        "slope_type",
-        "material_nature",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -1241,16 +1245,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土质"
         },
         {
           "code": "slope_height_m",
@@ -1295,16 +1299,16 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 108
         },
         {
           "code": "slope_structure_code",
           "label_zh": "斜坡结构",
           "group": "geometry",
           "requirement": "conditional_required",
-          "status": "available",
-          "value": "顺层坡"
+          "status": "missing",
+          "value": null
         },
         {
           "code": "river_relation",
@@ -1356,7 +1360,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -1473,15 +1477,12 @@
       "label": "G209 K2401+227-K2401+307 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.55,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 9,
       "blocking_items": [
         "slope_type",
-        "material_nature",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -1616,8 +1617,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -1662,16 +1663,16 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 335
         },
         {
           "code": "slope_structure_code",
           "label_zh": "斜坡结构",
           "group": "geometry",
           "requirement": "conditional_required",
-          "status": "available",
-          "value": "顺层坡"
+          "status": "missing",
+          "value": null
         },
         {
           "code": "river_relation",
@@ -1687,8 +1688,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "目前坡表大量基岩裸露，强降雨 期间易形成崩塌落石，局部存在危岩体",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -1723,7 +1729,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -1840,15 +1846,11 @@
       "label": "G209 K2402+458-K2402+500 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.6,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 8,
       "blocking_items": [
-        "slope_type",
-        "material_nature",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -1975,16 +1977,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -2029,8 +2031,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 70
         },
         {
           "code": "slope_structure_code",
@@ -2054,8 +2056,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "（2）崩塌体破坏特征 该处边坡为岩质边坡，大部分基岩裸露，为志留系纱帽群（S3sh）砂质页岩，坡表少量植被发 育，岩体节理裂隙发育，表层局部岩体破碎，易发生崩塌落石",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -2090,7 +2097,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -2207,15 +2214,11 @@
       "label": "G209 K2402+780-K2402+826 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.6,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 8,
       "blocking_items": [
-        "slope_type",
-        "material_nature",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -2342,16 +2345,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -2396,8 +2399,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 104
         },
         {
           "code": "slope_structure_code",
@@ -2421,8 +2424,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "茂密",
+            "has_deformation_sign": null,
+            "description": null,
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -2457,7 +2465,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -2574,15 +2582,12 @@
       "label": "G209 K2410+330-K2410+445 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.55,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 9,
       "blocking_items": [
         "slope_type",
-        "material_nature",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -2717,8 +2722,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -2763,16 +2768,16 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 115
         },
         {
           "code": "slope_structure_code",
           "label_zh": "斜坡结构",
           "group": "geometry",
           "requirement": "conditional_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "逆向坡"
         },
         {
           "code": "river_relation",
@@ -2788,8 +2793,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "崩塌部位无植被发育",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -2824,7 +2834,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -2941,15 +2951,12 @@
       "label": "G209 K2412+602-K2412+664 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.55,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 9,
       "blocking_items": [
         "slope_type",
-        "material_nature",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -3084,8 +3091,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -3130,8 +3137,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 115
         },
         {
           "code": "slope_structure_code",
@@ -3191,7 +3198,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -3308,15 +3315,12 @@
       "label": "G209 K2429+580-K2429+668 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.55,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 9,
       "blocking_items": [
         "slope_type",
-        "material_nature",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -3451,8 +3455,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -3497,8 +3501,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 265
         },
         {
           "code": "slope_structure_code",
@@ -3506,7 +3510,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "逆向坡"
+          "value": "斜向坡"
         },
         {
           "code": "river_relation",
@@ -3522,8 +3526,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "K2429+580-K2429+668 左侧危岩体 （1）基本情况 K2429+580-K2429+668 左侧危岩体区属于中低山地貌区，边坡长度约88m，最大高差约50m， 坡度约80-90°，大量基岩裸露，基岩岩性为三叠系（T2j）灰岩，呈层状，节理裂隙发育，岩体易沿 不利节理裂隙崩塌破坏，存在危岩体",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -3558,7 +3567,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -3675,15 +3684,12 @@
       "label": "G209 K2434+460-K2434+585 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.55,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 9,
       "blocking_items": [
         "slope_type",
-        "material_nature",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -3818,8 +3824,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -3864,8 +3870,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 255
         },
         {
           "code": "slope_structure_code",
@@ -3873,7 +3879,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "反倾坡"
+          "value": "逆向坡"
         },
         {
           "code": "river_relation",
@@ -3889,8 +3895,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "K2434+460-585 左侧危岩体 （1）基本情况 K2434+460~585 左侧危岩体区属于中低山地貌区，边坡长度约125m，高约40-60m，坡度约 80-90°，局部反倾坡，大量基岩裸露，基岩岩性为三叠系（T2j）灰岩，呈薄~中层状，节理裂隙发 育，整体为斜交坡，岩体易沿不利节理裂隙崩塌破坏，存在危岩体，该边坡约25m 高度范围内断 断续续发生崩塌落石",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -3925,7 +3936,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -4042,15 +4053,12 @@
       "label": "G209 K2435+310-K2435+430 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.55,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 9,
       "blocking_items": [
         "slope_type",
-        "material_nature",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -4185,8 +4193,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -4231,8 +4239,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 253
         },
         {
           "code": "slope_structure_code",
@@ -4240,7 +4248,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "斜交坡"
+          "value": "斜向坡"
         },
         {
           "code": "river_relation",
@@ -4256,8 +4264,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "K2435+310-K2435+430 左侧危岩体 （1）基本情况 K2435+310-K2435+430 左侧危岩体区属于中低山地貌区，边坡长度约120m，最大高差约40m， 坡度约80-90°，大量基岩裸露，基岩岩性为三叠系（T2j）灰岩，呈中厚层状，节理裂隙发育，整体 为斜交坡，岩体易沿不利节理裂隙崩塌破坏，存在危岩体",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -4292,7 +4305,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -4409,15 +4422,11 @@
       "label": "G209 K2435+820-K2435+900 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.6,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 8,
       "blocking_items": [
-        "slope_type",
-        "material_nature",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -4544,16 +4553,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -4598,8 +4607,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 161
         },
         {
           "code": "slope_structure_code",
@@ -4615,16 +4624,27 @@
           "label_zh": "临河关系",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "is_riverside": true,
+            "bank": null,
+            "channel_landform": null,
+            "description": "对于道路斜坡，从后缘截水沟、平台排水沟、 急流槽汇集到坡脚排水沟，排水沟沿公路排水沟排至冲沟低洼处或河道中",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "vegetation_condition",
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "K2435+820-K2435+900 左侧危岩体 （1）基本情况 K2435+820-K2435+900 左侧危岩体区属于中低山地貌区，边坡长度约80m，最大高差约50m， 坡度约80-90°，大量基岩裸露，基岩岩性为三叠系（T2j）灰岩，呈中厚层状，节理裂隙发育，大 里程侧为顺层外倾边坡，岩体易沿不利节理裂隙崩塌破坏，存在危岩体",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -4659,7 +4679,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -4776,15 +4796,13 @@
       "label": "G318 K1440+378-K1440+454 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.25,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 15,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
-        "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
@@ -4900,8 +4918,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -4912,8 +4930,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 10.0,
+            "slope_height_max_m": 25.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -5118,19 +5139,17 @@
       "label": "G318 K1443+425-K1443+445 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.2,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 16,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "stratum",
         "structural_plane",
         "deformation_observation",
         "groundwater",
@@ -5243,8 +5262,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土岩混合"
         },
         {
           "code": "slope_height_m",
@@ -5292,7 +5311,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "顺层坡"
+          "value": "逆向坡"
         },
         {
           "code": "river_relation",
@@ -5308,8 +5327,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "茂密",
+            "has_deformation_sign": null,
+            "description": "当雨季来临，大气降水较多时，由于植被发育，地 表降雨大量入渗坡体地层中，使得坡体地层含水量急剧增大，土层容重增大，下滑力增大，抗剪强 度迅速降低，直接降低了滑体的稳定性，从而诱发滑坡",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -5335,7 +5359,7 @@
           "domain": "geology",
           "relation": "HAS_STRATUM",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -5461,26 +5485,21 @@
       "label": "G318 K1453+105-K1453+220 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.35,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 13,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
-        "slope_height_m",
         "slope_gradient_deg",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "stratum",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -5586,8 +5605,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -5598,8 +5617,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 40.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -5626,8 +5648,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 107
         },
         {
           "code": "slope_structure_code",
@@ -5651,8 +5673,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "坡体大量基岩裸露，为二叠系上统（P2） 灰岩，可见局部夹泥质结构面，产状为315°∠10°，属小倾角逆向坡，薄层-中厚层状节理裂隙发育， 发育3 组节理：L1，162°∠79°，2-3 条/m，延伸长度10-20cm",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -5687,7 +5714,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -5774,7 +5801,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -5804,26 +5831,20 @@
       "label": "G318 K1455+580-K1455+610 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.4,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 12,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "stratum",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -5929,8 +5950,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -5941,8 +5962,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 20.0,
+            "slope_height_max_m": 30.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -5961,16 +5985,19 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 30.0,
+            "slope_gradient_max_deg": 40.0
+          }
         },
         {
           "code": "slope_aspect_deg",
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 252
         },
         {
           "code": "slope_structure_code",
@@ -5978,7 +6005,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "顺层坡"
+          "value": "顺向坡"
         },
         {
           "code": "river_relation",
@@ -6030,7 +6057,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -6117,7 +6144,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -6147,26 +6174,20 @@
       "label": "G318 K1456+455-K1456+585 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.4,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 12,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
         "slope_gradient_deg",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "stratum",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -6264,16 +6285,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -6284,8 +6305,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 65.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -6312,8 +6336,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 262
         },
         {
           "code": "slope_structure_code",
@@ -6321,7 +6345,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "顺层坡"
+          "value": "顺向坡"
         },
         {
           "code": "river_relation",
@@ -6337,8 +6361,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "坡表基岩裸露，为二叠系上统（P2）灰岩，中至厚层，局部夹薄层，节理裂隙发育，局部见溶蚀填 充物，坡表悬浮松散危岩易发生崩塌灾害",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -6373,7 +6402,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -6460,7 +6489,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -6490,20 +6519,14 @@
       "label": "G318 K1457+219-K1457+295 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.4,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 12,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "stratum",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -6607,16 +6630,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土质"
         },
         {
           "code": "slope_height_m",
@@ -6627,8 +6650,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 20.0,
+            "slope_height_max_m": 30.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -6647,16 +6673,19 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 50.0,
+            "slope_gradient_max_deg": 60.0
+          }
         },
         {
           "code": "slope_aspect_deg",
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 219
         },
         {
           "code": "slope_structure_code",
@@ -6664,7 +6693,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "顺层坡"
+          "value": "逆向坡"
         },
         {
           "code": "river_relation",
@@ -6672,8 +6701,14 @@
           "label_zh": "临河关系",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "is_riverside": true,
+            "bank": null,
+            "channel_landform": null,
+            "description": "开挖 面可见堆积体中灰岩块石最大尺寸0.8m×1.2m×1.6m，根据道路开挖揭露地层，大小里程两侧基 岩出露，临河侧岸坡基岩分布，推测覆盖层厚度4~11m",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "vegetation_condition",
@@ -6716,7 +6751,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -6833,25 +6868,20 @@
       "label": "G318 K1481+860-K1481+967 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.4,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 12,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -6949,16 +6979,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -6997,8 +7027,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 99
         },
         {
           "code": "slope_structure_code",
@@ -7006,7 +7036,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "顺层坡"
+          "value": "顺向坡"
         },
         {
           "code": "river_relation",
@@ -7022,8 +7052,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "稀疏",
+            "has_deformation_sign": null,
+            "description": "K1481+860-K1481+967 左侧危岩体 5.6.1 危岩变形特征及机理 （1）基本情况 该处危岩体边坡基岩大量裸露，发育少量植被",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -7058,7 +7093,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -7145,7 +7180,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -7175,25 +7210,21 @@
       "label": "G318 K1482+237-K1482+283 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.35,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 13,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -7299,8 +7330,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -7339,8 +7370,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 135
         },
         {
           "code": "slope_structure_code",
@@ -7348,7 +7379,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "顺层坡"
+          "value": "顺向坡"
         },
         {
           "code": "river_relation",
@@ -7364,8 +7395,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "K1482+237-K1482+283 左侧危岩体 5.7.1 危岩变形特征及机理 （1）基本情况 危岩体段落长度约46m，高度约20~25m，坡体倾角65°~80°，坡体上沿及坡脚植被较发育",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -7400,7 +7436,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -7487,7 +7523,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -7517,14 +7553,13 @@
       "label": "G318 K1494+700-K1494+780 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.2,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 16,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
@@ -7641,8 +7676,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土岩混合"
         },
         {
           "code": "slope_height_m",
@@ -7690,7 +7725,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "顺层坡"
+          "value": "逆向坡"
         },
         {
           "code": "river_relation",
@@ -7698,8 +7733,14 @@
           "label_zh": "临河关系",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "is_riverside": true,
+            "bank": null,
+            "channel_landform": null,
+            "description": "原坡体堆积体方量约为5.18×104m3（根据左右基岩出露情况，道路河道岸坡地层分布情况及早 期负地形堆填厚度确定），该处发生滑坡沿道路分布长度约80m，前后缘高差约55m，中部最大竖 向厚度约8-10m，变形坡面面积约4480m2，滑塌变形体方量约3 万方，属于小型滑坡，目前保护 道路通行清理上部变形体方量约1.5 万方",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "vegetation_condition",
@@ -7859,25 +7900,20 @@
       "label": "G318 K1496+180-K1496+325 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.4,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 12,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
-        "slope_gradient_deg",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -7983,8 +8019,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -8015,16 +8051,19 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 68.0,
+            "slope_gradient_max_deg": 80.0
+          }
         },
         {
           "code": "slope_aspect_deg",
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 120
         },
         {
           "code": "slope_structure_code",
@@ -8032,7 +8071,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "顺层坡"
+          "value": "顺向坡"
         },
         {
           "code": "river_relation",
@@ -8084,7 +8123,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -8171,7 +8210,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -8201,25 +8240,21 @@
       "label": "G318 K1496+736-K1496+912 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.35,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 13,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -8325,8 +8360,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -8365,8 +8400,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 120
         },
         {
           "code": "slope_structure_code",
@@ -8374,7 +8409,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "顺层坡"
+          "value": "逆向坡"
         },
         {
           "code": "river_relation",
@@ -8426,7 +8461,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -8513,7 +8548,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -8543,25 +8578,18 @@
       "label": "G318 K1498+340-K1498+421 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.5,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 10,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -8659,16 +8687,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堤"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -8679,8 +8707,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 20.0,
+            "slope_height_max_m": 30.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -8699,16 +8730,19 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 50.0,
+            "slope_gradient_max_deg": 60.0
+          }
         },
         {
           "code": "slope_aspect_deg",
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 315
         },
         {
           "code": "slope_structure_code",
@@ -8716,7 +8750,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "顺层坡"
+          "value": "顺向坡"
         },
         {
           "code": "river_relation",
@@ -8768,7 +8802,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -8855,7 +8889,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -8885,19 +8919,16 @@
       "label": "G318 K1506+670-K1506+700 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.3,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 14,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
-        "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -9009,8 +9040,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土岩混合"
         },
         {
           "code": "slope_height_m",
@@ -9049,8 +9080,8 @@
           "label_zh": "坡向",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": 244
         },
         {
           "code": "slope_structure_code",
@@ -9058,7 +9089,7 @@
           "group": "geometry",
           "requirement": "conditional_required",
           "status": "available",
-          "value": "顺层坡"
+          "value": "顺向坡"
         },
         {
           "code": "river_relation",
@@ -9074,8 +9105,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "茂密",
+            "has_deformation_sign": null,
+            "description": "当雨季来临，大气降水较多时，由于植被发育，地 32",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -9110,7 +9146,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -9158,7 +9194,7 @@
           "domain": "protection",
           "relation": "HAS_PROTECTION_DESIGN",
           "requirement": "conditional_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -9227,15 +9263,12 @@
       "label": "G344 K1022+605-K1022+663 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.3,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 14,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
@@ -9343,16 +9376,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -9363,8 +9396,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 45.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -9399,8 +9435,8 @@
           "label_zh": "斜坡结构",
           "group": "geometry",
           "requirement": "conditional_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "顺向坡"
         },
         {
           "code": "river_relation",
@@ -9500,7 +9536,7 @@
           "domain": "protection",
           "relation": "HAS_PROTECTION_DESIGN",
           "requirement": "conditional_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -9569,19 +9605,15 @@
       "label": "G347 K1124+560-K1125+330 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.35,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 13,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -9693,8 +9725,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -9705,8 +9737,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 40.0,
+            "slope_height_max_m": 200.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -9725,8 +9760,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 30.0,
+            "slope_gradient_max_deg": 30.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -9758,8 +9796,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": "该段左侧 山体地形上陡下缓，植被尤为发育，植被覆盖率约达85%，由于左侧山体相对较缓，且茂密的坡 面植被在该处形成了一道天然的屏障，因此左侧山体未出现崩塌落石地质灾害",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -9794,7 +9837,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -9911,19 +9954,16 @@
       "label": "G347 K1361+560-K1361+710 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.05,
+      "risk_data_completeness": 0.2,
       "risk_readiness": "not_ready",
-      "blocking_count": 19,
+      "blocking_count": 16,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "lithology",
         "stratum",
         "structural_plane",
         "deformation_observation",
@@ -10029,16 +10069,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土质"
         },
         {
           "code": "slope_height_m",
@@ -10102,8 +10142,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "茂密",
+            "has_deformation_sign": null,
+            "description": "K1361+560~K1361+710（K072+290~K072+440）段崩塌 （1）工点概况 该段边坡位于G347 里程K1361+560~K1361+710 右侧，该段路基以挖方的形式通过，在公路 内侧形成较陡边坡，产生新的裸露基岩临空面，坡型为直线型，属构造剥中山地貌区，坡度介于 45～60°，坡体植被发育，外侧为坪阡水库",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -10120,7 +10165,7 @@
           "domain": "geology",
           "relation": "HAS_LITHOLOGY",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -10255,20 +10300,15 @@
       "label": "G347 K1362+280-K1363+180 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.35,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 13,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "stratum",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -10372,16 +10412,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土质"
         },
         {
           "code": "slope_height_m",
@@ -10392,8 +10432,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 74.0,
+            "slope_height_max_m": 74.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -10412,8 +10455,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 40.0,
+            "slope_gradient_max_deg": 55.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -10445,8 +10491,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "茂密",
+            "has_deformation_sign": null,
+            "description": "K1362+280~K1363+180（K070+820~K071+720）段崩塌 （1）工点概况 该段边坡位于G347 里程K1362+280~K1363+180 右侧，该段路基以挖方的形式通过，在公路内侧 形成较陡边坡，产生新的裸露基岩临空面，坡型为直线型，属构造剥中山地貌区，路基至边坡开挖 坡口线处坡度介于80～90°，坡口线外为原始坡面，坡度40~55°，坡面植被发育",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -10481,7 +10532,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -10598,21 +10649,15 @@
       "label": "G347 K1365+300-K1365+400 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.05,
+      "risk_data_completeness": 0.35,
       "risk_readiness": "not_ready",
-      "blocking_count": 19,
+      "blocking_count": 13,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "lithology",
         "stratum",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -10716,16 +10761,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土质"
         },
         {
           "code": "slope_height_m",
@@ -10736,8 +10781,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 8.0,
+            "slope_height_max_m": 8.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -10756,8 +10804,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 35.0,
+            "slope_gradient_max_deg": 45.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -10789,8 +10840,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "茂密",
+            "has_deformation_sign": null,
+            "description": "K1365+300~K1365+400（K068+600~K068+700）段崩塌 （1）工点概况 该段边坡位于G347 里程K1365+300~K1365+400 右侧，该段路基以挖方的形式通过，在公路 内侧形成较陡边坡，产生新的裸露基岩临空面，坡型为直线型，属构造剥中山地貌区，路基至边坡 开挖坡口线处坡度介于60～70°，坡口线外为原始坡面，坡度35~45°，坡面植被发育",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -10807,7 +10863,7 @@
           "domain": "geology",
           "relation": "HAS_LITHOLOGY",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -10825,7 +10881,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -10942,16 +10998,12 @@
       "label": "G347 K1367+145-K1367+300 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.3,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 14,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "stratum",
@@ -11059,16 +11111,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土质"
         },
         {
           "code": "slope_height_m",
@@ -11079,8 +11131,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 8.0,
+            "slope_height_max_m": 8.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -11099,8 +11154,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 40.0,
+            "slope_gradient_max_deg": 55.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -11132,8 +11190,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "茂密",
+            "has_deformation_sign": null,
+            "description": "K1367+145~K1367+300（K066+700~K066+855）段崩塌 （1）工点概况 该段边坡位于G347 里程K1367+145~K1367+300 右侧，该段路基以挖方的形式通过，在公路 内侧形成较陡边坡，产生新的裸露基岩临空面，坡型为直线型，属构造剥中山地貌区，路基至边坡 开挖坡口线处坡度介于70～80°，坡口线外为原始坡面，坡度40~55°，坡面植被发育",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -11285,14 +11348,12 @@
       "label": "G347 K1367+585-K1367+640 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.2,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 16,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
@@ -11402,16 +11463,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堤"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土质"
         },
         {
           "code": "slope_height_m",
@@ -11628,20 +11689,14 @@
       "label": "G347 K1367+630-K1367+700 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.4,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 12,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "stratum",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -11745,16 +11800,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土质"
         },
         {
           "code": "slope_height_m",
@@ -11765,8 +11820,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 39.0,
+            "slope_height_max_m": 39.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -11785,8 +11843,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 50.0,
+            "slope_gradient_max_deg": 50.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -11818,8 +11879,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "无",
+            "has_deformation_sign": null,
+            "description": null,
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -11845,7 +11911,7 @@
           "domain": "geology",
           "relation": "HAS_STRATUM",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -11854,7 +11920,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -11902,7 +11968,7 @@
           "domain": "protection",
           "relation": "HAS_PROTECTION_DESIGN",
           "requirement": "conditional_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -11971,18 +12037,15 @@
       "label": "G347 K1368+485-K1368+750 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.3,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 14,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
+        "stratum",
         "structural_plane",
         "deformation_observation",
         "groundwater",
@@ -12087,16 +12150,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土质"
         },
         {
           "code": "slope_height_m",
@@ -12107,8 +12170,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 8.0,
+            "slope_height_max_m": 8.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -12127,8 +12193,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 35.0,
+            "slope_gradient_max_deg": 45.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -12160,8 +12229,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "茂密",
+            "has_deformation_sign": null,
+            "description": "K1368+485~K1368+750（K065+250~K065+515）段崩塌 （1）工点概况 该段边坡位于G347 里程K1368+485~K1368+750 右侧，该段路基以挖方的形式通过，在公路 内侧形成较陡边坡，产生新的裸露基岩临空面，坡型为直线型，属构造剥中山地貌区，路基至边坡 开挖坡口线处坡度介于60～70°，坡口线外为原始坡面，坡度35~45°，坡面植被发育",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -12187,7 +12261,7 @@
           "domain": "geology",
           "relation": "HAS_STRATUM",
           "requirement": "risk_required",
-          "status": "available",
+          "status": "missing",
           "value": null
         },
         {
@@ -12313,16 +12387,13 @@
       "label": "G347 K1373+480-K1373+690 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.3,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 14,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "structural_plane",
@@ -12437,8 +12508,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土岩混合"
         },
         {
           "code": "slope_height_m",
@@ -12449,8 +12520,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 40.0,
+            "slope_height_max_m": 70.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -12469,8 +12543,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 40.0,
+            "slope_gradient_max_deg": 55.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -12502,8 +12579,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "茂密",
+            "has_deformation_sign": null,
+            "description": "该段路基以挖方的形式通过此山脊，在公路内侧形 成较陡边坡，产生新的裸露基岩临空面，属构造剥中山地貌区，路基至边坡开挖坡口线处坡度介于 50～65°，坡口线外为原始坡面，坡度40~55°，坡面植被发育",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -12586,7 +12668,7 @@
           "domain": "protection",
           "relation": "HAS_PROTECTION_DESIGN",
           "requirement": "conditional_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -12655,16 +12737,12 @@
       "label": "G351 K1570+950-K1571+020 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.3,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 14,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "stratum",
@@ -12772,16 +12850,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土岩混合"
         },
         {
           "code": "slope_height_m",
@@ -12792,8 +12870,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 32.0,
+            "slope_height_max_m": 32.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -12812,8 +12893,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 80.0,
+            "slope_gradient_max_deg": 80.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -12998,19 +13082,14 @@
       "label": "G351 K1573+520-K1573+560 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.4,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 12,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -13114,16 +13193,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土岩混合"
         },
         {
           "code": "slope_height_m",
@@ -13134,8 +13213,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 30.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -13154,8 +13236,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 25.0,
+            "slope_gradient_max_deg": 25.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -13187,8 +13272,13 @@
           "label_zh": "植被情况",
           "group": "environment",
           "requirement": "optional",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "density": "茂密",
+            "has_deformation_sign": null,
+            "description": "滑坡周界清晰，小里程侧裸露基岩，并有地下水渗出，水量较大， 大里程侧有侧向临空条件，植被发育",
+            "temporal_scope": "historical_document_baseline"
+          }
         },
         {
           "code": "overall_slope_deformation_severity",
@@ -13223,7 +13313,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -13340,9 +13430,9 @@
       "label": "G351 K1574+500-K1574+600 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.05,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 19,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
@@ -13352,6 +13442,7 @@
         "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
+        "lithology",
         "stratum",
         "structural_plane",
         "deformation_observation",
@@ -13548,7 +13639,7 @@
           "domain": "geology",
           "relation": "HAS_LITHOLOGY",
           "requirement": "risk_required",
-          "status": "available",
+          "status": "missing",
           "value": null
         },
         {
@@ -13683,9 +13774,9 @@
       "label": "G351 K1574+800-K1574+860 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.05,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 19,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
@@ -13695,6 +13786,7 @@
         "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
+        "lithology",
         "stratum",
         "structural_plane",
         "deformation_observation",
@@ -13891,7 +13983,7 @@
           "domain": "geology",
           "relation": "HAS_LITHOLOGY",
           "requirement": "risk_required",
-          "status": "available",
+          "status": "missing",
           "value": null
         },
         {
@@ -14026,18 +14118,16 @@
       "label": "G351 K1576+120-K1576+180 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.2,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 16,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
         "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
+        "lithology",
         "stratum",
         "structural_plane",
         "deformation_observation",
@@ -14143,8 +14233,8 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
@@ -14163,8 +14253,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 26.0,
+            "slope_height_max_m": 26.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -14183,8 +14276,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 58.6,
+            "slope_gradient_max_deg": 58.6
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -14234,7 +14330,7 @@
           "domain": "geology",
           "relation": "HAS_LITHOLOGY",
           "requirement": "risk_required",
-          "status": "available",
+          "status": "missing",
           "value": null
         },
         {
@@ -14369,14 +14465,12 @@
       "label": "G351 K1576+410-K1576+470 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.2,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 16,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
@@ -14486,16 +14580,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土岩混合"
         },
         {
           "code": "slope_height_m",
@@ -14712,16 +14806,12 @@
       "label": "G351 K1576+550-K1576+600 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.3,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 14,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "stratum",
@@ -14829,16 +14919,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -14849,8 +14939,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 35.0,
+            "slope_height_max_m": 35.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -14869,8 +14962,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 66.0,
+            "slope_gradient_max_deg": 66.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -15063,10 +15159,10 @@
         "end_coordinate",
         "slope_type",
         "material_nature",
-        "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
+        "lithology",
         "stratum",
         "structural_plane",
         "deformation_observation",
@@ -15192,8 +15288,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 46.0,
+            "slope_height_max_m": 46.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -15263,7 +15362,7 @@
           "domain": "geology",
           "relation": "HAS_LITHOLOGY",
           "requirement": "risk_required",
-          "status": "available",
+          "status": "missing",
           "value": null
         },
         {
@@ -15398,14 +15497,13 @@
       "label": "G351 K1577+140-K1577+200 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.15,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 17,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
@@ -15523,8 +15621,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -15741,18 +15839,16 @@
       "label": "G351 K1577+800-K1577+860 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.2,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 16,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
         "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
+        "lithology",
         "stratum",
         "structural_plane",
         "deformation_observation",
@@ -15858,8 +15954,8 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
@@ -15878,8 +15974,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 30.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -15898,8 +15997,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 80.0,
+            "slope_gradient_max_deg": 80.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -15949,7 +16051,7 @@
           "domain": "geology",
           "relation": "HAS_LITHOLOGY",
           "requirement": "risk_required",
-          "status": "available",
+          "status": "missing",
           "value": null
         },
         {
@@ -16084,14 +16186,13 @@
       "label": "G351 K1578+130-K1578+250 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.2,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 16,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
@@ -16208,8 +16309,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -16426,18 +16527,17 @@
       "label": "G351 K1578+460-K1578+550 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.2,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 16,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
         "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
+        "lithology",
+        "stratum",
         "structural_plane",
         "deformation_observation",
         "groundwater",
@@ -16542,8 +16642,8 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
@@ -16562,8 +16662,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 25.0,
+            "slope_height_max_m": 25.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -16582,8 +16685,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 50.0,
+            "slope_gradient_max_deg": 50.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -16633,7 +16739,7 @@
           "domain": "geology",
           "relation": "HAS_LITHOLOGY",
           "requirement": "risk_required",
-          "status": "available",
+          "status": "missing",
           "value": null
         },
         {
@@ -16642,7 +16748,7 @@
           "domain": "geology",
           "relation": "HAS_STRATUM",
           "requirement": "risk_required",
-          "status": "available",
+          "status": "missing",
           "value": null
         },
         {
@@ -16768,14 +16874,13 @@
       "label": "G351 K1578+920-K1578+960 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.2,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 16,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
@@ -16892,8 +16997,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -17110,19 +17215,15 @@
       "label": "G351 K1579+450-K1579+550 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.35,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 13,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
         "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -17226,16 +17327,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -17266,8 +17367,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 70.0,
+            "slope_gradient_max_deg": 70.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -17335,7 +17439,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -17452,18 +17556,16 @@
       "label": "G351 K1580+270-K1580+320 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.25,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 15,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
+        "stratum",
         "structural_plane",
         "deformation_observation",
         "groundwater",
@@ -17576,8 +17678,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -17588,8 +17690,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 20.0,
+            "slope_height_max_m": 20.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -17608,8 +17713,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 80.0,
+            "slope_gradient_max_deg": 80.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -17668,7 +17776,7 @@
           "domain": "geology",
           "relation": "HAS_STRATUM",
           "requirement": "risk_required",
-          "status": "available",
+          "status": "missing",
           "value": null
         },
         {
@@ -17801,11 +17909,11 @@
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
+        "stratum",
         "structural_plane",
         "deformation_observation",
         "groundwater",
@@ -17918,8 +18026,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -18010,7 +18118,7 @@
           "domain": "geology",
           "relation": "HAS_STRATUM",
           "requirement": "risk_required",
-          "status": "available",
+          "status": "missing",
           "value": null
         },
         {
@@ -18136,16 +18244,13 @@
       "label": "G351 K1581+600-K1581+800 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.25,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 15,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "stratum",
@@ -18261,8 +18366,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土质"
         },
         {
           "code": "slope_height_m",
@@ -18273,8 +18378,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 30.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -18293,8 +18401,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 60.0,
+            "slope_gradient_max_deg": 60.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -18823,18 +18934,17 @@
       "label": "G351 K1587+700-K1587+800 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.2,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 16,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
+        "stratum",
         "structural_plane",
         "deformation_observation",
         "groundwater",
@@ -18947,8 +19057,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土质"
         },
         {
           "code": "slope_height_m",
@@ -18979,8 +19089,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 36.0,
+            "slope_gradient_max_deg": 36.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -19039,7 +19152,7 @@
           "domain": "geology",
           "relation": "HAS_STRATUM",
           "requirement": "risk_required",
-          "status": "available",
+          "status": "missing",
           "value": null
         },
         {
@@ -19165,14 +19278,13 @@
       "label": "G351 K1593+600-K1593+700 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.15,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 17,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
@@ -19290,8 +19402,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -19508,16 +19620,14 @@
       "label": "G351 K1613+100-K1613+400 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.2,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 16,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "stratum",
@@ -19633,8 +19743,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土岩混合"
         },
         {
           "code": "slope_height_m",
@@ -19665,8 +19775,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 38.0,
+            "slope_gradient_max_deg": 38.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -19851,20 +19964,16 @@
       "label": "G351 K1617+780-K1617+820 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.3,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 14,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
-        "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "stratum",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -19976,8 +20085,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土质"
         },
         {
           "code": "slope_height_m",
@@ -19988,8 +20097,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 30.0,
+            "slope_height_max_m": 30.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -20008,8 +20120,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 50.0,
+            "slope_gradient_max_deg": 50.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -20077,7 +20192,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -20194,16 +20309,13 @@
       "label": "G351 K1619+300-K1619+350 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.15,
+      "risk_data_completeness": 0.3,
       "risk_readiness": "not_ready",
-      "blocking_count": 17,
+      "blocking_count": 14,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
         "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "structural_plane",
@@ -20310,16 +20422,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -20350,8 +20462,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 53.0,
+            "slope_gradient_max_deg": 53.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -20536,20 +20651,16 @@
       "label": "G351 K1624+890-K1624+940 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.3,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 14,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
         "slope_height_m",
-        "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
         "stratum",
-        "structural_plane",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -20653,16 +20764,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "土岩混合"
         },
         {
           "code": "slope_height_m",
@@ -20693,8 +20804,11 @@
             "slope_gradient_min_deg",
             "slope_gradient_max_deg"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_gradient_min_deg": 65.0,
+            "slope_gradient_max_deg": 65.0
+          }
         },
         {
           "code": "slope_aspect_deg",
@@ -20762,7 +20876,7 @@
           "domain": "geology",
           "relation": "DEVELOPS_STRUCTURAL_PLANE",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -20879,15 +20993,12 @@
       "label": "G351 K1625+600-K1625+700 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.25,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 15,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
-        "slope_type",
-        "material_nature",
-        "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
         "overall_slope_deformation_severity",
@@ -20996,16 +21107,16 @@
           "label_zh": "路堤/路堑",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "路堑"
         },
         {
           "code": "material_nature",
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",
@@ -21016,8 +21127,11 @@
             "slope_height_min_m",
             "slope_height_max_m"
           ],
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": {
+            "slope_height_min_m": 26.0,
+            "slope_height_max_m": 28.0
+          }
         },
         {
           "code": "slope_length_m",
@@ -21153,7 +21267,7 @@
           "domain": "protection",
           "relation": "HAS_PROTECTION_DESIGN",
           "requirement": "conditional_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -21222,14 +21336,13 @@
       "label": "G351 K1625+740-K1625+800 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.1,
+      "risk_data_completeness": 0.15,
       "risk_readiness": "not_ready",
-      "blocking_count": 18,
+      "blocking_count": 17,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
         "slope_type",
-        "material_nature",
         "slope_height_m",
         "slope_gradient_deg",
         "slope_aspect_deg",
@@ -21347,8 +21460,8 @@
           "label_zh": "土质/岩质/土岩混合",
           "group": "geometry",
           "requirement": "risk_required",
-          "status": "missing",
-          "value": null
+          "status": "available",
+          "value": "岩质"
         },
         {
           "code": "slope_height_m",

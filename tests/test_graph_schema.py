@@ -47,7 +47,9 @@ class GraphSchemaTests(unittest.TestCase):
         payload = interface_payload()
         reserved = [row for row in payload["interfaces"] if row["status"] != "implemented"]
         self.assertTrue(any(row["path"] == "/api/monitoring/observations" for row in reserved))
-        self.assertTrue(any(row["path"] == "/api/risk/assess" for row in reserved))
+        implemented = [row for row in payload["interfaces"] if row["status"] == "implemented"]
+        self.assertTrue(any(row["path"] == "/api/risk/assess" for row in implemented))
+        self.assertTrue(any(row["path"] == "/api/risk/screening" for row in implemented))
 
     def test_schema_exposes_missing_semantics(self) -> None:
         payload = schema_payload()

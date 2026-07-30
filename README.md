@@ -83,10 +83,18 @@ http://127.0.0.1:8766/web/pdf-ingestion.html
 如果希望启动前先跑一次解析流水线：
 
 ```powershell
-.\scripts\start_demo.ps1 -RunPipeline -OcrPages 0
+.\scripts\start_demo.ps1 -RunPipeline
 ```
 
-其中 `-OcrPages 0` 表示只解析 PDF 和生成图谱，不跑 OCR 推理；需要试 OCR 时可以改成 `-OcrPages 1`。
+`-RunPipeline` 默认只做基础解析和图谱更新，不跑 OCR。需要OCR时显式指定页数，例如：
+
+```powershell
+.\scripts\start_demo.ps1 -RunPipeline -OcrPages 10
+```
+
+OCR初始化或首次下载模型时可能显示多个进度条，这是同一次解析任务的不同模型阶段，不表示服务启动了多次。服务自身有端口单实例检查，重复执行启动命令只会返回现有地址。
+
+服务运行期间会自动监听 `data/rawPDF`。不要在前端解析任务尚未结束时同时运行 `scripts/run_pipeline.py`；程序已增加跨进程任务锁，检测到并发解析时会直接提示已有任务及其进程号，避免两个任务同时写入结果文件。
 
 也可以手动启动：
 

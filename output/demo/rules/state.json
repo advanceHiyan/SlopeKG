@@ -1,0 +1,127 @@
+{
+  "updated_at": "2026-07-26T12:36:34",
+  "status": "completed",
+  "publication_status": "candidate_not_approved",
+  "execution_enabled": false,
+  "stats": {
+    "documents": 15,
+    "selected_pages": 118,
+    "native_pages": 85,
+    "ocr_pages": 33,
+    "clauses": 127,
+    "formulas": 2,
+    "threshold_tables": 22,
+    "rules": 164,
+    "risk_engine_candidates": 51,
+    "table_row_rules": 118,
+    "approved_rules": 0,
+    "evidence_validated_rules": 155,
+    "partial_evidence_rules": 9
+  },
+  "llm": {
+    "provider": "deepseek",
+    "recommended_model": "deepseek-v4-flash",
+    "enabled": true,
+    "key_available": true,
+    "key_source": "project_secret_file",
+    "max_output_tokens": 393216,
+    "note": "大模型是可选深度解析层；基础解析可独立运行，只有通过原文证据校验的深度候选才会进入深度图谱。",
+    "model": "deepseek-v4-flash",
+    "runs": [
+      {
+        "document_id": "rule_doc_a5d372b6d9fa",
+        "model": "deepseek-v4-flash",
+        "cache_hit": true,
+        "usage": {
+          "prompt_tokens": 6955,
+          "completion_tokens": 14589,
+          "total_tokens": 21544,
+          "prompt_tokens_details": {
+            "cached_tokens": 6912
+          },
+          "prompt_cache_hit_tokens": 6912,
+          "prompt_cache_miss_tokens": 43
+        },
+        "accepted_rules": 13,
+        "accepted_formulas": 0,
+        "accepted_tables": 16,
+        "rejected": 8
+      },
+      {
+        "document_id": "rule_doc_04c64b22d9da",
+        "model": "deepseek-v4-flash",
+        "cache_hit": true,
+        "usage": {
+          "prompt_tokens": 5457,
+          "completion_tokens": 8810,
+          "total_tokens": 14267,
+          "prompt_tokens_details": {
+            "cached_tokens": 5376
+          },
+          "prompt_cache_hit_tokens": 5376,
+          "prompt_cache_miss_tokens": 81
+        },
+        "accepted_rules": 29,
+        "accepted_formulas": 0,
+        "accepted_tables": 4,
+        "rejected": 3
+      },
+      {
+        "document_id": "rule_doc_54ed0576125f",
+        "model": "deepseek-v4-flash",
+        "cache_hit": true,
+        "usage": {
+          "prompt_tokens": 3774,
+          "completion_tokens": 4013,
+          "total_tokens": 7787,
+          "prompt_tokens_details": {
+            "cached_tokens": 3712
+          },
+          "prompt_cache_hit_tokens": 3712,
+          "prompt_cache_miss_tokens": 62
+        },
+        "accepted_rules": 12,
+        "accepted_formulas": 1,
+        "accepted_tables": 2,
+        "rejected": 1
+      },
+      {
+        "document_id": "rule_doc_8099789919ef",
+        "model": "deepseek-v4-flash",
+        "cache_hit": true,
+        "usage": {
+          "prompt_tokens": 1824,
+          "completion_tokens": 2272,
+          "total_tokens": 4096,
+          "prompt_tokens_details": {
+            "cached_tokens": 1792
+          },
+          "prompt_cache_hit_tokens": 1792,
+          "prompt_cache_miss_tokens": 32
+        },
+        "accepted_rules": 2,
+        "accepted_formulas": 0,
+        "accepted_tables": 0,
+        "rejected": 4
+      }
+    ]
+  },
+  "quality": {
+    "source_catalog_coverage": 1.0,
+    "rule_evidence_coverage": 0.9451,
+    "formula_evidence_coverage": 1.0,
+    "partial_evidence_rule_count": 9,
+    "approved_rule_count": 0,
+    "executable_rule_count": 0,
+    "risk_engine_candidate_count": 51,
+    "limitations": [
+      "候选规则尚未经过交通部研究院审核，不参与正式风险计算。",
+      "公式必须逐符号核验，当前仅作为公式候选展示。",
+      "规范版本有效性和引用关系仍需建立审核记录。"
+    ]
+  },
+  "outputs": {
+    "library": "output\\demo\\rules\\rule_library.json",
+    "rules_dir": "output\\demo\\rules"
+  }
+}

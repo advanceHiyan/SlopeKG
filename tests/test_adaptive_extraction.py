@@ -4,11 +4,11 @@ import unittest
 
 from scripts.extract_with_llm import build_quality_summary, candidate_is_schema_valid
 from slopekg.config import PATHS
-from slopekg.extractors import extract_domain_candidates, normalize_reference_station
+from slopekg.extractors import extract_domain_candidates, extract_section_values, normalize_reference_station
 from slopekg.llm import deepseek_key_info
 from slopekg.ocr import normalize_paddle_result
 from slopekg.parsers import classify_page
-from slopekg.semantic import validate_candidate
+from slopekg.semantic import stability_support_page, validate_candidate
 from slopekg.storage import read_json, read_jsonl
 
 
@@ -145,6 +145,51 @@ class LlmCandidateValidationTests(unittest.TestCase):
         self.assertTrue(validation["accepted"])
         self.assertEqual(cleaned["lithology_terms"], [])
         self.assertEqual(cleaned["hazard_body_type"], "危岩体")
+
+    def test_section_values_extract_static_risk_fields_with_history_boundary(self):
+        values = extract_section_values(
+            "该段为开挖岩质边坡，边坡长度约75m，高约30m，开挖边坡坡度约68-80°。"
+            "坡面产状为120º∠85º，L1产状160º∠70º，坡面绿植发育。"
+            "大里程段20m范围2年前发生过垮塌，地下水较发育。"
+        )
+
+        self.assertEqual(values["slope_type"], "路堑")
+        self.assertEqual(values["material_nature"], "岩质")
+        self.assertEqual(values["slope_height_max_m"], 30)
+        self.assertEqual(values["slope_gradient_max_deg"], 80)
+        self.assertEqual(values["slope_aspect_deg"], 120)
+        self.assertEqual(values["vegetation_condition"]["density"], "茂密")
+        self.assertTrue(values["structural_planes"])
+        self.assertFalse(values["deformation_observations"][0]["current_status_known"])
+
+    def test_stability_support_requires_condition_value_and_status_to_cooccur(self):
+        pages = {
+            1: "现状工况稳定系数为1.20，属于欠稳定状态。",
+            2: "暴雨工况用于计算，另表数值为1.15。",
+        }
+        self.assertIsNone(
+            stability_support_page(
+                {
+                    "condition": "暴雨工况",
+                    "safety_factor": 1.15,
+                    "required_factor": None,
+                    "status": "欠稳定",
+                },
+                pages,
+            )
+        )
+        self.assertEqual(
+            stability_support_page(
+                {
+                    "condition": "现状工况",
+                    "safety_factor": 1.2,
+                    "required_factor": None,
+                    "status": "欠稳定",
+                },
+                pages,
+            ),
+            1,
+        )
 
 
 if __name__ == "__main__":

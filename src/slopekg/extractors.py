@@ -378,6 +378,20 @@ LITHOLOGY_TERMS = ["砂质页岩", "页岩", "灰岩", "泥岩", "砂岩", "黏�
 STRATUM_TERMS = ["第四系", "志留系", "三叠系", "侏罗系", "纱帽群", "嘉陵江组"]
 STRUCTURE_TERMS = ["顺向坡", "顺层坡", "逆向坡", "反倾坡", "斜交坡", "横向坡"]
 FACTOR_TERMS = ["降雨", "风化", "节理裂隙", "地表水", "地下水", "道路开挖", "坡脚开挖", "人工开挖", "褶皱构造"]
+SECTION_DOMAIN_WORDS = [
+    "基本情况", "变形", "稳定性", "防护措施", "岩性", "结构面", "节理",
+    "坡度", "地层", "植被", "地下水", "地表水", "水文地质", "垮塌",
+]
+STRUCTURAL_PLANE_RE = re.compile(
+    r"(?P<name>坡面|岩层面|岩层|[LJ]\s*\d+|结构面\s*[LJ]?\s*\d*)"
+    r"(?:名称)?(?:的)?(?:产状)?(?:为|是|[:：])?\s*"
+    r"(?P<dip_direction>\d{1,3})\s*[°º]?\s*[∠/]\s*(?P<dip_angle>\d{1,2})\s*[°º]?"
+)
+STRUCTURAL_PLANE_TABLE_RE = re.compile(
+    r"(?:^|\s)(?P<code>P|YC|[LJ]\s*\d+)\s*"
+    r"(?P<name>坡面|岩层面|结构面)?\s+"
+    r"(?P<dip_direction>\d{1,3})\s+(?P<dip_angle>\d{1,2})(?=\s|$)"
+)
 
 
 def extract_section_facts(
@@ -388,27 +402,30 @@ def extract_section_facts(
 ) -> list[dict[str, Any]]:
     allowed = document_ids
     grouped: dict[str, dict[str, Any]] = {}
-    domain_words = ["基本情况", "变形", "稳定性", "防护措施", "岩性", "结构面", "节理", "坡度", "地层"]
+    active_station_by_panel: dict[str, str] = {}
     for (doc_id, page), blocks in sorted(by_page.items(), key=lambda item: (item[0][0], item[0][1])):
         if doc_id not in allowed:
             continue
         for panel_name, panel_blocks in split_page_panels(blocks).items():
             panel_text = " ".join(block["text"].replace("\n", " ") for block in panel_blocks)
-            if not any(word in panel_text for word in domain_words):
+            if not any(word in panel_text for word in SECTION_DOMAIN_WORDS):
                 continue
-            stations: list[str] = []
-            for match in STATION_RE.finditer(panel_text):
-                context = panel_text[max(0, match.start() - 50) : min(len(panel_text), match.end() + 90)]
-                if any(word in context for word in ["左侧", "右侧", "危岩体", "边坡", "崩塌", "滑坡", "沉降", "下沉", "垮塌"]):
-                    normalized = normalize_station_match(match)
-                    if normalized in allowed_stations and normalized not in stations:
-                        stations.append(normalized)
+            panel_key = f"{doc_id}:{panel_name}"
             document_stations = (stations_by_document or {}).get(doc_id, set())
-            if not stations and len(document_stations) == 1:
-                stations = list(document_stations)
-            if not stations:
-                continue
-            for station in stations:
+            segments, last_heading = station_section_segments(
+                panel_text,
+                allowed_stations,
+                active_station_by_panel.get(panel_key),
+                document_stations,
+            )
+            for station, segment_text in segments:
+                values = extract_section_values(segment_text)
+                station_scenarios = extract_stability_scenarios(segment_text)
+                for scenario in station_scenarios:
+                    scenario.pop("_evidence_start", None)
+                    scenario["evidence_document_id"] = doc_id
+                    scenario["evidence_page"] = page
+                    scenario["evidence_block_ids"] = [block["id"] for block in panel_blocks]
                 row = grouped.setdefault(
                     station,
                     candidate_row(
@@ -421,21 +438,25 @@ def extract_section_facts(
                         stratum_terms=[],
                         slope_structure_terms=[],
                         causal_factor_terms=[],
+                        structural_planes=[],
+                        deformation_observations=[],
+                        hydrology_observations=[],
                         stability_scenarios=[],
                         section_evidence=[],
                         section_text_samples=[],
                     ),
                 )
-                row["lithology_terms"] = union(row["lithology_terms"], terms_in_text(panel_text, LITHOLOGY_TERMS, longest_first=True))
-                row["stratum_terms"] = union(row["stratum_terms"], terms_in_text(panel_text, STRATUM_TERMS, longest_first=True))
-                row["slope_structure_terms"] = union(row["slope_structure_terms"], terms_in_text(panel_text, STRUCTURE_TERMS))
-                row["causal_factor_terms"] = union(row["causal_factor_terms"], terms_in_text(panel_text, FACTOR_TERMS))
-                scenarios = extract_stability_scenarios(panel_text)
-                for scenario in scenarios:
-                    scenario["evidence_document_id"] = doc_id
-                    scenario["evidence_page"] = page
-                    scenario["evidence_block_ids"] = [block["id"] for block in panel_blocks]
-                row["stability_scenarios"] = union(row["stability_scenarios"], scenarios)
+                row["lithology_terms"] = union(row["lithology_terms"], terms_in_text(segment_text, LITHOLOGY_TERMS, longest_first=True))
+                row["stratum_terms"] = union(row["stratum_terms"], terms_in_text(segment_text, STRATUM_TERMS, longest_first=True))
+                row["slope_structure_terms"] = union(row["slope_structure_terms"], terms_in_text(segment_text, STRUCTURE_TERMS))
+                row["causal_factor_terms"] = union(row["causal_factor_terms"], terms_in_text(segment_text, FACTOR_TERMS))
+                row["structural_planes"] = union(row["structural_planes"], values.pop("structural_planes", []))
+                row["deformation_observations"] = union(row["deformation_observations"], values.pop("deformation_observations", []))
+                row["hydrology_observations"] = union(row["hydrology_observations"], values.pop("hydrology_observations", []))
+                for key, value in values.items():
+                    if value not in (None, "", [], {}) and row.get(key) in (None, "", [], {}):
+                        row[key] = value
+                row["stability_scenarios"] = union(row["stability_scenarios"], station_scenarios)
                 row["section_evidence"].append(
                     {
                         "document_id": doc_id,
@@ -445,10 +466,287 @@ def extract_section_facts(
                         "bbox": panel_bbox(panel_blocks),
                     }
                 )
-                if len(row["section_text_samples"]) < 12:
-                    row["section_text_samples"].append({"document_id": doc_id, "page": page, "panel": panel_name, "text": panel_text[:8000]})
+                if len(row["section_text_samples"]) < 20:
+                    row["section_text_samples"].append(
+                        {
+                            "document_id": doc_id,
+                            "page": page,
+                            "panel": panel_name,
+                            "station_context": station,
+                            "text": segment_text[:8000],
+                        }
+                    )
                 row["evidence_block_ids"] = union(row.get("evidence_block_ids", []), [block["id"] for block in panel_blocks])
+            if last_heading:
+                active_station_by_panel[panel_key] = last_heading
+            elif len(document_stations) == 1:
+                active_station_by_panel.setdefault(panel_key, next(iter(document_stations)))
     return sorted(grouped.values(), key=lambda row: station_start_m(row["station"]))
+
+
+def station_section_segments(
+    text: str,
+    allowed_stations: set[str],
+    active_station: str | None,
+    document_stations: set[str],
+) -> tuple[list[tuple[str, str]], str | None]:
+    """Split a page panel by numbered slope headings and retain continuation text.
+
+    A station appearing in prose is not automatically a new section. This keeps
+    cross-references and typoed station ranges from stealing facts from the
+    active slope while allowing the text before the next heading to remain with
+    the previous slope.
+    """
+    occurrences: list[tuple[int, int, str]] = []
+    headings: list[tuple[int, int, str]] = []
+    for match in STATION_RE.finditer(text):
+        station = normalize_station_match(match)
+        if station not in allowed_stations:
+            continue
+        context = text[max(0, match.start() - 50) : min(len(text), match.end() + 90)]
+        if not any(word in context for word in ["左侧", "右侧", "危岩体", "边坡", "崩塌", "滑坡", "沉降", "下沉", "垮塌"]):
+            continue
+        occurrence = (match.start(), match.end(), station)
+        occurrences.append(occurrence)
+        prefix = re.sub(r"\s+", "", text[max(0, match.start() - 18) : match.start()])
+        if re.search(r"(?:^|\D)(?:图)?\d+\.\d+(?:\.\d+)?(?:-\d+)?$", prefix):
+            headings.append(occurrence)
+
+    segments: list[tuple[str, str]] = []
+    if headings:
+        if active_station in allowed_stations and headings[0][0] > 0:
+            preamble = text[: headings[0][0]].strip()
+            if preamble:
+                segments.append((str(active_station), preamble))
+        for index, (start, _end, station) in enumerate(headings):
+            stop = headings[index + 1][0] if index + 1 < len(headings) else len(text)
+            segment = text[start:stop].strip()
+            if segment:
+                segments.append((station, segment))
+        return segments, headings[-1][2]
+
+    if active_station in allowed_stations:
+        return [(str(active_station), text.strip())], None
+    unique_mentions = list(dict.fromkeys(station for _start, _end, station in occurrences))
+    if len(unique_mentions) == 1:
+        return [(unique_mentions[0], text.strip())], None
+    if not occurrences and len(document_stations) == 1:
+        return [(next(iter(document_stations)), text.strip())], None
+    return [], None
+
+
+def extract_section_values(text: str) -> dict[str, Any]:
+    compact = re.sub(r"\s+", "", text)
+    values: dict[str, Any] = {}
+
+    length = first_range_match(compact, [r"边坡(?:长度|长)(?:约|为)?(?P<a>\d+(?:\.\d+)?)(?:[-～~](?P<b>\d+(?:\.\d+)?))?m"])
+    height = first_range_match(
+        compact,
+        [r"(?:边坡(?:高度|高)|坡高|最大高差|[，,；;]高)(?:约|为)?(?P<a>\d+(?:\.\d+)?)(?:[-～~](?P<b>\d+(?:\.\d+)?))?m"],
+    )
+    gradient = first_range_match(
+        compact,
+        [r"(?:开挖边坡坡度|开挖坡度|边坡坡度|坡度)(?:约|为)?(?P<a>\d+(?:\.\d+)?)(?:[-～~](?P<b>\d+(?:\.\d+)?))?(?:°|º|度)"],
+    )
+    if length:
+        values["slope_length_m"] = max(length)
+    if height:
+        values["slope_height_min_m"], values["slope_height_max_m"] = min(height), max(height)
+    if gradient:
+        values["slope_gradient_min_deg"], values["slope_gradient_max_deg"] = min(gradient), max(gradient)
+
+    if any(term in compact for term in ["路堑边坡", "挖方边坡", "开挖边坡"]):
+        values["slope_type"] = "路堑"
+    elif any(term in compact for term in ["路堤边坡", "填方边坡"]):
+        values["slope_type"] = "路堤"
+
+    if "土岩混合" in compact:
+        values["material_nature"] = "土岩混合"
+    elif "岩质边坡" in compact:
+        values["material_nature"] = "岩质"
+    elif "土质边坡" in compact:
+        values["material_nature"] = "土质"
+
+    structure_terms = terms_in_text(compact, STRUCTURE_TERMS)
+    if structure_terms:
+        values["slope_structure_code"] = normalize_slope_structure(structure_terms[0])
+
+    planes = extract_structural_planes(text)
+    if planes:
+        values["structural_planes"] = planes
+        slope_plane = next((plane for plane in planes if plane.get("name") == "坡面"), None)
+        if slope_plane:
+            values["slope_aspect_deg"] = slope_plane.get("dip_direction")
+
+    terrain = re.search(r"(?:属于|为)(?P<value>[^，。；]{2,24}(?:地貌区|地貌))", text)
+    if terrain:
+        values["geomorphology"] = terrain.group("value").strip()
+
+    vegetation = extract_vegetation_condition(text)
+    if vegetation:
+        values["vegetation_condition"] = vegetation
+    river = extract_river_relation(text)
+    if river:
+        values["river_relation"] = river
+
+    severity = next(
+        (value for value in ["毁坏", "严重破坏", "中等破坏", "轻微破坏", "基本完好"] if value in compact),
+        None,
+    )
+    if severity:
+        values["overall_slope_deformation_severity"] = severity
+    measures = terms_in_text(compact, PROTECTION_TERMS, longest_first=True)
+    if measures:
+        values["measures"] = measures
+
+    values["deformation_observations"] = extract_document_observations(text, domain="deformation")
+    values["hydrology_observations"] = extract_document_observations(text, domain="hydrology")
+    return values
+
+
+def first_range_match(text: str, patterns: list[str]) -> tuple[float, float] | None:
+    for pattern in patterns:
+        match = re.search(pattern, text)
+        if match:
+            first_value = float(match.group("a"))
+            second_value = float(match.group("b") or first_value)
+            return first_value, second_value
+    return None
+
+
+def normalize_slope_structure(value: str) -> str:
+    return {
+        "顺层坡": "顺向坡",
+        "顺向坡": "顺向坡",
+        "斜交坡": "斜向坡",
+        "横向坡": "横向坡",
+        "逆向坡": "逆向坡",
+        "反倾坡": "逆向坡",
+    }.get(value, value)
+
+
+def extract_structural_planes(text: str) -> list[dict[str, Any]]:
+    output = []
+    seen: set[tuple[str, int, int]] = set()
+    normalized_text = re.sub(r"\s+", " ", text)
+    for match in [*STRUCTURAL_PLANE_RE.finditer(normalized_text), *STRUCTURAL_PLANE_TABLE_RE.finditer(normalized_text)]:
+        raw_name = match.groupdict().get("name") or match.groupdict().get("code") or "结构面"
+        name = re.sub(r"\s+", "", raw_name)
+        if name == "岩层":
+            name = "岩层面"
+        if name == "P":
+            name = "坡面"
+        elif name == "YC":
+            name = "岩层面"
+        dip_direction = int(match.group("dip_direction"))
+        dip_angle = int(match.group("dip_angle"))
+        if dip_direction > 360 or dip_angle > 90:
+            continue
+        signature = (name, dip_direction, dip_angle)
+        if signature in seen:
+            continue
+        seen.add(signature)
+        output.append(
+            {
+                "name": name,
+                "dip_direction": dip_direction,
+                "dip_angle": dip_angle,
+                "description": match.group(0),
+                "temporal_scope": "historical_document_baseline",
+            }
+        )
+    return output
+
+
+def extract_vegetation_condition(text: str) -> dict[str, Any] | None:
+    compact = re.sub(r"\s+", "", text)
+    density = None
+    if any(term in compact for term in ["无植被", "植被缺失", "大量基岩裸露", "基岩裸露"]):
+        density = "无"
+    elif any(term in compact for term in ["植被稀疏", "局部植被", "少量植被"]):
+        density = "稀疏"
+    elif any(term in compact for term in ["植被茂密", "植被发育", "绿植发育", "大量绿植"]):
+        density = "茂密"
+    if not density:
+        return None
+    return {
+        "density": density,
+        "has_deformation_sign": None,
+        "description": next((sentence.strip() for sentence in split_sentences(text) if "植被" in sentence or "绿植" in sentence or "基岩裸露" in sentence), None),
+        "temporal_scope": "historical_document_baseline",
+    }
+
+
+def extract_river_relation(text: str) -> dict[str, Any] | None:
+    compact = re.sub(r"\s+", "", text)
+    if not any(term in compact for term in ["临河", "河岸", "河道"]):
+        return None
+    return {
+        "is_riverside": True,
+        "bank": "左岸" if "左岸" in compact else "右岸" if "右岸" in compact else None,
+        "channel_landform": next((value for value in ["凹岸", "凸岸", "直线段"] if value in compact), None),
+        "description": next((sentence.strip() for sentence in split_sentences(text) if any(term in sentence for term in ["临河", "河岸", "河道"])), None),
+        "temporal_scope": "historical_document_baseline",
+    }
+
+
+def extract_document_observations(text: str, *, domain: str) -> list[dict[str, Any]]:
+    if domain == "deformation":
+        keywords = ["裂缝", "垮塌", "掉块", "掉落", "滑塌", "溜滑", "崩塌", "落石", "变形", "隆起", "管涌", "渗水"]
+        type_order = ["管涌", "渗水", "隆起", "裂缝", "垮塌", "滑塌", "溜滑", "崩塌", "落石", "掉块", "掉落", "变形"]
+    else:
+        keywords = ["地下水", "地表水", "汇水", "渗水", "滴水", "冲刷", "排水", "雨季", "降雨", "暴雨"]
+        type_order = ["地下水", "地表水", "汇水", "渗水", "滴水", "冲刷", "排水", "暴雨", "降雨", "雨季"]
+    output = []
+    seen: set[str] = set()
+    for sentence in split_sentences(text):
+        compact = re.sub(r"\s+", "", sentence)
+        if not any(term in compact for term in keywords):
+            continue
+        if domain == "hydrology":
+            observed_water_terms = ["地下水", "地表水", "汇水", "渗水", "滴水", "冲刷", "排水"]
+            observed_event_terms = ["雨季期间", "降雨期间", "暴雨期间", "雨水冲刷", "受降雨冲刷"]
+            if not any(term in compact for term in [*observed_water_terms, *observed_event_terms]):
+                continue
+        else:
+            generic_prediction = any(term in compact for term in ["易发生", "易形成", "可能产生", "可能发生", "不利于", "成因"])
+            explicit_history_or_state = any(
+                term in compact for term in ["发生过", "已发生", "目前", "现状", "存在", "可见", "出现", "曾发生"]
+            )
+            observed_event = any(
+                term in compact
+                for term in ["发生过", "已发生", "目前", "现状", "存在", "可见", "出现", "垮塌", "滑塌", "溜滑", "掉落", "掉块", "裂缝"]
+            )
+            if generic_prediction and not explicit_history_or_state:
+                continue
+            if not observed_event:
+                continue
+        observation_type = next((term for term in type_order if term in compact), domain)
+        description = sentence.strip()[:500]
+        signature = f"{observation_type}:{description}"
+        if signature in seen:
+            continue
+        seen.add(signature)
+        timing_match = re.search(r"(\d+\s*年前|雨季期间|降雨期间|暴雨期间|近期|目前|现状)", description)
+        output.append(
+            {
+                "type": observation_type,
+                "location": next((term for term in ["坡顶", "坡面", "坡脚", "前缘", "后缘", "左侧", "右侧"] if term in compact), None),
+                "scale": next((term for term in ["大范围", "小范围", "局部", "多处", "少量", "大量"] if term in compact), None),
+                "timing": timing_match.group(1).replace(" ", "") if timing_match else "报告形成前或报告描述期",
+                "status": "historical_document_observation",
+                "description": description,
+                "temporal_scope": "historical_document_baseline",
+                "current_status_known": False,
+            }
+        )
+        if len(output) >= 8:
+            break
+    return output
+
+
+def split_sentences(text: str) -> list[str]:
+    return [part for part in re.split(r"[。；;]\s*", text) if part.strip()]
 
 
 def extract_stability_scenarios(text: str) -> list[dict[str, Any]]:
@@ -472,6 +770,7 @@ def extract_stability_scenarios(text: str) -> list[dict[str, Any]]:
                     "analysis_scope": "现状边坡",
                     "source_kind": "定量计算",
                     "evidence_text": match.group(0),
+                    "_evidence_start": match.start(),
                 },
                 {
                     "condition": "暴雨工况",
@@ -481,8 +780,28 @@ def extract_stability_scenarios(text: str) -> list[dict[str, Any]]:
                     "analysis_scope": "现状边坡",
                     "source_kind": "定量计算",
                     "evidence_text": match.group(0),
+                    "_evidence_start": match.start(),
                 },
             ]
+        )
+    state_pattern = re.compile(
+        r"(?P<condition>天然|饱和|饱水)状态(?:下)?"
+        r"(?:(?!天然状态|饱和状态|饱水状态|稳定性?系数为).){0,40}?稳定性?系数为(?P<value>\d+\.\d+)"
+        r"，?(?:(?!；|。).){0,20}?(?:状态为|属于|处于)(?P<status>不稳定|欠稳定|基本稳定|稳定)(?:状态)?"
+    )
+    for match in state_pattern.finditer(compact):
+        condition = "饱和" if match.group("condition") == "饱水" else match.group("condition")
+        output.append(
+            {
+                "condition": f"{condition}状态",
+                "safety_factor": float(match.group("value")),
+                "required_factor": None,
+                "status": match.group("status"),
+                "analysis_scope": "现状边坡",
+                "source_kind": "定量计算",
+                "evidence_text": match.group(0),
+                "_evidence_start": match.start(),
+            }
         )
     return output
 
@@ -538,12 +857,45 @@ def merge_slope_candidates(*groups: list[dict[str, Any]]) -> list[dict[str, Any]
                 target["_field_sources"].setdefault(key, []).append(source_ref)
             target["sources"].append(source_ref)
             target["confidence"] = max(float(target["confidence"]), float(row["confidence"]))
-    return sorted(merged.values(), key=lambda row: (str(row.get("route_code") or "ROUTE"), station_start_m(row["station"])))
+    output = sorted(merged.values(), key=lambda row: (str(row.get("route_code") or "ROUTE"), station_start_m(row["station"])))
+    for row in output:
+        infer_material_nature(row)
+    return output
+
+
+def infer_material_nature(row: dict[str, Any]) -> None:
+    if row.get("material_nature"):
+        return
+    lithologies = set(row.get("lithology_terms", []))
+    rock_terms = {"砂质页岩", "页岩", "灰岩", "泥岩", "砂岩"}
+    soil_terms = {"黏土", "粘土", "碎石土", "块石土", "堆积体"}
+    has_rock = bool(lithologies & rock_terms) or "危岩体" in str(row.get("source_disaster_label") or "")
+    has_soil = bool(lithologies & soil_terms)
+    if has_rock and has_soil:
+        value = "土岩混合"
+    elif has_rock:
+        value = "岩质"
+    elif has_soil:
+        value = "土质"
+    else:
+        return
+    row["material_nature"] = value
+    row["material_nature_basis"] = "由已提取岩性词项或危岩体类型归一化"
+    source_refs = [
+        *row.get("_field_sources", {}).get("lithology_terms", []),
+        *row.get("_field_sources", {}).get("source_disaster_label", []),
+    ]
+    if source_refs:
+        row.setdefault("_field_sources", {})["material_nature"] = source_refs
 
 
 def build_assertions(slopes: list[dict[str, Any]]) -> list[dict[str, Any]]:
     assertions = []
-    skip = {"station", "sources", "_field_sources", "confidence", "method", "page", "evidence_block_id", "evidence_block_ids", "bbox", "raw_row", "raw_text", "points", "section_evidence", "section_text_samples"}
+    skip = {
+        "station", "sources", "_field_sources", "confidence", "method", "page",
+        "evidence_block_id", "evidence_block_ids", "bbox", "raw_row", "raw_text",
+        "points", "section_evidence", "section_text_samples", "material_nature_basis",
+    }
     for slope in slopes:
         for key, value in slope.items():
             if key in skip or value in (None, "", [], {}):

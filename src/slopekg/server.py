@@ -17,8 +17,10 @@ from typing import Any
 from urllib.parse import parse_qs, quote, unquote, urlparse
 
 from .config import PATHS
-from .exporter import export_standalone_html
+from .exporter import export_risk_standalone_html, export_standalone_html
 from .pipeline import DemoPipeline
+from .rule_extraction import RuleExtractionPipeline
+from .risk import build_risk_screening
 from .schema import INTERFACES, attribute_dictionary_payload, interface_payload, schema_payload
 from .storage import ensure_dir, read_json, read_jsonl
 
@@ -152,8 +154,9 @@ def document_inventory() -> dict[str, Any]:
 
 
 class PipelineJobManager:
-    def __init__(self, pipeline: DemoPipeline) -> None:
+    def __init__(self, pipeline: Any, *, completion_message: str = "PDF解析、信息抽取和图谱生成已完成") -> None:
         self.pipeline = pipeline
+        self.completion_message = completion_message
         self.lock = threading.Lock()
         self.jobs: dict[str, dict[str, Any]] = {}
         self.latest_id: str | None = None
@@ -201,7 +204,7 @@ class PipelineJobManager:
                 status="completed",
                 progress=100,
                 stage="completed",
-                message="PDF解析、信息抽取和图谱生成已完成",
+                message=self.completion_message,
                 result=state,
                 finished_at=now,
             )
@@ -244,6 +247,8 @@ class PipelineJobManager:
 
 PIPELINE = DemoPipeline()
 JOB_MANAGER = PipelineJobManager(PIPELINE)
+RULE_PIPELINE = RuleExtractionPipeline()
+RULE_JOB_MANAGER = PipelineJobManager(RULE_PIPELINE, completion_message="候选规则库、公式库和证据链已生成")
 
 
 def automatic_basic_options() -> dict[str, Any]:
@@ -342,6 +347,54 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         if parsed.path == "/api/pipeline/jobs/latest":
             self.write_json(JOB_MANAGER.latest() or {"status": "none"})
             return
+        if parsed.path == "/api/rules/jobs/latest":
+            self.write_json(RULE_JOB_MANAGER.latest() or {"status": "none"})
+            return
+        if parsed.path.startswith("/api/rules/jobs/"):
+            job_id = parsed.path.rsplit("/", 1)[-1]
+            job = RULE_JOB_MANAGER.get(job_id)
+            if job is None:
+                self.write_json({"error": f"unknown rule job: {job_id}"}, status=HTTPStatus.NOT_FOUND)
+            else:
+                self.write_json(job)
+            return
+        if parsed.path == "/api/rules/library":
+            self.write_json(read_json(PATHS.rules_json, empty_rule_library()))
+            return
+        if parsed.path == "/api/rules/documents":
+            library = read_json(PATHS.rules_json, empty_rule_library())
+            self.write_json({"rows": library.get("documents", []), "count": len(library.get("documents", [])), "stats": library.get("stats", {})})
+            return
+        if parsed.path == "/api/rules/formulas":
+            library = read_json(PATHS.rules_json, empty_rule_library())
+            self.write_json({"rows": library.get("formulas", []), "count": len(library.get("formulas", [])), "stats": library.get("stats", {})})
+            return
+        if parsed.path == "/api/risk/rules":
+            library = read_json(PATHS.rules_json, empty_rule_library())
+            rules = [row for row in library.get("rules", []) if row.get("risk_engine_candidate")]
+            self.write_json(
+                {
+                    "status": library.get("publication_status", "not_generated"),
+                    "execution_enabled": library.get("execution_enabled", False),
+                    "rows": rules,
+                    "count": len(rules),
+                    "stats": library.get("stats", {}),
+                    "message": "候选规则可查询和复核；只有经审核批准的规则才允许进入正式风险计算。",
+                }
+            )
+            return
+        if parsed.path == "/api/risk/screening":
+            query = parse_qs(parsed.query)
+            slope_id = query.get("slope_id", [None])[0]
+            payload = current_risk_screening()
+            if slope_id:
+                rows = [row for row in payload.get("assessments", []) if row.get("slope_id") == slope_id]
+                if not rows:
+                    self.write_json({"error": f"unknown slope: {slope_id}"}, status=HTTPStatus.NOT_FOUND)
+                    return
+                payload = {**payload, "assessments": rows}
+            self.write_json(payload)
+            return
         if parsed.path.startswith("/api/pipeline/jobs/"):
             job_id = parsed.path.rsplit("/", 1)[-1]
             job = JOB_MANAGER.get(job_id)
@@ -409,7 +462,6 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             "/api/maintenance/events",
             "/api/inspections",
             "/api/exposure",
-            "/api/risk/rules",
         }
         if parsed.path in reserved_paths:
             self.write_reserved_interface(parsed.path, parse_qs(parsed.query))
@@ -439,6 +491,23 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 return
             self.write_json(job, status=HTTPStatus.ACCEPTED if created else HTTPStatus.CONFLICT)
             return
+        if parsed.path == "/api/rules/jobs":
+            try:
+                body = self.read_json_body()
+                llm_model = str(body.get("llm_model", "deepseek-v4-flash")).strip()
+                if not llm_model or len(llm_model) > 100:
+                    raise ValueError("大模型名称不合法")
+                options = {
+                    "use_llm": bool(body.get("use_llm", True)),
+                    "llm_model": llm_model,
+                    "force_ocr": bool(body.get("force_ocr", False)),
+                }
+                job, created = RULE_JOB_MANAGER.start(options, trigger="rule_extraction")
+            except (TypeError, ValueError) as exc:
+                self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+                return
+            self.write_json(job, status=HTTPStatus.ACCEPTED if created else HTTPStatus.CONFLICT)
+            return
         if parsed.path == "/api/export/standalone":
             try:
                 body = self.read_json_body()
@@ -458,15 +527,46 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 status=HTTPStatus.CREATED,
             )
             return
-        if parsed.path == "/api/risk/assess":
+        if parsed.path == "/api/export/risk-standalone":
+            try:
+                body = self.read_json_body()
+                file_name = safe_export_name(str(body.get("file_name") or "SlopeKG_风险研判_离线版"))
+                destination = PATHS.output_dir / "share" / file_name
+                result = export_risk_standalone_html(destination)
+            except (TypeError, ValueError, FileNotFoundError) as exc:
+                self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+                return
             self.write_json(
                 {
-                    "status": "blocked",
-                    "error": "risk_assessment_not_enabled",
-                    "message": "正式风险规则、动态数据和审核流程尚未接入，当前只提供风险就绪度检查。",
-                    "readiness_endpoint": "/api/risk/readiness?slope_id={slope_id}",
+                    **result,
+                    "file_name": file_name,
+                    "download_url": f"/output/demo/share/{quote(file_name)}",
                 },
-                status=HTTPStatus.NOT_IMPLEMENTED,
+                status=HTTPStatus.CREATED,
+            )
+            return
+        if parsed.path == "/api/risk/assess":
+            try:
+                body = self.read_json_body()
+                slope_id = str(body.get("slope_id") or "").strip()
+                if not slope_id:
+                    raise ValueError("slope_id 不能为空")
+                payload = current_risk_screening()
+                result = next((row for row in payload.get("assessments", []) if row.get("slope_id") == slope_id), None)
+                if result is None:
+                    self.write_json({"error": f"unknown slope: {slope_id}"}, status=HTTPStatus.NOT_FOUND)
+                    return
+            except (TypeError, ValueError) as exc:
+                self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+                return
+            self.write_json(
+                {
+                    "status": "screening_completed",
+                    "formal_risk_assessment_enabled": False,
+                    "result": result,
+                    "boundary": payload.get("boundary", {}),
+                    "message": "已生成宏观复核优先级；这不是正式风险等级。",
+                }
             )
             return
         if parsed.path != "/api/pipeline/run":
@@ -637,6 +737,28 @@ def run_server(host: str = "127.0.0.1", port: int = 8765) -> None:
     httpd = ThreadingHTTPServer((host, port), SlopeKGHandler)
     print(f"SlopeKG demo server: http://{host}:{port}/web/index.html")
     httpd.serve_forever()
+
+
+def empty_rule_library() -> dict[str, Any]:
+    return {
+        "schema_name": "slope_rule_library",
+        "schema_version": "1.0.0-candidate",
+        "publication_status": "not_generated",
+        "execution_enabled": False,
+        "documents": [],
+        "clauses": [],
+        "formulas": [],
+        "threshold_tables": [],
+        "rules": [],
+        "stats": {},
+    }
+
+
+def current_risk_screening() -> dict[str, Any]:
+    graph = read_json(PATHS.graph_json, {"nodes": [], "edges": [], "evidence": []})
+    library = read_json(PATHS.rules_json, empty_rule_library())
+    completeness = read_json(PATHS.completeness_json, {"reports": [], "summary": {}})
+    return build_risk_screening(graph, library, completeness)
 
 
 def main() -> None:

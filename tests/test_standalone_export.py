@@ -6,7 +6,7 @@ import unittest
 from uuid import uuid4
 
 from slopekg.config import PATHS
-from slopekg.exporter import export_standalone_html
+from slopekg.exporter import export_risk_standalone_html, export_standalone_html
 
 
 class StandaloneExportTests(unittest.TestCase):
@@ -25,6 +25,25 @@ class StandaloneExportTests(unittest.TestCase):
             payload = json.loads(match.group(1))  # type: ignore[union-attr]
             self.assertEqual(len(payload["graph"]["nodes"]), result["nodes"])
             self.assertEqual(payload["export"]["format"], "slopekg_single_file_offline_html")
+        finally:
+            output.unlink(missing_ok=True)
+
+    def test_risk_export_is_interactive_single_html_with_embedded_screening(self) -> None:
+        output = PATHS.output_dir / "share" / f"_risk_export_test_{uuid4().hex}.html"
+        try:
+            result = export_risk_standalone_html(output)
+            html = output.read_text(encoding="utf-8")
+            self.assertGreater(result["slopes"], 0)
+            self.assertLess(result["bytes"], 2 * 1024 * 1024)
+            self.assertNotIn("__SLOPEKG_RISK_DATA__", html)
+            self.assertNotRegex(html, r"<script[^>]+src=")
+            self.assertNotRegex(html, r"<link[^>]+stylesheet")
+            match = re.search(r'<script id="slopekg-risk-data" type="application/json">([\s\S]*?)</script>', html)
+            self.assertIsNotNone(match)
+            payload = json.loads(match.group(1))  # type: ignore[union-attr]
+            self.assertEqual(len(payload["risk"]["assessments"]), result["slopes"])
+            self.assertEqual(payload["export"]["format"], "slopekg_risk_single_file_offline_html")
+            self.assertIn("P1", payload["risk"]["summary"]["priority_counts"])
         finally:
             output.unlink(missing_ok=True)
 

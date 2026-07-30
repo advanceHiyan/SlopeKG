@@ -145,9 +145,22 @@ def build_automatic_graph(
             add_node(nodes, factor_id, factor, "CausalFactor", extraction_method="automatic_semantic" if semantic else "deterministic_dictionary")
             add_edge(edges, slope_id, factor_id, "INFLUENCED_BY", evidence=field_evidence("causal_factors", semantic_evidence, source_evidence, all_evidence))
 
-        for plane_index, plane in enumerate(semantic.get("structural_planes", []), start=1):
+        structural_planes = unique_object_rows(
+            [*slope.get("structural_planes", []), *semantic.get("structural_planes", [])]
+        )
+        for plane_index, plane in enumerate(structural_planes, start=1):
             plane_id = stable_id("plane", f"{station}:{plane_index}:{plane.get('name')}")
-            add_node(nodes, plane_id, f"{station} {plane.get('name') or '结构面'}", "StructuralPlane", **plane)
+            plane_props = {
+                **plane,
+                "extraction_method": "validated_llm_extraction" if plane in semantic.get("structural_planes", []) else "deterministic_section_extraction",
+            }
+            add_node(
+                nodes,
+                plane_id,
+                f"{station} {plane.get('name') or '结构面'}",
+                "StructuralPlane",
+                **plane_props,
+            )
             add_edge(edges, slope_id, plane_id, "DEVELOPS_STRUCTURAL_PLANE", evidence=field_evidence("structural_planes", semantic_evidence, source_evidence, all_evidence))
 
         for measure_index, measure in enumerate(slope.get("measures", []), start=1):
@@ -168,7 +181,7 @@ def build_automatic_graph(
             add_edge(edges, slope_id, work_id, "HAS_PROTECTION_DESIGN", evidence=method_evidence(source_evidence, ["pdfplumber_treatment_table", "treatment_plan_table"], all_evidence))
             add_edge(edges, work_id, type_id, "INSTANCE_OF")
 
-        for scenario_index, scenario in enumerate(slope.get("stability_scenarios", []), start=1):
+        for scenario_index, scenario in enumerate(unique_stability_scenarios(slope.get("stability_scenarios", [])), start=1):
             scenario_evidence = add_scenario_evidence(evidence, station, scenario, documents)
             analysis_id = stable_id("stability", f"{station}:survey:{scenario_index}:{scenario.get('condition')}:{scenario.get('safety_factor')}")
             add_node(
@@ -223,7 +236,29 @@ def build_automatic_graph(
             )
             add_edge(edges, slope_id, analysis_id, "HAS_STABILITY_ANALYSIS", evidence=field_evidence("stability_conclusions", semantic_evidence, source_evidence, all_evidence))
 
-        add_semantic_observations(nodes, edges, slope_id, station, semantic, semantic_evidence, source_evidence, all_evidence)
+        observation_payload = {
+            **semantic,
+            "geomorphology": semantic.get("geomorphology") or slope.get("geomorphology"),
+            "deformation_observations": unique_object_rows(
+                [*slope.get("deformation_observations", []), *semantic.get("deformation_observations", [])]
+            ),
+            "hydrology_observations": unique_object_rows(
+                [*slope.get("hydrology_observations", []), *semantic.get("hydrology_observations", [])]
+            ),
+        }
+        add_semantic_observations(nodes, edges, slope_id, station, observation_payload, semantic_evidence, source_evidence, all_evidence)
+        vegetation = semantic.get("vegetation_condition") or slope.get("vegetation_condition")
+        if vegetation:
+            vegetation_id = stable_id("vegetation", f"{station}:{json.dumps(vegetation, ensure_ascii=False, sort_keys=True)}")
+            vegetation_props = vegetation if isinstance(vegetation, dict) else {"density": vegetation}
+            add_node(nodes, vegetation_id, f"{station} 植被调查", "VegetationSurvey", **vegetation_props)
+            add_edge(
+                edges,
+                slope_id,
+                vegetation_id,
+                "HAS_VEGETATION_SURVEY",
+                evidence=field_evidence("vegetation_condition", semantic_evidence, source_evidence, all_evidence),
+            )
 
         semantic_assertions.extend(build_semantic_assertions(station, semantic_row, semantic_evidence, all_evidence))
 
@@ -269,6 +304,11 @@ def public_source_record(slope: dict[str, Any]) -> dict[str, Any]:
 
 def slope_props(slope: dict[str, Any], semantic: dict[str, Any], route_code: str, index: int, start_m: int | None, end_m: int | None) -> dict[str, Any]:
     start_raw, end_raw = slope["station"].split("-", 1)
+    slope_length = slope.get("slope_length_m") or semantic.get("slope_length_m")
+    height_min = slope.get("slope_height_min_m") or semantic.get("slope_height_min_m")
+    height_max = slope.get("slope_height_max_m") or semantic.get("slope_height_max_m")
+    gradient_min = slope.get("slope_gradient_min_deg") or semantic.get("slope_gradient_min_deg")
+    gradient_max = slope.get("slope_gradient_max_deg") or semantic.get("slope_gradient_max_deg")
     return {
         "slope_id": f"{route_code}-AUTO-{index:03d}",
         "source_no": slope.get("no"),
@@ -279,17 +319,23 @@ def slope_props(slope: dict[str, Any], semantic: dict[str, Any], route_code: str
         "start_station_m": start_m,
         "end_station_m": end_m,
         "side": slope.get("side"),
-        "slope_length_m": slope.get("slope_length_m"),
-        "slope_height_min_m": slope.get("slope_height_min_m"),
-        "slope_height_max_m": slope.get("slope_height_max_m"),
-        "slope_height_raw": range_text(slope.get("slope_height_min_m"), slope.get("slope_height_max_m")),
-        "slope_gradient_min_deg": slope.get("slope_gradient_min_deg"),
-        "slope_gradient_max_deg": slope.get("slope_gradient_max_deg"),
-        "slope_gradient_raw": range_text(slope.get("slope_gradient_min_deg"), slope.get("slope_gradient_max_deg"), "°"),
+        "slope_length_m": slope_length,
+        "slope_height_min_m": height_min,
+        "slope_height_max_m": height_max,
+        "slope_height_raw": range_text(height_min, height_max),
+        "slope_gradient_min_deg": gradient_min,
+        "slope_gradient_max_deg": gradient_max,
+        "slope_gradient_raw": range_text(gradient_min, gradient_max, "°"),
+        "slope_type": semantic.get("slope_type") or slope.get("slope_type"),
+        "material_nature": semantic.get("material_nature") or slope.get("material_nature"),
+        "slope_aspect_deg": semantic.get("slope_aspect_deg") or slope.get("slope_aspect_deg"),
         "start_coordinate": slope.get("start_coordinate"),
         "end_coordinate": slope.get("end_coordinate"),
         "coordinate_crs": slope.get("coordinate_crs"),
-        "slope_structure_code": semantic.get("slope_structure") or first(slope.get("slope_structure_terms", [])),
+        "slope_structure_code": semantic.get("slope_structure") or slope.get("slope_structure_code") or first(slope.get("slope_structure_terms", [])),
+        "river_relation": semantic.get("river_relation") or slope.get("river_relation"),
+        "vegetation_condition": semantic.get("vegetation_condition") or slope.get("vegetation_condition"),
+        "overall_slope_deformation_severity": semantic.get("overall_slope_deformation_severity") or slope.get("overall_slope_deformation_severity"),
         "mechanism_summary": semantic.get("mechanism_summary"),
         "protection_rationale": semantic.get("protection_rationale"),
         "entity_resolution_status": "automatically_resolved_by_station_range",
@@ -400,6 +446,24 @@ def add_scenario_evidence(
     return evidence_id
 
 
+def unique_stability_scenarios(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    output = []
+    seen = set()
+    for row in rows:
+        key = (
+            row.get("condition"),
+            row.get("safety_factor"),
+            row.get("required_factor"),
+            row.get("status"),
+            row.get("analysis_scope"),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        output.append(row)
+    return output
+
+
 def build_semantic_assertions(
     station: str,
     semantic_row: dict[str, Any],
@@ -447,12 +511,22 @@ def add_semantic_observations(
 
     for index, item in enumerate(semantic.get("deformation_observations", []), start=1):
         node_id = stable_id("deformation", f"{station}:{index}:{json.dumps(item, ensure_ascii=False, sort_keys=True)}")
-        add_node(nodes, node_id, f"{station} {item.get('type') or '变形现象'}", "DeformationObservation", **item)
+        normalized = {
+            "temporal_scope": "historical_document_baseline",
+            "current_status_known": False,
+            **item,
+        }
+        add_node(nodes, node_id, f"{station} {item.get('type') or '变形现象'}", "DeformationObservation", **normalized)
         add_edge(edges, slope_id, node_id, "HAS_DEFORMATION_OBSERVATION", evidence=field_evidence("deformation_observations", semantic_evidence, source_evidence, fallback))
 
     for index, item in enumerate(semantic.get("hydrology_observations", []), start=1):
         node_id = stable_id("hydrology", f"{station}:{index}:{json.dumps(item, ensure_ascii=False, sort_keys=True)}")
-        add_node(nodes, node_id, f"{station} {item.get('type') or '水文现象'}", "HydrologyObservation", **item)
+        normalized = {
+            "temporal_scope": "historical_document_baseline",
+            "current_status_known": False,
+            **item,
+        }
+        add_node(nodes, node_id, f"{station} {item.get('type') or '水文现象'}", "HydrologyObservation", **normalized)
         add_edge(edges, slope_id, node_id, "HAS_HYDROLOGY_OBSERVATION", evidence=field_evidence("hydrology_observations", semantic_evidence, source_evidence, fallback))
 
     for index, item in enumerate(semantic.get("protection_records", []), start=1):
@@ -474,6 +548,10 @@ def field_evidence(
         "lithology_terms": ["section_panel_dictionary"],
         "stratum_terms": ["section_panel_dictionary"],
         "causal_factors": ["section_panel_dictionary"],
+        "structural_planes": ["section_panel_dictionary"],
+        "deformation_observations": ["section_panel_dictionary"],
+        "hydrology_observations": ["section_panel_dictionary"],
+        "vegetation_condition": ["section_panel_dictionary"],
         "hazard_types": ["slope_registry_table"],
     }
     return method_evidence(source_evidence, deterministic_methods.get(field, []), fallback)
@@ -484,6 +562,20 @@ def method_evidence(source_evidence: dict[str, list[str]], methods: list[str], f
         if source_evidence.get(method):
             return source_evidence[method][0]
     return first(fallback)
+
+
+def unique_object_rows(rows: list[Any]) -> list[dict[str, Any]]:
+    output = []
+    seen: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        signature = json.dumps(row, ensure_ascii=False, sort_keys=True, default=str)
+        if signature in seen:
+            continue
+        seen.add(signature)
+        output.append(row)
+    return output
 
 
 def write_graphml(path: Path, graph: dict[str, Any]) -> None:

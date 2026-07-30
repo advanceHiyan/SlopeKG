@@ -231,6 +231,13 @@ input[type="search"]:focus {
   accent-color: var(--accent);
 }
 
+.display-toggle-hint {
+  margin: 5px 3px 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .segment {
   border: 0;
   background: transparent;

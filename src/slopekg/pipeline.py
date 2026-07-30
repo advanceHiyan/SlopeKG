@@ -1,27 +1,108 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from datetime import datetime
+import json
+import os
 from pathlib import Path
 from typing import Any, Callable
 
 from .config import PATHS, DemoPaths
 from .deps import dependency_report
 from .extractors import extract_domain_candidates
-from .exporter import export_standalone_html
+from .exporter import export_risk_standalone_html, export_standalone_html
 from .graph_builder import build_automatic_graph, write_graphml
 from .llm import llm_status, read_deepseek_key
 from .ocr import OcrRunner
 from .parsers import PdfParser
 from .quality import evaluate_automatic_pipeline
+from .risk import build_risk_screening
 from .schema import build_completeness, interface_payload, schema_payload
 from .semantic import run_semantic_extraction
 from .storage import ensure_dir, read_json, read_jsonl, write_json, write_jsonl
+
+
+class PipelineAlreadyRunningError(RuntimeError):
+    pass
+
+
+def single_pipeline_run(method: Callable[..., dict[str, Any]]) -> Callable[..., dict[str, Any]]:
+    def guarded(self: "DemoPipeline", *args: Any, **kwargs: Any) -> dict[str, Any]:
+        ensure_dir(self.paths.output_dir)
+        with pipeline_run_guard(self.paths.output_dir / ".pipeline.lock"):
+            return method(self, *args, **kwargs)
+
+    return guarded
+
+
+@contextmanager
+def pipeline_run_guard(lock_path: Path):
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"pid": os.getpid(), "started_at": datetime.now().isoformat(timespec="seconds")}
+    descriptor: int | None = None
+    for attempt in range(2):
+        try:
+            descriptor = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(descriptor, json.dumps(payload, ensure_ascii=False).encode("utf-8"))
+            break
+        except FileExistsError:
+            owner = read_pipeline_lock(lock_path)
+            owner_pid = owner.get("pid")
+            if attempt == 0 and owner_pid and not process_is_running(int(owner_pid)):
+                lock_path.unlink(missing_ok=True)
+                continue
+            started_at = owner.get("started_at") or "未知时间"
+            raise PipelineAlreadyRunningError(
+                f"已有PDF解析任务正在运行（PID {owner_pid or '未知'}，开始于 {started_at}）。"
+                "请等待前端进度完成，不要同时从命令行重复启动流水线。"
+            )
+    if descriptor is None:
+        raise PipelineAlreadyRunningError("无法取得PDF解析任务锁。")
+    try:
+        yield
+    finally:
+        os.close(descriptor)
+        current = read_pipeline_lock(lock_path)
+        if current.get("pid") == os.getpid():
+            lock_path.unlink(missing_ok=True)
+
+
+def read_pipeline_lock(lock_path: Path) -> dict[str, Any]:
+    try:
+        return json.loads(lock_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def process_is_running(pid: int) -> bool:
+    if pid <= 0:
+        return False
+    if os.name == "nt":
+        # On POSIX, signal 0 probes a process without changing it. On Windows,
+        # os.kill(pid, 0) may call TerminateProcess instead, so use the native
+        # read-only process query API.
+        import ctypes
+
+        process_query_limited_information = 0x1000
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        handle = kernel32.OpenProcess(process_query_limited_information, False, pid)
+        if handle:
+            kernel32.CloseHandle(handle)
+            return True
+        # Access denied also proves that the process exists.
+        return ctypes.get_last_error() == 5
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
 
 
 class DemoPipeline:
     def __init__(self, paths: DemoPaths = PATHS):
         self.paths = paths
 
+    @single_pipeline_run
     def run(
         self,
         ocr_pages: int = 1000,
@@ -300,6 +381,8 @@ class DemoPipeline:
         graph["meta"]["dependencies"] = dependency_report()
         graph["meta"]["llm"] = {**llm_status(), "enabled": semantic_summary.get("enabled", False), "run": semantic_summary}
         completeness = build_completeness(graph)
+        rule_library = read_json(self.paths.rules_json, {"execution_enabled": False, "publication_status": "not_generated"})
+        risk_screening = build_risk_screening(graph, rule_library, completeness)
         graph["meta"]["completeness"] = completeness["summary"]
         self.write_graph_outputs(graph, parse_mode=parse_mode, activate=activate)
         write_json(self.paths.schema_json, schema_payload())
@@ -316,9 +399,12 @@ class DemoPipeline:
             write_jsonl(self.paths.extracted_dir / "llm_candidates.jsonl", semantic_rows)
             write_json(self.paths.extracted_dir / "llm_evaluation.json", semantic_summary)
         write_json(self.paths.output_dir / f"evaluation.{parse_mode}.json", evaluation)
+        ensure_dir(self.paths.output_dir / "risk")
+        write_json(self.paths.output_dir / "risk" / f"screening.{parse_mode}.json", risk_screening)
         if activate:
             write_json(self.paths.completeness_json, completeness)
             write_json(self.paths.evaluation_json, evaluation)
+            write_json(self.paths.output_dir / "risk" / "screening.json", risk_screening)
         return graph, evaluation
 
     def write_graph_outputs(self, graph: dict[str, Any], *, parse_mode: str, activate: bool) -> None:
@@ -425,6 +511,10 @@ class DemoPipeline:
         export_result = export_standalone_html(standalone_path, paths=self.paths, graph_mode="active")
         state["standalone_export"] = export_result
         state["outputs"]["standalone_html"] = str(standalone_path.relative_to(self.paths.root))
+        risk_standalone_path = self.paths.output_dir / "share" / "SlopeKG_风险研判_离线版.html"
+        risk_export_result = export_risk_standalone_html(risk_standalone_path, paths=self.paths)
+        state["risk_standalone_export"] = risk_export_result
+        state["outputs"]["risk_standalone_html"] = str(risk_standalone_path.relative_to(self.paths.root))
         write_json(self.paths.state_json, state)
         write_json(self.paths.deep_state_json if parse_mode == "deep" else self.paths.basic_state_json, state)
         return state

@@ -36,6 +36,9 @@ NODE_TYPES: dict[str, dict[str, Any]] = {
     "Drawing": {"label_zh": "图纸", "category": "evidence"},
     "Document": {"label_zh": "文档", "category": "evidence"},
     "Standard": {"label_zh": "规范", "category": "rule"},
+    "StandardClause": {"label_zh": "规范条文", "category": "rule"},
+    "Formula": {"label_zh": "计算公式", "category": "rule"},
+    "ThresholdTable": {"label_zh": "阈值表", "category": "rule"},
     "RiskRule": {"label_zh": "风险规则", "category": "rule"},
     "RiskAssessment": {"label_zh": "风险评估", "category": "assessment"},
     "ExposureObject": {"label_zh": "暴露对象", "category": "risk"},
@@ -69,6 +72,10 @@ RELATION_TYPES: dict[str, dict[str, str]] = {
     "AFFECTS_PROTECTION_WORK": {"label_zh": "损毁对象"},
     "HAS_VEGETATION_SURVEY": {"label_zh": "具有植被调查"},
     "HAS_MONITORING_PROGRAM": {"label_zh": "具有监测方案"},
+    "CONTAINS_CLAUSE": {"label_zh": "包含条文"},
+    "DEFINES_FORMULA": {"label_zh": "定义公式"},
+    "DEFINES_THRESHOLD_TABLE": {"label_zh": "定义阈值表"},
+    "DEFINES_RULE": {"label_zh": "定义规则"},
 }
 
 
@@ -122,6 +129,7 @@ INTERFACES: list[dict[str, Any]] = [
     {"path": "/api/pipeline/jobs/{job_id}", "method": "GET", "status": "implemented", "domain": "ingestion", "description": "查询后台任务真实阶段、进度、结果和错误"},
     {"path": "/api/pipeline/jobs/latest", "method": "GET", "status": "implemented", "domain": "ingestion", "description": "恢复当前服务进程中的最近一次解析任务"},
     {"path": "/api/export/standalone", "method": "POST", "status": "implemented", "domain": "export", "description": "按自定义文件名导出单文件离线HTML，可选择基础、深度或当前图谱"},
+    {"path": "/api/export/risk-standalone", "method": "POST", "status": "implemented", "domain": "export", "description": "按自定义文件名导出含筛查结果、证据和交互功能的单文件风险研判HTML"},
     {"path": "/api/slopes", "method": "GET", "status": "implemented", "domain": "slope", "description": "边坡列表及当前基础档案"},
     {"path": "/api/slopes/{slope_id}", "method": "GET", "status": "implemented", "domain": "slope", "description": "单边坡、邻接节点、关系和证据"},
     {"path": "/api/schema", "method": "GET", "status": "implemented", "domain": "schema", "description": "节点、关系和边坡字段 Schema"},
@@ -138,9 +146,14 @@ INTERFACES: list[dict[str, Any]] = [
     {"path": "/api/maintenance/events", "method": "GET", "status": "reserved_not_connected", "domain": "maintenance", "description": "养护、维修、清危和加固历史"},
     {"path": "/api/inspections", "method": "GET", "status": "reserved_not_connected", "domain": "inspection", "description": "裂缝、滑塌、渗水和设施状态巡检"},
     {"path": "/api/exposure", "method": "GET", "status": "reserved_not_connected", "domain": "risk", "description": "交通量、人员和重要设施等暴露数据"},
-    {"path": "/api/risk/rules", "method": "GET", "status": "reserved_waiting_approval", "domain": "risk", "description": "经交通部研究院确认的风险规则和版本"},
+    {"path": "/api/risk/rules", "method": "GET", "status": "implemented", "domain": "risk", "description": "候选及已审核风险规则、来源证据和版本；仅approved规则可执行"},
+    {"path": "/api/rules/library", "method": "GET", "status": "implemented", "domain": "rules", "description": "规范、条文、公式、阈值表和候选规则完整知识库"},
+    {"path": "/api/rules/documents", "method": "GET", "status": "implemented", "domain": "rules", "description": "规则原始资料目录、解析质量和覆盖页"},
+    {"path": "/api/rules/formulas", "method": "GET", "status": "implemented", "domain": "rules", "description": "公式候选、变量、单位、适用条件和PDF证据"},
+    {"path": "/api/rules/jobs", "method": "POST", "status": "implemented", "domain": "rules", "description": "后台启动规则、公式和阈值提取任务"},
+    {"path": "/api/risk/screening", "method": "GET", "status": "implemented", "domain": "risk", "description": "根据现有资料生成宏观人工复核优先级，不等同于正式风险等级"},
     {"path": "/api/risk/readiness", "method": "GET", "status": "implemented", "domain": "risk", "description": "风险研判前的数据就绪检查"},
-    {"path": "/api/risk/assess", "method": "POST", "status": "reserved_blocked", "domain": "risk", "description": "正式风险研判；规则确认和动态数据接入前保持阻断"},
+    {"path": "/api/risk/assess", "method": "POST", "status": "implemented", "domain": "risk", "description": "运行单边坡宏观筛查；正式风险等级仍因规则和动态数据未批准而保持空值"},
 ]
 
 
@@ -176,8 +189,11 @@ def build_completeness(graph: dict[str, Any]) -> dict[str, Any]:
     edges = graph.get("edges", [])
     slopes = [node for node in nodes if node.get("type") == "Slope"]
     outgoing: dict[str, set[str]] = {}
+    outgoing_targets: dict[tuple[str, str], list[str]] = {}
+    node_by_id = {node.get("id"): node for node in nodes}
     for edge in edges:
         outgoing.setdefault(edge["source"], set()).add(edge["relation"])
+        outgoing_targets.setdefault((edge["source"], edge["relation"]), []).append(edge["target"])
 
     reports = []
     for slope in slopes:
@@ -197,6 +213,16 @@ def build_completeness(graph: dict[str, Any]) -> dict[str, Any]:
                 status = "interface_reserved"
             else:
                 available = spec["relation"] in outgoing.get(slope["id"], set())
+                if available and spec["code"] == "deformation_observation":
+                    target_nodes = [
+                        node_by_id.get(target_id, {})
+                        for target_id in outgoing_targets.get((slope["id"], spec["relation"]), [])
+                    ]
+                    available = any(
+                        node.get("props", {}).get("current_status_known") is True
+                        or node.get("props", {}).get("temporal_scope") in {"current", "recent_inspection", "real_time_monitoring"}
+                        for node in target_nodes
+                    )
                 if available:
                     status = "available"
                 elif spec.get("interface"):

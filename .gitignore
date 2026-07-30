@@ -1,6 +1,14 @@
 data/rawPDF/
 output/demo/cache/
+output/demo/*.log
+output/demo/tmp*/
+output/demo/rules/llm_cache.json
+output/demo/rules/page_text.json
+output/demo/rules/page_text.jsonl
+output/demo/rules/pages/
 .tmp/
+tmp/
+tmp*/
 .secrets/
 .pytest_cache/
 __MACOSX/

@@ -1,10 +1,8 @@
 {
-  "updated_at": "2026-07-21T21:06:15",
+  "updated_at": "2026-07-27T17:54:45",
   "status_counts": {
-    "implemented": 18,
-    "reserved_not_connected": 5,
-    "reserved_waiting_approval": 1,
-    "reserved_blocked": 1
+    "implemented": 25,
+    "reserved_not_connected": 5
   },
   "interfaces": [
     {
@@ -164,9 +162,44 @@
     {
       "path": "/api/risk/rules",
       "method": "GET",
-      "status": "reserved_waiting_approval",
+      "status": "implemented",
       "domain": "risk",
-      "description": "经交通部研究院确认的风险规则和版本"
+      "description": "候选及已审核风险规则、来源证据和版本；仅approved规则可执行"
+    },
+    {
+      "path": "/api/rules/library",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "rules",
+      "description": "规范、条文、公式、阈值表和候选规则完整知识库"
+    },
+    {
+      "path": "/api/rules/documents",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "rules",
+      "description": "规则原始资料目录、解析质量和覆盖页"
+    },
+    {
+      "path": "/api/rules/formulas",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "rules",
+      "description": "公式候选、变量、单位、适用条件和PDF证据"
+    },
+    {
+      "path": "/api/rules/jobs",
+      "method": "POST",
+      "status": "implemented",
+      "domain": "rules",
+      "description": "后台启动规则、公式和阈值提取任务"
+    },
+    {
+      "path": "/api/risk/screening",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "risk",
+      "description": "根据现有资料生成宏观人工复核优先级，不等同于正式风险等级"
     },
     {
       "path": "/api/risk/readiness",
@@ -178,9 +211,9 @@
     {
       "path": "/api/risk/assess",
       "method": "POST",
-      "status": "reserved_blocked",
+      "status": "implemented",
       "domain": "risk",
-      "description": "正式风险研判；规则确认和动态数据接入前保持阻断"
+      "description": "运行单边坡宏观筛查；正式风险等级仍因规则和动态数据未批准而保持空值"
     }
   ]
 }

@@ -143,7 +143,7 @@ async function dataStatusPage() {
     metric(rows.filter((row) => row.status !== "implemented").length, "待接入/待确认接口"),
   ].join("");
   document.querySelector("#interfaceRows").innerHTML = rows.map((row) => `<tr><td class="code-path">${api.escapeHtml(row.path)}</td><td>${api.escapeHtml(row.method)}</td><td>${api.escapeHtml(row.domain)}</td><td>${badge(row.status)}</td><td>${api.escapeHtml(row.description)}</td></tr>`).join("");
-  const coverageRows = Object.entries(evaluation.automatic_coverage || {});
+  const coverageRows = Object.entries(evaluation.active_graph_coverage || evaluation.automatic_coverage || {});
   const discovery = evaluation.discovery || {};
   const semantic = evaluation.semantic || {};
   document.querySelector("#evaluationRows").innerHTML = [
@@ -165,27 +165,161 @@ async function dataStatusPage() {
 }
 
 function evaluationLabel(code) {
-  return ({ registry: "边坡登记", coordinates: "控制点坐标", treatment: "治理方案与安全系数", geometry: "坡高坡度", lithology: "岩性词项", stratum: "地层词项", multi_source: "多来源交叉确认" })[code] || code;
+  return ({
+    registry: "边坡登记",
+    coordinates: "控制点坐标",
+    treatment: "治理方案与安全系数",
+    geometry: "坡高坡度",
+    slope_type: "路堤/路堑",
+    material_nature: "土质/岩质",
+    slope_aspect: "坡向",
+    slope_structure: "斜坡结构",
+    lithology: "岩性词项",
+    stratum: "地层词项",
+    structural_plane: "结构面",
+    vegetation: "植被情况",
+    historical_deformation: "历史变形迹象",
+    hydrology_baseline: "历史水文基线",
+    protection_design: "防护设计",
+    current_deformation: "近期变形巡检",
+    stability: "稳定性工况",
+    multi_source: "多来源交叉确认",
+  })[code] || code;
 }
 
 async function riskPage() {
-  const [slopes, readiness] = await Promise.all([
-    api.getJson("/api/slopes", { rows: [] }),
-    api.getJson("/api/risk/readiness", { blocking_global_items: [], reports: [] }),
-  ]);
-  const select = document.querySelector("#riskSlopeSelect");
-  select.innerHTML += (slopes.rows || []).map((slope) => `<option value="${api.escapeHtml(slope.id)}">${api.escapeHtml(slope.props?.slope_id || slope.label)}</option>`).join("");
-  document.querySelector("#globalBlocking").innerHTML = (readiness.blocking_global_items || []).map((item) => `<div class="detail-row">${badge("reserved_blocked")} ${api.escapeHtml(globalBlockingLabel(item))}</div>`).join("");
-  document.querySelector("#checkRiskBtn").addEventListener("click", async () => {
-    const slopeId = select.value;
-    if (!slopeId) return;
-    const payload = await api.getJson(`/api/risk/readiness?slope_id=${encodeURIComponent(slopeId)}`, {});
-    const report = payload.reports?.[0];
-    const result = document.querySelector("#riskResult");
-    if (!report) { result.textContent = "未找到边坡完整性报告。"; return; }
-    const blockers = (report.fields || []).filter((item) => item.status !== "available" && ["risk_required", "scenario_required"].includes(item.requirement));
-    result.className = "";
-    result.innerHTML = `<h2>${api.escapeHtml(report.label)}</h2><p>${badge(report.risk_readiness)} 风险数据完整度：<strong>${percent(report.risk_data_completeness)}</strong></p><div class="notice">当前不能输出正式风险等级。以下数据缺失或尚未接入。</div><div class="field-grid">${blockers.map((item) => `<div class="field-item"><strong>${api.escapeHtml(item.label_zh)}</strong>${badge(item.status)}<br/><small>${item.interface ? `预留接口：${api.escapeHtml(item.interface)}` : "需从工程资料或现场调查补充"}</small></div>`).join("")}</div>`;
+  setupRiskExport();
+  const payload = await api.getJson("/api/risk/screening", { summary: {}, assessments: [], boundary: {} });
+  const rows = payload.assessments || [];
+  let selectedId = rows[0]?.slope_id || null;
+  const counts = payload.summary?.priority_counts || {};
+  document.querySelector("#riskMetrics").innerHTML = [
+    ["P1", counts.P1 || 0, "优先复核"], ["P2", counts.P2 || 0, "重点复核"],
+    ["P3", counts.P3 || 0, "常规复核"], ["P4", counts.P4 || 0, "资料补录"],
+  ].map(([code, value, label]) => `<article class="card metric-card risk-metric ${code.toLowerCase()}"><strong>${api.escapeHtml(value)}</strong><span>${code} ${label}</span></article>`).join("");
+
+  const search = document.querySelector("#riskSearch");
+  const priorityFilter = document.querySelector("#riskPriorityFilter");
+  const tableBody = document.querySelector("#riskRows");
+
+  function visibleRows() {
+    const keyword = search.value.trim().toLowerCase();
+    const priority = priorityFilter.value;
+    return rows.filter((row) => {
+      const text = [row.slope_label, row.business_id, row.route_code, row.station, ...(row.hazard_types || []), ...(row.hazard_body_types || [])].join(" ").toLowerCase();
+      return (!keyword || text.includes(keyword)) && (!priority || row.screening_priority_code === priority);
+    });
+  }
+
+  function renderRows() {
+    const filtered = visibleRows();
+    if (!filtered.length) {
+      tableBody.innerHTML = `<tr><td colspan="5">没有符合条件的边坡。</td></tr>`;
+      return;
+    }
+    tableBody.innerHTML = filtered.map((row) => `<tr data-risk-id="${api.escapeHtml(row.slope_id)}" class="${selectedId === row.slope_id ? "selected" : ""}">
+      <td><span class="priority-badge ${row.screening_priority_code.toLowerCase()}">${api.escapeHtml(row.screening_priority_code)}</span><span class="table-subtext">${api.escapeHtml(row.screening_priority)}</span></td>
+      <td><strong>${api.escapeHtml(row.business_id || row.slope_label)}</strong><span class="table-subtext">${api.escapeHtml(row.slope_label)}</span></td>
+      <td>${api.escapeHtml([...(row.hazard_types || []), ...(row.hazard_body_types || [])].filter((value, index, all) => all.indexOf(value) === index).join("、") || "未明确")}</td>
+      <td>${api.escapeHtml(row.stability_concern)}</td>
+      <td><strong>${api.escapeHtml(row.risk_data_inventory?.available_categories ?? "—")}/${api.escapeHtml(row.risk_data_inventory?.total_categories ?? "—")} 类</strong><span class="table-subtext missing-count">首轮建议补 ${api.escapeHtml(row.risk_data_inventory?.first_round_recommended ?? 0)} 类</span></td>
+    </tr>`).join("");
+    tableBody.querySelectorAll("[data-risk-id]").forEach((node) => {
+      node.addEventListener("click", () => {
+        selectedId = node.dataset.riskId;
+        renderRows();
+        renderDetail(rows.find((row) => row.slope_id === selectedId));
+      });
+    });
+  }
+
+  function renderDetail(row) {
+    const target = document.querySelector("#riskDetail");
+    if (!row) {
+      target.className = "card detail-empty";
+      target.textContent = "未找到筛查结果。";
+      return;
+    }
+    const basis = (row.basis || []).map((item) => {
+      const evidence = item.evidence;
+      const evidenceHtml = evidence ? `<blockquote class="evidence-quote">${api.escapeHtml(evidence.text || "已定位证据")}<span class="table-subtext">${api.escapeHtml(evidence.source_file || "")} · PDF第${api.escapeHtml(evidence.page)}页</span></blockquote>` : "";
+      return `<div class="risk-basis"><strong>${api.escapeHtml(item.label)}</strong><span>${api.escapeHtml(item.value)}</span><small>${api.escapeHtml(item.interpretation || "")}</small>${evidenceHtml}${item.boundary ? `<small class="missing-text">${api.escapeHtml(item.boundary)}</small>` : ""}</div>`;
+    }).join("") || `<p class="detail-empty">暂无足够的命中依据。</p>`;
+    const allGaps = row.critical_data_gaps || [];
+    const sourceGapCount = allGaps.filter((item) => item.gap_scope !== "interface_pending").length;
+    const interfaceGapCount = allGaps.length - sourceGapCount;
+    const inventory = row.risk_data_inventory || {};
+    const topGaps = allGaps.slice(0, 5);
+    const topGapList = topGaps.map((item) => `<li><strong>${api.escapeHtml(item.label || item.code)} <small class="gap-scope">${api.escapeHtml(item.gap_scope_label || "")}</small></strong><span>${api.escapeHtml(item.collection_hint || "")}</span></li>`).join("");
+    const gaps = allGaps.map((item) => `<div class="field-item risk-gap-item">
+      <div class="risk-gap-head"><strong>${api.escapeHtml(item.label || item.code)}</strong><span class="gap-scope">${api.escapeHtml(item.gap_scope_label || "")}</span><span class="gap-priority priority-${api.escapeHtml(item.improvement_priority ?? 2)}">${api.escapeHtml(item.improvement_priority_label || "基础补录")}</span>${badge(item.status || "missing")}</div>
+      <small class="gap-role">作用：${api.escapeHtml(item.accuracy_role || "基础信息")}</small>
+      <p>${api.escapeHtml(item.why_it_matters || "")}</p>
+      <small><b>建议补采：</b>${api.escapeHtml(item.collection_hint || "从资料或现场补录，并保留来源和时间。")}</small>
+      ${item.interface ? `<small class="gap-interface">待接接口：${api.escapeHtml(item.interface)}</small>` : ""}
+    </div>`).join("");
+    const scenarios = (row.stability_scenarios || []).map((item) => `<tr><td>${api.escapeHtml(item.condition)}</td><td>${item.fs == null ? "—" : api.escapeHtml(item.fs)}</td><td>${api.escapeHtml(item.status || "未判定")}</td><td>${item.current_status_known ? "对象为现状边坡（日期待核）" : "设计验算或时效待核"}</td></tr>`).join("");
+    target.className = "card risk-detail";
+    target.innerHTML = `
+      <div class="card-title-row"><div><h2>${api.escapeHtml(row.slope_label)}</h2><p class="section-subtitle">${api.escapeHtml(row.business_id || "")}</p></div><span class="priority-badge ${row.screening_priority_code.toLowerCase()}">${api.escapeHtml(row.screening_priority_code)} ${api.escapeHtml(row.screening_priority)}</span></div>
+      <div class="notice">${row.formal_risk_level ? `正式风险等级：${api.escapeHtml(row.formal_risk_level)}` : "正式风险等级：暂无法确定。当前只给出人工复核优先级。"}</div>
+      <div class="risk-data-callout">
+        <h3>为了进一步判断风险值，建议补充的数据</h3>
+        <p>共定义 <strong>${api.escapeHtml(inventory.total_categories ?? 18)}</strong> 类可提高研判准确度的信息，当前已具备 <strong>${api.escapeHtml(inventory.available_categories ?? "—")}</strong> 类。其余信息不要求一次性全部补齐；建议首轮先补下面${topGaps.length}类。</p>
+        <ol>${topGapList || "<li>当前未列出优先补充项。</li>"}</ol>
+        <small class="callout-footnote">其余未具备信息：该边坡资料 ${sourceGapCount} 类，待接接口/补录 ${interfaceGapCount} 类。可在下方展开查看。</small>
+      </div>
+      <div class="detail-list compact">
+        <div class="detail-row"><small>稳定性关注</small>${api.escapeHtml(row.stability_concern)}</div>
+        <div class="detail-row"><small>证据置信度</small>${api.escapeHtml(row.confidence)}（定性，不是概率）</div>
+        <div class="detail-row"><small>复核理由</small>${api.escapeHtml((row.screening_reasons || []).join("；"))}</div>
+      </div>
+      <div class="detail-block"><h3>命中依据</h3><div class="risk-basis-list">${basis}</div></div>
+      ${scenarios ? `<div class="detail-block"><h3>稳定性工况</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>工况</th><th>Fs</th><th>原报告结论</th><th>时效边界</th></tr></thead><tbody>${scenarios}</tbody></table></div></div>` : ""}
+      <div class="detail-block"><h3>建议动作</h3><ol class="action-list">${(row.recommended_action || []).map((item) => `<li>${api.escapeHtml(item)}</li>`).join("")}</ol></div>
+      <details class="detail-block risk-gap-details"><summary>查看全部${allGaps.length}项缺失数据及采集方法</summary><p class="section-subtitle">已按预计作用排序；制度项不替代现场数据。</p><div class="risk-gap-list">${gaps || "<p>未列出。</p>"}</div></details>
+      <div class="detail-block"><h3>结论边界</h3><ul class="boundary-list">${(row.limitations || []).map((item) => `<li>${api.escapeHtml(item)}</li>`).join("")}</ul></div>`;
+  }
+
+  const canDo = (payload.boundary?.can_do || []).map((item) => `<li>${api.escapeHtml(item)}</li>`).join("");
+  const cannotDo = (payload.boundary?.cannot_do || []).map((item) => `<li>${api.escapeHtml(item)}</li>`).join("");
+  document.querySelector("#riskBoundary").innerHTML = `<div><h3>当前可以做</h3><ul>${canDo}</ul></div><div><h3>当前不能做</h3><ul>${cannotDo}</ul></div>`;
+  search.addEventListener("input", renderRows);
+  priorityFilter.addEventListener("change", renderRows);
+  renderRows();
+  renderDetail(rows[0]);
+}
+
+function setupRiskExport() {
+  const button = document.querySelector("#exportRiskBtn");
+  if (!button || button.dataset.ready === "true") return;
+  button.dataset.ready = "true";
+  const fileName = document.querySelector("#riskExportFileName");
+  const status = document.querySelector("#riskExportStatus");
+  const link = document.querySelector("#riskExportDownloadLink");
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    link.hidden = true;
+    status.textContent = "正在生成风险研判离线 HTML…";
+    try {
+      const response = await fetch("/api/export/risk-standalone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file_name: fileName.value.trim() }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || `导出失败：HTTP ${response.status}`);
+      link.href = payload.download_url;
+      link.download = payload.file_name;
+      link.textContent = `再次下载 ${payload.file_name}`;
+      link.hidden = false;
+      status.textContent = `已生成 ${payload.file_name}，包含 ${payload.slopes || 0} 个边坡，大小 ${(Number(payload.bytes || 0) / 1024).toFixed(1)} KB。`;
+      link.click();
+    } catch (error) {
+      status.textContent = `导出失败：${error.message}`;
+    } finally {
+      button.disabled = false;
+    }
   });
 }
 
