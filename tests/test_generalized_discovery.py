@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from slopekg.extractors import extract_slope_registry
+from slopekg.extractors import extract_slope_registry, mark_station_resolution
 
 
 def block(doc_id: str, page: int, block_id: str, text: str, x0: float = 10.0) -> dict:
@@ -17,6 +17,13 @@ def block(doc_id: str, page: int, block_id: str, text: str, x0: float = 10.0) ->
 
 
 class GeneralizedSlopeDiscoveryTests(unittest.TestCase):
+    def test_non_increasing_source_station_is_retained_but_not_a_slope_root(self):
+        candidate = {"station": "K1625+980-K1625+030"}
+        mark_station_resolution(candidate)
+        self.assertFalse(candidate["eligible_as_slope_root"])
+        self.assertEqual(candidate["entity_resolution_status"], "non_increasing_station_range")
+        self.assertEqual(candidate["quality_issues"], ["non_increasing_station_range"])
+
     def test_generic_inventory_does_not_require_exact_title_or_side(self):
         document = {"id": "doc1", "file_name": "G999-1.000-2.000-勘察报告.pdf", "title": "沿线灾害报告"}
         title = block("doc1", 2, "b1", "表1-1 沿线灾害一览表")

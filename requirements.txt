@@ -13,7 +13,7 @@ python-docx>=1.1
 rapidfuzz>=3.9
 
 # OCR stack for Chinese scanned PDFs, table screenshots, and drawing title blocks.
-# If PaddlePaddle installation is slow or platform-specific, install it following
-# the official PaddlePaddle selector, then install paddleocr.
+# The base dependency is CPU-portable. On an NVIDIA machine run
+# scripts/setup_ocr_backend.ps1 -Backend auto to replace it with the GPU build.
 paddleocr>=2.8
 paddlepaddle>=2.6

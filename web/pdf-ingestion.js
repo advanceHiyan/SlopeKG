@@ -22,6 +22,9 @@
     details: document.getElementById("jobDetails"),
     error: document.getElementById("jobError"),
     ocrPages: document.getElementById("ocrPages"),
+    ocrDevice: document.getElementById("ocrDevice"),
+    ocrWorkers: document.getElementById("ocrWorkers"),
+    ocrBatchSize: document.getElementById("ocrBatchSize"),
     forceOcr: document.getElementById("forceOcr"),
   };
 
@@ -92,7 +95,8 @@
       ["任务编号", job.id],
       ["开始时间", job.started_at || job.created_at || "等待中"],
       ["处理模式", options.parse_mode === "deep" ? "深度解析（基础结果 + DeepSeek）" : "基础解析（不调用大模型）"],
-      ["处理设置", `OCR最多 ${options.ocr_pages ?? 0} 页`],
+      ["处理设置", `OCR最多 ${options.ocr_pages ?? 0} 页 / ${String(options.ocr_device || "auto").toUpperCase()} / 渲染并发 ${options.ocr_workers ?? 4} / 批量 ${options.ocr_batch_size || "自动"}`],
+      parsed.ocr_device_counts && Object.keys(parsed.ocr_device_counts).length ? ["实际OCR设备", Object.entries(parsed.ocr_device_counts).map(([name, count]) => `${name}：${count}页`).join(" / ")] : null,
       parsed.documents != null ? ["完成结果", `${parsed.documents} 份PDF / ${parsed.pages} 页 / ${result.graph?.nodes ?? 0} 个节点`] : null,
       llm.candidates != null ? ["语义校验", `${llm.passed ?? 0}/${llm.candidates} 通过`] : null,
     ].filter(Boolean).map(([label, value]) => `<div class="detail-row"><small>${escapeHtml(label)}</small>${escapeHtml(value)}</div>`).join("");
@@ -150,6 +154,9 @@
   function jobOptions(parseMode, reuseParsed = false, ocrPagesOverride = null) {
     return {
       ocr_pages: ocrPagesOverride == null ? Math.max(0, Math.min(1000, Number(elements.ocrPages.value || 0))) : ocrPagesOverride,
+      ocr_device: elements.ocrDevice.value || "auto",
+      ocr_workers: Math.max(1, Math.min(16, Number(elements.ocrWorkers.value || 4))),
+      ocr_batch_size: Math.max(0, Math.min(32, Number(elements.ocrBatchSize.value || 0))),
       force_ocr: elements.forceOcr.checked,
       parse_mode: parseMode,
       llm_model: "deepseek-v4-flash",

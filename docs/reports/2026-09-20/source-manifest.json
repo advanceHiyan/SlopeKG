@@ -1,0 +1,451 @@
+{
+  "verified_at": "2026-09-20T23:07:05+08:00",
+  "hash_scope": "Local source bytes before Git newline normalization.",
+  "files": [
+    {
+      "path": "docs/PDF计算资料提取优化与缺口复核_20260909.md",
+      "bytes": 5353,
+      "sha256": "b5e92b03046889be806d5dd8acb0b0b74d6cd74e16b10c85284201008c42304f"
+    },
+    {
+      "path": "docs/reports/2026-09-20/evaluation_engineering.json",
+      "bytes": 3850,
+      "sha256": "b128dbd16f43b65ee37bb2848f66fe2c859c7b0c28b1b0d7e4db8342289d8132"
+    },
+    {
+      "path": "docs/reports/2026-09-20/evaluation_pages.json",
+      "bytes": 10740,
+      "sha256": "93e3e07121c2fd6dab1e19021a137d654d1d428127fe881207a0824b8c678b06"
+    },
+    {
+      "path": "docs/reports/2026-09-20/progress-evidence.json",
+      "bytes": 17056,
+      "sha256": "a9899eed9babd944624a3ebcf0b5cd51078d159fde3193d50226e3becc4884cd"
+    },
+    {
+      "path": "docs/阶段成果说明_20260915.md",
+      "bytes": 4904,
+      "sha256": "e74b796ababa32fbb1d02a4d60eb39a234bc29a79daad92fda22fb0c8b68b3af"
+    },
+    {
+      "path": "docs/风险研判多轴升级说明_20260915.md",
+      "bytes": 3464,
+      "sha256": "ccaef21c6cdf40b32d2934fcc97f7ce7622c3e7f6d7b76cca21393a8c53f5f90"
+    },
+    {
+      "path": "output/demo/evaluation.json",
+      "bytes": 8283,
+      "sha256": "9ac972fd924a4775295f7f4e709547200f68d0451f3bbcfb3aad3fe9cd7f5c04"
+    },
+    {
+      "path": "output/demo/multimodal/asset_catalog.json",
+      "bytes": 741491,
+      "sha256": "b2f9cd34550dbd90b93fff6abad485d86b057eab4e07187b085aa3465b73c1bd"
+    },
+    {
+      "path": "output/demo/multimodal/quality_report.json",
+      "bytes": 907,
+      "sha256": "c81a627176e79250feadf03f328383d5f8ddb402b6d3c2b8858c5c0c13923a45"
+    },
+    {
+      "path": "output/demo/pipeline_state.json",
+      "bytes": 14303,
+      "sha256": "e2c0fd3ac586a6f23cc5cb17c354267a617ab15b6cdba7cf49a1ceb10e7e6eb6"
+    },
+    {
+      "path": "output/demo/risk/evaluation.json",
+      "bytes": 414,
+      "sha256": "1e7ddd54ad88746e0cbc448735528dc4019c746d2faeafaaa308958b57631f12"
+    },
+    {
+      "path": "output/demo/risk/screening.json",
+      "bytes": 1090093,
+      "sha256": "1b8dd0adf2365a3e5e4d6f47b2836b85791f64415d2b320265c0307dd662c1c6"
+    },
+    {
+      "path": "output/demo/rules/rule_library.json",
+      "bytes": 433747,
+      "sha256": "1083b625b26920cd32fdc68dbd6b5be474f43c168f9bfa024d143a8e0fc7350b"
+    },
+    {
+      "path": "output/demo/web/data/demo_graph.json",
+      "bytes": 4499885,
+      "sha256": "2d7dc5abc55867840be2725e66a2ede03e00e446d607fea1475991f06b91d090"
+    },
+    {
+      "path": "scripts/archive_stage_results.py",
+      "bytes": 3941,
+      "sha256": "e6cf4877385c31a4e1ae99ae10c7fb36423990686ca54d2803abc0eef6569358"
+    },
+    {
+      "path": "scripts/build_demo.py",
+      "bytes": 30269,
+      "sha256": "11170a6943f9423bb65b0898a565e7d7b5e42b5a82c6980fb186e72315565323"
+    },
+    {
+      "path": "scripts/build_multimodal_catalog.py",
+      "bytes": 1739,
+      "sha256": "2e7efb1b553a906fae0cb8bcbf0b581781cdd8af1ec6845088b6db1f919e4a17"
+    },
+    {
+      "path": "scripts/evaluate_engineering_extraction.py",
+      "bytes": 3917,
+      "sha256": "007ef4fee2ed7286f58a56146be48af014734c80d3140fb91c38b59234435312"
+    },
+    {
+      "path": "scripts/evaluate_page_extraction.py",
+      "bytes": 6791,
+      "sha256": "34cf4d4d3abf10add44be59ccfd5e68898f95cb18f9063bc934d6aac9fedb1b3"
+    },
+    {
+      "path": "scripts/evaluate_risk_predictions.py",
+      "bytes": 1181,
+      "sha256": "ef6dbda7a2c5a30e4c425b5023151cb801184ec588f4eaffb862bdf3b7ba67d1"
+    },
+    {
+      "path": "scripts/export_standalone.py",
+      "bytes": 766,
+      "sha256": "76eade88db55bb6f690b71b3b30d3f0714a9988717891eb620c450745e497a79"
+    },
+    {
+      "path": "scripts/extract_rules.py",
+      "bytes": 1066,
+      "sha256": "dac3f065cb4985cffddaae3439c5ed5c5085c775b25fb6ac516284e0d9cbff5e"
+    },
+    {
+      "path": "scripts/extract_with_llm.py",
+      "bytes": 5289,
+      "sha256": "8fb91a62445bf08b6ecccb21d924c8f1f9fb0c8d4e4dc12df93213d900eb756e"
+    },
+    {
+      "path": "scripts/rebuild_from_sidecars.py",
+      "bytes": 3980,
+      "sha256": "6b3804fee76e88b34f75ad3cedca6eae726a46ebde958af1ad1c7983e36acdb8"
+    },
+    {
+      "path": "scripts/run_pipeline.py",
+      "bytes": 2155,
+      "sha256": "1da5139f390dacf379f1c28b86dbf01df33aad4d99983a8ac432e104e869bad9"
+    },
+    {
+      "path": "scripts/run_risk_screening.py",
+      "bytes": 1521,
+      "sha256": "11f34b5206adcf0470a183f87085161c77b0132e0905eb7012d0ef2a3c5f471f"
+    },
+    {
+      "path": "scripts/serve_demo.py",
+      "bytes": 271,
+      "sha256": "fabefe93ecb1f2e21949f36fc63c7266b9c3401fb4718cb17297d1d5e0b404b0"
+    },
+    {
+      "path": "scripts/setup_ocr_backend.ps1",
+      "bytes": 1322,
+      "sha256": "9afaf92cd5b1610ccb410dfdc5ad4cf9419fe3299480db0851a76f7fb295ce0b"
+    },
+    {
+      "path": "scripts/start_demo.ps1",
+      "bytes": 2739,
+      "sha256": "c4474634694dc30a147baf41e4492932560ac57d047480f263d364b9384a526b"
+    },
+    {
+      "path": "src/slopekg/__init__.py",
+      "bytes": 86,
+      "sha256": "3af09f98ba16b2537eebfc3819ab4e619f78c77dbfae6116c1e017702d049bd6"
+    },
+    {
+      "path": "src/slopekg/config.py",
+      "bytes": 3959,
+      "sha256": "84b2251321fd8b3b4683bc488a1f7b917365a0b3f9f48ba8da628df036ae54df"
+    },
+    {
+      "path": "src/slopekg/deps.py",
+      "bytes": 1256,
+      "sha256": "4cf4d6cba5c4a8af9273c6e7e92887fc4e31554922c6645b543a109d09cbec1d"
+    },
+    {
+      "path": "src/slopekg/engineering.py",
+      "bytes": 15826,
+      "sha256": "035807c804f5ea27875127ba556e455984b9fedfc2c23c369d41cfa1580fd1dc"
+    },
+    {
+      "path": "src/slopekg/exporter.py",
+      "bytes": 7098,
+      "sha256": "ce69e06316718118bfcb5bd9f1511f295ced594a3930f2cc45ed5a0c38dec24b"
+    },
+    {
+      "path": "src/slopekg/extractors.py",
+      "bytes": 64915,
+      "sha256": "3b45cc891ef980db5087794776cbb1cdcc3fc8763fe5b2f821bf3348c9714872"
+    },
+    {
+      "path": "src/slopekg/graph_builder.py",
+      "bytes": 45839,
+      "sha256": "f72391e82e5627944f70be34bf3f861c162fd1bb1e50e40538afef39af1cc255"
+    },
+    {
+      "path": "src/slopekg/llm.py",
+      "bytes": 3396,
+      "sha256": "6a72134bcd438b36e0cb3ea0c7e87e38b94267603e6aeddc06c65fc326091038"
+    },
+    {
+      "path": "src/slopekg/manual.py",
+      "bytes": 17467,
+      "sha256": "12c0fb82c6c025110efa20c41f92a3040514eaab47dbea2a805fef9fd93eaf1a"
+    },
+    {
+      "path": "src/slopekg/multimodal.py",
+      "bytes": 20216,
+      "sha256": "049e620e998bbf661527d75f022fbaf5149d2cbab0dc0e21f42bd0b97ad3d7d1"
+    },
+    {
+      "path": "src/slopekg/ocr.py",
+      "bytes": 19030,
+      "sha256": "a73a4db609efc191a43688eaeb36403107becb5226f20503120e75a1255dc1ab"
+    },
+    {
+      "path": "src/slopekg/parsers.py",
+      "bytes": 17007,
+      "sha256": "2297329be5b739dadb95afff7a80849b01c8490ba96d766712d94f3c3105fd0f"
+    },
+    {
+      "path": "src/slopekg/pipeline.py",
+      "bytes": 31451,
+      "sha256": "bca6133f9216344faafc0ea9d9899271a90414140d9569c32267af35bcd12157"
+    },
+    {
+      "path": "src/slopekg/quality.py",
+      "bytes": 11238,
+      "sha256": "d7f708171655be493ef8fdc21db7952b8e9384456573537ed7663a3991e375da"
+    },
+    {
+      "path": "src/slopekg/risk.py",
+      "bytes": 66382,
+      "sha256": "a419a686bbd987e0d2a0c0265b5472a445440a46ab64fae4357dca8908522731"
+    },
+    {
+      "path": "src/slopekg/risk_evaluation.py",
+      "bytes": 4189,
+      "sha256": "c1f1f5f872699c804421f86c414fbdcac3015de8b074bbd1efd664e80bb6b8cf"
+    },
+    {
+      "path": "src/slopekg/rule_extraction.py",
+      "bytes": 37186,
+      "sha256": "76bb449f2b0e8c17a78407c726203335a149ef8111d12991ac74de0f835f5075"
+    },
+    {
+      "path": "src/slopekg/schema.py",
+      "bytes": 23952,
+      "sha256": "89343dab7283fb1f5aff541fc8c91671cf3ae5980737f1d8a1caa09ddedfe9d5"
+    },
+    {
+      "path": "src/slopekg/semantic.py",
+      "bytes": 31906,
+      "sha256": "b3d7d0b31f4f86103c292a19bba9d8d9562274529b5dab884981b34429206ca7"
+    },
+    {
+      "path": "src/slopekg/server.py",
+      "bytes": 41535,
+      "sha256": "d272fd7ad478b4a0ad7b212bf11b056412224f6fc9600cad36dc3d867ba6f46b"
+    },
+    {
+      "path": "src/slopekg/storage.py",
+      "bytes": 1585,
+      "sha256": "a3bcb6acdc32c43e4b92dece617de6ac2ed7b64eeb0189833196e9a5b91c9bdb"
+    },
+    {
+      "path": "tests/browser/assets.test.cjs",
+      "bytes": 6763,
+      "sha256": "40f58f0322d75a8d036326054d2c182bc3d0f10e988529efa1b9b72dc4185996"
+    },
+    {
+      "path": "tests/fixtures/engineering_gold.json",
+      "bytes": 2693,
+      "sha256": "9cf791bbf55893500fe0e83bcefa821699582d7c5970aa8da84ce7ed86fee971"
+    },
+    {
+      "path": "tests/fixtures/page_extraction_gold.json",
+      "bytes": 3247,
+      "sha256": "01aa0bdea7a036ec71380ab14b054e7dd2594867eceb3bfd9d645647b1baf21c"
+    },
+    {
+      "path": "tests/test_adaptive_extraction.py",
+      "bytes": 9186,
+      "sha256": "76580f215d985267314ebe9218f9a26abe728fad56006bd356edf8024a17e5f9"
+    },
+    {
+      "path": "tests/test_asset_integration.py",
+      "bytes": 6545,
+      "sha256": "b899a46a182f4c610b86b1883305258e0dc2058819e502c6422df6d7aba0ecba"
+    },
+    {
+      "path": "tests/test_engineering_tables.py",
+      "bytes": 7765,
+      "sha256": "8fbbe3da25a26c450f06fd289aa7b77d1883b1b0a598b2cdcf04a9b3f01a2547"
+    },
+    {
+      "path": "tests/test_generalized_discovery.py",
+      "bytes": 2674,
+      "sha256": "7a337e81670df14c3c515adb37a3c453e5bc5491d98a2633b4d10754f91fa73b"
+    },
+    {
+      "path": "tests/test_graph_schema.py",
+      "bytes": 5240,
+      "sha256": "e09ef8345f0c2f0bd0277d729d6474bef65c144858ac8ebf87812e34a7f3c41c"
+    },
+    {
+      "path": "tests/test_layered_pipeline.py",
+      "bytes": 8236,
+      "sha256": "5c032a157f81684d1a4352df1c283d130ecb471ba2f3a7ff5746cd352a7e696a"
+    },
+    {
+      "path": "tests/test_manual_workflow.py",
+      "bytes": 4689,
+      "sha256": "8988c0abdc3d6e612ff3e64384de63c85ce78a52d51f978523c4015a60adf4fa"
+    },
+    {
+      "path": "tests/test_multimodal.py",
+      "bytes": 6116,
+      "sha256": "da59856a691d227b89dd6e17052af015a6caf689741a4c24fd7ceeae4c78c3d8"
+    },
+    {
+      "path": "tests/test_ocr_runtime.py",
+      "bytes": 3896,
+      "sha256": "1d3bbb6a73957636eb5710a5737d1a4b34a140a73a59fe5cc5dacf3df0ae6031"
+    },
+    {
+      "path": "tests/test_page_extraction_evaluation.py",
+      "bytes": 1509,
+      "sha256": "eed4c2c96cc8042b7956d8e15a61d3ce095bcf2d9d248a0e9921e171aad7cbc4"
+    },
+    {
+      "path": "tests/test_pdf_ingestion.py",
+      "bytes": 3757,
+      "sha256": "2621ab00565878591c6fdde2bdc8297f80e9239494a009bd4f19e73fa477fe14"
+    },
+    {
+      "path": "tests/test_risk_evaluation.py",
+      "bytes": 1263,
+      "sha256": "c5f23c222ee62c733c4b8b89570602e426f7a9b56e8317a1f42a39f2bd53fe65"
+    },
+    {
+      "path": "tests/test_risk_screening.py",
+      "bytes": 12547,
+      "sha256": "cbb88cbc778c5c4441b5c4630cf8843449ac8ebdfef529703f44d871592a056f"
+    },
+    {
+      "path": "tests/test_rule_extraction.py",
+      "bytes": 4971,
+      "sha256": "ad80aef6e89246dbe15f1f52c695f2f46ad1811ba523da71c2b342669ce4dd33"
+    },
+    {
+      "path": "tests/test_standalone_export.py",
+      "bytes": 3447,
+      "sha256": "764b4822c568e7bd777650e8b36c5bb9989033800497162c6ad70e602fed656b"
+    },
+    {
+      "path": "web/api.js",
+      "bytes": 1176,
+      "sha256": "a8283618664fccf92ec33b935f06706484b17cc7c59d8a4fb94d9c703025ab5f"
+    },
+    {
+      "path": "web/app.js",
+      "bytes": 34875,
+      "sha256": "b34659341711332ef0756c65a2a04212e6375cba6179096b5d468df24138e5ac"
+    },
+    {
+      "path": "web/assets.css",
+      "bytes": 1463,
+      "sha256": "53d30b3a617c6113598327e65085d9b9b185673d458e01e35d03e8c9571dcedb"
+    },
+    {
+      "path": "web/assets.html",
+      "bytes": 2376,
+      "sha256": "69122f5791fb58e48091bccf602ff8febf7d824750f758aabcc1496efff4a6d2"
+    },
+    {
+      "path": "web/assets.js",
+      "bytes": 6261,
+      "sha256": "ea78d83ffba9a524f00d0d164caf3179887d7fd6768e72b17f2b25ae3bc31e89"
+    },
+    {
+      "path": "web/data-status.html",
+      "bytes": 2994,
+      "sha256": "f2f902e7e1216d92c4b51ffb1ee021fbb2bd823781157128ba86d1b564804fe0"
+    },
+    {
+      "path": "web/formulas.html",
+      "bytes": 1742,
+      "sha256": "a19b4e3e11e23d823ad0f3649b1c2b1bb67eee7cb3967744d2933ffc852256ab"
+    },
+    {
+      "path": "web/graph.html",
+      "bytes": 3989,
+      "sha256": "7fee538ca829dada1fc57f1aa9ff62050c9562a21fa9800a0bb3d1e5f6933ead"
+    },
+    {
+      "path": "web/index.html",
+      "bytes": 4282,
+      "sha256": "dd4ea42d036a0c00a45d5c6e7f86610626a2efc11f5a79bc21bfe10c71ecb521"
+    },
+    {
+      "path": "web/pages.css",
+      "bytes": 18311,
+      "sha256": "acc0da924f0d7a0918b4091318cad07a293d78593f7fb95ea2c22831ddc521bd"
+    },
+    {
+      "path": "web/pdf-ingestion.html",
+      "bytes": 5346,
+      "sha256": "75f551698733e5685da037b616739e5c53fbbf14812a2bc97dc06d18133b6a93"
+    },
+    {
+      "path": "web/pdf-ingestion.js",
+      "bytes": 14732,
+      "sha256": "c75e6674a410bb8eeb7c52c7b3012e537d1f7b7c545809216b6c213a1fbd8200"
+    },
+    {
+      "path": "web/portal.js",
+      "bytes": 36001,
+      "sha256": "b4009a1284bd9bb833c46fc6765f5862a4f22014c95b9e839b3d2ebd30cd24a3"
+    },
+    {
+      "path": "web/risk-standalone.template.html",
+      "bytes": 17913,
+      "sha256": "96f0c8247160b03f4a48b1ea14726e3075998dde9958c9444b5cf491951de905"
+    },
+    {
+      "path": "web/risk.html",
+      "bytes": 3882,
+      "sha256": "ccb9de34b7aacb3cb42bdf292302f4c1247ffada3f4dc92aacf3ecba166e9a40"
+    },
+    {
+      "path": "web/rule-sources.html",
+      "bytes": 2194,
+      "sha256": "1d683cb3449e23349addec2404921ae617cf19bcf81c35f02dc5e5b2429c7ad2"
+    },
+    {
+      "path": "web/rules.html",
+      "bytes": 4145,
+      "sha256": "7453b7a3642fa2b9a2a624d8586272afc3b2c9d59d435e0c87df86dc6aa9d42f"
+    },
+    {
+      "path": "web/rules.js",
+      "bytes": 19740,
+      "sha256": "94547ebe3d9a23e2b8f9899dda807679bce53802feedd6165227dce8a306962e"
+    },
+    {
+      "path": "web/slopes.html",
+      "bytes": 2044,
+      "sha256": "5b27a105bc1808546f24a069be8fdddd2cf685da91e45cad322dd1908326ef99"
+    },
+    {
+      "path": "web/standalone-report.template.html",
+      "bytes": 23593,
+      "sha256": "663bf5bd1284b17c7f5c960d26f9826c50b9f93064ba8d72cf4686e057ffb81e"
+    },
+    {
+      "path": "web/styles.css",
+      "bytes": 11457,
+      "sha256": "ec1669f4fe6e98572afb58280529e62a1edbd61609ebc47d0859724c4a5a3882"
+    }
+  ]
+}

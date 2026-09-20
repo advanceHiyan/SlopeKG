@@ -22,6 +22,8 @@ def export_standalone_html(
     *,
     paths: DemoPaths = PATHS,
     graph_mode: str = "active",
+    graph_override: dict[str, Any] | None = None,
+    completeness_override: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Export the current result as one offline HTML file with embedded data."""
     graph_files = {
@@ -39,7 +41,7 @@ def export_standalone_html(
             raise ValueError("深度图谱与当前PDF版本不一致，请先执行深度解析，或导出当前图谱")
     if not graph_file.exists() and graph_mode == "deep":
         graph_file = paths.graph_json
-    graph = read_json(graph_file, None)
+    graph = graph_override if graph_mode == "active" and graph_override is not None else read_json(graph_file, None)
     if not graph:
         raise FileNotFoundError(f"Graph output is missing: {graph_file}")
 
@@ -53,7 +55,7 @@ def export_standalone_html(
         },
         "graph": graph_for_export,
         "state": read_json(paths.state_json, {}),
-        "completeness": read_json(paths.completeness_json, {}),
+        "completeness": completeness_override if completeness_override is not None else read_json(paths.completeness_json, {}),
         "evaluation": read_json(paths.evaluation_json, {}),
         "schema": read_json(paths.schema_json, {}),
     }
@@ -80,10 +82,11 @@ def export_risk_standalone_html(
     output: Path = DEFAULT_RISK_OUTPUT,
     *,
     paths: DemoPaths = PATHS,
+    risk_override: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Export the current macro risk screening as an interactive single HTML file."""
     risk_file = paths.output_dir / "risk" / "screening.json"
-    risk = read_json(risk_file, None)
+    risk = risk_override if risk_override is not None else read_json(risk_file, None)
     if not risk:
         raise FileNotFoundError(f"Risk screening output is missing: {risk_file}")
 
@@ -94,6 +97,9 @@ def export_risk_standalone_html(
             "source": str(risk_file.relative_to(paths.root)),
         },
         "risk": risk,
+        "evaluation": read_json(paths.output_dir / "risk" / "evaluation.json", {
+            "status": "requires_independent_expert_gold_set", "evaluated": 0, "metrics": None,
+        }),
     }
     serialized = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
     template = RISK_TEMPLATE_FILE.read_text(encoding="utf-8")
@@ -135,6 +141,18 @@ def compact_graph_for_offline(graph: dict[str, Any]) -> dict[str, Any]:
         "omitted_property_assertions": len(graph.get("property_assertions", [])),
         "omitted_source_records": len(graph.get("source_records", [])),
         "full_trace_available_in_graph_json": True,
+        "visual_edge_provenance_stored_on_asset_node": True,
     }
     compact["meta"] = compact_meta
+    # Visual asset provenance is already present in the asset's properties.
+    # The offline viewer reads those properties, not these duplicated edge
+    # fields. Keep every node/edge and other edge evidence unchanged.
+    visual_ids = {n["id"] for n in graph.get("nodes", []) if n.get("props", {}).get("asset_catalog_member")}
+    compact["edges"] = [
+        {**edge, "props": {k: v for k, v in edge.get("props", {}).items() if k not in {"source_document_id", "source_page"}}}
+        if edge.get("relation") in {"HAS_VISUAL_ASSET", "DERIVED_FROM"}
+        and (edge.get("source") in visual_ids or edge.get("target") in visual_ids)
+        else edge
+        for edge in graph.get("edges", [])
+    ]
     return compact

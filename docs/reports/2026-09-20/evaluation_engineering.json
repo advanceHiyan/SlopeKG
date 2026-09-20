@@ -1,0 +1,156 @@
+{
+  "scope": "已人工查看原页的局部表格回归集，不代表全库准确率或覆盖率，也不代表工程结论正确性",
+  "cases": [
+    {
+      "file_prefix": "G209-2388.976-2435.900-施工",
+      "page": 33,
+      "kind": "parameters",
+      "expected": 6,
+      "extracted": 6,
+      "correct": 6,
+      "association_ok": true,
+      "issue_detection_ok": true,
+      "passed": true
+    },
+    {
+      "file_prefix": "G209-2388.976-2435.900-施工",
+      "page": 33,
+      "kind": "factors",
+      "expected": 2,
+      "extracted": 2,
+      "correct": 2,
+      "association_ok": true,
+      "issue_detection_ok": true,
+      "passed": true
+    },
+    {
+      "file_prefix": "G318",
+      "page": 25,
+      "kind": "parameters",
+      "expected": 6,
+      "extracted": 6,
+      "correct": 6,
+      "association_ok": true,
+      "issue_detection_ok": true,
+      "passed": true
+    },
+    {
+      "file_prefix": "G347-1361",
+      "page": 14,
+      "kind": "parameters",
+      "expected": 18,
+      "extracted": 18,
+      "correct": 18,
+      "association_ok": true,
+      "issue_detection_ok": true,
+      "passed": true
+    },
+    {
+      "file_prefix": "G347-1361",
+      "page": 18,
+      "kind": "factors",
+      "expected": 4,
+      "extracted": 4,
+      "correct": 4,
+      "association_ok": true,
+      "issue_detection_ok": true,
+      "passed": true
+    },
+    {
+      "file_prefix": "G351",
+      "page": 42,
+      "kind": "parameters",
+      "expected": 18,
+      "extracted": 18,
+      "correct": 18,
+      "association_ok": true,
+      "issue_detection_ok": true,
+      "passed": true
+    },
+    {
+      "file_prefix": "G351",
+      "page": 42,
+      "kind": "factors",
+      "expected": 2,
+      "extracted": 2,
+      "correct": 2,
+      "association_ok": true,
+      "issue_detection_ok": true,
+      "passed": true
+    },
+    {
+      "file_prefix": "G351",
+      "page": 44,
+      "kind": "parameters",
+      "expected": 18,
+      "extracted": 18,
+      "correct": 18,
+      "association_ok": true,
+      "issue_detection_ok": true,
+      "passed": true
+    },
+    {
+      "file_prefix": "G351",
+      "page": 44,
+      "kind": "factors",
+      "expected": 2,
+      "extracted": 2,
+      "correct": 2,
+      "association_ok": true,
+      "issue_detection_ok": true,
+      "passed": true
+    }
+  ],
+  "cases_passed": 9,
+  "cases_total": 9,
+  "expected_records": 76,
+  "extracted_records": 76,
+  "correct_records": 76,
+  "precision": 1.0,
+  "recall": 1.0,
+  "corpus_counts": {
+    "registry_source_rows": 63,
+    "registry_rows": 62,
+    "registry_records_needing_review": 1,
+    "registry_rows_by_route": {
+      "G209": 13,
+      "G318": 13,
+      "G344": 1,
+      "G347": 9,
+      "G351": 26
+    },
+    "coordinate_rows": 13,
+    "treatment_rows": 13,
+    "geometry_rows": 11,
+    "section_fact_rows": 59,
+    "engineering_tables": 56,
+    "engineering_tables_associated": 55,
+    "engineering_tables_document_scope": 1,
+    "engineering_tables_needing_review": 1,
+    "engineering_tables_with_source_issues": 1,
+    "material_parameter_values": 254,
+    "table_stability_results": 38,
+    "assertions": 1285,
+    "page_type_counts": {
+      "scanned": 75,
+      "mixed": 7,
+      "table": 190,
+      "native_text": 47,
+      "drawing": 329,
+      "blank": 3
+    },
+    "native_bbox_coverage": 1.0
+  },
+  "source_issues": [
+    {
+      "source_file": "G351-1570.950-1625.800-其他文件-185055.pdf",
+      "page": 44,
+      "station": "K1587+700-K1587+800",
+      "quality_issues": [
+        "caption_station_mismatch",
+        "possible_text_table_status_conflict"
+      ],
+      "caption": "表4-5 K1587+800~K1587+790 滑坡稳定性评价"
+    }
+  ]
+}

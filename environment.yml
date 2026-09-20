@@ -20,5 +20,7 @@ dependencies:
       - openpyxl>=3.1
       - python-docx>=1.1
       - paddleocr>=2.8
+      # Portable baseline; scripts/setup_ocr_backend.ps1 selects the GPU build
+      # automatically after environment creation when NVIDIA hardware exists.
       - paddlepaddle>=2.6
       - rapidfuzz>=3.9

@@ -1,0 +1,414 @@
+{
+  "generated_at": "2026-09-20T15:19:52",
+  "scope": "查看原页后建立的11页局部回归集；包含可追溯的版面拼接候选，不代表全库字符级准确率、字段级准确率或工程结论正确性",
+  "summary": {
+    "cases_passed": 11,
+    "cases_total": 11,
+    "documents_covered": 9,
+    "source_documents": 9,
+    "assistant_reviewed_cases": 3,
+    "expected_key_facts": 55,
+    "matched_key_facts": 55,
+    "key_fact_recall": 1.0,
+    "by_page_type": {
+      "drawing": {
+        "passed": 2,
+        "total": 2
+      },
+      "native_text": {
+        "passed": 4,
+        "total": 4
+      },
+      "scanned": {
+        "passed": 3,
+        "total": 3
+      },
+      "table": {
+        "passed": 2,
+        "total": 2
+      }
+    }
+  },
+  "cases": [
+    {
+      "file": "G209-2388.976-2435.900-其他文件-185255.pdf",
+      "page": 10,
+      "page_type": "native_text",
+      "classified_page_type": "native_text",
+      "source_items": 36,
+      "expected_facts": 5,
+      "matched_facts": 5,
+      "checks": [
+        {
+          "expected": "3.工程地质条件",
+          "matched": true
+        },
+        {
+          "expected": "3.1地形地貌",
+          "matched": true
+        },
+        {
+          "expected": "志留系罗惹坪组",
+          "matched": true
+        },
+        {
+          "expected": "三叠系嘉陵江组",
+          "matched": true
+        },
+        {
+          "expected": "崩塌、危岩体及不稳定边坡",
+          "matched": true
+        }
+      ],
+      "mean_ocr_confidence": null,
+      "passed": true,
+      "review_method": "existing_human_review"
+    },
+    {
+      "file": "G344-1015.070-1024.170-其他文件-081608(1).pdf",
+      "page": 10,
+      "page_type": "native_text",
+      "classified_page_type": "native_text",
+      "source_items": 40,
+      "expected_facts": 4,
+      "matched_facts": 4,
+      "checks": [
+        {
+          "expected": "5.2滑坡类型及规模",
+          "matched": true
+        },
+        {
+          "expected": "滑坡体厚度2-7米",
+          "matched": true
+        },
+        {
+          "expected": "浅层岩质滑坡中的破碎岩体滑坡",
+          "matched": true
+        },
+        {
+          "expected": "规模属小型滑坡",
+          "matched": true
+        }
+      ],
+      "mean_ocr_confidence": null,
+      "passed": true,
+      "review_method": "existing_human_review"
+    },
+    {
+      "file": "G209-2388.976-2435.900-施工图设计文件-185203.pdf",
+      "page": 33,
+      "page_type": "table",
+      "classified_page_type": "table",
+      "source_items": 104,
+      "expected_facts": 6,
+      "matched_facts": 6,
+      "checks": [
+        {
+          "expected": "含砾粉质黏土",
+          "matched": true
+        },
+        {
+          "expected": "重度(kN/m3)",
+          "matched": true
+        },
+        {
+          "expected": "19.0",
+          "matched": true
+        },
+        {
+          "expected": "内聚力C(kPa)",
+          "matched": true
+        },
+        {
+          "expected": "1.14",
+          "matched": true
+        },
+        {
+          "expected": "1.04",
+          "matched": true
+        }
+      ],
+      "mean_ocr_confidence": null,
+      "passed": true,
+      "review_method": "existing_human_review"
+    },
+    {
+      "file": "G351-1570.950-1625.800-其他文件-185055.pdf",
+      "page": 44,
+      "page_type": "table",
+      "classified_page_type": "table",
+      "source_items": 102,
+      "expected_facts": 7,
+      "matched_facts": 7,
+      "checks": [
+        {
+          "expected": "天然工况",
+          "matched": true
+        },
+        {
+          "expected": "1.058",
+          "matched": true
+        },
+        {
+          "expected": "1.15",
+          "matched": true
+        },
+        {
+          "expected": "基本稳定",
+          "matched": true
+        },
+        {
+          "expected": "暴雨工况",
+          "matched": true
+        },
+        {
+          "expected": "1.002",
+          "matched": true
+        },
+        {
+          "expected": "极限平衡",
+          "matched": true
+        }
+      ],
+      "mean_ocr_confidence": null,
+      "passed": true,
+      "review_method": "existing_human_review"
+    },
+    {
+      "file": "G347-1124.365-1125.337-其他文件-183447.pdf",
+      "page": 2,
+      "page_type": "scanned",
+      "classified_page_type": "scanned",
+      "source_items": 13,
+      "expected_facts": 4,
+      "matched_facts": 4,
+      "checks": [
+        {
+          "expected": "G347南德线(远安县境)",
+          "matched": true
+        },
+        {
+          "expected": "盐池段公路地质灾害恢复治理工程",
+          "matched": true
+        },
+        {
+          "expected": "勘察报告",
+          "matched": true
+        },
+        {
+          "expected": "第二册勘察说明及图表",
+          "matched": true
+        }
+      ],
+      "mean_ocr_confidence": 0.9421,
+      "passed": true,
+      "review_method": "existing_human_review"
+    },
+    {
+      "file": "滑坡分类等.pdf",
+      "page": 10,
+      "page_type": "scanned",
+      "classified_page_type": "scanned",
+      "source_items": 46,
+      "expected_facts": 6,
+      "matched_facts": 6,
+      "checks": [
+        {
+          "expected": "整体下沉",
+          "matched": true
+        },
+        {
+          "expected": "岩溶塌陷",
+          "matched": true
+        },
+        {
+          "expected": "采空区塌陷",
+          "matched": true
+        },
+        {
+          "expected": "黄土湿陷",
+          "matched": true
+        },
+        {
+          "expected": "沿河路基水毁",
+          "matched": true
+        },
+        {
+          "expected": "河湾路基凹岸冲刷",
+          "matched": true
+        }
+      ],
+      "mean_ocr_confidence": 0.9974,
+      "passed": true,
+      "review_method": "existing_human_review"
+    },
+    {
+      "file": "G209-2388.976-2435.900-施工图设计文件-185203.pdf",
+      "page": 83,
+      "page_type": "drawing",
+      "classified_page_type": "drawing",
+      "source_items": 58,
+      "expected_facts": 4,
+      "matched_facts": 4,
+      "checks": [
+        {
+          "expected": "K2402+780-K2402+826",
+          "matched": true
+        },
+        {
+          "expected": "坡面清方+挂网喷锚",
+          "matched": true
+        },
+        {
+          "expected": "SDZ-X06-1",
+          "matched": true
+        },
+        {
+          "expected": "施工图设计",
+          "matched": true
+        }
+      ],
+      "mean_ocr_confidence": 0.9535,
+      "passed": true,
+      "review_method": "existing_human_review"
+    },
+    {
+      "file": "G344-1015.070-1024.170-其他文件-081608(1).pdf",
+      "page": 16,
+      "page_type": "drawing",
+      "classified_page_type": "drawing",
+      "source_items": 30,
+      "expected_facts": 4,
+      "matched_facts": 4,
+      "checks": [
+        {
+          "expected": "嵩县G344东灵线梅子沟段边坡灾害防治工程",
+          "matched": true
+        },
+        {
+          "expected": "工程地质平面图",
+          "matched": true
+        },
+        {
+          "expected": "施工图设计",
+          "matched": true
+        },
+        {
+          "expected": "2021.06",
+          "matched": true
+        }
+      ],
+      "mean_ocr_confidence": 0.9491,
+      "passed": true,
+      "review_method": "existing_human_review"
+    },
+    {
+      "file": "G318-1440.378-1506.700-其他文件-183700.pdf",
+      "page": 10,
+      "page_type": "native_text",
+      "classified_page_type": "native_text",
+      "source_items": 47,
+      "expected_facts": 5,
+      "matched_facts": 5,
+      "checks": [
+        {
+          "expected": "3.工程地质条件",
+          "matched": true
+        },
+        {
+          "expected": "项目区典型地貌照片",
+          "matched": true
+        },
+        {
+          "expected": "28.6度",
+          "matched": true
+        },
+        {
+          "expected": "巴东县G318线路区地质构造图",
+          "matched": true
+        },
+        {
+          "expected": "9.5m",
+          "matched": true
+        }
+      ],
+      "mean_ocr_confidence": null,
+      "passed": true,
+      "review_method": "assistant_visual_source_check"
+    },
+    {
+      "file": "G347-1361.560-1373.690-其他文件-113751(1).pdf",
+      "page": 8,
+      "page_type": "native_text",
+      "classified_page_type": "native_text",
+      "source_items": 40,
+      "expected_facts": 5,
+      "matched_facts": 5,
+      "checks": [
+        {
+          "expected": "2.3气象与水文",
+          "matched": true
+        },
+        {
+          "expected": "海拔950m",
+          "matched": true
+        },
+        {
+          "expected": "800-2500mm",
+          "matched": true
+        },
+        {
+          "expected": "20m的高差",
+          "matched": true
+        },
+        {
+          "expected": "神农架林区地层岩性分布图",
+          "matched": true
+        }
+      ],
+      "mean_ocr_confidence": null,
+      "passed": true,
+      "review_method": "assistant_visual_source_check"
+    },
+    {
+      "file": "2021地质灾害评估规范.pdf",
+      "page": 4,
+      "page_type": "scanned",
+      "classified_page_type": "scanned",
+      "source_items": 10,
+      "expected_facts": 5,
+      "matched_facts": 5,
+      "checks": [
+        {
+          "expected": "GB/T40112-2021",
+          "matched": true
+        },
+        {
+          "expected": "前言",
+          "matched": true
+        },
+        {
+          "expected": "中华人民共和国自然资源部提出",
+          "matched": true
+        },
+        {
+          "expected": "SAC/TC93",
+          "matched": true
+        },
+        {
+          "expected": "北京市地质研究所",
+          "matched": true
+        }
+      ],
+      "mean_ocr_confidence": 0.9903,
+      "passed": true,
+      "review_method": "assistant_visual_source_check"
+    }
+  ],
+  "limitations": [
+    "未标注页面上的全部字符，因此不能计算字符识别精确率。",
+    "关键事实未覆盖所有页面、所有字段和全部图纸方向。",
+    "新增AI原页核对样本用于内部回归，尚未经独立人工复核。",
+    "表格数值匹配另由evaluation_engineering.json中的单元格级回归集验证。"
+  ]
+}

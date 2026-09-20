@@ -1,0 +1,150 @@
+{
+  "schema_name": "slopekg_multimodal_asset_layer",
+  "schema_version": "1.0.0",
+  "status": "implemented_contract_waiting_for_external_samples",
+  "principles": [
+    "原始文件不写入知识图谱，只保存稳定ID、位置、校验和及关系",
+    "派生结果必须通过derived_from和processing_run_id追溯到输入与处理版本",
+    "缺少坐标系、采集时间或空间范围时保留unknown，不做推断",
+    "视觉识别候选不能直接写成正式风险事实"
+  ],
+  "entity_types": {
+    "VisualAsset": {
+      "required": [
+        "id",
+        "href",
+        "sha256",
+        "media_type"
+      ],
+      "examples": [
+        "现场照片",
+        "PDF图片",
+        "图纸截图",
+        "监测曲线"
+      ]
+    },
+    "AcquisitionEvent": {
+      "required": [
+        "id",
+        "acquisition_time",
+        "platform_or_device"
+      ],
+      "conditional": [
+        "flight_id",
+        "operator"
+      ]
+    },
+    "SpatialFootprint": {
+      "required": [
+        "id",
+        "crs",
+        "geometry_or_bbox"
+      ]
+    },
+    "RasterAsset": {
+      "required": [
+        "id",
+        "href",
+        "sha256",
+        "crs"
+      ],
+      "conditional": [
+        "resolution",
+        "bands",
+        "nodata"
+      ]
+    },
+    "PointCloudAsset": {
+      "required": [
+        "id",
+        "href",
+        "sha256",
+        "crs"
+      ],
+      "conditional": [
+        "point_count",
+        "scale",
+        "offset"
+      ]
+    },
+    "ThreeDModelAsset": {
+      "required": [
+        "id",
+        "href",
+        "sha256",
+        "crs"
+      ],
+      "conditional": [
+        "texture_assets",
+        "lod"
+      ]
+    },
+    "MonitoringSeries": {
+      "required": [
+        "id",
+        "slope_id",
+        "time_field",
+        "value_field",
+        "unit"
+      ],
+      "conditional": [
+        "quality_flag",
+        "sensor_id",
+        "crs"
+      ]
+    },
+    "DerivedMetric": {
+      "required": [
+        "id",
+        "metric_name",
+        "value",
+        "unit",
+        "derived_from",
+        "processing_run_id"
+      ]
+    },
+    "ProcessingRun": {
+      "required": [
+        "id",
+        "software",
+        "version",
+        "parameters",
+        "started_at"
+      ]
+    },
+    "QualityReport": {
+      "required": [
+        "id",
+        "target_id",
+        "checks",
+        "generated_at"
+      ]
+    },
+    "AnnotationSet": {
+      "required": [
+        "id",
+        "task",
+        "target_ids",
+        "review_status"
+      ]
+    }
+  },
+  "relations": [
+    "HAS_VISUAL_ASSET",
+    "HAS_SPATIAL_ASSET",
+    "HAS_MONITORING_SERIES",
+    "ACQUIRED_DURING",
+    "COVERS_FOOTPRINT",
+    "DERIVED_FROM",
+    "GENERATED_BY",
+    "HAS_QUALITY_REPORT",
+    "HAS_ANNOTATION_SET",
+    "OBSERVES_SLOPE"
+  ],
+  "missing_value_semantics": [
+    "present",
+    "unknown",
+    "not_observed",
+    "not_applicable"
+  ]
+}

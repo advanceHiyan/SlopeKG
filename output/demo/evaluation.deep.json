@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-27T17:58:40",
+  "generated_at": "2026-09-09T22:26:11",
   "evaluation_mode": "automatic_internal_quality_no_manual_seed",
   "manual_seed_used": false,
   "discovery": {
@@ -16,6 +16,11 @@
       "coverage": 1.0
     },
     "coordinates": {
+      "available": 0,
+      "total": 63,
+      "coverage": 0.0
+    },
+    "survey_control_points": {
       "available": 13,
       "total": 63,
       "coverage": 0.2063
@@ -81,9 +86,9 @@
       "coverage": 0.6032
     },
     "stability": {
-      "available": 18,
+      "available": 32,
       "total": 63,
-      "coverage": 0.2857
+      "coverage": 0.5079
     },
     "multi_source": {
       "available": 59,
@@ -98,6 +103,11 @@
       "coverage": 1.0
     },
     "coordinates": {
+      "available": 0,
+      "total": 63,
+      "coverage": 0.0
+    },
+    "survey_control_points": {
       "available": 13,
       "total": 63,
       "coverage": 0.2063
@@ -153,9 +163,9 @@
       "coverage": 0.4444
     },
     "stability": {
-      "available": 29,
+      "available": 39,
       "total": 63,
-      "coverage": 0.4603
+      "coverage": 0.619
     },
     "historical_deformation": {
       "available": 57,
@@ -181,26 +191,22 @@
     "passed": 52,
     "pass_rate": 0.8814,
     "verified_quotes": 410,
-    "submitted_quotes": 666,
-    "evidence_quote_precision": 0.6156,
-    "field_evidence_coverage": 0.7087,
-    "api_calls": 7,
-    "cache_hits": 52,
-    "cache_revalidated": 0,
-    "supplemental_calls": 0,
-    "section_gaps_detected": 61,
-    "section_gaps_resolved": 0,
-    "failures": 7
+    "submitted_quotes": 468,
+    "evidence_quote_precision": 0.8761,
+    "field_evidence_coverage": 0.8717,
+    "api_calls": 0,
+    "cache_revalidated": 52,
+    "mode": "offline_source_revalidation_no_api"
   },
   "evidence": {
-    "assertions": 1901,
+    "assertions": 1950,
     "assertions_with_evidence": 1901,
-    "coverage": 1.0
+    "coverage": 0.9749
   },
   "graph_integrity": {
-    "nodes": 1581,
+    "nodes": 1645,
     "duplicate_node_ids": 0,
-    "edges": 2045,
+    "edges": 2109,
     "dangling_edges": 0,
     "orphan_nodes": 0
   },
@@ -223,9 +229,9 @@
     "graph_has_no_dangling_edges": true,
     "graph_has_no_orphan_nodes": true,
     "semantic_pass_rate_at_least_90pct": false,
-    "semantic_field_evidence_at_least_80pct": false
+    "semantic_field_evidence_at_least_80pct": true
   },
-  "quality_gate_pass_rate": 0.7143,
+  "quality_gate_pass_rate": 0.7857,
   "parser": {
     "registry_rows": 63,
     "registry_rows_by_route": {
@@ -239,7 +245,12 @@
     "treatment_rows": 13,
     "geometry_rows": 11,
     "section_fact_rows": 59,
-    "assertions": 1122,
+    "engineering_tables": 56,
+    "engineering_tables_associated": 55,
+    "engineering_tables_needing_review": 2,
+    "material_parameter_values": 254,
+    "table_stability_results": 38,
+    "assertions": 1171,
     "page_type_counts": {
       "scanned": 75,
       "mixed": 7,
@@ -249,6 +260,33 @@
       "blank": 3
     },
     "native_bbox_coverage": 1.0
+  },
+  "engineering_tables": {
+    "tables": 56,
+    "parameter_values": 254,
+    "stability_results": 38,
+    "review_candidates": [
+      {
+        "source_file": "G347-1361.560-1373.690-其他文件-113751(1).pdf",
+        "page": 14,
+        "station": null,
+        "quality_issues": [
+          "station_unresolved"
+        ],
+        "caption": "表4-4\n稳定性计算参数推荐表"
+      },
+      {
+        "source_file": "G351-1570.950-1625.800-其他文件-185055.pdf",
+        "page": 44,
+        "station": "K1587+700-K1587+800",
+        "quality_issues": [
+          "caption_station_mismatch",
+          "possible_text_table_status_conflict"
+        ],
+        "caption": "表4-5 K1587+800~K1587+790 滑坡稳定性评价"
+      }
+    ],
+    "boundary": "表格提取数量不是准确率。未确定适用范围或存在原文冲突的结果不自动参与筛查。"
   },
   "accuracy_status": "requires_independent_gold_set_for_periodic_audit",
   "limitations": [

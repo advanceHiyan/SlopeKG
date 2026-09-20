@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>风险研判 - SlopeKG</title>
-  <link rel="stylesheet" href="./pages.css?v=20260728-1"/>
+  <link rel="stylesheet" href="./pages.css?v=20260911-1"/>
 </head>
 <body class="portal-body" data-page="risk">
   <header class="site-header">
@@ -22,9 +22,9 @@
     <div class="page-heading">
       <div>
         <h1>宏观风险筛查与复核排序</h1>
-        <p>利用现有灾害体、坡高坡度、稳定性工况和异常迹象安排现场复核优先级。结果不是正式风险等级，也不预测具体失稳时间。</p>
+        <p>分别检查静态易发性、近期动态异常和暴露后果，再安排现场复核优先级。结果不是失稳概率，也不预测具体失稳时间。</p>
       </div>
-      <span class="badge pending">规则筛查 v1</span>
+      <span class="badge pending">多轴筛查 v2</span>
     </div>
     <section class="card export-card" style="margin-bottom:16px">
       <div>
@@ -38,8 +38,9 @@
         <a id="riskExportDownloadLink" class="export-download" hidden>下载已生成文件</a>
       </div>
     </section>
-    <div class="notice">P1–P4 表示人工复核顺序，不是高、中、低风险。点击任一边坡后，右侧顶部会优先显示“为了进一步判断风险值，建议补充的数据”。缺失值不会按安全值处理。</div>
+    <div class="notice">P1–P4 表示人工复核顺序，不是高、中、低风险。选择边坡后可直接补录缺失数据，保存后会重新计算完整度和复核顺序；人工值独立保存，不会被下一次PDF解析覆盖。</div>
     <section id="riskMetrics" class="grid metrics-grid"><div class="loading">加载中…</div></section>
+    <section id="riskValidation" class="notice">正在读取独立验证状态…</section>
     <section class="risk-layout">
       <article class="card">
         <div class="filters">
@@ -52,8 +53,8 @@
         </div>
         <div class="table-wrap risk-table-wrap">
           <table class="data-table risk-table">
-            <thead><tr><th>优先级</th><th>边坡</th><th>灾害资料</th><th>稳定性关注</th><th>风险信息具备情况</th></tr></thead>
-            <tbody id="riskRows"><tr><td colspan="5">加载中…</td></tr></tbody>
+            <thead><tr><th>优先级</th><th>边坡</th><th>灾害资料</th><th>静态关注</th><th>近期动态</th><th>风险信息具备情况</th></tr></thead>
+            <tbody id="riskRows"><tr><td colspan="6">加载中…</td></tr></tbody>
           </table>
         </div>
       </article>
@@ -65,6 +66,6 @@
     </section>
   </main>
   <script src="./api.js?v=20260711-1"></script>
-  <script src="./portal.js?v=20260728-1"></script>
+  <script src="./portal.js?v=20260911-1"></script>
 </body>
 </html>

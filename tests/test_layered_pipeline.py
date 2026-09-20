@@ -31,6 +31,18 @@ class LayeredPipelineTests(unittest.TestCase):
         options = automatic_basic_options()
         self.assertEqual(options["ocr_pages"], 1000)
         self.assertEqual(options["ocr_scope"], "changed")
+        self.assertEqual(options["ocr_device"], "auto")
+        self.assertEqual(options["ocr_workers"], 4)
+        self.assertEqual(options["ocr_batch_size"], 0)
+
+    def test_server_accepts_bounded_ocr_acceleration_options(self) -> None:
+        options = SlopeKGHandler.pipeline_options(
+            None,
+            {"ocr_device": "gpu", "ocr_workers": 99, "ocr_batch_size": 99},
+        )  # type: ignore[arg-type]
+        self.assertEqual(options["ocr_device"], "gpu")
+        self.assertEqual(options["ocr_workers"], 16)
+        self.assertEqual(options["ocr_batch_size"], 32)
 
     def test_basic_and_deep_outputs_are_separate(self) -> None:
         self.assertTrue(PATHS.basic_graph_json.exists())

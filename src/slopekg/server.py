@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import mimetypes
 import re
@@ -18,15 +19,68 @@ from urllib.parse import parse_qs, quote, unquote, urlparse
 
 from .config import PATHS
 from .exporter import export_risk_standalone_html, export_standalone_html
+from .manual import (
+    apply_slope_overrides,
+    delete_manual_rule,
+    delete_slope_override,
+    manual_schema,
+    merged_rule_library,
+    save_manual_rule,
+    save_slope_override,
+    slope_override_record,
+)
+from .multimodal import multimodal_contract
 from .pipeline import DemoPipeline
 from .rule_extraction import RuleExtractionPipeline
 from .risk import build_risk_screening
-from .schema import INTERFACES, attribute_dictionary_payload, interface_payload, schema_payload
+from .schema import INTERFACES, attribute_dictionary_payload, build_completeness, interface_payload, schema_payload
 from .storage import ensure_dir, read_json, read_jsonl
 
 
 MAX_UPLOAD_REQUEST_BYTES = 512 * 1024 * 1024
 MAX_UPLOAD_FILE_BYTES = 256 * 1024 * 1024
+PUBLIC_STATIC_PREFIXES = (
+    "/web/",
+    "/data/rawPDF/",
+    "/output/demo/assets/ocr_pages/",
+    "/output/demo/graph/",
+    "/output/demo/rules/pages/",
+    "/output/demo/share/",
+    "/output/demo/web/data/",
+)
+DENIED_STATIC_PATH = "__slopekg_access_denied__"
+
+
+def origin_matches_host(origin: str | None, host: str | None) -> bool:
+    """Allow CLI clients and same-origin browser requests, but not foreign pages."""
+    if not origin:
+        return True
+    parsed = urlparse(origin)
+    host_name = urlparse(f"//{host or ''}").hostname
+    if parsed.scheme not in {"http", "https"} or not host_name or parsed.netloc.casefold() != str(host).casefold():
+        return False
+    if host_name.casefold() == "localhost":
+        return True
+    try:
+        address = ipaddress.ip_address(host_name)
+    except ValueError:
+        return False
+    return address.is_loopback or address.is_private
+
+
+def safe_static_path(request_path: str, root: Path = PATHS.root) -> Path:
+    """Map only explicitly public URL trees and keep resolved paths below root."""
+    decoded = unquote(urlparse(request_path).path).replace("\\", "/")
+    public_prefix = next((prefix for prefix in PUBLIC_STATIC_PREFIXES if decoded.startswith(prefix)), None)
+    if public_prefix is None:
+        return root / DENIED_STATIC_PATH
+    candidate = (root / decoded.lstrip("/")).resolve()
+    public_root = (root / public_prefix.lstrip("/")).resolve()
+    try:
+        candidate.relative_to(public_root)
+    except ValueError:
+        return root / DENIED_STATIC_PATH
+    return candidate
 
 
 def safe_pdf_name(value: str) -> str:
@@ -260,6 +314,9 @@ def automatic_basic_options() -> dict[str, Any]:
         "llm_model": "deepseek-v4-flash",
         "reuse_parsed": False,
         "ocr_scope": "changed",
+        "ocr_device": "auto",
+        "ocr_workers": 4,
+        "ocr_batch_size": 0,
     }
 
 
@@ -327,6 +384,9 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(PATHS.root), **kwargs)
 
     def do_OPTIONS(self) -> None:  # noqa: N802
+        if not self.request_origin_allowed():
+            self.write_json({"error": "cross-origin request denied"}, status=HTTPStatus.FORBIDDEN)
+            return
         self.send_response(HTTPStatus.NO_CONTENT)
         self.send_cors_headers()
         self.end_headers()
@@ -359,18 +419,18 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 self.write_json(job)
             return
         if parsed.path == "/api/rules/library":
-            self.write_json(read_json(PATHS.rules_json, empty_rule_library()))
+            self.write_json(current_rule_library())
             return
         if parsed.path == "/api/rules/documents":
-            library = read_json(PATHS.rules_json, empty_rule_library())
+            library = current_rule_library()
             self.write_json({"rows": library.get("documents", []), "count": len(library.get("documents", [])), "stats": library.get("stats", {})})
             return
         if parsed.path == "/api/rules/formulas":
-            library = read_json(PATHS.rules_json, empty_rule_library())
+            library = current_rule_library()
             self.write_json({"rows": library.get("formulas", []), "count": len(library.get("formulas", [])), "stats": library.get("stats", {})})
             return
         if parsed.path == "/api/risk/rules":
-            library = read_json(PATHS.rules_json, empty_rule_library())
+            library = current_rule_library()
             rules = [row for row in library.get("rules", []) if row.get("risk_engine_candidate")]
             self.write_json(
                 {
@@ -395,6 +455,12 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 payload = {**payload, "assessments": rows}
             self.write_json(payload)
             return
+        if parsed.path == "/api/risk/evaluation":
+            self.write_json(read_json(
+                PATHS.output_dir / "risk" / "evaluation.json",
+                {"status": "requires_independent_expert_gold_set", "evaluated": 0, "metrics": None},
+            ))
+            return
         if parsed.path.startswith("/api/pipeline/jobs/"):
             job_id = parsed.path.rsplit("/", 1)[-1]
             job = JOB_MANAGER.get(job_id)
@@ -404,7 +470,17 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 self.write_json(job)
             return
         if parsed.path == "/api/graph":
-            self.write_json(read_json(PATHS.graph_json, {"nodes": [], "edges": [], "evidence": []}))
+            self.write_json(current_graph())
+            return
+        if parsed.path == "/api/manual/schema":
+            self.write_json(manual_schema())
+            return
+        if parsed.path.startswith("/api/manual/slopes/"):
+            slope_id = parsed.path.rsplit("/", 1)[-1]
+            if not find_slope(slope_id):
+                self.write_json({"error": f"unknown slope: {slope_id}"}, status=HTTPStatus.NOT_FOUND)
+            else:
+                self.write_json(slope_override_record(slope_id))
             return
         if parsed.path == "/api/schema":
             self.write_json(read_json(PATHS.schema_json, schema_payload()))
@@ -414,6 +490,15 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             return
         if parsed.path == "/api/interfaces":
             self.write_json(read_json(PATHS.interfaces_json, interface_payload()))
+            return
+        if parsed.path == "/api/multimodal/schema":
+            self.write_json(read_json(PATHS.multimodal_contract_json, multimodal_contract()))
+            return
+        if parsed.path == "/api/multimodal/assets":
+            self.write_json(read_json(PATHS.multimodal_catalog_json, {"status": "not_generated", "count": 0, "assets": []}))
+            return
+        if parsed.path == "/api/multimodal/quality":
+            self.write_json(read_json(PATHS.multimodal_quality_json, {"status": "not_generated", "summary": {"assets": 0}, "issues": []}))
             return
         if parsed.path == "/api/evaluation":
             self.write_json(read_json(PATHS.evaluation_json, {"status": "not_generated"}))
@@ -432,7 +517,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self.write_json({"name": "llm_candidates", "rows": rows, "count": len(rows), "quality": quality})
             return
         if parsed.path == "/api/slopes":
-            graph = read_json(PATHS.graph_json, {"nodes": []})
+            graph = current_graph()
             slopes = [node for node in graph.get("nodes", []) if node.get("type") == "Slope"]
             self.write_json({"count": len(slopes), "rows": slopes})
             return
@@ -441,11 +526,11 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self.write_slope_detail(slope_id)
             return
         if parsed.path == "/api/completeness":
-            self.write_json(read_json(PATHS.completeness_json, {"summary": {}, "reports": []}))
+            self.write_json(current_completeness())
             return
         if parsed.path.startswith("/api/completeness/"):
             slope_id = parsed.path.rsplit("/", 1)[-1]
-            payload = read_json(PATHS.completeness_json, {"reports": []})
+            payload = current_completeness()
             report = next((row for row in payload.get("reports", []) if row.get("slope_id") == slope_id), None)
             if report is None:
                 self.write_json({"error": f"unknown slope: {slope_id}"}, status=HTTPStatus.NOT_FOUND)
@@ -478,7 +563,45 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         return super().do_GET()
 
     def do_POST(self) -> None:  # noqa: N802
+        if not self.request_origin_allowed():
+            self.write_json({"error": "cross-origin request denied"}, status=HTTPStatus.FORBIDDEN)
+            return
         parsed = urlparse(self.path)
+        if parsed.path.startswith("/api/manual/slopes/"):
+            slope_id = parsed.path.rsplit("/", 1)[-1]
+            if not find_slope(slope_id):
+                self.write_json({"error": f"unknown slope: {slope_id}"}, status=HTTPStatus.NOT_FOUND)
+                return
+            try:
+                record = save_slope_override(slope_id, self.read_json_body())
+            except (TypeError, ValueError) as exc:
+                self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+                return
+            assessment = next(
+                (row for row in current_risk_screening().get("assessments", []) if row.get("slope_id") == slope_id),
+                None,
+            )
+            report = next(
+                (row for row in current_completeness().get("reports", []) if row.get("slope_id") == slope_id),
+                None,
+            )
+            self.write_json({"status": "saved", "record": record, "assessment": assessment, "completeness": report}, status=HTTPStatus.CREATED)
+            return
+        if parsed.path == "/api/manual/rules":
+            try:
+                rule = save_manual_rule(self.read_json_body())
+            except (TypeError, ValueError) as exc:
+                self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+                return
+            self.write_json(
+                {
+                    "status": "saved",
+                    "rule": rule,
+                    "message": "规则已启用并参与P1-P4排序" if rule.get("execution_enabled") else "规则已保存，但当前不会自动执行",
+                },
+                status=HTTPStatus.CREATED,
+            )
+            return
         if parsed.path == "/api/documents/upload":
             self.handle_pdf_upload()
             return
@@ -514,7 +637,12 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 file_name = safe_export_name(str(body.get("file_name", "")))
                 graph_mode = str(body.get("graph_mode", "active")).strip().lower()
                 destination = PATHS.output_dir / "share" / file_name
-                result = export_standalone_html(destination, graph_mode=graph_mode)
+                result = export_standalone_html(
+                    destination,
+                    graph_mode=graph_mode,
+                    graph_override=current_graph() if graph_mode == "active" else None,
+                    completeness_override=current_completeness() if graph_mode == "active" else None,
+                )
             except (TypeError, ValueError, FileNotFoundError) as exc:
                 self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
                 return
@@ -532,7 +660,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 body = self.read_json_body()
                 file_name = safe_export_name(str(body.get("file_name") or "SlopeKG_风险研判_离线版"))
                 destination = PATHS.output_dir / "share" / file_name
-                result = export_risk_standalone_html(destination)
+                result = export_risk_standalone_html(destination, risk_override=current_risk_screening())
             except (TypeError, ValueError, FileNotFoundError) as exc:
                 self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
                 return
@@ -579,6 +707,23 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             return
         self.write_json(state)
 
+    def do_DELETE(self) -> None:  # noqa: N802
+        if not self.request_origin_allowed():
+            self.write_json({"error": "cross-origin request denied"}, status=HTTPStatus.FORBIDDEN)
+            return
+        parsed = urlparse(self.path)
+        if parsed.path.startswith("/api/manual/slopes/"):
+            slope_id = parsed.path.rsplit("/", 1)[-1]
+            deleted = delete_slope_override(slope_id)
+            self.write_json({"status": "deleted" if deleted else "not_found", "slope_id": slope_id}, status=HTTPStatus.OK if deleted else HTTPStatus.NOT_FOUND)
+            return
+        if parsed.path.startswith("/api/manual/rules/"):
+            rule_id = parsed.path.rsplit("/", 1)[-1]
+            deleted = delete_manual_rule(rule_id)
+            self.write_json({"status": "deleted" if deleted else "not_found", "rule_id": rule_id}, status=HTTPStatus.OK if deleted else HTTPStatus.NOT_FOUND)
+            return
+        self.write_json({"error": "not found"}, status=HTTPStatus.NOT_FOUND)
+
     def pipeline_options(self, body: dict[str, Any]) -> dict[str, Any]:
         ocr_pages = max(0, min(1000, int(body.get("ocr_pages", 1000))))
         llm_model = str(body.get("llm_model", "deepseek-v4-flash")).strip()
@@ -590,6 +735,11 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         ocr_scope = str(body.get("ocr_scope", "all")).strip().lower()
         if ocr_scope not in {"all", "changed"}:
             raise ValueError("ocr_scope 只能为 all 或 changed")
+        ocr_device = str(body.get("ocr_device", "auto")).strip().lower()
+        if ocr_device not in {"auto", "cpu", "gpu"}:
+            raise ValueError("ocr_device 只能为 auto、cpu 或 gpu")
+        ocr_workers = max(1, min(16, int(body.get("ocr_workers", 4))))
+        ocr_batch_size = max(0, min(32, int(body.get("ocr_batch_size", 0))))
         return {
             "ocr_pages": ocr_pages,
             "force_ocr": bool(body.get("force_ocr", False)),
@@ -597,6 +747,9 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             "llm_model": llm_model,
             "reuse_parsed": bool(body.get("reuse_parsed", False)),
             "ocr_scope": ocr_scope,
+            "ocr_device": ocr_device,
+            "ocr_workers": ocr_workers,
+            "ocr_batch_size": ocr_batch_size,
         }
 
     def handle_pdf_upload(self) -> None:
@@ -643,7 +796,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         )
 
     def write_slope_detail(self, slope_id: str) -> None:
-        graph = read_json(PATHS.graph_json, {"nodes": [], "edges": [], "evidence": []})
+        graph = current_graph()
         node = next((item for item in graph.get("nodes", []) if item.get("id") == slope_id and item.get("type") == "Slope"), None)
         if node is None:
             self.write_json({"error": f"unknown slope: {slope_id}"}, status=HTTPStatus.NOT_FOUND)
@@ -653,12 +806,12 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         related_nodes = [item for item in graph.get("nodes", []) if item.get("id") in related_ids]
         evidence_ids = {edge.get("props", {}).get("evidence") for edge in edges if edge.get("props", {}).get("evidence")}
         evidence = [item for item in graph.get("evidence", []) if item.get("id") in evidence_ids]
-        completeness = read_json(PATHS.completeness_json, {"reports": []})
+        completeness = current_completeness()
         report = next((row for row in completeness.get("reports", []) if row.get("slope_id") == slope_id), None)
         self.write_json({"slope": node, "edges": edges, "related_nodes": related_nodes, "evidence": evidence, "completeness": report})
 
     def write_risk_readiness(self, slope_id: str | None) -> None:
-        payload = read_json(PATHS.completeness_json, {"summary": {}, "reports": []})
+        payload = current_completeness()
         reports = payload.get("reports", [])
         if slope_id:
             reports = [row for row in reports if row.get("slope_id") == slope_id]
@@ -709,15 +862,18 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         self.wfile.write(payload)
 
     def send_cors_headers(self) -> None:
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        origin = self.headers.get("Origin")
+        if origin and origin_matches_host(origin, self.headers.get("Host")):
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
 
+    def request_origin_allowed(self) -> bool:
+        return origin_matches_host(self.headers.get("Origin"), self.headers.get("Host"))
+
     def translate_path(self, path: str) -> str:
-        path = unquote(urlparse(path).path)
-        if path.startswith("/output/") or path.startswith("/web/") or path.startswith("/data/"):
-            return str((PATHS.root / path.lstrip("/")).resolve())
-        return str((PATHS.root / path.lstrip("/")).resolve())
+        return str(safe_static_path(path))
 
     def guess_type(self, path: str) -> str:
         if path.endswith(".js"):
@@ -754,10 +910,31 @@ def empty_rule_library() -> dict[str, Any]:
     }
 
 
+def current_graph() -> dict[str, Any]:
+    base = read_json(PATHS.graph_json, {"nodes": [], "edges": [], "evidence": []})
+    return apply_slope_overrides(base)
+
+
+def current_rule_library() -> dict[str, Any]:
+    base = read_json(PATHS.rules_json, empty_rule_library())
+    return merged_rule_library(base)
+
+
+def current_completeness() -> dict[str, Any]:
+    return build_completeness(current_graph())
+
+
+def find_slope(slope_id: str) -> dict[str, Any] | None:
+    return next(
+        (row for row in current_graph().get("nodes", []) if row.get("id") == slope_id and row.get("type") == "Slope"),
+        None,
+    )
+
+
 def current_risk_screening() -> dict[str, Any]:
-    graph = read_json(PATHS.graph_json, {"nodes": [], "edges": [], "evidence": []})
-    library = read_json(PATHS.rules_json, empty_rule_library())
-    completeness = read_json(PATHS.completeness_json, {"reports": [], "summary": {}})
+    graph = current_graph()
+    library = current_rule_library()
+    completeness = build_completeness(graph)
     return build_risk_screening(graph, library, completeness)
 
 

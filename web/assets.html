@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>图片资料 - SlopeKG</title><link rel="stylesheet" href="./pages.css"/><link rel="stylesheet" href="./assets.css"/></head>
+<body class="portal-body">
+<header class="site-header"><div class="site-header-inner"><a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a><nav class="site-nav"><a href="./index.html">总览</a><a href="./pdf-ingestion.html">PDF解析</a><a href="./slopes.html">边坡档案</a><a href="./graph.html">关系图谱</a><a href="./data-status.html">数据与接口</a><a class="active" href="./assets.html">图片资料</a></nav></div></header>
+<main class="page-main">
+<div class="page-heading"><div><h1>图片资料与来源核对</h1><p>浏览解析得到的原页与图纸截图，核对出处和资料归属。</p></div><button id="reloadAssets" type="button">刷新目录</button></div>
+<p id="assetSummary" class="notice info" role="status">正在加载图片目录…</p>
+<section class="card asset-filters" aria-label="筛选图片">
+<label>来源文档<select id="assetDocument"><option value="">全部文档</option></select></label>
+<label>图片类型<select id="assetType"><option value="">全部类型</option></select></label>
+<label>PDF页码<input id="assetPage" type="number" min="1" step="1" placeholder="全部页码"/></label>
+<label>核对状态<select id="assetStatus"><option value="">全部状态</option><option value="pending">边坡归属待核对</option><option value="approved">边坡归属已审核</option><option value="invalid">文件或元数据有错误</option></select></label>
+<label>搜索<input id="assetSearch" type="search" placeholder="文档、文件名或边坡编号"/></label>
+</section>
+<p id="assetCount" aria-live="polite"></p>
+<section id="assetCards" class="asset-grid" aria-label="图片列表"></section>
+<div class="asset-pagination"><button id="assetPrevious" type="button" disabled>上一页</button><span id="assetPagination"></span><button id="assetNext" type="button" disabled>下一页</button></div>
+<details class="card"><summary id="assetIssueSummary">目录问题</summary><ul id="assetIssues"></ul></details>
+</main><script src="./api.js"></script><script src="./assets.js"></script></body></html>

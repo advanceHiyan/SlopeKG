@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-09-20T15:22:21",
+  "schema_version": "1.0.0",
+  "status": "ready_for_catalog_review",
+  "summary": {
+    "assets": 545,
+    "asset_type_counts": {
+      "VisualAsset": 545
+    },
+    "origin_counts": {
+      "pdf_derived": 545
+    },
+    "subtype_counts": {
+      "pdf_full_page": 130,
+      "drawing_title_block": 411,
+      "pdf_page_region": 4
+    },
+    "issue_counts": {},
+    "spatial_assets": 0,
+    "assets_linked_to_document": 545,
+    "assets_linked_to_slope": 0,
+    "invalid_assets": 0,
+    "assets_with_reviewed_slope": 0
+  },
+  "issues": [],
+  "limitations": [
+    "当前盘点仅验证文件级资产目录和元数据完整性，不执行遥感变化检测或点云配准",
+    "缺少原始空间样例时，坐标系、覆盖范围和采集时间保持未知",
+    "PDF渲染图只能作为视觉证据，不能替代GeoTIFF、LAS/LAZ或原始三维模型"
+  ]
+}

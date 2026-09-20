@@ -6,14 +6,10 @@
   "passed": 52,
   "pass_rate": 0.8814,
   "verified_quotes": 410,
-  "submitted_quotes": 666,
-  "evidence_quote_precision": 0.6156,
-  "field_evidence_coverage": 0.7087,
-  "api_calls": 7,
-  "cache_hits": 52,
-  "cache_revalidated": 0,
-  "supplemental_calls": 0,
-  "section_gaps_detected": 61,
-  "section_gaps_resolved": 0,
-  "failures": 7
+  "submitted_quotes": 468,
+  "evidence_quote_precision": 0.8761,
+  "field_evidence_coverage": 0.8717,
+  "api_calls": 0,
+  "cache_revalidated": 52,
+  "mode": "offline_source_revalidation_no_api"
 }

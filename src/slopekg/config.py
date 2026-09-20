@@ -25,6 +25,7 @@ class DemoPaths:
     assets_dir: Path = OUTPUT_DIR / "assets"
     extracted_dir: Path = OUTPUT_DIR / "extracted"
     rules_dir: Path = OUTPUT_DIR / "rules"
+    multimodal_dir: Path = OUTPUT_DIR / "multimodal"
     cache_dir: Path = CACHE_DIR
     web_dir: Path = WEB_DIR
     attribute_dictionary_file: Path = ATTRIBUTE_DICTIONARY_FILE
@@ -76,6 +77,34 @@ class DemoPaths:
     @property
     def rules_state_json(self) -> Path:
         return self.rules_dir / "state.json"
+
+    @property
+    def manual_dir(self) -> Path:
+        return self.output_dir / "manual"
+
+    @property
+    def slope_overrides_json(self) -> Path:
+        return self.manual_dir / "slope_overrides.json"
+
+    @property
+    def manual_rules_json(self) -> Path:
+        return self.manual_dir / "rules.json"
+
+    @property
+    def manual_audit_jsonl(self) -> Path:
+        return self.manual_dir / "audit.jsonl"
+
+    @property
+    def multimodal_catalog_json(self) -> Path:
+        return self.multimodal_dir / "asset_catalog.json"
+
+    @property
+    def multimodal_quality_json(self) -> Path:
+        return self.multimodal_dir / "quality_report.json"
+
+    @property
+    def multimodal_contract_json(self) -> Path:
+        return self.multimodal_dir / "data_contract.json"
 
 
 PATHS = DemoPaths()

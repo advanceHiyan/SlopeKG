@@ -64,7 +64,9 @@ class ExtractionRegressionTests(unittest.TestCase):
             }
         )
         stats = extraction.get("stats", {})
-        self.assertGreaterEqual(stats.get("registry_rows", 0), 63)
+        self.assertGreaterEqual(stats.get("registry_rows", 0), 62)
+        self.assertEqual(stats.get("registry_source_rows"), 63)
+        self.assertEqual(stats.get("registry_records_needing_review"), 1)
         self.assertEqual(stats.get("coordinate_rows"), 13)
         self.assertGreaterEqual(stats.get("geometry_rows", 0), 11)
         self.assertEqual(stats.get("native_bbox_coverage"), 1.0)
@@ -86,7 +88,11 @@ class ExtractionRegressionTests(unittest.TestCase):
         self.assertGreaterEqual(counts.get("G318", 0), 13)
         self.assertGreaterEqual(counts.get("G344", 0), 1)
         self.assertGreaterEqual(counts.get("G347", 0), 9)
-        self.assertGreaterEqual(counts.get("G351", 0), 27)
+        self.assertGreaterEqual(counts.get("G351", 0), 26)
+        self.assertEqual(
+            extraction["registry_issues"][0]["quality_issues"],
+            ["non_increasing_station_range"],
+        )
 
     def test_paddle_v3_result_objects_are_normalized(self):
         class ResultLike:

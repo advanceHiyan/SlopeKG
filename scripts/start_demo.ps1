@@ -2,7 +2,10 @@ param(
     [int]$Port = 8766,
     [switch]$RunPipeline,
     [ValidateSet("basic", "deep")][string]$Mode = "basic",
-    [int]$OcrPages = 0
+    [int]$OcrPages = 0,
+    [ValidateSet("auto", "cpu", "gpu")][string]$OcrDevice = "auto",
+    [ValidateRange(1, 16)][int]$OcrWorkers = 4,
+    [ValidateRange(0, 32)][int]$OcrBatchSize = 0
 )
 
 $ErrorActionPreference = "Stop"
@@ -59,7 +62,7 @@ if ($RunPipeline) {
     } else {
         Write-Host "  OCR is disabled for this startup update. Use -OcrPages N when OCR is needed."
     }
-    & $Python scripts\run_pipeline.py --mode $Mode --ocr-pages $OcrPages
+    & $Python scripts\run_pipeline.py --mode $Mode --ocr-pages $OcrPages --ocr-device $OcrDevice --ocr-workers $OcrWorkers --ocr-batch-size $OcrBatchSize
     if ($LASTEXITCODE -ne 0) {
         throw "Pipeline failed with exit code $LASTEXITCODE"
     }

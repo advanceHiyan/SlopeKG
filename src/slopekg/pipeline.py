@@ -11,12 +11,15 @@ from .config import PATHS, DemoPaths
 from .deps import dependency_report
 from .extractors import extract_domain_candidates
 from .exporter import export_risk_standalone_html, export_standalone_html
-from .graph_builder import build_automatic_graph, write_graphml
+from .graph_builder import attach_visual_assets, build_automatic_graph, write_graphml
+from .multimodal import build_multimodal_outputs
 from .llm import llm_status, read_deepseek_key
-from .ocr import OcrRunner
+from .manual import apply_slope_overrides, merged_rule_library
+from .ocr import OcrRunner, with_layout_groups
 from .parsers import PdfParser
 from .quality import evaluate_automatic_pipeline
 from .risk import build_risk_screening
+from .risk_evaluation import evaluate_risk_screening
 from .schema import build_completeness, interface_payload, schema_payload
 from .semantic import run_semantic_extraction
 from .storage import ensure_dir, read_json, read_jsonl, write_json, write_jsonl
@@ -112,6 +115,9 @@ class DemoPipeline:
         llm_model: str = "deepseek-v4-flash",
         reuse_parsed: bool = False,
         ocr_scope: str = "all",
+        ocr_device: str = "auto",
+        ocr_workers: int = 4,
+        ocr_batch_size: int = 0,
         progress_callback: Callable[[int, str, str], None] | None = None,
     ) -> dict[str, Any]:
         if use_llm is not None:
@@ -120,6 +126,10 @@ class DemoPipeline:
             raise ValueError("parse_mode must be 'basic' or 'deep'")
         if ocr_scope not in {"all", "changed"}:
             raise ValueError("ocr_scope must be 'all' or 'changed'")
+        if ocr_device not in {"auto", "cpu", "gpu"}:
+            raise ValueError("ocr_device must be 'auto', 'cpu' or 'gpu'")
+        ocr_workers = max(1, min(16, int(ocr_workers)))
+        ocr_batch_size = max(0, min(32, int(ocr_batch_size)))
         def progress(percent: int, stage: str, message: str) -> None:
             if progress_callback:
                 progress_callback(percent, stage, message)
@@ -188,6 +198,9 @@ class DemoPipeline:
             max_pages=ocr_pages,
             force=force_ocr,
             all_tasks=all_ocr_tasks,
+            device=ocr_device,
+            workers=ocr_workers,
+            batch_size=ocr_batch_size,
             progress_callback=lambda current, total: progress(
                 55 + round(7 * current / max(total, 1)),
                 "ocr",
@@ -303,6 +316,9 @@ class DemoPipeline:
         max_pages: int,
         force: bool,
         all_tasks: list[dict[str, Any]] | None = None,
+        device: str = "auto",
+        workers: int = 4,
+        batch_size: int = 0,
         progress_callback: Callable[[int, int], None] | None = None,
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         all_tasks = all_tasks if all_tasks is not None else tasks
@@ -310,7 +326,13 @@ class DemoPipeline:
         current_tasks = {row.get("id"): row for row in all_tasks}
         existing_results = [row for row in existing_results if ocr_result_is_current(row, current_tasks.get(row.get("task_id")))]
         prepared_tasks = tasks if force else mark_cached_ocr_tasks(tasks, existing_results)
-        runner = OcrRunner(self.paths.root, self.paths.assets_dir)
+        runner = OcrRunner(
+            self.paths.root,
+            self.paths.assets_dir,
+            device=device,
+            render_workers=workers,
+            batch_size=batch_size,
+        )
         tasks_by_id = {row["id"]: row for row in mark_cached_ocr_tasks(all_tasks, existing_results)}
         results_by_id = {row["id"]: row for row in existing_results}
 
@@ -336,7 +358,7 @@ class DemoPipeline:
             tasks_by_id[row["id"]] = row
         updated_tasks = list(tasks_by_id.values())
         results_by_id = {row["id"]: row for row in [*existing_results, *new_results]}
-        results = list(results_by_id.values())
+        results = with_layout_groups(list(results_by_id.values()))
         write_jsonl(self.paths.parsed_dir / "ocr_tasks.jsonl", updated_tasks)
         write_jsonl(self.paths.parsed_dir / "ocr_results.jsonl", results)
         return updated_tasks, results
@@ -353,7 +375,15 @@ class DemoPipeline:
         activate: bool,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         graph = build_automatic_graph(parsed, extracted, semantic_rows)
+        multimodal = build_multimodal_outputs(
+            [self.paths.assets_dir, self.paths.root / "data" / "multimodal"],
+            self.paths.root, self.paths.output_dir / "multimodal",
+            documents=parsed["documents"],
+            slope_ids={n["id"] for n in graph["nodes"] if n["type"] == "Slope"},
+        )
+        attach_visual_assets(graph, multimodal["catalog"])
         evaluation = evaluate_automatic_pipeline(extracted, semantic_summary, graph)
+        evaluation["multimodal"] = multimodal["quality"]["summary"]
         graph["meta"]["pipeline"] = {
             "mode": "basic" if parse_mode == "basic" else "deep",
             "layers": ["adaptive_pdf_parse", "deterministic_extraction"] + (["validated_llm_semantics"] if parse_mode == "deep" else []),
@@ -380,9 +410,18 @@ class DemoPipeline:
         }
         graph["meta"]["dependencies"] = dependency_report()
         graph["meta"]["llm"] = {**llm_status(), "enabled": semantic_summary.get("enabled", False), "run": semantic_summary}
-        completeness = build_completeness(graph)
-        rule_library = read_json(self.paths.rules_json, {"execution_enabled": False, "publication_status": "not_generated"})
-        risk_screening = build_risk_screening(graph, rule_library, completeness)
+        effective_graph = apply_slope_overrides(graph, self.paths)
+        completeness = build_completeness(effective_graph)
+        rule_library = merged_rule_library(
+            read_json(self.paths.rules_json, {"execution_enabled": False, "publication_status": "not_generated", "rules": []}),
+            self.paths,
+        )
+        risk_screening = build_risk_screening(effective_graph, rule_library, completeness)
+        risk_gold_path = self.paths.root / "data" / "validation" / "risk_gold.json"
+        risk_evaluation = evaluate_risk_screening(
+            risk_screening,
+            read_json(risk_gold_path, {"labels": []}) if risk_gold_path.exists() else {"labels": []},
+        )
         graph["meta"]["completeness"] = completeness["summary"]
         self.write_graph_outputs(graph, parse_mode=parse_mode, activate=activate)
         write_json(self.paths.schema_json, schema_payload())
@@ -401,10 +440,12 @@ class DemoPipeline:
         write_json(self.paths.output_dir / f"evaluation.{parse_mode}.json", evaluation)
         ensure_dir(self.paths.output_dir / "risk")
         write_json(self.paths.output_dir / "risk" / f"screening.{parse_mode}.json", risk_screening)
+        write_json(self.paths.output_dir / "risk" / f"evaluation.{parse_mode}.json", risk_evaluation)
         if activate:
             write_json(self.paths.completeness_json, completeness)
             write_json(self.paths.evaluation_json, evaluation)
             write_json(self.paths.output_dir / "risk" / "screening.json", risk_screening)
+            write_json(self.paths.output_dir / "risk" / "evaluation.json", risk_evaluation)
         return graph, evaluation
 
     def write_graph_outputs(self, graph: dict[str, Any], *, parse_mode: str, activate: bool) -> None:
@@ -438,9 +479,13 @@ class DemoPipeline:
         publication_stage: str = "completed",
     ) -> dict[str, Any]:
         ocr_status_counts: dict[str, int] = {}
+        ocr_device_counts: dict[str, int] = {}
         for task in ocr_tasks:
             status = task.get("status", "unknown")
             ocr_status_counts[status] = ocr_status_counts.get(status, 0) + 1
+            device = task.get("device")
+            if device:
+                ocr_device_counts[str(device)] = ocr_device_counts.get(str(device), 0) + 1
         deep_graph = read_json(self.paths.deep_graph_json, {}) if self.paths.deep_graph_json.exists() else {}
         deep_exists = bool(deep_graph)
         deep_fresh = deep_exists and graph_matches_documents(deep_graph, parsed["documents"])
@@ -461,6 +506,7 @@ class DemoPipeline:
                 "ocr_tasks": len(ocr_tasks),
                 "ocr_results": len(ocr_results),
                 "ocr_status_counts": ocr_status_counts,
+                "ocr_device_counts": ocr_device_counts,
             },
             "graph": graph["meta"]["stats"],
             "completeness": graph["meta"].get("completeness", {}),
@@ -508,7 +554,14 @@ class DemoPipeline:
         write_json(self.paths.state_json, state)
         write_json(self.paths.deep_state_json if parse_mode == "deep" else self.paths.basic_state_json, state)
         standalone_path = self.paths.output_dir / "share" / "SlopeKG_成果展示_离线版.html"
-        export_result = export_standalone_html(standalone_path, paths=self.paths, graph_mode="active")
+        effective_graph = apply_slope_overrides(graph, self.paths)
+        export_result = export_standalone_html(
+            standalone_path,
+            paths=self.paths,
+            graph_mode="active",
+            graph_override=effective_graph,
+            completeness_override=build_completeness(effective_graph),
+        )
         state["standalone_export"] = export_result
         state["outputs"]["standalone_html"] = str(standalone_path.relative_to(self.paths.root))
         risk_standalone_path = self.paths.output_dir / "share" / "SlopeKG_风险研判_离线版.html"

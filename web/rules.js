@@ -27,6 +27,12 @@
     threshold_table_row: "阈值表行",
     classification: "分级规则",
     decision_rule: "判定规则",
+    manual_declarative: "人工结构化规则",
+    draft: "草稿",
+    disabled: "已停用",
+    executable: "结构可执行",
+    stored_not_executable: "仅保存·不可执行",
+    manual_source: "人工来源",
   };
 
   function label(value) {
@@ -77,7 +83,7 @@
       metric(stats.rules, "候选规则"),
       metric(stats.evidence_validated_rules, "证据已定位"),
       metric(stats.risk_engine_candidates, "风险引擎候选"),
-      metric(stats.threshold_tables, "阈值表"),
+      metric(stats.manual_rules || 0, `人工规则（启用${stats.executable_manual_rules || 0}）`),
     ].join("");
     const publication = document.getElementById("rulePublication");
     publication.textContent = label(library.publication_status);
@@ -112,10 +118,12 @@
     body.innerHTML = rows.map((row) => {
       const doc = documents.get(row.document_id) || {};
       const scene = [row.hazard_type, row.scenario].filter(Boolean).join(" / ") || "未明确";
+      const sourceText = row.extraction_method === "manual_input" ? "人工录入" : (row.document_code || doc.code || "未知");
+      const pageText = row.page ? `PDF第${e(row.page)}页` : label(row.execution_status);
       return `<tr data-rule-id="${e(row.id)}" class="${selectedId === row.id ? "selected" : ""}">
         <td><strong>${e(row.title || "未命名规则")}</strong><span class="table-subtext">${e(label(row.rule_kind))}</span></td>
         <td>${e(scene)}</td>
-        <td>${e(row.document_code || doc.code || "未知")}<span class="table-subtext">PDF第${e(row.page)}页</span></td>
+        <td>${e(sourceText)}<span class="table-subtext">${e(pageText)}</span></td>
         <td><span class="badge ${e(row.approval_status)}">${e(label(row.approval_status))}</span></td>
       </tr>`;
     }).join("");
@@ -133,6 +141,8 @@
     const inputs = Array.isArray(row.inputs) && row.inputs.length ? row.inputs.join("、") : "未结构化";
     const exceptions = Array.isArray(row.exceptions) && row.exceptions.length ? row.exceptions.join("；") : "未提取到例外条款";
     const detail = document.getElementById("ruleDetail");
+    const isManual = row.extraction_method === "manual_input";
+    const unsupported = (row.unsupported_reasons || []).join("；");
     detail.className = "card rule-detail";
     detail.innerHTML = `
       <h2>${e(row.title || "未命名规则")}</h2>
@@ -143,18 +153,58 @@
         <span class="badge">${e(row.extraction_method || "未知提取方式")}</span>
       </div>
       <div class="detail-list compact">
-        <div class="detail-row"><small>来源</small>${e(row.document_code || doc.code || "未知")} ${e(doc.title || "")} · PDF第${e(row.page)}页</div>
+        <div class="detail-row"><small>来源</small>${isManual ? "人工录入" : `${e(row.document_code || doc.code || "未知")} ${e(doc.title || "")} · PDF第${e(row.page)}页`}</div>
         <div class="detail-row"><small>输入字段</small>${e(inputs)}</div>
         <div class="detail-row"><small>适用场景</small>${e([row.hazard_type, row.scenario].filter(Boolean).join(" / ") || "未明确")}</div>
+        <div class="detail-row"><small>执行状态</small>${e(label(row.execution_status || (row.execution_enabled ? "executable" : "未启用")))}${unsupported ? `<span class="table-subtext missing-text">${e(unsupported)}</span>` : ""}</div>
       </div>
       <div class="detail-block"><h3>条件</h3><p>${e(row.condition_text || "尚未结构化")}</p></div>
       <div class="detail-block"><h3>输出</h3><p>${e(row.output_text || "尚未结构化")}</p></div>
       <div class="detail-block"><h3>例外/限制</h3><p>${e(exceptions)}</p></div>
-      <div class="detail-block"><h3>原文证据</h3><blockquote class="evidence-quote">${e(row.evidence_quote || "无")}</blockquote>${sourceLinks(row)}</div>
-      <div class="notice">此项为自动提取候选。完成规范有效性、数值、比较符号和适用条件审核前，系统不会执行该规则。</div>`;
+      <div class="detail-block"><h3>${isManual ? "逻辑说明" : "原文证据"}</h3><blockquote class="evidence-quote">${e(row.evidence_quote || "无")}</blockquote>${isManual ? "" : sourceLinks(row)}</div>
+      <div class="notice">${isManual ? (row.execution_enabled ? "该规则已审核启用，可调整P1—P4复核顺序，但不会生成正式风险等级。" : "该规则已经保存，但未参与风险排序；请检查状态及不可执行原因。") : "此项为自动提取候选。完成规范有效性、数值、比较符号和适用条件审核前，系统不会执行该规则。"}</div>
+      ${isManual ? `<button class="button ghost delete-manual-rule" type="button">删除这条人工规则</button>` : ""}`;
+    const deleteButton = detail.querySelector(".delete-manual-rule");
+    if (deleteButton) deleteButton.addEventListener("click", async () => {
+      if (!window.confirm("确定删除这条人工规则吗？")) return;
+      const response = await fetch(`/api/manual/rules/${encodeURIComponent(row.id)}`, { method: "DELETE" });
+      if (!response.ok) return;
+      window.location.reload();
+    });
+  }
+
+  async function setupManualRuleForm() {
+    const schema = await api.getJson("/api/manual/schema", { rule_fields: [], rule_operators: [] });
+    const form = document.getElementById("manualRuleForm");
+    const container = document.getElementById("manualRuleConditions");
+    document.getElementById("toggleRuleForm").addEventListener("click", () => { form.hidden = !form.hidden; });
+    function addCondition() {
+      const row = document.createElement("div");
+      row.className = "manual-condition-row";
+      row.innerHTML = `<select class="condition-field">${schema.rule_fields.map((item) => `<option value="${e(item.code)}">${e(item.label)}</option>`).join("")}</select><select class="condition-operator">${schema.rule_operators.map((item) => `<option value="${e(item.code)}">${e(item.label)}</option>`).join("")}</select><input class="condition-value" placeholder="阈值或文字；多值用逗号分隔"/><button class="button ghost remove-condition" type="button">移除</button>`;
+      row.querySelector(".remove-condition").addEventListener("click", () => { if (container.children.length > 1) row.remove(); });
+      container.appendChild(row);
+    }
+    addCondition();
+    document.getElementById("addRuleCondition").addEventListener("click", addCondition);
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const conditions = [...container.querySelectorAll(".manual-condition-row")].map((row) => ({ field: row.querySelector(".condition-field").value, operator: row.querySelector(".condition-operator").value, value: row.querySelector(".condition-value").value }));
+      const status = document.getElementById("manualRuleStatus");
+      status.textContent = "正在校验并保存…";
+      try {
+        const response = await fetch("/api/manual/rules", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: data.get("title"), match: data.get("match"), priority: data.get("priority"), approval_status: data.get("approval_status"), reason: data.get("reason"), logic_note: data.get("logic_note"), conditions }) });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
+        status.textContent = result.message;
+        window.setTimeout(() => window.location.reload(), 700);
+      } catch (error) { status.textContent = `保存失败：${error.message}`; }
+    });
   }
 
   async function initRules() {
+    await setupManualRuleForm();
     await loadLibrary();
     renderRuleMetrics();
     const kinds = [...new Set((library.rules || []).map((row) => row.rule_kind).filter(Boolean))].sort();

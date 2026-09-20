@@ -87,6 +87,10 @@
       "label_zh": "稳定性分析",
       "category": "analysis"
     },
+    "MaterialParameterSet": {
+      "label_zh": "材料计算参数",
+      "category": "analysis"
+    },
     "Drawing": {
       "label_zh": "图纸",
       "category": "evidence"
@@ -122,6 +126,50 @@
     "ExposureObject": {
       "label_zh": "暴露对象",
       "category": "risk"
+    },
+    "VisualAsset": {
+      "label_zh": "视觉资产",
+      "category": "multimodal"
+    },
+    "AcquisitionEvent": {
+      "label_zh": "采集事件",
+      "category": "multimodal"
+    },
+    "SpatialFootprint": {
+      "label_zh": "空间覆盖范围",
+      "category": "multimodal"
+    },
+    "RasterAsset": {
+      "label_zh": "栅格资产",
+      "category": "multimodal"
+    },
+    "PointCloudAsset": {
+      "label_zh": "点云资产",
+      "category": "multimodal"
+    },
+    "ThreeDModelAsset": {
+      "label_zh": "三维模型资产",
+      "category": "multimodal"
+    },
+    "MonitoringSeries": {
+      "label_zh": "监测时序",
+      "category": "multimodal"
+    },
+    "DerivedMetric": {
+      "label_zh": "派生指标",
+      "category": "multimodal"
+    },
+    "ProcessingRun": {
+      "label_zh": "处理运行",
+      "category": "provenance"
+    },
+    "QualityReport": {
+      "label_zh": "质量报告",
+      "category": "quality"
+    },
+    "AnnotationSet": {
+      "label_zh": "标注集",
+      "category": "quality"
     }
   },
   "relation_types": {
@@ -170,6 +218,9 @@
     "HAS_STABILITY_ANALYSIS": {
       "label_zh": "具有稳定性分析"
     },
+    "HAS_MATERIAL_PARAMETERS": {
+      "label_zh": "具有材料计算参数"
+    },
     "SHOWN_IN": {
       "label_zh": "显示于图纸"
     },
@@ -214,6 +265,36 @@
     },
     "DEFINES_RULE": {
       "label_zh": "定义规则"
+    },
+    "HAS_VISUAL_ASSET": {
+      "label_zh": "具有视觉资产"
+    },
+    "HAS_SPATIAL_ASSET": {
+      "label_zh": "具有空间资产"
+    },
+    "HAS_MONITORING_SERIES": {
+      "label_zh": "具有监测时序"
+    },
+    "ACQUIRED_DURING": {
+      "label_zh": "采集于"
+    },
+    "COVERS_FOOTPRINT": {
+      "label_zh": "覆盖空间范围"
+    },
+    "DERIVED_FROM": {
+      "label_zh": "派生自"
+    },
+    "GENERATED_BY": {
+      "label_zh": "生成于处理运行"
+    },
+    "HAS_QUALITY_REPORT": {
+      "label_zh": "具有质量报告"
+    },
+    "HAS_ANNOTATION_SET": {
+      "label_zh": "具有标注集"
+    },
+    "OBSERVES_SLOPE": {
+      "label_zh": "观测边坡"
     }
   },
   "slope_fields": [
@@ -270,6 +351,12 @@
       "label_zh": "坐标参考系",
       "group": "location",
       "requirement": "conditional_required"
+    },
+    {
+      "code": "control_points",
+      "label_zh": "测量控制点（非边坡端点）",
+      "group": "location",
+      "requirement": "optional"
     },
     {
       "code": "start_coordinate",
@@ -466,6 +553,23 @@
     "path": "/api/attribute-dictionary",
     "schema_version": "0.2.0",
     "status": "feedback_updated"
+  },
+  "multimodal": {
+    "schema_version": "1.0.0",
+    "contract_path": "/api/multimodal/schema",
+    "entity_types": [
+      "VisualAsset",
+      "AcquisitionEvent",
+      "SpatialFootprint",
+      "RasterAsset",
+      "PointCloudAsset",
+      "ThreeDModelAsset",
+      "MonitoringSeries",
+      "DerivedMetric",
+      "ProcessingRun",
+      "QualityReport",
+      "AnnotationSet"
+    ]
   },
   "missing_value_semantics": [
     "present",

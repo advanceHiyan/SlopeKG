@@ -28,9 +28,12 @@
           <div id="selectedFiles" class="selected-files"><div class="detail-empty">尚未选择文件。</div></div>
           <div class="ingest-options">
             <label><span>本次最多执行OCR页数</span><input id="ocrPages" type="number" min="0" max="1000" value="1000" /></label>
+            <label><span>OCR计算设备</span><select id="ocrDevice"><option value="auto">自动（GPU优先）</option><option value="gpu">仅GPU</option><option value="cpu">仅CPU</option></select></label>
+            <label><span>页面渲染并发</span><input id="ocrWorkers" type="number" min="1" max="16" value="4" /></label>
+            <label><span>GPU批量页数</span><input id="ocrBatchSize" type="number" min="0" max="32" value="0" /></label>
             <label class="check-option"><input id="forceOcr" type="checkbox" /><span>重新执行已处理过的OCR任务</span></label>
           </div>
-          <p class="form-help">OCR值为0时仍会完成逐页分类并生成待处理队列；原生文本页和可解析表格不会无条件使用OCR。深度解析不会覆盖基础图谱，两套结果分别保存。</p>
+          <p class="form-help">批量页数为0时自动选择：CPU逐页、GPU每批4页。页面渲染可并发；单张GPU采用批量推理，避免重复加载多个模型撑爆显存。OCR值为0时仍会完成逐页分类并生成待处理队列。</p>
           <div class="action-row"><button id="uploadOnlyBtn" class="button" type="button" disabled>上传并自动更新</button><button id="uploadRunBtn" class="button" type="button" disabled hidden>上传并基础解析</button><button id="rerunBtn" class="button ghost" type="button">基础解析全部资料</button><button id="reextractBtn" class="button ghost" type="button">基于现有文本重新抽取</button><button id="deepRunBtn" class="button secondary" type="button">基于基础结果深度解析</button></div>
         </div>
 

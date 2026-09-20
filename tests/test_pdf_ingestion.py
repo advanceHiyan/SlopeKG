@@ -4,7 +4,17 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from slopekg.server import PdfDirectoryWatcher, document_inventory, parse_pdf_uploads, safe_export_name, safe_pdf_name, unique_destination
+from slopekg.server import (
+    DENIED_STATIC_PATH,
+    PdfDirectoryWatcher,
+    document_inventory,
+    origin_matches_host,
+    parse_pdf_uploads,
+    safe_export_name,
+    safe_pdf_name,
+    safe_static_path,
+    unique_destination,
+)
 
 
 class PdfUploadValidationTests(unittest.TestCase):
@@ -53,6 +63,19 @@ class PdfUploadValidationTests(unittest.TestCase):
             self.assertFalse(watcher.check_once())
             self.assertTrue(watcher.check_once())
         manager.start.assert_called_once()
+
+    def test_static_server_exposes_only_intended_public_trees(self):
+        root = Path.cwd()
+        self.assertEqual(safe_static_path("/web/index.html", root), (root / "web" / "index.html").resolve())
+        self.assertEqual(safe_static_path("/.private/ledger.xlsx", root), root / DENIED_STATIC_PATH)
+        self.assertEqual(safe_static_path("/%2e%2e/.secrets/key", root), root / DENIED_STATIC_PATH)
+        self.assertEqual(safe_static_path("/web/%2e%2e/.private/ledger.xlsx", root), root / DENIED_STATIC_PATH)
+
+    def test_browser_mutations_require_same_origin(self):
+        self.assertTrue(origin_matches_host(None, "127.0.0.1:8765"))
+        self.assertTrue(origin_matches_host("http://127.0.0.1:8765", "127.0.0.1:8765"))
+        self.assertFalse(origin_matches_host("https://example.com", "127.0.0.1:8765"))
+        self.assertFalse(origin_matches_host("http://evil.example:8765", "evil.example:8765"))
 
 
 if __name__ == "__main__":

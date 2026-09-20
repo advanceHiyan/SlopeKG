@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-07-27T17:54:45",
+  "generated_at": "2026-09-09T22:26:11",
   "schema_version": "1.1.0-layered-parsing",
   "summary": {
     "slopes": 63,
-    "average_risk_data_completeness": 0.377,
+    "average_risk_data_completeness": 0.364,
     "ready": 0,
     "not_ready": 63
   },
@@ -13,10 +13,12 @@
       "label": "G209 K2388+976-K2389+036 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.6,
+      "risk_data_completeness": 0.5,
       "risk_readiness": "not_ready",
-      "blocking_count": 8,
+      "blocking_count": 10,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "slope_type",
         "deformation_observation",
         "groundwater",
@@ -100,44 +102,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS01",
+              "x": 356065.841,
+              "y": 3314980.333,
+              "z": 546.208,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0056",
+              "bbox": [
+                623.04,
+                611.79,
+                1106.52,
+                631.52
+              ]
+            },
+            {
+              "point_no": "GPS02",
+              "x": 356144.584,
+              "y": 3314935.788,
+              "z": 551.97,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0057",
+              "bbox": [
+                853.44,
+                627.87,
+                1103.88,
+                639.56
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS01",
-            "x": 356065.841,
-            "y": 3314980.333,
-            "z": 546.208,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0056",
-            "bbox": [
-              623.04,
-              611.79,
-              1106.52,
-              631.52
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS02",
-            "x": 356144.584,
-            "y": 3314935.788,
-            "z": 551.97,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0057",
-            "bbox": [
-              853.44,
-              627.87,
-              1103.88,
-              639.56
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -381,10 +394,12 @@
       "label": "G209 K2391+966-K2392+030 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.55,
+      "risk_data_completeness": 0.45,
       "risk_readiness": "not_ready",
-      "blocking_count": 9,
+      "blocking_count": 11,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "slope_type",
         "overall_slope_deformation_severity",
         "deformation_observation",
@@ -469,44 +484,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS19",
+              "x": 358670.181,
+              "y": 3315226.901,
+              "z": 637.244,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0019",
+              "bbox": [
+                86.52,
+                253.23,
+                572.64,
+                273.08
+              ]
+            },
+            {
+              "point_no": "GPS20",
+              "x": 358721.807,
+              "y": 3315306.364,
+              "z": 640.666,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0021",
+              "bbox": [
+                319.56,
+                269.31,
+                572.64,
+                281.0
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS19",
-            "x": 358670.181,
-            "y": 3315226.901,
-            "z": 637.244,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0019",
-            "bbox": [
-              86.52,
-              253.23,
-              572.64,
-              273.08
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS20",
-            "x": 358721.807,
-            "y": 3315306.364,
-            "z": 640.666,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0021",
-            "bbox": [
-              319.56,
-              269.31,
-              572.64,
-              281.0
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -750,10 +776,12 @@
       "label": "G209 K2397+685-K2397+760 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.6,
+      "risk_data_completeness": 0.5,
       "risk_readiness": "not_ready",
-      "blocking_count": 8,
+      "blocking_count": 10,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "overall_slope_deformation_severity",
         "deformation_observation",
         "groundwater",
@@ -837,44 +865,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS03",
+              "x": 360466.306,
+              "y": 3315415.861,
+              "z": 718.747,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0059",
+              "bbox": [
+                623.04,
+                643.95,
+                1106.52,
+                663.68
+              ]
+            },
+            {
+              "point_no": "GPS04",
+              "x": 360433.296,
+              "y": 3315342.485,
+              "z": 717.212,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0060",
+              "bbox": [
+                853.44,
+                660.03,
+                1106.52,
+                671.72
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS03",
-            "x": 360466.306,
-            "y": 3315415.861,
-            "z": 718.747,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0059",
-            "bbox": [
-              623.04,
-              643.95,
-              1106.52,
-              663.68
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS04",
-            "x": 360433.296,
-            "y": 3315342.485,
-            "z": 717.212,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0060",
-            "bbox": [
-              853.44,
-              660.03,
-              1106.52,
-              671.72
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -1113,10 +1152,12 @@
       "label": "G209 K2398+300-K2398+439 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.65,
+      "risk_data_completeness": 0.55,
       "risk_readiness": "not_ready",
-      "blocking_count": 7,
+      "blocking_count": 9,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -1199,44 +1240,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS05",
+              "x": 360374.454,
+              "y": 3314746.532,
+              "z": 713.348,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0062",
+              "bbox": [
+                623.04,
+                676.23,
+                1106.52,
+                695.96
+              ]
+            },
+            {
+              "point_no": "GPS06",
+              "x": 360337.713,
+              "y": 3314662.129,
+              "z": 709.446,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0064",
+              "bbox": [
+                853.44,
+                692.31,
+                1106.52,
+                704.0
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS05",
-            "x": 360374.454,
-            "y": 3314746.532,
-            "z": 713.348,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0062",
-            "bbox": [
-              623.04,
-              676.23,
-              1106.52,
-              695.96
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS06",
-            "x": 360337.713,
-            "y": 3314662.129,
-            "z": 709.446,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0064",
-            "bbox": [
-              853.44,
-              692.31,
-              1106.52,
-              704.0
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -1475,10 +1527,12 @@
       "label": "G209 K2401+227-K2401+307 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.55,
+      "risk_data_completeness": 0.45,
       "risk_readiness": "not_ready",
-      "blocking_count": 9,
+      "blocking_count": 11,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "slope_type",
         "overall_slope_deformation_severity",
         "deformation_observation",
@@ -1563,44 +1617,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS07",
+              "x": 361227.758,
+              "y": 3312930.114,
+              "z": 706.138,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0067",
+              "bbox": [
+                623.04,
+                708.39,
+                1106.52,
+                728.12
+              ]
+            },
+            {
+              "point_no": "GPS08",
+              "x": 361308.836,
+              "y": 3312924.648,
+              "z": 708.078,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0068",
+              "bbox": [
+                853.44,
+                724.47,
+                1106.52,
+                736.16
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS07",
-            "x": 361227.758,
-            "y": 3312930.114,
-            "z": 706.138,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0067",
-            "bbox": [
-              623.04,
-              708.39,
-              1106.52,
-              728.12
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS08",
-            "x": 361308.836,
-            "y": 3312924.648,
-            "z": 708.078,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0011_text_0068",
-            "bbox": [
-              853.44,
-              724.47,
-              1106.52,
-              736.16
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -1843,10 +1908,12 @@
       "label": "G209 K2402+458-K2402+500 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.65,
+      "risk_data_completeness": 0.55,
       "risk_readiness": "not_ready",
-      "blocking_count": 7,
+      "blocking_count": 9,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -1929,44 +1996,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS09",
+              "x": 361266.355,
+              "y": 3311813.522,
+              "z": 685.651,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0003",
+              "bbox": [
+                89.16,
+                92.19,
+                572.64,
+                111.92
+              ]
+            },
+            {
+              "point_no": "GPS10",
+              "x": 361294.796,
+              "y": 3311749.175,
+              "z": 683.194,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0004",
+              "bbox": [
+                319.56,
+                108.27,
+                572.64,
+                119.96
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS09",
-            "x": 361266.355,
-            "y": 3311813.522,
-            "z": 685.651,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0003",
-            "bbox": [
-              89.16,
-              92.19,
-              572.64,
-              111.92
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS10",
-            "x": 361294.796,
-            "y": 3311749.175,
-            "z": 683.194,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0004",
-            "bbox": [
-              319.56,
-              108.27,
-              572.64,
-              119.96
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -2210,10 +2288,12 @@
       "label": "G209 K2402+780-K2402+826 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.6,
+      "risk_data_completeness": 0.5,
       "risk_readiness": "not_ready",
-      "blocking_count": 8,
+      "blocking_count": 10,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "overall_slope_deformation_severity",
         "deformation_observation",
         "groundwater",
@@ -2297,44 +2377,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS11",
+              "x": 361477.831,
+              "y": 3311542.611,
+              "z": 689.779,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0006",
+              "bbox": [
+                89.16,
+                124.35,
+                572.64,
+                144.08
+              ]
+            },
+            {
+              "point_no": "GPS12",
+              "x": 361445.0,
+              "y": 3311473.138,
+              "z": 691.807,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0008",
+              "bbox": [
+                319.56,
+                140.43,
+                572.64,
+                152.12
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS11",
-            "x": 361477.831,
-            "y": 3311542.611,
-            "z": 689.779,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0006",
-            "bbox": [
-              89.16,
-              124.35,
-              572.64,
-              144.08
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS12",
-            "x": 361445.0,
-            "y": 3311473.138,
-            "z": 691.807,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0008",
-            "bbox": [
-              319.56,
-              140.43,
-              572.64,
-              152.12
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -2578,10 +2669,12 @@
       "label": "G209 K2410+330-K2410+445 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.6,
+      "risk_data_completeness": 0.5,
       "risk_readiness": "not_ready",
-      "blocking_count": 8,
+      "blocking_count": 10,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "slope_type",
         "deformation_observation",
         "groundwater",
@@ -2665,44 +2758,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS13",
+              "x": 359595.009,
+              "y": 3304752.274,
+              "z": 804.042,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0009",
+              "bbox": [
+                89.16,
+                156.63,
+                572.64,
+                176.36
+              ]
+            },
+            {
+              "point_no": "GPS14",
+              "x": 359659.65,
+              "y": 3304761.649,
+              "z": 800.102,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0011",
+              "bbox": [
+                319.56,
+                172.71,
+                572.64,
+                184.4
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS13",
-            "x": 359595.009,
-            "y": 3304752.274,
-            "z": 804.042,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0009",
-            "bbox": [
-              89.16,
-              156.63,
-              572.64,
-              176.36
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS14",
-            "x": 359659.65,
-            "y": 3304761.649,
-            "z": 800.102,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0011",
-            "bbox": [
-              319.56,
-              172.71,
-              572.64,
-              184.4
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -2945,10 +3049,12 @@
       "label": "G209 K2412+602-K2412+664 右侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.55,
+      "risk_data_completeness": 0.45,
       "risk_readiness": "not_ready",
-      "blocking_count": 9,
+      "blocking_count": 11,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "slope_type",
         "overall_slope_deformation_severity",
         "deformation_observation",
@@ -3033,44 +3139,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS15",
+              "x": 359138.396,
+              "y": 3304012.571,
+              "z": 693.15,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0012",
+              "bbox": [
+                89.16,
+                188.79,
+                570.0,
+                208.52
+              ]
+            },
+            {
+              "point_no": "GPS16",
+              "x": 359104.321,
+              "y": 3303932.314,
+              "z": 691.414,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0014",
+              "bbox": [
+                319.56,
+                204.87,
+                572.64,
+                216.56
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS15",
-            "x": 359138.396,
-            "y": 3304012.571,
-            "z": 693.15,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0012",
-            "bbox": [
-              89.16,
-              188.79,
-              570.0,
-              208.52
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS16",
-            "x": 359104.321,
-            "y": 3303932.314,
-            "z": 691.414,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0014",
-            "bbox": [
-              319.56,
-              204.87,
-              572.64,
-              216.56
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -3309,10 +3426,12 @@
       "label": "G209 K2429+580-K2429+668 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.6,
+      "risk_data_completeness": 0.5,
       "risk_readiness": "not_ready",
-      "blocking_count": 8,
+      "blocking_count": 10,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "slope_type",
         "deformation_observation",
         "groundwater",
@@ -3396,44 +3515,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS25",
+              "x": 354085.55,
+              "y": 3290701.322,
+              "z": 557.209,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0030",
+              "bbox": [
+                86.52,
+                349.83,
+                572.64,
+                369.68
+              ]
+            },
+            {
+              "point_no": "GPS26",
+              "x": 354117.274,
+              "y": 3290567.032,
+              "z": 562.983,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0031",
+              "bbox": [
+                319.56,
+                365.91,
+                572.64,
+                377.6
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS25",
-            "x": 354085.55,
-            "y": 3290701.322,
-            "z": 557.209,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0030",
-            "bbox": [
-              86.52,
-              349.83,
-              572.64,
-              369.68
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS26",
-            "x": 354117.274,
-            "y": 3290567.032,
-            "z": 562.983,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0031",
-            "bbox": [
-              319.56,
-              365.91,
-              572.64,
-              377.6
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -3677,10 +3807,12 @@
       "label": "G209 K2434+460-K2434+585 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.55,
+      "risk_data_completeness": 0.45,
       "risk_readiness": "not_ready",
-      "blocking_count": 9,
+      "blocking_count": 11,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "slope_type",
         "overall_slope_deformation_severity",
         "deformation_observation",
@@ -3765,44 +3897,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS17",
+              "x": 355905.344,
+              "y": 3287581.588,
+              "z": 543.13,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0016",
+              "bbox": [
+                89.16,
+                220.95,
+                570.0,
+                240.8
+              ]
+            },
+            {
+              "point_no": "GPS18",
+              "x": 355939.342,
+              "y": 3287491.78,
+              "z": 544.332,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0017",
+              "bbox": [
+                319.56,
+                237.03,
+                572.64,
+                248.72
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS17",
-            "x": 355905.344,
-            "y": 3287581.588,
-            "z": 543.13,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0016",
-            "bbox": [
-              89.16,
-              220.95,
-              570.0,
-              240.8
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS18",
-            "x": 355939.342,
-            "y": 3287491.78,
-            "z": 544.332,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0017",
-            "bbox": [
-              319.56,
-              237.03,
-              572.64,
-              248.72
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -4045,10 +4188,12 @@
       "label": "G209 K2435+310-K2435+430 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.6,
+      "risk_data_completeness": 0.5,
       "risk_readiness": "not_ready",
-      "blocking_count": 8,
+      "blocking_count": 10,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "slope_type",
         "deformation_observation",
         "groundwater",
@@ -4132,44 +4277,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS21",
+              "x": 356233.467,
+              "y": 3286951.281,
+              "z": 558.613,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0023",
+              "bbox": [
+                86.52,
+                285.39,
+                572.64,
+                305.24
+              ]
+            },
+            {
+              "point_no": "GPS22",
+              "x": 356278.599,
+              "y": 3286808.685,
+              "z": 557.971,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0024",
+              "bbox": [
+                319.56,
+                301.47,
+                572.64,
+                313.16
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS21",
-            "x": 356233.467,
-            "y": 3286951.281,
-            "z": 558.613,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0023",
-            "bbox": [
-              86.52,
-              285.39,
-              572.64,
-              305.24
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS22",
-            "x": 356278.599,
-            "y": 3286808.685,
-            "z": 557.971,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0024",
-            "bbox": [
-              319.56,
-              301.47,
-              572.64,
-              313.16
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -4412,10 +4568,12 @@
       "label": "G209 K2435+820-K2435+900 左侧边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.65,
+      "risk_data_completeness": 0.55,
       "risk_readiness": "not_ready",
-      "blocking_count": 7,
+      "blocking_count": 9,
       "blocking_items": [
+        "start_coordinate",
+        "end_coordinate",
         "deformation_observation",
         "groundwater",
         "rainfall",
@@ -4498,44 +4656,55 @@
           "value": "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "available",
+          "value": [
+            {
+              "point_no": "GPS23",
+              "x": 356531.29,
+              "y": 3286626.457,
+              "z": 551.853,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0026",
+              "bbox": [
+                86.52,
+                317.55,
+                572.64,
+                337.4
+              ]
+            },
+            {
+              "point_no": "GPS24",
+              "x": 356641.005,
+              "y": 3286638.316,
+              "z": 553.423,
+              "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0027",
+              "bbox": [
+                319.56,
+                333.63,
+                572.64,
+                345.32
+              ]
+            }
+          ]
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS23",
-            "x": 356531.29,
-            "y": 3286626.457,
-            "z": 551.853,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0026",
-            "bbox": [
-              86.52,
-              317.55,
-              572.64,
-              337.4
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "end_coordinate",
           "label_zh": "止点坐标",
           "group": "location",
           "requirement": "risk_required",
-          "status": "available",
-          "value": {
-            "point_no": "GPS24",
-            "x": 356641.005,
-            "y": 3286638.316,
-            "z": 553.423,
-            "evidence_block_id": "doc_g209_2388_976_2435_900_施工图设计_20ba9aa705_p0012_text_0027",
-            "bbox": [
-              319.56,
-              333.63,
-              572.64,
-              345.32
-            ]
-          }
+          "status": "missing",
+          "value": null
         },
         {
           "code": "slope_type",
@@ -4874,6 +5043,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -5220,6 +5397,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -5560,6 +5745,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -5907,6 +6100,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -6247,6 +6448,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -6591,6 +6800,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -6942,6 +7159,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -7283,6 +7508,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -7627,6 +7860,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -7974,6 +8215,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -8316,6 +8565,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -8655,6 +8912,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -8999,6 +9264,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -9346,6 +9619,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -9687,6 +9968,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -9944,9 +10233,9 @@
       "label": "G347 K1361+560-K1361+710 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.25,
+      "risk_data_completeness": 0.3,
       "risk_readiness": "not_ready",
-      "blocking_count": 15,
+      "blocking_count": 14,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
@@ -9960,7 +10249,6 @@
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -10036,6 +10324,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -10266,7 +10562,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -10296,9 +10592,9 @@
       "label": "G347 K1362+280-K1363+180 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.45,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 11,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
@@ -10309,7 +10605,6 @@
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -10385,6 +10680,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -10614,7 +10917,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -10734,6 +11037,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -11086,6 +11397,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -11436,6 +11755,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -11690,9 +12017,9 @@
       "label": "G347 K1367+630-K1367+700 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.45,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 11,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
@@ -11703,7 +12030,6 @@
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -11779,6 +12105,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -12008,7 +12342,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -12129,6 +12463,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -12480,6 +12822,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -12826,6 +13176,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -13082,9 +13440,9 @@
       "label": "G351 K1573+520-K1573+560 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.45,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 11,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
@@ -13095,7 +13453,6 @@
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -13171,6 +13528,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -13399,7 +13764,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -13525,6 +13890,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -13871,6 +14244,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -14207,6 +14588,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -14559,6 +14948,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -14894,6 +15291,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -15246,6 +15651,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -15595,6 +16008,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -15934,6 +16355,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -16287,6 +16716,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -16623,6 +17060,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -16974,6 +17419,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -17310,6 +17763,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -17562,9 +18023,9 @@
       "label": "G351 K1580+270-K1580+320 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.35,
+      "risk_data_completeness": 0.4,
       "risk_readiness": "not_ready",
-      "blocking_count": 13,
+      "blocking_count": 12,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
@@ -17576,7 +18037,6 @@
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -17652,6 +18112,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -17876,7 +18344,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -17998,6 +18466,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -18246,9 +18722,9 @@
       "label": "G351 K1581+600-K1581+800 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.45,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 11,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
@@ -18259,7 +18735,6 @@
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -18335,6 +18810,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -18563,7 +19046,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -18689,6 +19172,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -18937,9 +19428,9 @@
       "label": "G351 K1587+700-K1587+800 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.35,
+      "risk_data_completeness": 0.4,
       "risk_readiness": "not_ready",
-      "blocking_count": 13,
+      "blocking_count": 12,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
@@ -18951,7 +19442,6 @@
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -19027,6 +19517,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -19248,7 +19746,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -19369,6 +19867,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -19624,9 +20130,9 @@
       "label": "G351 K1613+100-K1613+400 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.45,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 11,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
@@ -19637,7 +20143,6 @@
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -19713,6 +20218,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -19941,7 +20454,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -19971,9 +20484,9 @@
       "label": "G351 K1617+780-K1617+820 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.4,
+      "risk_data_completeness": 0.45,
       "risk_readiness": "not_ready",
-      "blocking_count": 12,
+      "blocking_count": 11,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
@@ -19984,7 +20497,6 @@
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -20060,6 +20572,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -20288,7 +20808,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -20407,6 +20927,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -20757,6 +21285,14 @@
           "value": null
         },
         {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
+        },
+        {
           "code": "start_coordinate",
           "label_zh": "起点坐标",
           "group": "location",
@@ -21006,9 +21542,9 @@
       "label": "G351 K1625+600-K1625+700 边坡",
       "review_status": "automatic_evidence_validated_not_human_reviewed",
       "entity_resolution_status": "automatically_resolved_by_station_range",
-      "risk_data_completeness": 0.25,
+      "risk_data_completeness": 0.3,
       "risk_readiness": "not_ready",
-      "blocking_count": 15,
+      "blocking_count": 14,
       "blocking_items": [
         "start_coordinate",
         "end_coordinate",
@@ -21022,7 +21558,6 @@
         "rainfall",
         "protection_condition",
         "maintenance",
-        "stability",
         "exposure",
         "risk_rules"
       ],
@@ -21098,6 +21633,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -21319,7 +21862,7 @@
           "domain": "analysis",
           "relation": "HAS_STABILITY_ANALYSIS",
           "requirement": "risk_required",
-          "status": "missing",
+          "status": "available",
           "value": null
         },
         {
@@ -21441,6 +21984,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",
@@ -21785,6 +22336,14 @@
           "requirement": "conditional_required",
           "status": "missing",
           "value": null
+        },
+        {
+          "code": "control_points",
+          "label_zh": "测量控制点（非边坡端点）",
+          "group": "location",
+          "requirement": "optional",
+          "status": "missing",
+          "value": []
         },
         {
           "code": "start_coordinate",

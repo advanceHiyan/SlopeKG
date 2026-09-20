@@ -84,7 +84,7 @@ a { color: inherit; }
 .selected-file small { color: var(--muted); margin-top: 3px; }
 .ingest-options { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin-top: 14px; }
 .ingest-options label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-.ingest-options input[type="number"] { width: 84px; height: 34px; border: 1px solid var(--line); border-radius: 6px; padding: 0 8px; }
+.ingest-options input[type="number"], .ingest-options select { width: 92px; height: 34px; border: 1px solid var(--line); border-radius: 6px; padding: 0 8px; background: #fff; }
 .check-option input { accent-color: var(--accent); }
 .form-help, .section-subtitle { color: var(--muted); font-size: 12px; line-height: 1.55; }
 .section-subtitle { margin: -5px 0 0; }
@@ -113,6 +113,12 @@ a { color: inherit; }
 .subnav a { padding: 10px 14px; color: var(--muted); text-decoration: none; border-bottom: 3px solid transparent; }
 .subnav a:hover, .subnav a.active { color: var(--accent); border-color: var(--accent); }
 .rules-layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(330px, .65fr); gap: 16px; margin-top: 16px; align-items: start; }
+.manual-rule-card { margin-bottom: 16px; }
+.manual-rule-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+.manual-rule-meta label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; }
+.manual-rule-meta input, .manual-rule-meta select, .manual-condition-row input, .manual-condition-row select { width: 100%; height: 38px; border: 1px solid var(--line); border-radius: 7px; padding: 0 9px; background: #fff; }
+.manual-rule-conditions { display: grid; gap: 8px; margin-bottom: 9px; }
+.manual-condition-row { display: grid; grid-template-columns: 1.1fr 1fr 1.5fr auto; gap: 8px; align-items: center; }
 .rule-table tbody tr, .formula-card { cursor: pointer; }
 .rule-table tbody tr:hover, .rule-table tbody tr.selected { background: var(--accent-soft); }
 .rule-detail h2 { margin-bottom: 6px; }
@@ -158,6 +164,17 @@ a { color: inherit; }
 .risk-metric.p3 { border-top-color: #5576b8; }
 .risk-metric.p4 { border-top-color: #87939a; }
 .risk-detail .card-title-row { margin-bottom: 14px; }
+.detail-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.manual-editor { margin: 14px 0; border: 1px solid #9dd0c8; border-radius: 10px; padding: 14px; background: #f7fcfb; }
+.manual-editor-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.manual-editor-head h3 { margin: 0 0 5px; }
+.manual-editor-head p { margin: 0 0 12px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.manual-meta-grid, .manual-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.manual-meta-grid { margin-bottom: 12px; }
+.manual-field { display: grid; gap: 5px; border: 1px solid var(--line); border-radius: 7px; padding: 9px; background: #fff; }
+.manual-field > span, .manual-meta-grid label { color: var(--ink); font-size: 12px; font-weight: 700; }
+.manual-field input, .manual-field select, .manual-meta-grid input { width: 100%; height: 36px; border: 1px solid var(--line); border-radius: 6px; padding: 0 8px; background: #fff; }
+.manual-field small, .manual-save-status { color: var(--muted); font-size: 11px; line-height: 1.4; }
 .risk-detail .card-title-row h2 { margin-bottom: 4px; }
 .risk-basis-list { display: grid; gap: 10px; }
 .risk-basis { border: 1px solid var(--line); border-radius: 8px; padding: 11px; }
@@ -196,9 +213,9 @@ a { color: inherit; }
 .boundary-grid h3 { margin: 0 0 8px; }
 @media (max-width: 900px) {
   .site-header-inner, .page-heading { align-items: flex-start; flex-direction: column; }
-  .grid.metrics-grid, .feature-grid, .grid.two-col, .ingest-layout, .rules-layout, .rule-run-card, .risk-layout, .boundary-grid { grid-template-columns: 1fr; }
+  .grid.metrics-grid, .feature-grid, .grid.two-col, .ingest-layout, .rules-layout, .rule-run-card, .risk-layout, .boundary-grid, .manual-rule-meta, .manual-condition-row { grid-template-columns: 1fr; }
   .page-main { padding: 20px 14px; }
-  .field-grid { grid-template-columns: 1fr; }
+  .field-grid, .manual-meta-grid, .manual-field-grid { grid-template-columns: 1fr; }
   .export-card { align-items: stretch; flex-direction: column; }
   .export-controls { align-items: stretch; justify-content: flex-start; }
   .export-controls input { width: min(100%, 360px); }

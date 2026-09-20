@@ -1,0 +1,77 @@
+{
+  "description": "原8页人工对照集保留不变；2026-09-20由AI查看原页增加3页，覆盖全部9份PDF。新增样本为内部回归样本，尚未经独立人工复核，不作为风险金标准或全库准确率。",
+  "cases": [
+    {
+      "file_prefix": "G209-2388.976-2435.900-其他",
+      "page": 10,
+      "page_type": "native_text",
+      "expected_phrases": ["3.工程地质条件", "3.1地形地貌", "志留系罗惹坪组", "三叠系嘉陵江组", "崩塌、危岩体及不稳定边坡"]
+    },
+    {
+      "file_prefix": "G344-1015.070-1024.170",
+      "page": 10,
+      "page_type": "native_text",
+      "expected_phrases": ["5.2滑坡类型及规模", "滑坡体厚度2-7米", "浅层岩质滑坡中的破碎岩体滑坡", "规模属小型滑坡"]
+    },
+    {
+      "file_prefix": "G209-2388.976-2435.900-施工",
+      "page": 33,
+      "page_type": "table",
+      "expected_phrases": ["含砾粉质黏土", "重度(kN/m3)", "19.0", "内聚力C(kPa)", "1.14", "1.04"]
+    },
+    {
+      "file_prefix": "G351-1570.950-1625.800",
+      "page": 44,
+      "page_type": "table",
+      "expected_phrases": ["天然工况", "1.058", "1.15", "基本稳定", "暴雨工况", "1.002", "极限平衡"]
+    },
+    {
+      "file_prefix": "G347-1124.365-1125.337",
+      "page": 2,
+      "page_type": "scanned",
+      "expected_phrases": ["G347南德线(远安县境)", "盐池段公路地质灾害恢复治理工程", "勘察报告", "第二册勘察说明及图表"]
+    },
+    {
+      "file_prefix": "滑坡分类等",
+      "page": 10,
+      "page_type": "scanned",
+      "expected_phrases": ["整体下沉", "岩溶塌陷", "采空区塌陷", "黄土湿陷", "沿河路基水毁", "河湾路基凹岸冲刷"]
+    },
+    {
+      "file_prefix": "G209-2388.976-2435.900-施工",
+      "page": 83,
+      "page_type": "drawing",
+      "expected_phrases": ["K2402+780-K2402+826", "坡面清方+挂网喷锚", "SDZ-X06-1", "施工图设计"]
+    },
+    {
+      "file_prefix": "G344-1015.070-1024.170",
+      "page": 16,
+      "page_type": "drawing",
+      "expected_phrases": ["嵩县G344东灵线梅子沟段边坡灾害防治工程", "工程地质平面图", "施工图设计", "2021.06"]
+    },
+    {
+      "file_prefix": "G318-1440.378-1506.700",
+      "page": 10,
+      "page_type": "native_text",
+      "review_method": "assistant_visual_source_check",
+      "reviewed_at": "2026-09-20",
+      "expected_phrases": ["3.工程地质条件", "项目区典型地貌照片", "28.6度", "巴东县G318线路区地质构造图", "9.5m"]
+    },
+    {
+      "file_prefix": "G347-1361.560-1373.690",
+      "page": 8,
+      "page_type": "native_text",
+      "review_method": "assistant_visual_source_check",
+      "reviewed_at": "2026-09-20",
+      "expected_phrases": ["2.3气象与水文", "海拔950m", "800-2500mm", "20m的高差", "神农架林区地层岩性分布图"]
+    },
+    {
+      "file_prefix": "2021地质灾害评估规范",
+      "page": 4,
+      "page_type": "scanned",
+      "review_method": "assistant_visual_source_check",
+      "reviewed_at": "2026-09-20",
+      "expected_phrases": ["GB/T40112-2021", "前言", "中华人民共和国自然资源部提出", "SAC/TC93", "北京市地质研究所"]
+    }
+  ]
+}

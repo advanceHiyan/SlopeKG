@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-09-20T15:22:21",
+  "status": "requires_independent_expert_gold_set",
+  "evaluated": 0,
+  "metrics": null,
+  "required_label_fields": [
+    "slope_id",
+    "expert_priority"
+  ],
+  "optional_label_fields": [
+    "reviewed_at",
+    "reviewer_role",
+    "observed_event",
+    "notes"
+  ],
+  "boundary": "页面抽取准确率和稳定系数复核结果不能替代风险判断金标准。"
+}

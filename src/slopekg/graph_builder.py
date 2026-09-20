@@ -181,7 +181,26 @@ def build_automatic_graph(
             add_edge(edges, slope_id, work_id, "HAS_PROTECTION_DESIGN", evidence=method_evidence(source_evidence, ["pdfplumber_treatment_table", "treatment_plan_table"], all_evidence))
             add_edge(edges, work_id, type_id, "INSTANCE_OF")
 
+        for record in slope.get("engineering_records", []):
+            if not record.get("material_parameters"):
+                continue
+            parameter_id = stable_id("material_parameters", record["id"])
+            parameter_evidence = add_scenario_evidence(evidence, station, {
+                "evidence_document_id": record["document_id"], "evidence_page": record["page"],
+                "evidence_text": "\n".join(" | ".join(str(c or "") for c in row) for row in record["rows"]),
+                "evidence_block_ids": [record["id"]], "evidence_bbox": record["bbox"],
+                "extraction_method": record["method"], "supports": ["material_parameters"],
+            }, documents)
+            add_node(nodes, parameter_id, f"{station} 材料参数（第{record['page']}页）", "MaterialParameterSet",
+                     parameters=record["material_parameters"], source_file=record["source_file"],
+                     source_page=record["page"], quality_issues=record["quality_issues"],
+                     review_status=record["review_status"], temporal_scope="historical_document_baseline",
+                     current_status_known=False, applicability="报告计算参数，适用断面与工况需核验")
+            add_edge(edges, slope_id, parameter_id, "HAS_MATERIAL_PARAMETERS", evidence=parameter_evidence)
+
+        stability_keys: set[tuple[Any, ...]] = set()
         for scenario_index, scenario in enumerate(unique_stability_scenarios(slope.get("stability_scenarios", [])), start=1):
+            stability_keys.add(stability_scenario_key(scenario))
             scenario_evidence = add_scenario_evidence(evidence, station, scenario, documents)
             analysis_id = stable_id("stability", f"{station}:survey:{scenario_index}:{scenario.get('condition')}:{scenario.get('safety_factor')}")
             add_node(
@@ -195,7 +214,13 @@ def build_automatic_graph(
                 status=scenario.get("status"),
                 analysis_scope=scenario.get("analysis_scope"),
                 source_kind=scenario.get("source_kind"),
-                value_source="deterministic_survey_sentence_extraction",
+                value_source=scenario.get("extraction_method", "deterministic_survey_sentence_extraction"),
+                section=scenario.get("section"),
+                body_id=scenario.get("body_id"),
+                failure_mode=scenario.get("failure_mode"),
+                table_evidence_id=scenario.get("table_evidence_id"),
+                quality_issues=scenario.get("quality_issues", []),
+                eligible_for_screening=scenario.get("eligible_for_screening", True),
             )
             add_edge(
                 edges,
@@ -206,6 +231,13 @@ def build_automatic_graph(
             )
 
         for fs_index, pair in enumerate(slope.get("safety_factor_pairs", []), start=1):
+            stability_keys.add(stability_scenario_key({
+                "condition": "治理设计工况",
+                "safety_factor": pair.get("actual"),
+                "required_factor": pair.get("required"),
+                "status": "满足要求" if pair.get("actual", 0) >= pair.get("required", 0) else "不满足要求",
+                "analysis_scope": None,
+            }))
             analysis_id = stable_id("stability", f"{station}:treatment:{fs_index}")
             add_node(
                 nodes,
@@ -220,6 +252,16 @@ def build_automatic_graph(
             )
             add_edge(edges, slope_id, analysis_id, "HAS_STABILITY_ANALYSIS", evidence=method_evidence(source_evidence, ["pdfplumber_treatment_table", "treatment_plan_table"], all_evidence))
         for conclusion_index, conclusion in enumerate(semantic.get("stability_conclusions", []), start=1):
+            table_issues = sorted({issue
+                for record in slope.get("engineering_records", [])
+                if record.get("page") == conclusion.get("evidence_page")
+                for result in record.get("stability_results", [])
+                if result.get("safety_factor") == conclusion.get("safety_factor")
+                for issue in record.get("quality_issues", [])})
+            conclusion_key = stability_scenario_key(conclusion)
+            if conclusion_key in stability_keys:
+                continue
+            stability_keys.add(conclusion_key)
             analysis_id = stable_id("stability", f"{station}:semantic:{conclusion_index}:{conclusion.get('condition')}")
             add_node(
                 nodes,
@@ -233,8 +275,16 @@ def build_automatic_graph(
                 analysis_scope=conclusion.get("analysis_scope"),
                 source_kind=conclusion.get("source_kind"),
                 value_source="validated_llm_extraction",
+                quality_issues=table_issues,
+                eligible_for_screening=not table_issues,
             )
-            add_edge(edges, slope_id, analysis_id, "HAS_STABILITY_ANALYSIS", evidence=field_evidence("stability_conclusions", semantic_evidence, source_evidence, all_evidence))
+            add_edge(
+                edges,
+                slope_id,
+                analysis_id,
+                "HAS_STABILITY_ANALYSIS",
+                evidence=matching_stability_evidence(conclusion, semantic_evidence.get("stability_conclusions", []), evidence),
+            )
 
         observation_payload = {
             **semantic,
@@ -262,6 +312,48 @@ def build_automatic_graph(
 
         semantic_assertions.extend(build_semantic_assertions(station, semantic_row, semantic_evidence, all_evidence))
 
+    # Project/route-level recommended parameters are source data, not missing
+    # slope associations. Keep them attached to their document and never let
+    # them silently leak into a nearby slope or risk-screening calculation.
+    document_scope_records = []
+    for record in extracted.get("engineering_records", []):
+        if record.get("association_scope") != "document" or not record.get("material_parameters"):
+            continue
+        document_id = record.get("document_id")
+        parameter_id = stable_id("material_parameters", record["id"])
+        evidence_id = add_scenario_evidence(evidence, f"document:{document_id}", {
+            "evidence_document_id": document_id,
+            "evidence_page": record.get("page"),
+            "evidence_text": "\n".join(" | ".join(str(c or "") for c in row) for row in record.get("rows", [])),
+            "evidence_block_ids": [record["id"]],
+            "evidence_bbox": record.get("bbox"),
+            "extraction_method": record.get("method"),
+            "supports": ["document_scope_material_parameters"],
+        }, documents)
+        add_node(
+            nodes,
+            parameter_id,
+            f"{record.get('route_code') or '文档'} 通用材料参数（第{record.get('page')}页）",
+            "MaterialParameterSet",
+            parameters=record["material_parameters"],
+            source_file=record.get("source_file"),
+            source_page=record.get("page"),
+            association_scope="document",
+            applicability="报告项目区推荐参数，未自动分配到具体边坡",
+            quality_issues=record.get("quality_issues", []),
+            review_status=record.get("review_status"),
+            eligible_for_screening=False,
+        )
+        if document_id in documents:
+            add_edge(edges, document_id, parameter_id, "HAS_MATERIAL_PARAMETERS", evidence=evidence_id)
+        document_scope_records.append({
+            "id": record["id"],
+            "document_id": document_id,
+            "page": record.get("page"),
+            "association_scope": "document",
+            "review_status": record.get("review_status"),
+        })
+
     graph = {
         "meta": {
             "title": "公路边坡风险知识图谱",
@@ -276,6 +368,33 @@ def build_automatic_graph(
         "edges": edges,
         "evidence": evidence,
         "source_records": [public_source_record(slope) for slope in slopes],
+        "document_scope_records": document_scope_records,
+        "source_issues": [
+            {
+                "kind": "registry_station_issue",
+                "route_code": row.get("route_code"),
+                "station": row.get("station"),
+                "source_file": documents.get(row.get("document_id"), {}).get("file_name"),
+                "page": row.get("page"),
+                "evidence_block_id": row.get("evidence_block_id"),
+                "quality_issues": row.get("quality_issues", []),
+                "resolution": "retained_as_source_issue_not_created_as_slope",
+            }
+            for row in extracted.get("registry_issues", [])
+        ] + [
+            {
+                "kind": "engineering_table_issue",
+                "route_code": row.get("route_code"),
+                "station": row.get("station"),
+                "source_file": row.get("source_file"),
+                "page": row.get("page"),
+                "evidence_block_id": row.get("id"),
+                "quality_issues": row.get("quality_issues", []),
+                "resolution": "excluded_from_screening_pending_domain_confirmation",
+            }
+            for row in extracted.get("engineering_records", [])
+            if row.get("quality_issues")
+        ],
         "property_assertions": [*extracted.get("assertions", []), *semantic_assertions],
     }
     graph["meta"]["stats"] = graph_stats(graph)
@@ -332,6 +451,8 @@ def slope_props(slope: dict[str, Any], semantic: dict[str, Any], route_code: str
         "start_coordinate": slope.get("start_coordinate"),
         "end_coordinate": slope.get("end_coordinate"),
         "coordinate_crs": slope.get("coordinate_crs"),
+        "control_points": slope.get("control_points", []),
+        "coordinate_role": slope.get("coordinate_role"),
         "slope_structure_code": semantic.get("slope_structure") or slope.get("slope_structure_code") or first(slope.get("slope_structure_terms", [])),
         "river_relation": semantic.get("river_relation") or slope.get("river_relation"),
         "vegetation_condition": semantic.get("vegetation_condition") or slope.get("vegetation_condition"),
@@ -428,7 +549,7 @@ def add_scenario_evidence(
     if page is None or not text:
         return None
     document_id = scenario.get("evidence_document_id")
-    evidence_id = stable_id("stability_evidence", f"{station}:{page}:{text}")
+    evidence_id = stable_id("stability_evidence", f"{document_id}:{station}:{page}:{text}")
     if not any(item["id"] == evidence_id for item in evidence):
         evidence.append(
             {
@@ -436,11 +557,12 @@ def add_scenario_evidence(
                 "source_file": documents.get(document_id, {}).get("file_name"),
                 "document_id": document_id,
                 "page": page,
-                "kind": "deterministic_stability_sentence",
+                "kind": scenario.get("extraction_method", "deterministic_stability_sentence"),
+                "bbox": scenario.get("evidence_bbox"),
                 "block_ids": scenario.get("evidence_block_ids", []),
                 "text": text,
-                "validation_status": "regex_value_and_condition_matched",
-                "supports": ["stability_scenarios"],
+                "validation_status": "table_header_and_cell_matched" if scenario.get("extraction_method") else "regex_value_and_condition_matched",
+                "supports": scenario.get("supports", ["stability_scenarios"]),
             }
         )
     return evidence_id
@@ -456,12 +578,66 @@ def unique_stability_scenarios(rows: list[dict[str, Any]]) -> list[dict[str, Any
             row.get("required_factor"),
             row.get("status"),
             row.get("analysis_scope"),
+            row.get("section"), row.get("body_id"), row.get("failure_mode"),
+            row.get("table_evidence_id"),
         )
         if key in seen:
             continue
         seen.add(key)
         output.append(row)
     return output
+
+
+def stability_scenario_key(row: dict[str, Any]) -> tuple[Any, ...]:
+    condition = str(row.get("condition") or "").replace(" ", "")
+    condition = {
+        "天然状态": "天然", "天然工况": "天然",
+        "饱水": "饱和", "饱水状态": "饱和", "饱和状态": "饱和",
+    }.get(condition, condition)
+    factor = row.get("safety_factor", row.get("fs"))
+    required = row.get("required_factor", row.get("required_fs"))
+    return (condition, factor, required, row.get("status"), row.get("analysis_scope"))
+
+
+def matching_stability_evidence(
+    scenario: dict[str, Any],
+    evidence_ids: list[str],
+    evidence: list[dict[str, Any]],
+) -> str | None:
+    """Bind a semantic stability result only to a quote containing its own condition and value."""
+    candidates = {item.get("id"): item for item in evidence if item.get("id") in evidence_ids}
+    factor = scenario.get("safety_factor")
+    status = str(scenario.get("status") or "")
+    condition = stability_condition_terms(scenario.get("condition"))
+    for evidence_id in evidence_ids:
+        text = str(candidates.get(evidence_id, {}).get("text") or "").replace(" ", "")
+        if not text:
+            continue
+        if factor is not None:
+            numbers = [float(token) for token in re.findall(r"\d+(?:\.\d+)?", text)]
+            if not any(abs(number - float(factor)) < 1e-9 for number in numbers):
+                continue
+        if status and status not in text:
+            continue
+        if condition and not any(term in text for term in condition):
+            continue
+        return evidence_id
+    return None
+
+
+def stability_condition_terms(value: Any) -> list[str]:
+    condition = str(value or "").replace(" ", "")
+    if condition in {"天然", "天然状态", "天然工况"}:
+        return ["天然"]
+    if condition in {"饱和", "饱和状态", "饱水", "饱水状态"}:
+        return ["饱和", "饱水"]
+    if "暴雨" in condition:
+        return ["暴雨"]
+    if "现状" in condition or "现在" in condition:
+        return ["现状", "现在"]
+    if "治理" in condition or "设计" in condition:
+        return ["治理", "设计"]
+    return [condition] if condition else []
 
 
 def build_semantic_assertions(
@@ -607,6 +783,50 @@ def write_graphml(path: Path, graph: dict[str, Any]) -> None:
         )
     lines.extend(["</graph>", "</graphml>"])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def attach_visual_assets(graph: dict[str, Any], catalog: dict[str, Any]) -> None:
+    """Replace catalog-owned visual nodes; attach only verified provenance.
+
+    A document association never implies a slope association. Even an explicit
+    slope ID needs an approved review before it becomes a graph edge.
+    """
+    previous = {n["id"] for n in graph["nodes"] if n.get("props", {}).get("asset_catalog_member")}
+    graph["nodes"] = [n for n in graph["nodes"] if n["id"] not in previous]
+    graph["edges"] = [e for e in graph["edges"] if e["source"] not in previous and e["target"] not in previous]
+    nodes = {n["id"]: n for n in graph["nodes"]}
+    counts = Counter(str(a.get("id")) for a in catalog.get("assets", []))
+    attached = 0
+    for asset in catalog.get("assets", []):
+        asset_id = asset.get("id")
+        document_id = asset.get("source_document_id")
+        page = asset.get("source_page")
+        if (asset.get("asset_type") != "VisualAsset" or asset.get("validation_status") != "valid"
+                or counts[str(asset_id)] != 1 or asset_id in nodes
+                or nodes.get(document_id, {}).get("type") != "Document"
+                or type(page) is not int or page < 1):
+            continue
+        props = {key: asset.get(key) for key in (
+            "href", "sha256", "media_type", "subtype", "source_document_id", "source_page", "origin",
+        )}
+        props.update(asset_catalog_member=True, association_scope="document", slope_review_status=asset.get("slope_review_status", "unreviewed"))
+        add_node(nodes, asset_id, asset.get("file_name", asset_id), "VisualAsset", **props)
+        # Stable edge IDs do not depend on catalog order or the existing edge count.
+        def edge(source: str, target: str, relation: str) -> None:
+            graph["edges"].append({"id": stable_id("asset_edge", f"{source}:{relation}:{target}"),
+                                   "source": source, "target": target, "relation": relation,
+                                   "props": {"source_page": page, "source_document_id": document_id}})
+        edge(document_id, asset_id, "HAS_VISUAL_ASSET")
+        edge(asset_id, document_id, "DERIVED_FROM")
+        slope_id = asset.get("slope_id")
+        if asset.get("slope_review_status") == "approved" and nodes.get(slope_id, {}).get("type") == "Slope":
+            edge(slope_id, asset_id, "HAS_VISUAL_ASSET")
+            nodes[asset_id]["props"].update(slope_id=slope_id, association_scope="reviewed_slope")
+        attached += 1
+    graph["nodes"] = list(nodes.values())
+    graph["meta"]["multimodal"] = {"catalog_assets": catalog.get("count", 0), "visual_assets_in_graph": attached,
+                                    "generated_at": catalog.get("generated_at")}
+    graph["meta"]["stats"] = graph_stats(graph)
 
 
 def graph_stats(graph: dict[str, Any]) -> dict[str, Any]:

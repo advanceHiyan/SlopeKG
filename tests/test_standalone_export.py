@@ -1,15 +1,29 @@
 from __future__ import annotations
 
 import json
+import copy
 import re
 import unittest
 from uuid import uuid4
 
 from slopekg.config import PATHS
-from slopekg.exporter import export_risk_standalone_html, export_standalone_html
+from slopekg.exporter import compact_graph_for_offline, export_risk_standalone_html, export_standalone_html
 
 
 class StandaloneExportTests(unittest.TestCase):
+    def test_visual_provenance_is_preserved_without_mutating_live_graph(self):
+        graph = {"meta": {}, "nodes": [{"id": "asset", "type": "VisualAsset", "props": {
+            "asset_catalog_member": True, "source_document_id": "doc", "source_page": 83, "sha256": "digest"}}],
+            "edges": [{"id": "edge", "source": "doc", "target": "asset", "relation": "HAS_VISUAL_ASSET",
+                       "props": {"source_document_id": "doc", "source_page": 83, "evidence": "ev"}}]}
+        original = copy.deepcopy(graph)
+        compact = compact_graph_for_offline(graph)
+        self.assertEqual(graph, original)
+        self.assertEqual(compact["nodes"], graph["nodes"])
+        self.assertEqual(compact["edges"][0]["props"], {"evidence": "ev"})
+        self.assertEqual(compact["edges"][0]["source"], "doc")
+        self.assertEqual(compact["edges"][0]["target"], "asset")
+
     def test_export_is_one_self_contained_html_with_embedded_graph(self) -> None:
         output = PATHS.output_dir / "share" / f"_export_test_{uuid4().hex}.html"
         try:

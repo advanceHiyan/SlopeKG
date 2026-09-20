@@ -6,10 +6,14 @@ output/demo/rules/llm_cache.json
 output/demo/rules/page_text.json
 output/demo/rules/page_text.jsonl
 output/demo/rules/pages/
+output/demo/manual/
 .tmp/
 tmp/
 tmp*/
 .secrets/
+.private/
+/AGENTS.md
+/outputs/**/SlopeKG项目管理台账*
 .pytest_cache/
 __MACOSX/
 .DS_Store

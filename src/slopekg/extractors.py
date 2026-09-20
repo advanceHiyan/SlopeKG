@@ -5,6 +5,8 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any
 
+from .engineering import attach_engineering_records, extract_engineering_tables
+
 
 STATION_RE = re.compile(
     r"K\s*(?P<start_km>\d+)\s*\+\s*(?P<start_m>\d+)\s*[-～~]\s*"
@@ -31,9 +33,11 @@ def extract_domain_candidates(parsed: dict[str, list[dict[str, Any]]]) -> dict[s
 
     survey_ids = [doc_id for doc_id, doc in documents.items() if doc.get("kind") == "勘察报告"]
     design_ids = [doc_id for doc_id, doc in documents.items() if doc.get("kind") == "施工图"]
-    registry = dedupe_by_route_station(
+    registry_source_rows = dedupe_by_route_station(
         [row for doc_id in survey_ids for row in extract_slope_registry(documents[doc_id], by_page, tables)]
     )
+    registry_issues = [row for row in registry_source_rows if not row.get("eligible_as_slope_root", True)]
+    registry = [row for row in registry_source_rows if row.get("eligible_as_slope_root", True)]
     coordinates = dedupe_by_station([row for doc_id in design_ids for row in extract_coordinates(doc_id, by_page)])
     treatments = dedupe_by_station([row for doc_id in design_ids for row in extract_treatments(doc_id, by_page, tables)])
     domain_document_ids = set([*survey_ids, *design_ids])
@@ -58,6 +62,8 @@ def extract_domain_candidates(parsed: dict[str, list[dict[str, Any]]]) -> dict[s
             row.setdefault("route_code", route_by_document.get(row.get("document_id"), "ROUTE"))
 
     merged = merge_slope_candidates(registry, coordinates, treatments, geometry, section_facts)
+    engineering_records = extract_engineering_tables(parsed, registry)
+    attach_engineering_records(merged, engineering_records)
     assertions = build_assertions(merged)
     page_type_counts: dict[str, int] = defaultdict(int)
     registry_rows_by_route: dict[str, int] = defaultdict(int)
@@ -70,18 +76,29 @@ def extract_domain_candidates(parsed: dict[str, list[dict[str, Any]]]) -> dict[s
         "mode": "deterministic_native_layout",
         "slopes": merged,
         "registry": registry,
+        "registry_issues": registry_issues,
         "coordinates": coordinates,
         "treatments": treatments,
         "geometry": geometry,
         "section_facts": section_facts,
+        "engineering_records": engineering_records,
         "assertions": assertions,
         "stats": {
+            "registry_source_rows": len(registry_source_rows),
             "registry_rows": len(registry),
+            "registry_records_needing_review": len(registry_issues),
             "registry_rows_by_route": dict(registry_rows_by_route),
             "coordinate_rows": len(coordinates),
             "treatment_rows": len(treatments),
             "geometry_rows": len(geometry),
             "section_fact_rows": len(section_facts),
+            "engineering_tables": len(engineering_records),
+            "engineering_tables_associated": sum(bool(r["station"]) for r in engineering_records),
+            "engineering_tables_document_scope": sum(r.get("association_scope") == "document" for r in engineering_records),
+            "engineering_tables_needing_review": sum(r.get("review_status") == "needs_review" for r in engineering_records),
+            "engineering_tables_with_source_issues": sum(bool(r["quality_issues"]) for r in engineering_records),
+            "material_parameter_values": sum(len(r["material_parameters"]) for r in engineering_records),
+            "table_stability_results": sum(len(r["stability_results"]) for r in engineering_records),
             "assertions": len(assertions),
             "page_type_counts": dict(page_type_counts),
             "native_bbox_coverage": round(sum(1 for row in blocks if row.get("bbox")) / len(blocks), 4) if blocks else 0,
@@ -131,22 +148,22 @@ def extract_slope_registry(
                 continue
             no = first_integer_cell(cells)
             side = next((value for value in ["左侧", "右侧"] if value in flat), None)
-            output.append(
-                candidate_row(
-                    station,
-                    page,
-                    table,
-                    "generic_slope_inventory_table",
-                    0.995 if registry_table_header(table) else 0.98,
-                    no=no,
-                    route_code=route_code,
-                    side=side,
-                    slope_length_m=registry_length_from_cells(cells, station, no),
-                    source_alias=next((cell.replace(" ", "") for cell in cells if STATION_RE.search(cell)), station),
-                    source_disaster_label=label,
-                    raw_row=" | ".join(cells),
-                )
+            candidate = candidate_row(
+                station,
+                page,
+                table,
+                "generic_slope_inventory_table",
+                0.995 if registry_table_header(table) else 0.98,
+                no=no,
+                route_code=route_code,
+                side=side,
+                slope_length_m=registry_length_from_cells(cells, station, no),
+                source_alias=next((cell.replace(" ", "") for cell in cells if STATION_RE.search(cell)), station),
+                source_disaster_label=label,
+                raw_row=" | ".join(cells),
             )
+            mark_station_resolution(candidate)
+            output.append(candidate)
 
     # Native blocks supplement rows that table extraction split or omitted.
     for (doc_id, page), blocks in by_page.items():
@@ -164,21 +181,21 @@ def extract_slope_registry(
             disaster = hazard_label(text)
             if no is None or disaster is None:
                 continue
-            output.append(
-                candidate_row(
-                    station,
-                    page,
-                    block,
-                    "generic_slope_inventory_block",
-                    0.985,
-                    no=no,
-                    route_code=route_code,
-                    side=side,
-                    slope_length_m=length or station_span_m(station),
-                    source_alias=next((line.replace(" ", "") for line in lines if "K" in line and ("边坡" in line or "危岩体" in line)), station),
-                    source_disaster_label=disaster,
-                )
+            candidate = candidate_row(
+                station,
+                page,
+                block,
+                "generic_slope_inventory_block",
+                0.985,
+                no=no,
+                route_code=route_code,
+                side=side,
+                slope_length_m=length or station_span_m(station),
+                source_alias=next((line.replace(" ", "") for line in lines if "K" in line and ("边坡" in line or "危岩体" in line)), station),
+                source_disaster_label=disaster,
             )
+            mark_station_resolution(candidate)
+            output.append(candidate)
     output = dedupe_by_route_station(output)
     if output:
         return output
@@ -221,8 +238,10 @@ def extract_coordinates(document_id: str | None, by_page: dict[tuple[str, int], 
     if current and current.get("points"):
         output.append(current)
     for row in output:
-        row["start_coordinate"] = row["points"][0] if row["points"] else None
-        row["end_coordinate"] = row["points"][1] if len(row["points"]) > 1 else None
+        row["control_points"] = row["points"]
+        row["coordinate_role"] = "survey_control_points_not_slope_endpoints"
+        row["start_coordinate"] = None
+        row["end_coordinate"] = None
         row["coordinate_crs"] = "CGCS2000（国家2000坐标系，3度带具体参数待核验）"
     return dedupe_by_station(output)
 
@@ -938,6 +957,32 @@ def normalize_station_match(match: re.Match[str] | None) -> str | None:
     end_km = int(end_km_raw) if end_km_raw else start_km
     end_m = int(match.group("end_m"))
     return f"K{start_km}+{start_m:03d}-K{end_km}+{end_m:03d}"
+
+
+def mark_station_resolution(candidate: dict[str, Any]) -> None:
+    """Keep malformed source rows for review without creating false slopes."""
+    bounds = station_bounds_for_validation(candidate.get("station"))
+    if bounds is None:
+        candidate["eligible_as_slope_root"] = False
+        candidate["entity_resolution_status"] = "invalid_station_syntax"
+        candidate["quality_issues"] = ["invalid_station_syntax"]
+    elif bounds[1] <= bounds[0]:
+        candidate["eligible_as_slope_root"] = False
+        candidate["entity_resolution_status"] = "non_increasing_station_range"
+        candidate["quality_issues"] = ["non_increasing_station_range"]
+    else:
+        candidate["eligible_as_slope_root"] = True
+        candidate["entity_resolution_status"] = "station_range_valid"
+
+
+def station_bounds_for_validation(station: Any) -> tuple[int, int] | None:
+    match = STATION_RE.search(str(station or ""))
+    if not match:
+        return None
+    start = int(match.group("start_km")) * 1000 + int(match.group("start_m"))
+    end_km = int(match.group("end_km") or match.group("start_km"))
+    end = end_km * 1000 + int(match.group("end_m"))
+    return start, end
 
 
 def station_start_m(station: str) -> int:

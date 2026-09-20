@@ -6,6 +6,7 @@ import json
 from typing import Any
 
 from .config import ATTRIBUTE_DICTIONARY_FILE
+from .multimodal import MULTIMODAL_SCHEMA_VERSION, multimodal_contract
 
 
 SCHEMA_VERSION = "1.1.0-layered-parsing"
@@ -33,6 +34,7 @@ NODE_TYPES: dict[str, dict[str, Any]] = {
     "VegetationSurvey": {"label_zh": "植被调查", "category": "environment"},
     "MonitoringProgram": {"label_zh": "监测方案", "category": "monitoring"},
     "StabilityAnalysis": {"label_zh": "稳定性分析", "category": "analysis"},
+    "MaterialParameterSet": {"label_zh": "材料计算参数", "category": "analysis"},
     "Drawing": {"label_zh": "图纸", "category": "evidence"},
     "Document": {"label_zh": "文档", "category": "evidence"},
     "Standard": {"label_zh": "规范", "category": "rule"},
@@ -42,6 +44,17 @@ NODE_TYPES: dict[str, dict[str, Any]] = {
     "RiskRule": {"label_zh": "风险规则", "category": "rule"},
     "RiskAssessment": {"label_zh": "风险评估", "category": "assessment"},
     "ExposureObject": {"label_zh": "暴露对象", "category": "risk"},
+    "VisualAsset": {"label_zh": "视觉资产", "category": "multimodal"},
+    "AcquisitionEvent": {"label_zh": "采集事件", "category": "multimodal"},
+    "SpatialFootprint": {"label_zh": "空间覆盖范围", "category": "multimodal"},
+    "RasterAsset": {"label_zh": "栅格资产", "category": "multimodal"},
+    "PointCloudAsset": {"label_zh": "点云资产", "category": "multimodal"},
+    "ThreeDModelAsset": {"label_zh": "三维模型资产", "category": "multimodal"},
+    "MonitoringSeries": {"label_zh": "监测时序", "category": "multimodal"},
+    "DerivedMetric": {"label_zh": "派生指标", "category": "multimodal"},
+    "ProcessingRun": {"label_zh": "处理运行", "category": "provenance"},
+    "QualityReport": {"label_zh": "质量报告", "category": "quality"},
+    "AnnotationSet": {"label_zh": "标注集", "category": "quality"},
 }
 
 
@@ -61,6 +74,7 @@ RELATION_TYPES: dict[str, dict[str, str]] = {
     "HAS_EXISTING_PROTECTION": {"label_zh": "具有既有防护"},
     "INSTANCE_OF": {"label_zh": "实例类型"},
     "HAS_STABILITY_ANALYSIS": {"label_zh": "具有稳定性分析"},
+    "HAS_MATERIAL_PARAMETERS": {"label_zh": "具有材料计算参数"},
     "SHOWN_IN": {"label_zh": "显示于图纸"},
     "IN_DOCUMENT": {"label_zh": "位于文档"},
     "RECORDED_IN": {"label_zh": "记录于文档"},
@@ -76,6 +90,16 @@ RELATION_TYPES: dict[str, dict[str, str]] = {
     "DEFINES_FORMULA": {"label_zh": "定义公式"},
     "DEFINES_THRESHOLD_TABLE": {"label_zh": "定义阈值表"},
     "DEFINES_RULE": {"label_zh": "定义规则"},
+    "HAS_VISUAL_ASSET": {"label_zh": "具有视觉资产"},
+    "HAS_SPATIAL_ASSET": {"label_zh": "具有空间资产"},
+    "HAS_MONITORING_SERIES": {"label_zh": "具有监测时序"},
+    "ACQUIRED_DURING": {"label_zh": "采集于"},
+    "COVERS_FOOTPRINT": {"label_zh": "覆盖空间范围"},
+    "DERIVED_FROM": {"label_zh": "派生自"},
+    "GENERATED_BY": {"label_zh": "生成于处理运行"},
+    "HAS_QUALITY_REPORT": {"label_zh": "具有质量报告"},
+    "HAS_ANNOTATION_SET": {"label_zh": "具有标注集"},
+    "OBSERVES_SLOPE": {"label_zh": "观测边坡"},
 }
 
 
@@ -89,6 +113,7 @@ SLOPE_FIELDS: list[dict[str, Any]] = [
     {"code": "end_station_m", "label_zh": "标准化止点里程", "group": "location", "requirement": "core_required"},
     {"code": "side", "label_zh": "左右侧", "group": "location", "requirement": "core_required"},
     {"code": "coordinate_crs", "label_zh": "坐标参考系", "group": "location", "requirement": "conditional_required"},
+    {"code": "control_points", "label_zh": "测量控制点（非边坡端点）", "group": "location", "requirement": "optional"},
     {"code": "start_coordinate", "label_zh": "起点坐标", "group": "location", "requirement": "risk_required"},
     {"code": "end_coordinate", "label_zh": "止点坐标", "group": "location", "requirement": "risk_required"},
     {"code": "slope_type", "label_zh": "路堤/路堑", "group": "geometry", "requirement": "risk_required"},
@@ -132,6 +157,10 @@ INTERFACES: list[dict[str, Any]] = [
     {"path": "/api/export/risk-standalone", "method": "POST", "status": "implemented", "domain": "export", "description": "按自定义文件名导出含筛查结果、证据和交互功能的单文件风险研判HTML"},
     {"path": "/api/slopes", "method": "GET", "status": "implemented", "domain": "slope", "description": "边坡列表及当前基础档案"},
     {"path": "/api/slopes/{slope_id}", "method": "GET", "status": "implemented", "domain": "slope", "description": "单边坡、邻接节点、关系和证据"},
+    {"path": "/api/manual/schema", "method": "GET", "status": "implemented", "domain": "manual", "description": "人工补录字段、规则字段及可执行运算符白名单"},
+    {"path": "/api/manual/slopes/{slope_id}", "method": "GET/POST/DELETE", "status": "implemented", "domain": "manual", "description": "查询、保存或撤销单边坡人工补录；人工层独立于PDF自动结果"},
+    {"path": "/api/manual/rules", "method": "POST", "status": "implemented", "domain": "rules", "description": "新增或修改人工规则；白名单内结构化规则可影响P1-P4排序"},
+    {"path": "/api/manual/rules/{rule_id}", "method": "DELETE", "status": "implemented", "domain": "rules", "description": "删除人工规则，不允许删除PDF自动提取规则"},
     {"path": "/api/schema", "method": "GET", "status": "implemented", "domain": "schema", "description": "节点、关系和边坡字段 Schema"},
     {"path": "/api/attribute-dictionary", "method": "GET", "status": "implemented", "domain": "schema", "description": "交通部研究院反馈版边坡属性数据字典 v0.2"},
     {"path": "/api/interfaces", "method": "GET", "status": "implemented", "domain": "schema", "description": "接口状态注册表"},
@@ -152,8 +181,12 @@ INTERFACES: list[dict[str, Any]] = [
     {"path": "/api/rules/formulas", "method": "GET", "status": "implemented", "domain": "rules", "description": "公式候选、变量、单位、适用条件和PDF证据"},
     {"path": "/api/rules/jobs", "method": "POST", "status": "implemented", "domain": "rules", "description": "后台启动规则、公式和阈值提取任务"},
     {"path": "/api/risk/screening", "method": "GET", "status": "implemented", "domain": "risk", "description": "根据现有资料生成宏观人工复核优先级，不等同于正式风险等级"},
+    {"path": "/api/risk/evaluation", "method": "GET", "status": "implemented", "domain": "risk", "description": "使用独立专家金标准评测P1-P4一致性、重点对象召回率和严重漏判；无标签时明确返回不可评测"},
     {"path": "/api/risk/readiness", "method": "GET", "status": "implemented", "domain": "risk", "description": "风险研判前的数据就绪检查"},
     {"path": "/api/risk/assess", "method": "POST", "status": "implemented", "domain": "risk", "description": "运行单边坡宏观筛查；正式风险等级仍因规则和动态数据未批准而保持空值"},
+    {"path": "/api/multimodal/schema", "method": "GET", "status": "implemented", "domain": "multimodal", "description": "多模态资产、采集、处理、质检和溯源数据契约"},
+    {"path": "/api/multimodal/assets", "method": "GET", "status": "implemented", "domain": "multimodal", "description": "STAC式多模态资产目录；未生成时明确返回not_generated"},
+    {"path": "/api/multimodal/quality", "method": "GET", "status": "implemented", "domain": "multimodal", "description": "资产元数据完整性和缺失字段质量报告"},
 ]
 
 
@@ -170,6 +203,11 @@ def schema_payload() -> dict[str, Any]:
             "path": "/api/attribute-dictionary",
             "schema_version": "0.2.0",
             "status": "feedback_updated",
+        },
+        "multimodal": {
+            "schema_version": MULTIMODAL_SCHEMA_VERSION,
+            "contract_path": "/api/multimodal/schema",
+            "entity_types": list(multimodal_contract()["entity_types"]),
         },
         "missing_value_semantics": ["present", "absent", "unknown", "not_observed", "not_applicable"],
     }
@@ -212,8 +250,13 @@ def build_completeness(graph: dict[str, Any]) -> dict[str, Any]:
             if spec.get("global"):
                 status = "interface_reserved"
             else:
-                available = spec["relation"] in outgoing.get(slope["id"], set())
-                if available and spec["code"] == "deformation_observation":
+                direct_codes = {
+                    "stability": ("stability_factor", "stability_status"),
+                    "exposure": ("consequence_level", "exposure"),
+                }.get(spec["code"], (spec["code"],))
+                direct_available = any(props.get(code) not in (None, "", [], {}, "未核查") for code in direct_codes)
+                available = direct_available or spec["relation"] in outgoing.get(slope["id"], set())
+                if available and not direct_available and spec["code"] == "deformation_observation":
                     target_nodes = [
                         node_by_id.get(target_id, {})
                         for target_id in outgoing_targets.get((slope["id"], spec["relation"]), [])

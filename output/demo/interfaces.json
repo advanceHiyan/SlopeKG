@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-07-27T17:54:45",
+  "updated_at": "2026-09-20T15:22:22",
   "status_counts": {
-    "implemented": 25,
+    "implemented": 34,
     "reserved_not_connected": 5
   },
   "interfaces": [
@@ -48,6 +48,13 @@
       "description": "按自定义文件名导出单文件离线HTML，可选择基础、深度或当前图谱"
     },
     {
+      "path": "/api/export/risk-standalone",
+      "method": "POST",
+      "status": "implemented",
+      "domain": "export",
+      "description": "按自定义文件名导出含筛查结果、证据和交互功能的单文件风险研判HTML"
+    },
+    {
       "path": "/api/slopes",
       "method": "GET",
       "status": "implemented",
@@ -60,6 +67,34 @@
       "status": "implemented",
       "domain": "slope",
       "description": "单边坡、邻接节点、关系和证据"
+    },
+    {
+      "path": "/api/manual/schema",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "manual",
+      "description": "人工补录字段、规则字段及可执行运算符白名单"
+    },
+    {
+      "path": "/api/manual/slopes/{slope_id}",
+      "method": "GET/POST/DELETE",
+      "status": "implemented",
+      "domain": "manual",
+      "description": "查询、保存或撤销单边坡人工补录；人工层独立于PDF自动结果"
+    },
+    {
+      "path": "/api/manual/rules",
+      "method": "POST",
+      "status": "implemented",
+      "domain": "rules",
+      "description": "新增或修改人工规则；白名单内结构化规则可影响P1-P4排序"
+    },
+    {
+      "path": "/api/manual/rules/{rule_id}",
+      "method": "DELETE",
+      "status": "implemented",
+      "domain": "rules",
+      "description": "删除人工规则，不允许删除PDF自动提取规则"
     },
     {
       "path": "/api/schema",
@@ -202,6 +237,13 @@
       "description": "根据现有资料生成宏观人工复核优先级，不等同于正式风险等级"
     },
     {
+      "path": "/api/risk/evaluation",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "risk",
+      "description": "使用独立专家金标准评测P1-P4一致性、重点对象召回率和严重漏判；无标签时明确返回不可评测"
+    },
+    {
       "path": "/api/risk/readiness",
       "method": "GET",
       "status": "implemented",
@@ -214,6 +256,27 @@
       "status": "implemented",
       "domain": "risk",
       "description": "运行单边坡宏观筛查；正式风险等级仍因规则和动态数据未批准而保持空值"
+    },
+    {
+      "path": "/api/multimodal/schema",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "multimodal",
+      "description": "多模态资产、采集、处理、质检和溯源数据契约"
+    },
+    {
+      "path": "/api/multimodal/assets",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "multimodal",
+      "description": "STAC式多模态资产目录；未生成时明确返回not_generated"
+    },
+    {
+      "path": "/api/multimodal/quality",
+      "method": "GET",
+      "status": "implemented",
+      "domain": "multimodal",
+      "description": "资产元数据完整性和缺失字段质量报告"
     }
   ]
 }

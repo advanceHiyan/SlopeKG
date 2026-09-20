@@ -17,6 +17,7 @@ def evaluate_automatic_pipeline(
     total = len(slopes)
     stations = [row.get("station") for row in slopes]
     valid_stations = sum(bool(STATION_PATTERN.match(str(value or ""))) for value in stations)
+    increasing_stations = sum(station_range_is_increasing(value) for value in stations)
     unique_stations = len(set(stations))
     slope_keys = [(str(row.get("route_code") or "ROUTE"), row.get("station")) for row in slopes]
     unique_slope_keys = len(set(slope_keys))
@@ -49,6 +50,7 @@ def evaluate_automatic_pipeline(
     coverage = {
         "registry": field_coverage(slopes, "source_alias"),
         "coordinates": field_coverage(slopes, "start_coordinate"),
+        "survey_control_points": field_coverage(slopes, "control_points"),
         "treatment": field_coverage(slopes, "safety_factor_pairs"),
         "geometry": field_coverage(slopes, "slope_height_min_m"),
         "slope_type": field_coverage(slopes, "slope_type"),
@@ -67,6 +69,7 @@ def evaluate_automatic_pipeline(
     active_graph_coverage = {
         "registry": graph_prop_coverage(graph_slopes, "source_alias"),
         "coordinates": graph_prop_coverage(graph_slopes, "start_coordinate"),
+        "survey_control_points": graph_prop_coverage(graph_slopes, "control_points"),
         "geometry": graph_prop_coverage(graph_slopes, "slope_height_min_m"),
         "slope_type": graph_prop_coverage(graph_slopes, "slope_type"),
         "material_nature": graph_prop_coverage(graph_slopes, "material_nature"),
@@ -94,6 +97,7 @@ def evaluate_automatic_pipeline(
     gates = {
         "slope_discovery_nonempty": total > 0,
         "station_syntax_valid": valid_stations == total and total > 0,
+        "station_ranges_increasing": increasing_stations == total and total > 0,
         "route_station_identity_unique": unique_slope_keys == total and total > 0,
         "registry_coverage_at_least_95pct": coverage["registry"]["coverage"] >= 0.95,
         "coordinate_coverage_at_least_80pct": coverage["coordinates"]["coverage"] >= 0.80,
@@ -117,6 +121,7 @@ def evaluate_automatic_pipeline(
         "discovery": {
             "slopes": total,
             "valid_station_syntax": valid_stations,
+            "increasing_station_ranges": increasing_stations,
             "unique_stations": unique_stations,
             "unique_slope_keys": unique_slope_keys,
             "multi_source_slopes": multi_source,
@@ -145,6 +150,15 @@ def evaluate_automatic_pipeline(
         "quality_gates": gates,
         "quality_gate_pass_rate": round(sum(gates.values()) / len(gates), 4),
         "parser": extracted.get("stats", {}),
+        "engineering_tables": {
+            "tables": len(extracted.get("engineering_records", [])),
+            "parameter_values": sum(len(r["material_parameters"]) for r in extracted.get("engineering_records", [])),
+            "stability_results": sum(len(r["stability_results"]) for r in extracted.get("engineering_records", [])),
+            "review_candidates": [{k: r[k] for k in ("source_file", "page", "station", "quality_issues", "caption")}
+                                  for r in extracted.get("engineering_records", []) if r.get("quality_issues")],
+            "boundary": "表格提取数量不是准确率。未确定适用范围或存在原文冲突的结果不自动参与筛查。",
+        },
+        "source_issues": extracted.get("registry_issues", []),
         "accuracy_status": "requires_independent_gold_set_for_periodic_audit",
         "limitations": [
             "运行时不依赖人工种子；内部指标衡量覆盖、证据和一致性，不等同于真实语义准确率。",
@@ -152,6 +166,19 @@ def evaluate_automatic_pipeline(
             "扫描页OCR引擎不可用时会降级到原生文本和其他文档来源，并显式记录缺口。",
         ],
     }
+
+
+def station_range_is_increasing(value: Any) -> bool:
+    match = STATION_PATTERN.match(str(value or ""))
+    if not match:
+        return False
+    start, end = str(value).split("-")
+
+    def station_metres(token: str) -> int:
+        kilometre, metre = token.removeprefix("K").split("+")
+        return int(kilometre) * 1000 + int(metre)
+
+    return station_metres(start) < station_metres(end)
 
 
 def field_coverage(rows: list[dict[str, Any]], field: str) -> dict[str, Any]:
