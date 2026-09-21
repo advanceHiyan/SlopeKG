@@ -615,5 +615,11 @@
       "Local test success is not target-machine acceptance or risk-prediction accuracy.",
       "The 118/118 local result requires local source documents and a project secret file; the isolated staged snapshot has 3 input-dependent failures/errors."
     ]
+  },
+  "monthly_attribution": {
+    "status": "confirmed",
+    "baseline_commit": "0986b9212eaff07d952867cba6f73adc882f1125",
+    "rule": "All project increments after the July 30 baseline through the September 20 report cutoff are attributed to September; August has no separately reported progress. Existing baseline assets are not counted as new. Weekly attribution still requires dated evidence.",
+    "updated_at": "2026-09-21T10:00:26+08:00"
   }
 }
