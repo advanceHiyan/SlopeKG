@@ -109,7 +109,7 @@ def extract_layered_factor_cells(rows: list[list[Any]]) -> list[dict[str, Any]]:
     if len(rows) < 3:
         return []
     header = "".join(compact(c) for c in rows[0])
-    if not re.fullmatch(r"(?:计算剖面|计算断面)浅层稳定性系数整体稳定性系数剩余下滑力", header):
+    if not re.fullmatch(r"(?:计算剖面|计算断面)浅层稳定性?系数整体稳定性?系数(?:整体)?剩余下滑力", header):
         return []
     subheader = "".join(compact(c) for c in rows[1])
     subheader = subheader.replace("（", "(").replace("）", ")").lower()
@@ -129,6 +129,46 @@ def extract_layered_factor_cells(rows: list[list[Any]]) -> list[dict[str, Any]]:
                            "row_index": row_index, "normalized_value_index": index,
                            "header_reconstruction": "verified_layered_factors_and_force_columns"})
     return result
+
+
+def extract_aligned_factor_cells(rows: list[list[Any]]) -> list[dict[str, Any]]:
+    """Interpret aligned two-level headers by parent, condition and unit.
+
+    Empty parent cells inherit a merged heading; a nonempty unknown heading
+    stops inheritance. Column order and the number of conditions are arbitrary.
+    Ragged/flattened grids must use a separately verified reconstruction.
+    """
+    if len(rows) < 3 or not rows[0] or any(len(r) != len(rows[0]) for r in rows):
+        return []
+    header, states = [[compact(c) for c in r] for r in rows[:2]]
+    if header[0] not in {"计算剖面", "计算断面", "剖面", "断面"}:
+        return []
+    columns = []
+    parent = ""
+    for index in range(1, len(header)):
+        if header[index]:
+            parent = header[index]
+        match = re.fullmatch(r"(浅层|整体)?(?:边坡)?稳定性?系数(?:F[Ss]|K)?", parent)
+        state = condition(states[index])
+        # A dimensioned quantity (force, stress, etc.) cannot be an Fs.
+        if not match or not state or not re.fullmatch(r"(?:天然|暴雨|饱和|饱水|地震|正常|非正常|现状)(?:工况)?", states[index]):
+            continue
+        scope = {"浅层": "浅层边坡", "整体": "整体边坡"}.get(match.group(1))
+        columns.append((index, state, scope))
+    if not columns:
+        return []
+    output = []
+    for row_index, row in enumerate(rows[2:], 2):
+        if not compact(row[0]) or number(row[0]) is not None:
+            continue
+        for index, state, scope in columns:
+            value = number(row[index])
+            if value is not None and 0 < value < 100:
+                output.append(dict(condition=state, analysis_scope=scope, section=compact(row[0]),
+                                   safety_factor=value, required_factor=None, status=None,
+                                   row_index=row_index, column_index=index,
+                                   header_reconstruction="aligned_parent_condition_unit"))
+    return output
 
 
 def normalize_factor_grid(rows: list[list[Any]]) -> list[list[Any]]:
@@ -156,6 +196,9 @@ def normalize_factor_grid(rows: list[list[Any]]) -> list[list[Any]]:
 
 
 def extract_factor_cells(rows: list[list[Any]]) -> list[dict[str, Any]]:
+    aligned = extract_aligned_factor_cells(rows)
+    if aligned:
+        return aligned
     layered = extract_layered_factor_cells(rows)
     if layered:
         return layered
@@ -200,7 +243,11 @@ def extract_factor_cells(rows: list[list[Any]]) -> list[dict[str, Any]]:
                                    status=row[status_col] or None if status_col is not None else None,
                                    **subjects, row_index=row_index, column_index=actual_col))
     elif len(cells) >= 3:
-        columns = {i: cell for i, cell in enumerate(cells[1]) if condition(cell)}
+        # Only conditions under the actual-Fs parent belong to this measure.
+        # The old fallback also consumed force/threshold columns with conditions.
+        end = next((i for i in range(actual_col + 1, len(header)) if header[i]), len(header))
+        columns = {i: cells[1][i] for i in range(actual_col, min(end, len(cells[1])))
+                   if condition(cells[1][i]) and not re.search(r"[（(]|/", cells[1][i])}
         for row_index, row in enumerate(cells[2:], 2):
             if len(row) != len(header) or not row[0]:
                 continue
@@ -304,7 +351,7 @@ def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, 
         context = " ".join(b["text"] for b in sorted(nearby, key=order))
         for factor in factors:
             if "整体" in caption:
-                factor["analysis_scope"] = "整体边坡"
+                factor.setdefault("analysis_scope", "整体边坡")
             elif "危岩" in caption or factor.get("body_id") or factor.get("failure_mode"):
                 factor["analysis_scope"] = "危岩体"
                 mode = re.search(r"(坠落式|滑移式|倾倒式)", caption)

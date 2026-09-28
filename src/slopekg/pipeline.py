@@ -440,6 +440,7 @@ class DemoPipeline:
         write_json(self.paths.extracted_dir / "basic_extraction_summary.json", extracted)
         write_jsonl(self.paths.extracted_dir / "slopes.jsonl", extracted.get("slopes", []))
         write_jsonl(self.paths.extracted_dir / f"property_assertions.{parse_mode}.jsonl", graph.get("property_assertions", []))
+        write_json(self.paths.extracted_dir / f"processing_audit.{parse_mode}.json", graph["processing_audit"])
         if activate:
             write_jsonl(self.paths.extracted_dir / "property_assertions.jsonl", graph.get("property_assertions", []))
         if parse_mode == "deep":

@@ -565,6 +565,12 @@ def detect_section_gaps(
         source_has_section = any(normalize_text(keyword) in source for keyword in keywords)
         if source_has_section and candidate.get(field) in (None, "", [], {}):
             gaps.append(field)
+    # A nonempty list can still be incomplete. Compare typed source tuples to
+    # both extraction layers; never compare angles alone across object roles.
+    from .source_candidates import missing_orientations
+    planes = [*(deterministic.get("structural_planes") or []), *(candidate.get("structural_planes") or [])]
+    if missing_orientations(samples, planes) and "structural_planes" not in gaps:
+        gaps.append("structural_planes")
     return gaps
 
 

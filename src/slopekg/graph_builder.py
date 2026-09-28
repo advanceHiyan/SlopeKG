@@ -446,6 +446,8 @@ def build_automatic_graph(
         "property_assertions": [*extracted.get("assertions", []), *semantic_assertions],
     }
     graph["meta"]["stats"] = graph_stats(graph)
+    from .source_candidates import build_processing_audit
+    graph["processing_audit"] = build_processing_audit(parsed, extracted, graph)
     graph["meta"]["automatic_extraction"] = {
         "candidate_slopes": len(slopes),
         "deterministic_assertions": len(extracted.get("assertions", [])),

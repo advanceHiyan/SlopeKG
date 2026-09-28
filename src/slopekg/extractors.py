@@ -7,6 +7,7 @@ from typing import Any
 
 from .engineering import attach_engineering_records, extract_engineering_tables
 from .observation import observation_clauses, positive_mention, belongs_to_station
+from .source_candidates import orientation_candidates, body_material_claims, preceding_section_station
 
 
 STATION_RE = re.compile(
@@ -405,12 +406,12 @@ SECTION_DOMAIN_WORDS = [
 STRUCTURAL_PLANE_RE = re.compile(
     r"(?P<name>坡面|岩层面|岩层|岩体|[LJ]\s*\d+|结构面\s*[LJ]?\s*\d*)"
     r"(?:名称)?(?:的)?(?:相对完整[，,])?(?:产状)?(?:为|是)?\s*[:：]*\s*"
-    r"(?P<dip_direction>\d{1,3})\s*[°º]?\s*[∠/]\s*(?P<dip_angle>\d{1,2})\s*[°º]?"
+    r"(?P<dip_direction>\d{1,3}(?:\.\d+)?)\s*[°º]?\s*[∠/]\s*(?P<dip_angle>\d{1,2}(?:\.\d+)?)\s*[°º]?"
 )
 STRUCTURAL_PLANE_TABLE_RE = re.compile(
     r"(?:^|[\s。；])(?P<code>P|YC|[LJ]\s*\d+)\s*"
     r"(?P<name>坡面|岩层面|结构面)?\s+"
-    r"(?P<dip_direction>\d{1,3})\s+(?P<dip_angle>\d{1,2})(?=\s|$)"
+    r"(?P<dip_direction>\d{1,3}(?:\.\d+)?)\s+(?P<dip_angle>\d{1,2}(?:\.\d+)?)(?=\s|$)"
 )
 
 
@@ -491,7 +492,14 @@ def extract_section_facts(
                 row["stratum_terms"] = union(row["stratum_terms"], terms_in_text(segment_text, STRATUM_TERMS, longest_first=True))
                 row["slope_structure_terms"] = union(row["slope_structure_terms"], terms_in_text(segment_text, STRUCTURE_TERMS))
                 row["causal_factor_terms"] = union(row["causal_factor_terms"], terms_in_text(segment_text, FACTOR_TERMS))
-                row["structural_planes"] = union(row["structural_planes"], values.pop("structural_planes", []))
+                # A repeated description on another page is evidence for the
+                # same named plane, not another orientation fact.
+                plane_keys = {(p.get('name'), p.get('dip_direction'), p.get('dip_angle')) for p in row['structural_planes']}
+                for plane in values.pop('structural_planes', []):
+                    key = (plane.get('name'), plane.get('dip_direction'), plane.get('dip_angle'))
+                    if key not in plane_keys:
+                        row['structural_planes'].append(plane)
+                        plane_keys.add(key)
                 row["deformation_observations"] = union(row["deformation_observations"], values.pop("deformation_observations", []))
                 row["hydrology_observations"] = union(row["hydrology_observations"], values.pop("hydrology_observations", []))
                 for key, value in values.items():
@@ -687,7 +695,7 @@ def extract_section_values(text: str, *, station: str | None = None) -> dict[str
     elif re.search(r"属(?:浅层|深层|小型|中型|大型|巨型)*土质(?:层)?滑坡", material_text):
         values["material_nature"] = "土质"
     elif any(term in compact for term in ["岩质边坡", "基岩陡壁", "基岩陡坡"]) or re.search(
-            r"(?:该段边坡(?:地层|地质)|边坡(?:基岩)?岩性|坡表基岩)[^。；]{0,180}?(?:白云岩|灰岩|页岩|板岩|砂岩|泥岩)", material_text):
+            r"(?:该段边坡(?:地层|地质)|边坡(?:地层|地质|基岩)?岩性|坡表基岩)[^。；]{0,180}?(?:白云岩|灰岩|页岩|板岩|砂岩|泥岩)", material_text):
         values["material_nature"] = "岩质"
     elif "土质边坡" in compact:
         values["material_nature"] = "土质"
@@ -698,7 +706,7 @@ def extract_section_values(text: str, *, station: str | None = None) -> dict[str
     if structure_terms:
         values["slope_structure_code"] = normalize_slope_structure(structure_terms[0])
 
-    planes = extract_structural_planes(text)
+    planes = extract_structural_planes(text, station=station)
     if planes:
         values["structural_planes"] = planes
         slope_plane = next((plane for plane in planes if plane.get("name") == "坡面"), None)
@@ -757,7 +765,7 @@ def normalize_slope_structure(value: str) -> str:
     }.get(value, value)
 
 
-def extract_structural_planes(text: str) -> list[dict[str, Any]]:
+def extract_structural_planes(text: str, *, station: str | None = None) -> list[dict[str, Any]]:
     output = []
     seen: set[tuple[str, int, int]] = set()
     normalized_text = re.sub(r"\s+", " ", text)
@@ -766,6 +774,10 @@ def extract_structural_planes(text: str) -> list[dict[str, Any]]:
     verbal_bedding = re.compile(r"(?P<name>岩层)[^。；]{0,20}?倾向\s*(?P<dip_direction>\d{1,3})[°º]\s*[，,]\s*倾角\s*(?P<dip_angle>\d{1,2})[°º]")
     through_joint = re.compile(r"(?P<name>贯通裂隙)(?:产状)?(?:为)?\s*(?P<dip_direction>\d{1,3})[°º]?\s*∠\s*(?P<dip_angle>\d{1,2})[°º]?")
     for match in [*STRUCTURAL_PLANE_RE.finditer(normalized_text), *STRUCTURAL_PLANE_TABLE_RE.finditer(normalized_text), *bedding.finditer(normalized_text), *verbal_bedding.finditer(normalized_text), *through_joint.finditer(normalized_text)]:
+        if station and preceding_section_station(normalized_text, match.start()) not in (None, station):
+            continue
+        if re.match(r"\s*[°º]?\s*(?:[-~～—至]\s*\d|\.\d)", normalized_text[match.end():]):
+            continue  # A range endpoint or truncated decimal is not a scalar.
         raw_name = match.groupdict().get("name") or match.groupdict().get("code") or "结构面"
         name = re.sub(r"\s+", "", raw_name)
         if name == "岩层":
@@ -776,8 +788,10 @@ def extract_structural_planes(text: str) -> list[dict[str, Any]]:
             name = "坡面"
         elif name == "YC":
             name = "岩层面"
-        dip_direction = int(match.group("dip_direction"))
-        dip_angle = int(match.group("dip_angle"))
+        dip_direction = float(match.group("dip_direction"))
+        dip_angle = float(match.group("dip_angle"))
+        dip_direction = int(dip_direction) if dip_direction.is_integer() else dip_direction
+        dip_angle = int(dip_angle) if dip_angle.is_integer() else dip_angle
         if dip_direction > 360 or dip_angle > 90:
             continue
         signature = (name, dip_direction, dip_angle)
@@ -794,13 +808,30 @@ def extract_structural_planes(text: str) -> list[dict[str, Any]]:
             }
         )
     for group in re.finditer(r"(?:主控)?结构面\s*[（(]([^）)]+)[）)]", normalized_text):
-        for pair in re.finditer(r"(\d{1,3})\s*[°º]?\s*∠\s*(\d{1,2})\s*[°º]?", group.group(1)):
-            direction, angle = map(int, pair.groups())
+        if station and preceding_section_station(normalized_text, group.start()) not in (None, station):
+            continue
+        for pair in re.finditer(r"(?<![\d.])(\d{1,3}(?:\.\d+)?)\s*[°º]?\s*∠\s*(\d{1,2}(?:\.\d+)?)\s*[°º]?", group.group(1)):
+            if (re.search(r"\d\s*[°º]?\s*[-~～—至]\s*$", group.group(1)[:pair.start()])
+                    or re.match(r"\s*[°º]?\s*(?:[-~～—至]\s*\d|\.\d)", group.group(1)[pair.end():])):
+                continue
+            direction, angle = map(float, pair.groups())
             signature = ("结构面", direction, angle)
             if direction <= 360 and angle <= 90 and signature not in seen:
                 seen.add(signature)
                 output.append({"name": "结构面", "dip_direction": direction, "dip_angle": angle,
                                "description": group.group(0), "temporal_scope": "historical_document_baseline"})
+    # Resolve a geological subject once, including a list of orientations.
+    # Unnamed pairs remain in the processing audit rather than becoming facts.
+    known_pairs = {(p['dip_direction'], p['dip_angle']) for p in output}
+    for candidate in orientation_candidates(normalized_text):
+        pair = (candidate['dip_direction'], candidate['dip_angle'])
+        if station and candidate['station_hint'] and candidate['station_hint'] != station:
+            continue
+        if candidate['role'] != 'bedding' or '产状' not in candidate['quote'] or pair in known_pairs:
+            continue
+        known_pairs.add(pair)
+        output.append(dict(name='岩层面', dip_direction=pair[0], dip_angle=pair[1],
+                           description=candidate['quote'], temporal_scope='historical_document_baseline'))
     return output
 
 
@@ -1019,6 +1050,19 @@ def merge_slope_candidates(*groups: list[dict[str, Any]]) -> list[dict[str, Any]
 
 def infer_material_nature(row: dict[str, Any]) -> None:
     if row.get("material_nature"):
+        return
+    # Use explicit subject/composition claims before a bag of lithology terms.
+    # Cover, joint fill and sliding-bed nouns alone cannot classify the body.
+    claims = [{**claim, 'document_id': sample.get('document_id'), 'page': sample.get('page')}
+              for sample in row.get('section_text_samples', [])
+              if sample.get('station_context') == row.get('station')
+              for claim in body_material_claims(sample.get('text', ''))
+              if claim['station_hint'] in (None, row.get('station'))]
+    classes = {claim['value'] for claim in claims}
+    if len(classes) == 1:
+        row['material_nature'] = next(iter(classes))
+        row['material_nature_basis'] = '原文坡体性质明确表述'
+        row['material_nature_evidence'] = claims
         return
     lithologies = set(row.get("lithology_terms", []))
     rock_terms = {"砂质页岩", "页岩", "灰岩", "泥岩", "砂岩", "白云岩", "泥质白云岩", "角砾状白云岩"}
