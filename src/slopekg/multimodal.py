@@ -10,6 +10,7 @@ import re
 from typing import Any, Iterable
 
 from .storage import ensure_dir, write_json
+from .slope_attribution import suggest_slope_attributions
 
 
 MULTIMODAL_SCHEMA_VERSION = "1.0.0"
@@ -334,6 +335,38 @@ def discover_assets(roots: Iterable[Path], project_root: Path, *, issues: list[d
     return assets
 
 
+def _normalise_href(value: str) -> str:
+    href = str(value or "").strip().replace("\\", "/")
+    while href.startswith("./"):
+        href = href[2:]
+    return href.casefold()
+
+
+def filter_current_pdf_evidence(
+    assets: Iterable[dict[str, Any]], active_pdf_asset_hrefs: Iterable[str] | None,
+) -> tuple[list[dict[str, Any]], int]:
+    """Exclude stale OCR render caches when an authoritative active set exists.
+
+    The files remain on disk for traceability. Only generated images under an
+    ``assets/ocr_pages`` directory are filtered; independent source assets and
+    explicitly catalogued spatial data remain eligible for the catalog.
+    """
+    rows = list(assets)
+    if active_pdf_asset_hrefs is None:
+        return rows, 0
+    active = {_normalise_href(value) for value in active_pdf_asset_hrefs if str(value or "").strip()}
+    kept: list[dict[str, Any]] = []
+    excluded = 0
+    for asset in rows:
+        href = _normalise_href(str(asset.get("href") or ""))
+        is_ocr_render = asset.get("origin") == "pdf_derived" and "/assets/ocr_pages/" in f"/{href}"
+        if is_ocr_render and href not in active:
+            excluded += 1
+            continue
+        kept.append(asset)
+    return kept, excluded
+
+
 def build_multimodal_outputs(
     roots: Iterable[Path],
     project_root: Path,
@@ -341,9 +374,14 @@ def build_multimodal_outputs(
     *,
     documents: Iterable[dict[str, Any]] = (),
     slope_ids: set[str] | None = None,
+    active_pdf_asset_hrefs: Iterable[str] | None = None,
+    slopes: Iterable[dict[str, Any]] = (),
+    text_blocks: Iterable[dict[str, Any]] = (),
+    ocr_results: Iterable[dict[str, Any]] = (),
 ) -> dict[str, Any]:
     issues: list[dict[str, str]] = []
-    assets = discover_assets(roots, project_root, issues=issues)
+    discovered_assets = discover_assets(roots, project_root, issues=issues)
+    assets, stale_pdf_evidence_excluded = filter_current_pdf_evidence(discovered_assets, active_pdf_asset_hrefs)
     document_rows = list(documents)
     link_assets_to_documents(assets, document_rows)
     document_index = {str(row["id"]): row for row in document_rows}
@@ -368,6 +406,16 @@ def build_multimodal_outputs(
     invalid_ids = {row["asset_id"] for row in issues if row["severity"] == "error"}
     for asset in assets:
         asset["validation_status"] = "invalid" if asset["id"] in invalid_ids else "valid"
+    attribution = suggest_slope_attributions(
+        assets, documents=document_rows, slopes=slopes,
+        text_blocks=text_blocks, ocr_results=ocr_results,
+    )
+    attribution_by_id = {row["asset_id"]: row for row in attribution["assets"]}
+    for asset in assets:
+        suggestion = attribution_by_id.get(asset["id"])
+        if suggestion:
+            asset["slope_candidate_status"] = suggestion["status"]
+            asset["slope_candidates"] = suggestion["candidates"]
     catalog = {
         "type": "Catalog",
         "stac_version": "1.1.0",
@@ -388,6 +436,8 @@ def build_multimodal_outputs(
         "status": "ready_for_catalog_review" if not issue_counts.get("error") else "has_blocking_errors",
         "summary": {
             "assets": len(assets),
+            "assets_discovered": len(discovered_assets),
+            "stale_pdf_evidence_excluded": stale_pdf_evidence_excluded,
             "asset_type_counts": dict(type_counts),
             "origin_counts": dict(origin_counts),
             "subtype_counts": dict(subtype_counts),
@@ -397,16 +447,20 @@ def build_multimodal_outputs(
             "assets_linked_to_slope": sum(1 for asset in assets if asset.get("slope_id")),
             "invalid_assets": sum(asset["validation_status"] == "invalid" for asset in assets),
             "assets_with_reviewed_slope": sum(bool(asset.get("slope_id")) and asset.get("slope_review_status") == "approved" and asset["validation_status"] == "valid" for asset in assets),
+            "slope_attribution_candidates": attribution["summary"],
         },
         "issues": issues,
         "limitations": [
+            "OCR页面证据仅统计当前解析结果引用的文件；历史渲染缓存保留在磁盘但不进入目录和图谱",
             "当前盘点仅验证文件级资产目录和元数据完整性，不执行遥感变化检测或点云配准",
             "缺少原始空间样例时，坐标系、覆盖范围和采集时间保持未知",
             "PDF渲染图只能作为视觉证据，不能替代GeoTIFF、LAS/LAZ或原始三维模型",
+            "边坡归属候选仅由当前页面识别出的桩号生成，须对照原页人工核验；不会自动形成已审核归属或图谱边",
         ],
     }
     ensure_dir(output_dir)
     write_json(output_dir / "data_contract.json", multimodal_contract())
     write_json(output_dir / "asset_catalog.json", catalog)
     write_json(output_dir / "quality_report.json", quality)
-    return {"catalog": catalog, "quality": quality, "contract": multimodal_contract()}
+    write_json(output_dir / "slope_attribution_candidates.json", attribution)
+    return {"catalog": catalog, "quality": quality, "contract": multimodal_contract(), "attribution": attribution}

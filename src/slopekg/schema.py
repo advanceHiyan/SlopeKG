@@ -74,6 +74,7 @@ RELATION_TYPES: dict[str, dict[str, str]] = {
     "HAS_EXISTING_PROTECTION": {"label_zh": "具有既有防护"},
     "INSTANCE_OF": {"label_zh": "实例类型"},
     "HAS_STABILITY_ANALYSIS": {"label_zh": "具有稳定性分析"},
+    "DOCUMENTS_STABILITY_ANALYSIS": {"label_zh": "记录归属待核实的稳定性分析"},
     "HAS_MATERIAL_PARAMETERS": {"label_zh": "具有材料计算参数"},
     "SHOWN_IN": {"label_zh": "显示于图纸"},
     "IN_DOCUMENT": {"label_zh": "位于文档"},

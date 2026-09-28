@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Any
 
 from .schema import SCHEMA_VERSION
+from .engineering import condition
+from .stability import normalize_stability_identity, eligible_whole_slope
 
 
 def build_automatic_graph(
@@ -220,7 +222,7 @@ def build_automatic_graph(
                 failure_mode=scenario.get("failure_mode"),
                 table_evidence_id=scenario.get("table_evidence_id"),
                 quality_issues=scenario.get("quality_issues", []),
-                eligible_for_screening=scenario.get("eligible_for_screening", True),
+                eligible_for_screening=scenario.get("eligible_for_screening", True) and eligible_whole_slope(scenario),
             )
             add_edge(
                 edges,
@@ -252,6 +254,29 @@ def build_automatic_graph(
             )
             add_edge(edges, slope_id, analysis_id, "HAS_STABILITY_ANALYSIS", evidence=method_evidence(source_evidence, ["pdfplumber_treatment_table", "treatment_plan_table"], all_evidence))
         for conclusion_index, conclusion in enumerate(semantic.get("stability_conclusions", []), start=1):
+            conclusion = normalize_stability_identity(conclusion)
+            matching_records = [record for record in extracted.get("engineering_records", [])
+                                if record.get("route_code") == slope.get("route_code")
+                                and (record.get("station") == station or station in record.get("station_candidates", []))
+                                and record.get("page") == conclusion.get("evidence_page")
+                                and (not conclusion.get("evidence_document_id")
+                                     or record.get("document_id") == conclusion["evidence_document_id"])
+                                and any(result.get("safety_factor") == conclusion.get("safety_factor")
+                                        and condition(result.get("condition")) == condition(conclusion.get("condition"))
+                                        for result in record.get("stability_results", []))]
+            # Preserve a shared-section calculation at document scope below;
+            # a semantic duplicate must not invent an exclusive slope owner.
+            if any("shared_section_station_ambiguous" in r.get("quality_issues", []) for r in matching_records):
+                continue
+            matches = [result for record in matching_records for result in record.get("stability_results", [])
+                       if result.get("safety_factor") == conclusion.get("safety_factor")
+                       and condition(result.get("condition")) == condition(conclusion.get("condition"))
+                       and all(not conclusion.get(k) or conclusion[k] == result.get(k)
+                               for k in ("body_id", "failure_mode", "section"))]
+            if len(matches) == 1:
+                for field in ("body_id", "failure_mode", "section", "analysis_scope"):
+                    if matches[0].get(field) is not None:
+                        conclusion[field] = matches[0][field]
             table_issues = sorted({issue
                 for record in slope.get("engineering_records", [])
                 if record.get("page") == conclusion.get("evidence_page")
@@ -274,9 +299,12 @@ def build_automatic_graph(
                 status=conclusion.get("status"),
                 analysis_scope=conclusion.get("analysis_scope"),
                 source_kind=conclusion.get("source_kind"),
+                body_id=conclusion.get("body_id"),
+                failure_mode=conclusion.get("failure_mode"),
+                section=conclusion.get("section"),
                 value_source="validated_llm_extraction",
                 quality_issues=table_issues,
-                eligible_for_screening=not table_issues,
+                eligible_for_screening=not table_issues and eligible_whole_slope(conclusion),
             )
             add_edge(
                 edges,
@@ -354,6 +382,26 @@ def build_automatic_graph(
             "review_status": record.get("review_status"),
         })
 
+    # Keep ambiguous results discoverable without attaching them as facts of
+    # either candidate slope. The source and all possible owners stay visible.
+    for record in extracted.get("engineering_records", []):
+        if "shared_section_station_ambiguous" not in record.get("quality_issues", []):
+            continue
+        for index, result in enumerate(record.get("stability_results", [])):
+            analysis_id = stable_id("stability", f"unresolved:{record['id']}:{index}")
+            evidence_id = add_scenario_evidence(evidence, "归属待核实", {
+                "evidence_document_id": record["document_id"], "evidence_page": record["page"],
+                "evidence_text": record.get("caption", "") + "\n" + json.dumps(record["rows"], ensure_ascii=False),
+                "evidence_block_ids": [record["id"]], "extraction_method": record["method"],
+            }, documents)
+            add_node(nodes, analysis_id, f"{result.get('body_id') or '计算结果'} 归属待核实", "StabilityAnalysis",
+                     condition=result.get("condition"), fs=result.get("safety_factor"), status=result.get("status"),
+                     analysis_scope=result.get("analysis_scope"), body_id=result.get("body_id"),
+                     failure_mode=result.get("failure_mode"), candidate_stations=record["station_candidates"],
+                     association_scope="unresolved", quality_issues=record["quality_issues"],
+                     table_evidence_id=record["id"], eligible_for_screening=False)
+            add_edge(edges, record["document_id"], analysis_id, "DOCUMENTS_STABILITY_ANALYSIS", evidence=evidence_id)
+
     graph = {
         "meta": {
             "title": "公路边坡风险知识图谱",
@@ -424,7 +472,9 @@ def public_source_record(slope: dict[str, Any]) -> dict[str, Any]:
 def slope_props(slope: dict[str, Any], semantic: dict[str, Any], route_code: str, index: int, start_m: int | None, end_m: int | None) -> dict[str, Any]:
     start_raw, end_raw = slope["station"].split("-", 1)
     slope_length = slope.get("slope_length_m") or semantic.get("slope_length_m")
-    height_min = slope.get("slope_height_min_m") or semantic.get("slope_height_min_m")
+    height_min = slope.get("slope_height_min_m")
+    if height_min is None and not slope.get('slope_height_maximum_only'):
+        height_min = semantic.get("slope_height_min_m")
     height_max = slope.get("slope_height_max_m") or semantic.get("slope_height_max_m")
     gradient_min = slope.get("slope_gradient_min_deg") or semantic.get("slope_gradient_min_deg")
     gradient_max = slope.get("slope_gradient_max_deg") or semantic.get("slope_gradient_max_deg")
@@ -445,8 +495,11 @@ def slope_props(slope: dict[str, Any], semantic: dict[str, Any], route_code: str
         "slope_gradient_min_deg": gradient_min,
         "slope_gradient_max_deg": gradient_max,
         "slope_gradient_raw": range_text(gradient_min, gradient_max, "°"),
+        "geometry_evidence": slope.get("geometry_evidence"),
+        "scoped_geometry": slope.get("scoped_geometry", []),
         "slope_type": semantic.get("slope_type") or slope.get("slope_type"),
-        "material_nature": semantic.get("material_nature") or slope.get("material_nature"),
+        "material_nature": (slope.get("material_nature") if slope.get("material_nature_basis") == "原文坡体性质明确表述"
+                            else semantic.get("material_nature") or slope.get("material_nature")),
         "slope_aspect_deg": semantic.get("slope_aspect_deg") or slope.get("slope_aspect_deg"),
         "start_coordinate": slope.get("start_coordinate"),
         "end_coordinate": slope.get("end_coordinate"),
@@ -596,7 +649,8 @@ def stability_scenario_key(row: dict[str, Any]) -> tuple[Any, ...]:
     }.get(condition, condition)
     factor = row.get("safety_factor", row.get("fs"))
     required = row.get("required_factor", row.get("required_fs"))
-    return (condition, factor, required, row.get("status"), row.get("analysis_scope"))
+    return (condition, factor, required, row.get("status"), row.get("analysis_scope"),
+            row.get("body_id"), row.get("failure_mode"), row.get("section"))
 
 
 def matching_stability_evidence(
@@ -908,6 +962,10 @@ def protection_category(measure: str) -> str:
 def range_text(minimum: Any, maximum: Any, suffix: str = "m") -> str | None:
     if minimum is None and maximum is None:
         return None
+    if minimum is None:
+        return f"≤{maximum}{suffix}"
+    if maximum is None:
+        return f"≥{minimum}{suffix}"
     return f"{minimum}{suffix}" if minimum == maximum else f"{minimum}-{maximum}{suffix}"
 
 

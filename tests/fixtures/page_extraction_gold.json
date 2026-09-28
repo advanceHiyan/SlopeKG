@@ -1,5 +1,5 @@
 {
-  "description": "原8页人工对照集保留不变；2026-09-20由AI查看原页增加3页，覆盖全部9份PDF。新增样本为内部回归样本，尚未经独立人工复核，不作为风险金标准或全库准确率。",
+  "description": "原8页人工对照集保留不变；2026-09-20由AI查看原页增加3页；2026-09-24再核对原PDF增加4页，保留未识别事实作为改进项。新增样本仅用于内部回归，尚未经独立人工复核，不作为风险金标准或全库准确率。",
   "cases": [
     {
       "file_prefix": "G209-2388.976-2435.900-其他",
@@ -72,6 +72,38 @@
       "review_method": "assistant_visual_source_check",
       "reviewed_at": "2026-09-20",
       "expected_phrases": ["GB/T40112-2021", "前言", "中华人民共和国自然资源部提出", "SAC/TC93", "北京市地质研究所"]
+    },
+    {
+      "file_prefix": "G209-2388.976-2435.900-其他",
+      "page": 36,
+      "page_type": "drawing",
+      "review_method": "assistant_visual_source_check",
+      "reviewed_at": "2026-09-24",
+      "expected_phrases": ["K2388+976-K2389+036", "K2389+036左侧危岩体", "209国道", "图号", "SK-X01-1"]
+    },
+    {
+      "file_prefix": "G318-1440.378-1506.700",
+      "page": 12,
+      "page_type": "native_text",
+      "review_method": "assistant_visual_source_check",
+      "reviewed_at": "2026-09-24",
+      "expected_phrases": ["3.6 人类工程活动", "最大坡高60m", "K1442+650", "4.灾害成因及稳定性分析方法", "降雨、风化、地震、人类活动"]
+    },
+    {
+      "file_prefix": "G351-1570.950-1625.800",
+      "page": 45,
+      "page_type": "table",
+      "review_method": "assistant_visual_source_check",
+      "reviewed_at": "2026-09-24",
+      "expected_phrases": ["表5-1 滑坡及潜在不稳定边坡稳定状态区间划分一览表", "正常工况", "1.15＞K≥1.05", "K1581+600~K1581+800", "坡高约30m"]
+    },
+    {
+      "file_prefix": "滑坡分类等",
+      "page": 3,
+      "page_type": "scanned",
+      "review_method": "assistant_visual_source_check",
+      "reviewed_at": "2026-09-24",
+      "expected_phrases": ["附录 A 地质灾害与水毁分类表", "滑移", "鼓胀", "拉裂", "错断崩塌"]
     }
   ]
 }

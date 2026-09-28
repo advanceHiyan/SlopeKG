@@ -380,6 +380,14 @@ class DemoPipeline:
             self.paths.root, self.paths.output_dir / "multimodal",
             documents=parsed["documents"],
             slope_ids={n["id"] for n in graph["nodes"] if n["type"] == "Slope"},
+            active_pdf_asset_hrefs={
+                str(row.get("image_path"))
+                for row in [*ocr_tasks, *ocr_results]
+                if row.get("image_path")
+            },
+            slopes=[n for n in graph["nodes"] if n["type"] == "Slope"],
+            text_blocks=parsed["text_blocks"],
+            ocr_results=ocr_results,
         )
         attach_visual_assets(graph, multimodal["catalog"])
         evaluation = evaluate_automatic_pipeline(extracted, semantic_summary, graph)

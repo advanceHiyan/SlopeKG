@@ -99,6 +99,31 @@ class MultimodalAssetTests(unittest.TestCase):
         self.assertEqual(asset["derived_from"], ["doc-survey"])
         self.assertEqual(result["quality"]["summary"]["assets_linked_to_document"], 1)
 
+    def test_builder_writes_unapproved_slope_candidate_with_ocr_provenance(self) -> None:
+        root = case_root("slope_candidate")
+        assets_dir = root / "output" / "demo" / "assets" / "ocr_pages"
+        assets_dir.mkdir(parents=True, exist_ok=True)
+        image = assets_dir / "survey_1234567890_p0003-full_page-fitz.png"
+        image.write_bytes(b"page")
+        href = image.relative_to(root).as_posix()
+        documents = [{"id": "doc-survey", "file_name": "G209-survey.pdf", "source_sha256": "1234567890abcdef"}]
+        slopes = [{"id": "slope-1", "type": "Slope", "label": "G209 K2402+780-K2402+826",
+                   "props": {"route_code_cache": "G209", "start_station_m": 2402780, "end_station_m": 2402826}}]
+        ocr = [{"id": "ocr-1", "document_id": "doc-survey", "page": 3,
+                "image_path": href, "text": "K2402+780-K2402+826"}]
+
+        result = build_multimodal_outputs(
+            [assets_dir], root, root / "generated", documents=documents,
+            slopes=slopes, slope_ids={"slope-1"}, ocr_results=ocr,
+        )
+
+        candidate = result["catalog"]["assets"][0]
+        self.assertEqual(candidate["slope_candidate_status"], "single_candidate_needs_review")
+        self.assertEqual(candidate["slope_candidates"][0]["slope_id"], "slope-1")
+        self.assertIsNone(candidate["slope_id"])
+        self.assertEqual(result["quality"]["summary"]["assets_linked_to_slope"], 0)
+        self.assertTrue((root / "generated" / "slope_attribution_candidates.json").exists())
+
     def test_builder_links_legacy_pdf_asset_by_exact_unique_file_stem(self) -> None:
         root = case_root("legacy_document_link")
         assets_dir = root / "output" / "demo" / "assets" / "ocr_pages"
@@ -111,6 +136,28 @@ class MultimodalAssetTests(unittest.TestCase):
         asset = result["catalog"]["assets"][0]
         self.assertEqual(asset["source_document_id"], "doc-survey")
         self.assertEqual(result["quality"]["summary"]["assets_linked_to_document"], 1)
+
+    def test_builder_can_exclude_stale_ocr_render_caches_without_deleting_files(self) -> None:
+        root = case_root("active_pdf_evidence")
+        assets_dir = root / "output" / "demo" / "assets" / "ocr_pages"
+        assets_dir.mkdir(parents=True, exist_ok=True)
+        current = assets_dir / "survey_1234567890_p0003-full_page-fitz.png"
+        legacy = assets_dir / "survey_p0003-full_page-fitz.png"
+        current.write_bytes(b"same-page")
+        legacy.write_bytes(b"same-page")
+
+        result = build_multimodal_outputs(
+            [assets_dir],
+            root,
+            root / "generated",
+            active_pdf_asset_hrefs=[current.relative_to(root).as_posix()],
+        )
+
+        self.assertEqual(result["catalog"]["count"], 1)
+        self.assertEqual(result["catalog"]["assets"][0]["file_name"], current.name)
+        self.assertEqual(result["quality"]["summary"]["assets_discovered"], 2)
+        self.assertEqual(result["quality"]["summary"]["stale_pdf_evidence_excluded"], 1)
+        self.assertTrue(legacy.exists())
 
     def test_duplicate_sidecar_ids_are_blocking_catalog_errors(self) -> None:
         root = case_root("duplicate_asset_ids")

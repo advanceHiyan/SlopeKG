@@ -1,4 +1,5 @@
 data/rawPDF/
+/data/yjw的评估结果/
 output/demo/cache/
 output/demo/*.log
 output/demo/tmp*/

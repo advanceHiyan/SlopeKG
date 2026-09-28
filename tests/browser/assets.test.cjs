@@ -26,10 +26,12 @@ async function gallery(t) {
     assets: Array.from({ length: 60 }, (_, index) => ({
       id: `image-${index}`, asset_type: 'VisualAsset', file_name: `image-${index}.png`,
       source_document_id: 'doc-a', source_page: 83, subtype: 'drawing_title_block',
+      origin: 'pdf_derived',
       validation_status: 'valid', slope_review_status: 'pending',
     })).concat([{
       id: 'other', asset_type: 'VisualAsset', file_name: 'other.png',
       source_document_id: 'doc-b', source_page: 2, subtype: 'pdf_full_page',
+      origin: 'pdf_derived',
       validation_status: 'valid', slope_review_status: 'pending',
     }]),
     beforeAssets: async () => {},
@@ -46,7 +48,7 @@ async function gallery(t) {
       await state.beforeAssets();
       return route.fulfill(state.fail ? { status: 500, body: 'failure' } : { json: { assets: state.assets } });
     }
-    if (pathname === '/api/multimodal/quality') return route.fulfill({ json: { issues: [] } });
+    if (pathname === '/api/multimodal/quality') return route.fulfill({ json: { summary: { stale_pdf_evidence_excluded: 5 }, issues: [] } });
     if (pathname === '/api/parsed/documents') return route.fulfill({ json: { rows: documents } });
     const file = pathname.slice('/web/'.length);
     if (pathname.startsWith('/web/') && ['assets.html', 'assets.js', 'api.js', 'assets.css', 'pages.css'].includes(file)) {
@@ -77,6 +79,31 @@ test('refresh keeps all active filters', async t => {
     assert.equal(await page.inputValue(`#${id}`), value, id);
   }
   assert.match(await page.textContent('#assetCount'), /60/);
+});
+
+test('summary distinguishes current OCR evidence from excluded render caches', async t => {
+  const { page } = await gallery(t);
+  const summary = await page.textContent('#assetSummary');
+  assert.match(summary, /61 项当前视觉资料/);
+  assert.match(summary, /61 项PDF\/OCR页面证据/);
+  assert.match(summary, /5 项历史渲染缓存未纳入目录/);
+});
+
+test('slope candidates show their OCR basis without appearing approved', async t => {
+  const { page, state } = await gallery(t);
+  state.assets[0].slope_candidates = [{
+    slope_id: 'slope-1', slope_label: 'G209 K2402+780-K2402+826 左侧边坡',
+    basis: 'station_within_slope_range',
+    evidence: [{ source_id: 'ocr-1', text: 'K2402+780 左侧危岩体' }],
+  }];
+  await refresh(page);
+  assert.match(await page.textContent('#assetSummary'), /1 项有待核对的边坡候选/);
+  const card = page.locator('.asset-card').first();
+  assert.match(await card.textContent(), /候选边坡（未审核，需核对原页）/);
+  assert.match(await card.textContent(), /K2402\+780 左侧危岩体/);
+  assert.match(await card.textContent(), /边坡归属待核对/);
+  await page.fill('#assetSearch', 'K2402+780');
+  assert.match(await page.textContent('#assetCount'), /1 项符合条件/);
 });
 
 test('refresh keeps the current page', async t => {

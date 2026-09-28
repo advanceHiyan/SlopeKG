@@ -7,9 +7,10 @@ from datetime import datetime
 from typing import Any, Callable
 
 from .llm import call_deepseek_json
+from .observation import supported_observation, belongs_to_station
 
 
-PROMPT_VERSION = "slope-semantic-v6-static-fields-continuation-evidence"
+PROMPT_VERSION = "slope-semantic-v8-calculation-object-identity"
 SEMANTIC_FIELDS = {
     "hazard_body_type",
     "hazard_types",
@@ -53,7 +54,8 @@ geomorphology(string|null)、structural_planes(array<object>)、stability_conclu
 deformation_observations(array<object>)、hydrology_observations(array<object>)、protection_records(array<object>)、causal_factors(array<string>)、
 protection_rationale(string|null)、uncertainties(array<string>)、evidence_quotes(array<object>)。
 structural_planes每项包含name、dip_direction、dip_angle、description；未知值用null。
-stability_conclusions每项包含condition、safety_factor、required_factor、status、analysis_scope、source_kind；未知值用null，必须分别保留天然、暴雨、地震、治理前、治理后等不同工况。
+stability_conclusions每项包含condition、safety_factor、required_factor、status、analysis_scope、source_kind、body_id、failure_mode、section；未知值用null，必须分别保留天然、暴雨、地震、治理前、治理后等不同工况。analysis_scope写整体边坡、危岩体、浅层边坡或计算断面；危岩编号写body_id，破坏模式写failure_mode，剖面编号写section，禁止把它们混写成来源类型。共同标题包含多个坡段而计算表未明确唯一归属时，不要将其作为目标边坡独有结果，记录uncertainties。
+坡高和坡度只填写目标坡段一般描述；典型剖面、局部危岩尺寸、邻侧自然山体尺寸不能替代整坡属性。基岩坡体上部有土覆盖层不等于整个坡体为土质。
 deformation_observations每项包含type、location、scale、timing、status、description；裂缝、掉块、局部垮塌、滑塌、鼓胀等分别记录。
 hydrology_observations每项包含type、location、timing、value、unit、description；地下水、地表水、降雨、汇水、渗水和排水条件分别记录。
 protection_records每项包含measure、status、location、parameters、description；status只能表达existing、recommended、designed、constructed、damaged或unknown，不得把拟建工程写成现状工程。
@@ -273,14 +275,16 @@ def select_source_samples(slope: dict[str, Any]) -> list[dict[str, Any]]:
             snippets = [text[:7000]]
         else:
             snippets = context_windows(text, variants)
-        if not snippets and any(term in text for term in [slope.get("source_alias", ""), station]):
+        if not snippets and not re.search(r"K\s*\d+\s*\+", text) and any(
+                term and term in text for term in [slope.get("source_alias", ""), station]):
             snippets = [text[:5000]]
         for snippet in snippets:
             key = (int(sample["page"]), snippet[:120])
             if key in seen:
                 continue
             seen.add(key)
-            selected.append({"document_id": sample.get("document_id"), "page": int(sample["page"]), "text": snippet})
+            selected.append({"document_id": sample.get("document_id"), "page": int(sample["page"]),
+                             "station_context": station, "text": snippet})
     selected.sort(key=lambda row: source_sample_score(row["text"]), reverse=True)
     return selected[:12]
 
@@ -294,6 +298,16 @@ def station_variants(station: str) -> list[str]:
 
 
 def context_windows(text: str, variants: list[str], radius: int = 2600) -> list[str]:
+    from .extractors import STATION_RE, normalize_station_match, station_section_segments
+    mentions = {normalize_station_match(m) for m in STATION_RE.finditer(text)}
+    target = normalize_station_match(STATION_RE.search(variants[0])) if variants else None
+    if target and len(mentions) > 1:
+        segments, _ = station_section_segments(text, mentions, None, mentions)
+        target_segments = [segment for station, segment in segments if station == target]
+        if target_segments:
+            return target_segments
+        # Multiple sites without clear section boundaries need review, not a radius guess.
+        return []
     windows = []
     for variant in variants:
         start = 0
@@ -380,7 +394,10 @@ def validate_candidate(candidate: Any, samples: list[dict[str, Any]]) -> tuple[d
     ]
     if not all(isinstance(candidate.get(field), list) for field in list_fields):
         return {}, {"accepted": False, "schema_valid": False, "verified_quotes": 0, "submitted_quotes": 0}
-    page_text = {int(sample["page"]): normalize_text(sample["text"]) for sample in samples}
+    page_text: dict[int, str] = {}
+    for sample in samples:
+        page = int(sample["page"])
+        page_text[page] = page_text.get(page, "") + "\n" + normalize_text(sample["text"])
     canonical_page_text = {page: canonical_evidence_text(text) for page, text in page_text.items()}
     submitted = candidate.get("evidence_quotes", [])
     verified = []
@@ -467,10 +484,14 @@ def validate_candidate(candidate: Any, samples: list[dict[str, Any]]) -> tuple[d
             or (item.get("safety_factor") is None and item.get("status") in (None, ""))
         ):
             continue
+        from .stability import normalize_stability_identity
+        item = normalize_stability_identity(item)
         support_page = stability_support_page(item, page_text)
         if support_page is None:
             continue
-        verified_stability.append({**item, "evidence_page": support_page})
+        source_ids = {s.get("document_id") for s in samples if s["page"] == support_page}
+        verified_stability.append({**item, "evidence_page": support_page,
+                                   "evidence_document_id": next(iter(source_ids)) if len(source_ids) == 1 else None})
     cleaned["stability_conclusions"] = verified_stability
     if cleaned["stability_conclusions"]:
         automatically_verified_fields.add("stability_conclusions")
@@ -492,6 +513,13 @@ def validate_candidate(candidate: Any, samples: list[dict[str, Any]]) -> tuple[d
     }
     for field, required_keys in object_schemas.items():
         cleaned[field] = [item for item in cleaned[field] if isinstance(item, dict) and required_keys.issubset(item)]
+        if field in {"deformation_observations", "hydrology_observations"}:
+            domain = "deformation" if field == "deformation_observations" else "hydrology"
+            cleaned[field] = [item for item in cleaned[field] if supported_observation(item, source_all, domain=domain)]
+            targets = {s["station_context"] for s in samples if s.get("station_context")}
+            if len(targets) == 1:
+                target = next(iter(targets))
+                cleaned[field] = [item for item in cleaned[field] if belongs_to_station(item, target)]
         if cleaned[field] and field in quote_supported_fields:
             automatically_verified_fields.add(field)
     supported_fields = quote_supported_fields | automatically_verified_fields
@@ -646,6 +674,13 @@ def stability_support_page(item: dict[str, Any], page_text: dict[int, str]) -> i
             ]
         for position in candidate_positions:
             window = source[max(0, position - 140) : min(len(source), position + 180)]
+            scope = str(item.get("analysis_scope") or "")
+            # “The number occurs on this page” cannot justify relabelling a
+            # rock-body calculation as an overall slope calculation.
+            sentence_start = max(source.rfind("。", 0, position), source.rfind("；", 0, position)) + 1
+            local_subject = source[max(sentence_start, position - 100):position + 70]
+            if scope in {"现状边坡", "整体边坡"} and "危岩体" in local_subject and "整体边坡" not in local_subject:
+                continue
             if condition_terms and not any(term in window for term in condition_terms):
                 continue
             if status and status not in window:

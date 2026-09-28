@@ -118,11 +118,12 @@ class AssetIntegrationTests(unittest.TestCase):
                         extracted_dir=out / "extracted", rules_dir=out / "rules", multimodal_dir=out / "multimodal")
         pipeline = DemoPipeline(paths)
         parsed = {"documents": self.documents, "pages": [], "text_blocks": [], "tables": [], "ocr_results": []}
-        graph, report = pipeline.build_graph(parsed, [], [], {"slopes": []}, [], {}, "basic", True)
+        ocr_results = [{"image_path": self.image.relative_to(self.root).as_posix()}]
+        graph, report = pipeline.build_graph(parsed, [], ocr_results, {"slopes": []}, [], {}, "basic", True)
         self.assertEqual(graph["meta"]["stats"]["node_type_counts"]["VisualAsset"], 1)
         self.assertEqual(report["multimodal"]["assets"], 1)
         self.assertTrue(paths.multimodal_catalog_json.exists())
         self.image.unlink()
-        graph, report = pipeline.build_graph(parsed, [], [], {"slopes": []}, [], {}, "basic", True)
+        graph, report = pipeline.build_graph(parsed, [], ocr_results, {"slopes": []}, [], {}, "basic", True)
         self.assertNotIn("VisualAsset", graph["meta"]["stats"]["node_type_counts"])
         self.assertEqual(report["multimodal"]["assets"], 0)
