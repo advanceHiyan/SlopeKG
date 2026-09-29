@@ -127,19 +127,20 @@ def source_signature(graph: dict[str, Any]) -> tuple[tuple[Any, ...], ...]:
 def compact_graph_for_offline(graph: dict[str, Any]) -> dict[str, Any]:
     """Keep all visual graph content while omitting trace tables unused by the offline viewer.
 
-    ``property_assertions`` and ``source_records`` are retained in the machine-readable
+    ``property_assertions``, ``source_records`` and ``processing_audit`` are retained in the machine-readable
     graph JSON.  The standalone viewer resolves provenance through node/edge evidence,
     so embedding the two redundant trace tables would more than double its size.
     """
     compact = {
         key: value
         for key, value in graph.items()
-        if key not in {"property_assertions", "source_records"}
+        if key not in {"property_assertions", "source_records", "processing_audit"}
     }
     compact_meta = dict(compact.get("meta") or {})
     compact_meta["offline_compaction"] = {
         "omitted_property_assertions": len(graph.get("property_assertions", [])),
         "omitted_source_records": len(graph.get("source_records", [])),
+        "omitted_processing_candidates": len(graph.get("processing_audit", {}).get("candidates", [])),
         "full_trace_available_in_graph_json": True,
         "visual_edge_provenance_stored_on_asset_node": True,
     }

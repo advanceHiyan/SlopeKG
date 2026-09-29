@@ -345,7 +345,7 @@ def extract_geometry_candidates(
     output: list[dict[str, Any]] = []
     geometry_re = re.compile(
         r"边坡长度?约?\s*(?P<length>\d+(?:\.\d+)?)\s*m.{0,260}?"
-        r"(?:边坡高|高|最大高差)约?\s*(?P<h1>\d+(?:\.\d+)?)"
+        r"(?P<height_label>最大高差|边坡高|高)约?\s*(?P<h1>\d+(?:\.\d+)?)"
         r"(?:\s*[-～~]\s*(?P<h2>\d+(?:\.\d+)?))?\s*m.{0,260}?(?:开挖坡度|坡度).*?(?P<a1>\d+(?:\.\d+)?)"
         r"(?:\s*[-～~]\s*(?P<a2>\d+(?:\.\d+)?))?\s*[°º]",
         re.DOTALL,
@@ -384,8 +384,9 @@ def extract_geometry_candidates(
                     "geometry_sentence_rule",
                     0.94,
                     slope_length_m=float(match.group("length")),
-                    slope_height_min_m=min(h1, h2),
+                    slope_height_min_m=None if match.group('height_label') == '最大高差' else min(h1, h2),
                     slope_height_max_m=max(h1, h2),
+                    slope_height_maximum_only=match.group('height_label') == '最大高差',
                     slope_gradient_min_deg=min(a1, a2),
                     slope_gradient_max_deg=max(a1, a2),
                     raw_text=panel_text,
@@ -656,6 +657,13 @@ def extract_section_values(text: str, *, station: str | None = None) -> dict[str
     if scoped:
         values["scoped_geometry"] = scoped
     geometry_text = re.sub(r"每级坡高(?:约|为)?\d+(?:\.\d+)?(?:m|米)", "", geometry_text)
+    # A surrounding landform is a separate object, even when its height is
+    # written simply as “高”. Keep it for audit instead of filling slope height.
+    for sentence in re.split(r"[。；]", geometry_text):
+        if re.search(r"(?:山脊|山峰|山丘)[^。；]{0,25}[，,]高", sentence):
+            geometry_text = geometry_text.replace(sentence, "")
+            values.setdefault('scoped_geometry', []).append(dict(
+                scope='周边地形', section=None, quote=sentence))
     # Upper/lower local faces are not a whole-slope angle range.
     geometry_text = re.sub(r"(?:局部)?[上下]边坡坡度(?:约|为)?\d+(?:\.\d+)?(?:[-～~]\d+(?:\.\d+)?)?[°º度]", "", geometry_text)
     side = re.search(r"(?:该段边坡|该段崩塌|该边坡|崩塌|滑坡)(?:整体上)?(?:[^。；]{0,45}?)位于(?:线路|公路|道路)(左侧|右侧)", compact)
@@ -667,7 +675,7 @@ def extract_section_values(text: str, *, station: str | None = None) -> dict[str
     length = first_range_match(compact, [r"边坡(?:长度|长)(?:约|为)?(?P<a>\d+(?:\.\d+)?)(?:[-～~](?P<b>\d+(?:\.\d+)?))?m"])
     height = first_range_match(
         geometry_text,
-        [r"(?<!最大)(?:边坡(?:高度|高)|基岩陡壁高|坡高|最大高差|前后缘高差|[，,；;]高)(?:约|为)?(?P<a>\d+(?:\.\d+)?)(?:[-～~](?P<b>\d+(?:\.\d+)?))?(?:m|米)"],
+        [r"(?<!最大)(?:边坡(?:高度|高)|基岩陡壁高|坡高|前后缘高差|[，,；;]高)(?:约|为)?(?P<a>\d+(?:\.\d+)?)(?:[-～~](?P<b>\d+(?:\.\d+)?))?(?:m|米)"],
     )
     gradient = first_range_match(
         geometry_text,
@@ -677,7 +685,7 @@ def extract_section_values(text: str, *, station: str | None = None) -> dict[str
         values["slope_length_m"] = max(length)
     if height:
         values["slope_height_min_m"], values["slope_height_max_m"] = min(height), max(height)
-    maximum = re.search(r"(?:(?:基岩陡壁|边坡)[^。；]{0,35}?最高处|最大坡高)(?:约|为)?(\d+(?:\.\d+)?)(?:m|米)", geometry_text)
+    maximum = re.search(r"(?:(?:基岩陡壁|边坡)[^。；]{0,35}?最高处|最大坡高|最大高差)(?:约|为)?(\d+(?:\.\d+)?)(?:m|米)", geometry_text)
     if maximum:
         values["slope_height_max_m"] = float(maximum.group(1))
         if not height:
@@ -1044,6 +1052,13 @@ def merge_slope_candidates(*groups: list[dict[str, Any]]) -> list[dict[str, Any]
             target["confidence"] = max(float(target["confidence"]), float(row["confidence"]))
     output = sorted(merged.values(), key=lambda row: (str(row.get("route_code") or "ROUTE"), station_start_m(row["station"])))
     for row in output:
+        # “岩体” does not identify a joint. Where an explicitly typed bedding
+        # observation repeats that pair, retain the typed observation only.
+        planes = row.get('structural_planes', [])
+        bedding_pairs = {(p.get('dip_direction'), p.get('dip_angle')) for p in planes
+                         if p.get('name') in {'岩层', '岩层面', '层面', '层理'}}
+        row['structural_planes'] = [p for p in planes if not (
+            p.get('name') == '岩体' and (p.get('dip_direction'), p.get('dip_angle')) in bedding_pairs)]
         infer_material_nature(row)
     return output
 

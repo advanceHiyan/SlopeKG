@@ -12,7 +12,7 @@ from typing import Any
 
 
 PAIR = re.compile(r"(?<![\d.])(\d{1,3}(?:\.\d+)?)\s*[°º]?\s*∠\s*(\d{1,2}(?:\.\d+)?)(?![\d.])\s*[°º]?")
-OBJECT = re.compile(r"坡面|坡向|坡角|岩层(?:面|产状)?|层理|层面|地层岩性|地层|(?:主控)?结构面|主控|组合交线|节理|裂隙")
+OBJECT = re.compile(r"坡面|坡向|坡角|岩层(?:面|产状)?|层理|层面|地层岩性|岩性|地层|(?:主控)?结构面|主控|组合交线|节理|裂隙")
 
 
 def preceding_section_station(text: str, end: int) -> str | None:
@@ -49,6 +49,15 @@ def orientation_candidates(text: str) -> list[dict[str, Any]]:
         names = list(OBJECT.finditer(prefix))
         subject = names[-1] if names else None
         role = plane_role(subject.group()) if subject else None
+        if subject and subject.group() == '岩性':
+            # A named layer plus a composition predicate and an orientation
+            # predicate establishes bedding; an isolated rock name does not.
+            tail = prefix[subject.end():]
+            if (re.search(r'地层(?:属|为)', prefix[:subject.start()])
+                    and re.match(r'(?:以|为)', tail)
+                    and re.search(r'(?:板岩|灰岩|砂岩|页岩|泥岩|白云岩)', tail)
+                    and '产状' in tail):
+                role = 'bedding'
         if subject and subject.group() == "地层岩性" and "产状" not in prefix[subject.end():]:
             role = None
         if re.search(r"对岸|对面|其他边坡|邻坡|示例|假设", prefix):

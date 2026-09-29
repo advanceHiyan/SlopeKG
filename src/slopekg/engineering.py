@@ -349,6 +349,9 @@ def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, 
         captions = [b for b in nearby if re.match(r"\s*表\s*\d", b.get("text", ""))]
         caption = max(captions, key=order).get("text", "") if captions else ""
         context = " ".join(b["text"] for b in sorted(nearby, key=order))
+        section_blocks = sorted([b for b in blocks[table['document_id']]
+                                 if nearest and nearest[0] <= order(b) < order(anchor)], key=order)
+        subject_context = calculation_subject_context(section_blocks) if station else {}
         for factor in factors:
             if "整体" in caption:
                 factor.setdefault("analysis_scope", "整体边坡")
@@ -357,6 +360,11 @@ def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, 
                 mode = re.search(r"(坠落式|滑移式|倾倒式)", caption)
                 if mode:
                     factor.setdefault("failure_mode", mode.group(1))
+            if not factor.get('analysis_scope') and subject_context.get('analysis_scope'):
+                factor['analysis_scope'] = subject_context['analysis_scope']
+            if (factor.get('analysis_scope') == '危岩体' and not factor.get('body_id')
+                    and subject_context.get('body_id')):
+                factor['body_id'] = subject_context['body_id']
         document_scope = station is None and not station_candidates and is_document_scope_parameter_table(context, caption, material, factors)
         issues = []
         if len(station_candidates) > 1:
@@ -387,6 +395,7 @@ def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, 
             "section_heading": nearest[2]["text"] if nearest else None,
             "section_heading_page": nearest[2]["page"] if nearest else None,
             "caption": caption, "context_text": context,
+            "calculation_subject_context": subject_context,
             "rows": table.get("rows", []), "material_parameters": material, "stability_results": factors,
             "quality_issues": sorted(set(issues)),
             "review_status": (
@@ -398,6 +407,39 @@ def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, 
             "method": "engineering_table_headers_v1",
         })
     return output
+
+
+def calculation_subject_context(blocks: list[dict[str, Any]]) -> dict[str, Any]:
+    """Resolve an explicitly headed calculation object in section reading order.
+
+    Context ends at the next numbered subsection. A lone body name elsewhere
+    in the section cannot assign an ID to a generic calculation table.
+    """
+    heading_index = None
+    heading = ''
+    for index, block in enumerate(blocks):
+        raw = str(block.get('text', ''))
+        text = compact(raw)
+        numbered = (re.match(r'^[（(]?\d+[）)][\u4e00-\u9fff]', text)
+                    or re.match(r'^\s*\d+(?:\.\d+)+\s+(?!条|款)[\u4e00-\u9fffK]', raw))
+        if numbered and len(text) < 80:
+            heading_index, heading = index, text
+    if heading_index is None or not re.search(r'稳定性?(?:分析|计算)', heading):
+        return {}
+    result = {'heading': heading, 'evidence_block_ids': [blocks[heading_index]['id']]}
+    scope = re.search(r'([上下]部(?:土质|岩质)边坡)', heading)
+    if scope:
+        result['analysis_scope'] = scope.group(1)
+    if '单个危岩体' in heading:
+        body_blocks = blocks[heading_index+1:]
+        body_ids = {m.group(1) for b in body_blocks for m in re.finditer(
+            r'危岩体\s*([A-Z]+\d+)\s*[:：]', str(b.get('text', '')))}
+        if len(body_ids) == 1:
+            result['body_id'] = next(iter(body_ids))
+            result['analysis_scope'] = '危岩体'
+            result['evidence_block_ids'].extend(b['id'] for b in body_blocks
+                                               if result['body_id'] in str(b.get('text', '')))
+    return result
 
 
 def is_document_scope_parameter_table(
@@ -429,17 +471,35 @@ def attach_engineering_records(slopes: list[dict[str, Any]], records: list[dict[
             continue
         slope.setdefault("engineering_records", []).append(record)
         for result in record["stability_results"]:
+            identity_fields = ('body_id', 'failure_mode', 'section')
             matches = [s for s in slope.get("stability_scenarios", [])
                        if s.get("evidence_document_id") == record["document_id"]
                        and s.get("evidence_page") == record["page"]
                        and condition(s.get("condition")) == condition(result["condition"])
                        and s.get("safety_factor") == result["safety_factor"]
-                       and not result.get("body_id") and not result.get("failure_mode")
-                       and (not result.get("analysis_scope") or s.get("analysis_scope") == result["analysis_scope"])]
+                       and (not (result.get('body_id') or result.get('failure_mode'))
+                            or record.get('calculation_subject_context', {}).get('body_id'))
+                       and all(not s.get(k) or not result.get(k) or s[k] == result[k] for k in identity_fields)
+                       and (not result.get("analysis_scope") or s.get("analysis_scope") == result["analysis_scope"]
+                            or (s.get('analysis_scope') == '现状边坡'
+                                and record.get('calculation_subject_context', {}).get('analysis_scope') == result['analysis_scope']))]
+            # Equal numbers in different calculation objects are not an identity.
+            # Refine incomplete prose only when one local table row can own it.
+            alternatives = [r for other in records
+                            if other.get('document_id') == record['document_id']
+                            and other.get('station') == record['station'] and other.get('page') == record['page']
+                            for r in other['stability_results']
+                            if condition(r['condition']) == condition(result['condition'])
+                            and r['safety_factor'] == result['safety_factor']]
+            if len(alternatives) != 1:
+                matches = []
             # Existing prose results can be enriched, but never silently corrected.
             if matches:
                 for match in matches:
                     match["table_evidence_id"] = record["id"]
+                    for field in (*identity_fields, 'analysis_scope'):
+                        if result.get(field) is not None:
+                            match[field] = result[field]
                     if match.get("status") and result.get("status") and match["status"] != result["status"]:
                         record["quality_issues"] = sorted(set([*record["quality_issues"], "text_table_status_conflict"]))
                     if record["quality_issues"]:
