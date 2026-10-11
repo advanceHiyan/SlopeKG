@@ -15,6 +15,25 @@ tmp*/
 .private/
 /AGENTS.md
 /outputs/**/SlopeKG项目管理台账*
+.codex-template-work/
+/outputs/**/*.inspect.ndjson
+/outputs/**/work/
+/outputs/**/preview/
+/outputs/**/previews/
+/outputs/ledger-update-*/
+# Generated datasets and deliverables stay local; regenerate from source inputs.
+/output/
+/outputs/
+# Project schedules and private communication must not be published.
+/data/**/*.xlsx
+/data/**/*.xls
+/docs/*沟通*
+/docs/SlopeKG月度进展报告*
+/docs/reports/
+# Office reports and July presentation deliverables remain local.
+/docs/*.docx
+/docs/*.pptx
+/docs/SlopeKG*20260730.md
 .pytest_cache/
 __MACOSX/
 .DS_Store
