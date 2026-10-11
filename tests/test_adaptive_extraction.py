@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import unittest
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
 
 from scripts.extract_with_llm import build_quality_summary, candidate_is_schema_valid
 from slopekg.config import PATHS
-from slopekg.extractors import extract_domain_candidates, extract_section_values, normalize_reference_station
+from slopekg.extractors import extract_section_values, normalize_reference_station
 from slopekg.llm import deepseek_key_info
 from slopekg.ocr import normalize_paddle_result
 from slopekg.parsers import classify_page
 from slopekg.semantic import stability_support_page, validate_candidate
-from slopekg.storage import read_json, read_jsonl
 
 
 class AdaptivePageStrategyTests(unittest.TestCase):
@@ -54,45 +56,6 @@ class ExtractionRegressionTests(unittest.TestCase):
     def test_station_normalization(self):
         self.assertEqual(normalize_reference_station("K2398+300-439"), "K2398+300-K2398+439")
 
-    def test_full_parse_outputs_have_expected_coverage(self):
-        extraction = extract_domain_candidates(
-            {
-                "documents": read_jsonl(PATHS.parsed_dir / "documents.jsonl"),
-                "pages": read_jsonl(PATHS.parsed_dir / "pages.jsonl"),
-                "text_blocks": read_jsonl(PATHS.parsed_dir / "text_blocks.jsonl"),
-                "tables": read_jsonl(PATHS.parsed_dir / "tables.jsonl"),
-            }
-        )
-        stats = extraction.get("stats", {})
-        self.assertGreaterEqual(stats.get("registry_rows", 0), 62)
-        self.assertEqual(stats.get("registry_source_rows"), 63)
-        self.assertEqual(stats.get("registry_records_needing_review"), 1)
-        self.assertEqual(stats.get("coordinate_rows"), 13)
-        self.assertGreaterEqual(stats.get("geometry_rows", 0), 11)
-        self.assertEqual(stats.get("native_bbox_coverage"), 1.0)
-        documents = read_jsonl(PATHS.parsed_dir / "documents.jsonl")
-        self.assertEqual(len(read_jsonl(PATHS.parsed_dir / "pages.jsonl")), sum(int(row["pages"]) for row in documents))
-
-    def test_new_reports_are_discovered_without_g209_template(self):
-        extraction = extract_domain_candidates(
-            {
-                "documents": read_jsonl(PATHS.parsed_dir / "documents.jsonl"),
-                "pages": read_jsonl(PATHS.parsed_dir / "pages.jsonl"),
-                "text_blocks": read_jsonl(PATHS.parsed_dir / "text_blocks.jsonl"),
-                "tables": read_jsonl(PATHS.parsed_dir / "tables.jsonl"),
-            }
-        )
-        counts = {}
-        for row in extraction["registry"]:
-            counts[row["route_code"]] = counts.get(row["route_code"], 0) + 1
-        self.assertGreaterEqual(counts.get("G318", 0), 13)
-        self.assertGreaterEqual(counts.get("G344", 0), 1)
-        self.assertGreaterEqual(counts.get("G347", 0), 9)
-        self.assertGreaterEqual(counts.get("G351", 0), 26)
-        self.assertEqual(
-            extraction["registry_issues"][0]["quality_issues"],
-            ["non_increasing_station_range"],
-        )
 
     def test_paddle_v3_result_objects_are_normalized(self):
         class ResultLike:
@@ -109,9 +72,14 @@ class ExtractionRegressionTests(unittest.TestCase):
 
 class LlmCandidateValidationTests(unittest.TestCase):
     def test_project_secret_has_priority_and_is_not_exposed_by_status(self):
-        key, source = deepseek_key_info()
-        self.assertTrue(key)
-        self.assertEqual(source, "project_secret_file")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / ".secrets").mkdir()
+            (root / ".secrets" / "deepseek_api_key.txt").write_text("unit-test-placeholder", encoding="utf-8")
+            with patch("slopekg.llm.ROOT", root), patch.dict("os.environ", {"DEEPSEEK_API_KEY": "environment-placeholder"}):
+                key, source = deepseek_key_info()
+            self.assertEqual(key, "unit-test-placeholder")
+            self.assertEqual(source, "project_secret_file")
 
     def test_candidate_schema_and_quality_metrics(self):
         candidate = {

@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 import unittest
+import tempfile
+from pathlib import Path
+from pypdf import PdfWriter
+from tests.support import workspace_paths
 from slopekg.rule_extraction import (
     RuleExtractionPipeline,
     derive_table_rules,
@@ -12,7 +16,15 @@ from slopekg.schema import interface_payload
 
 class RuleExtractionTests(unittest.TestCase):
     def test_catalog_searches_nested_source_directories(self) -> None:
-        rows = RuleExtractionPipeline().catalog_documents()
+        with tempfile.TemporaryDirectory() as directory:
+            paths = workspace_paths(Path(directory))
+            nested_dir = paths.raw_dir / "人工智能资料"
+            nested_dir.mkdir(parents=True)
+            writer = PdfWriter()
+            writer.add_blank_page(width=100, height=100)
+            with (nested_dir / "公路工程地质勘察规范.pdf").open("wb") as stream:
+                writer.write(stream)
+            rows = RuleExtractionPipeline(paths).catalog_documents()
         nested = next(row for row in rows if row["code"] == "JTG C20-2011")
         self.assertIn("人工智能资料", nested["path"])
 

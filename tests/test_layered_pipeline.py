@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import unittest
-import uuid
+import tempfile
+from pathlib import Path
+from tests.support import workspace_paths, sample_graph
 
-from slopekg.config import PATHS
 from slopekg.extractors import extract_section_facts, extract_stability_scenarios
 from slopekg.llm import DEEPSEEK_MAX_OUTPUT_TOKENS
-from slopekg.pipeline import PipelineAlreadyRunningError, pipeline_run_guard
+from slopekg.pipeline import DemoPipeline, PipelineAlreadyRunningError, pipeline_run_guard
 from slopekg.semantic import detect_section_gaps, source_fingerprint
 from slopekg.server import SlopeKGHandler, automatic_basic_options
 
@@ -18,14 +19,13 @@ class LayeredPipelineTests(unittest.TestCase):
         self.assertNotIn("use_llm", options)
 
     def test_pipeline_lock_rejects_a_second_run(self) -> None:
-        lock_path = PATHS.output_dir / f".test_pipeline_{uuid.uuid4().hex}.lock"
-        try:
+        with tempfile.TemporaryDirectory() as directory:
+            lock_path = Path(directory) / "pipeline.lock"
             with pipeline_run_guard(lock_path):
                 with self.assertRaises(PipelineAlreadyRunningError):
                     with pipeline_run_guard(lock_path):
                         pass
-        finally:
-            lock_path.unlink(missing_ok=True)
+            self.assertFalse(lock_path.exists())
 
     def test_automatic_update_runs_full_ocr_only_for_changed_documents(self) -> None:
         options = automatic_basic_options()
@@ -45,9 +45,17 @@ class LayeredPipelineTests(unittest.TestCase):
         self.assertEqual(options["ocr_batch_size"], 32)
 
     def test_basic_and_deep_outputs_are_separate(self) -> None:
-        self.assertTrue(PATHS.basic_graph_json.exists())
-        self.assertTrue(PATHS.deep_graph_json.exists())
-        self.assertNotEqual(PATHS.basic_graph_json, PATHS.deep_graph_json)
+        with tempfile.TemporaryDirectory() as directory:
+            paths = workspace_paths(Path(directory))
+            pipeline = DemoPipeline(paths)
+            pipeline.write_graph_outputs(sample_graph(), parse_mode="basic", activate=True)
+            basic_bytes = paths.basic_graph_json.read_bytes()
+            deep = sample_graph()
+            deep["meta"]["mode"] = "deep"
+            pipeline.write_graph_outputs(deep, parse_mode="deep", activate=False)
+            self.assertEqual(paths.basic_graph_json.read_bytes(), basic_bytes)
+            self.assertEqual(paths.graph_json.read_bytes(), basic_bytes)
+            self.assertNotEqual(paths.deep_graph_json.read_bytes(), basic_bytes)
 
     def test_deepseek_uses_documented_maximum_output(self) -> None:
         self.assertEqual(DEEPSEEK_MAX_OUTPUT_TOKENS, 393216)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from collections import Counter
 from datetime import date, datetime
 import re
@@ -282,12 +283,54 @@ def related_facts(
     return facts
 
 
-def assess_slope(
-    slope: dict[str, Any],
-    related: list[dict[str, Any]],
-    completeness_report: dict[str, Any] | None,
-    rule_library: dict[str, Any],
-) -> dict[str, Any]:
+@dataclass
+class _SlopeEvidence:
+    props: dict[str, Any]
+    temporal_validity: dict[str, Any]
+    hazard_bodies: list[dict[str, Any]]
+    susceptibility: list[dict[str, Any]]
+    protection: list[dict[str, Any]]
+    exposure: list[dict[str, Any]]
+    observations: list[dict[str, Any]]
+    historical_observations: list[dict[str, Any]]
+    hazard_types: list[str]
+    body_types: list[str]
+    stability_scenarios: list[dict[str, Any]]
+    scenario_stability: list[dict[str, Any]]
+    observed_terms: list[str]
+    historical_observed_terms: list[str]
+    height: float | None
+    gradient: float | None
+    hazard_identity_reliable: bool
+    supporting_context_available: bool
+
+
+@dataclass
+class _RiskAxes:
+    current_protection_known: bool
+    exposure_known: bool
+    consequence_level: str | None
+    likelihood_level: str | None
+    static_susceptibility: dict[str, Any]
+    dynamic_alert: dict[str, Any]
+    consequence_assessment: dict[str, Any]
+    provisional_risk_level: str | None
+    formal_gate: dict[str, Any]
+    formal_risk_level: str | None
+
+
+@dataclass
+class _AssessmentQuality:
+    gaps: list[dict[str, Any]]
+    risk_data_inventory: dict[str, Any]
+    confidence: str
+    confidence_assessment: dict[str, Any]
+    hazard_profiles: list[dict[str, Any]]
+    calculation_readiness: dict[str, Any]
+    matched_rules: list[dict[str, Any]]
+
+
+def _collect_slope_evidence(slope: dict[str, Any], related: list[dict[str, Any]]) -> _SlopeEvidence:
     props = slope.get("props", {})
     temporal_validity = dynamic_temporal_validity(props)
     hazard_bodies = [fact for fact in related if fact["node"].get("type") == "HazardBody"]
@@ -373,10 +416,35 @@ def assess_slope(
         or bool(historical_observations)
         or any(fact["node"].get("type") not in ADMINISTRATIVE_FACT_TYPES for fact in related)
     )
+    return _SlopeEvidence(
+        props=props,
+        temporal_validity=temporal_validity,
+        hazard_bodies=hazard_bodies,
+        susceptibility=susceptibility,
+        protection=protection,
+        exposure=exposure,
+        observations=observations,
+        historical_observations=historical_observations,
+        hazard_types=hazard_types,
+        body_types=body_types,
+        stability_scenarios=stability_scenarios,
+        scenario_stability=scenario_stability,
+        observed_terms=observed_terms,
+        historical_observed_terms=historical_observed_terms,
+        height=height,
+        gradient=gradient,
+        hazard_identity_reliable=hazard_identity_reliable,
+        supporting_context_available=supporting_context_available,
+    )
+
+
+def _screening_basis(
+    facts: _SlopeEvidence,
+) -> tuple[list[dict[str, Any]], dict[str, Any] | None, list[dict[str, Any]], str]:
     basis: list[dict[str, Any]] = []
 
-    worst_stability = worst_stability_record(scenario_stability)
-    stability_conflicts = detect_stability_conflicts(scenario_stability)
+    worst_stability = worst_stability_record(facts.scenario_stability)
+    stability_conflicts = detect_stability_conflicts(facts.scenario_stability)
     stability_concern = "无法判断"
     if worst_stability:
         stability_concern = stability_concern_label(worst_stability)
@@ -391,22 +459,22 @@ def assess_slope(
                 "boundary": "报告形成时间和现场现状未核验，作为工况筛查依据，不等同于实时监测。",
             }
         )
-    if body_types:
+    if facts.body_types:
         basis.append(
             {
                 "kind": "hazard_body",
                 "label": "灾害体类型",
-                "value": "、".join(body_types),
-                "interpretation": "工程资料中存在明确灾害证据" if hazard_identity_reliable else "仅为自动识别候选，尚缺少灾害文字证据",
+                "value": "、".join(facts.body_types),
+                "interpretation": "工程资料中存在明确灾害证据" if facts.hazard_identity_reliable else "仅为自动识别候选，尚缺少灾害文字证据",
                 "source": "图谱灾害体节点",
-                "evidence": first_evidence(hazard_bodies) if hazard_identity_reliable else None,
+                "evidence": first_evidence(facts.hazard_bodies) if facts.hazard_identity_reliable else None,
             }
         )
-    if height is not None or gradient is not None:
+    if facts.height is not None or facts.gradient is not None:
         value = "，".join(
             text for text in (
-                f"坡高约{height:g}m" if height is not None else "",
-                f"最大坡度约{gradient:g}°" if gradient is not None else "",
+                f"坡高约{facts.height:g}m" if facts.height is not None else "",
+                f"最大坡度约{facts.gradient:g}°" if facts.gradient is not None else "",
             ) if text
         )
         basis.append(
@@ -419,49 +487,193 @@ def assess_slope(
                 "evidence": None,
             }
         )
-    if observed_terms:
+    if facts.observed_terms:
         basis.append(
             {
                 "kind": "deformation_observation",
                 "label": "明确变形/渗流迹象",
-                "value": "、".join(observed_terms),
+                "value": "、".join(facts.observed_terms),
                 "interpretation": "存在需现场核验的异常迹象",
                 "source": "巡检或监测节点",
-                "evidence": first_evidence(observations),
+                "evidence": first_evidence(facts.observations),
             }
         )
-    if historical_observed_terms:
+    if facts.historical_observed_terms:
         basis.append(
             {
                 "kind": "historical_deformation_observation",
                 "label": "历史工程资料中的变形迹象",
-                "value": "、".join(historical_observed_terms),
+                "value": "、".join(facts.historical_observed_terms),
                 "interpretation": "用于静态易发性关注，不代表当前仍在发展",
                 "source": "PDF历史工程资料",
-                "evidence": first_evidence(historical_observations),
+                "evidence": first_evidence(facts.historical_observations),
                 "boundary": "必须通过近期现场巡检确认其是否持续、扩大或已经处置。",
             }
         )
+    return basis, worst_stability, stability_conflicts, stability_concern
 
-    priority, reasons = screening_priority(
-        body_types=body_types,
-        hazard_types=hazard_types,
+
+def _risk_axes(
+    facts: _SlopeEvidence,
+    rule_library: dict[str, Any],
+    worst_stability: dict[str, Any] | None,
+    stability_conflicts: list[dict[str, Any]],
+) -> _RiskAxes:
+    current_protection_known = facts.props.get("protection_condition") not in (None, "", "未核查") or any(
+        fact["node"].get("props", {}).get("current_condition") not in {None, "", "unknown"}
+        for fact in facts.protection
+    )
+    exposure_known = bool(facts.exposure) or bool(facts.props.get("exposure")) or bool(facts.props.get("consequence_level"))
+    consequence_level = consequence_from_exposure(facts.exposure, facts.props)
+    likelihood_level = likelihood_from_stability(worst_stability, facts.observed_terms)
+    static_susceptibility = static_susceptibility_assessment(
+        body_types=facts.body_types,
+        hazard_types=facts.hazard_types,
         stability=worst_stability,
-        observed_terms=observed_terms,
-        height=height,
-        gradient=gradient,
-        hazard_identity_reliable=hazard_identity_reliable,
-        supporting_context_available=supporting_context_available,
+        historical_terms=facts.historical_observed_terms,
+        height=facts.height,
+        gradient=facts.gradient,
+        hazard_identity_reliable=facts.hazard_identity_reliable,
+    )
+    dynamic_alert = dynamic_alert_assessment(
+        observed_terms=facts.observed_terms,
+        props=facts.props,
+        current_observations=facts.observations,
+        temporal_validity=facts.temporal_validity,
+    )
+    consequence_assessment = {
+        "level": consequence_level or "无法判断",
+        "status": "available" if consequence_level else "missing",
+        "interpretation": (
+            "已有暴露/后果等级，可用于参考矩阵；仍需核对数据范围和日期。"
+            if consequence_level else
+            "缺少交通量、人员、道路中断和重要设施信息，不能形成综合风险。"
+        ),
+    }
+    provisional_risk_level = risk_matrix(likelihood_level, consequence_level)
+    formal_gate = formal_risk_gate(
+        rule_library=rule_library,
+        likelihood_level=likelihood_level,
+        consequence_level=consequence_level,
+        current_dynamic_evidence=dynamic_alert["current_evidence_available"],
+        dynamic_rule_result_available=dynamic_alert["threshold_evaluated"],
+        conflicts=stability_conflicts,
+    )
+    formal_risk_level = provisional_risk_level if formal_gate["ready"] else None
+    return _RiskAxes(
+        current_protection_known=current_protection_known,
+        exposure_known=exposure_known,
+        consequence_level=consequence_level,
+        likelihood_level=likelihood_level,
+        static_susceptibility=static_susceptibility,
+        dynamic_alert=dynamic_alert,
+        consequence_assessment=consequence_assessment,
+        provisional_risk_level=provisional_risk_level,
+        formal_gate=formal_gate,
+        formal_risk_level=formal_risk_level,
+    )
+
+
+def _assessment_quality(
+    facts: _SlopeEvidence,
+    axes: _RiskAxes,
+    related: list[dict[str, Any]],
+    completeness_report: dict[str, Any] | None,
+    rule_library: dict[str, Any],
+    worst_stability: dict[str, Any] | None,
+    stability_conflicts: list[dict[str, Any]],
+) -> _AssessmentQuality:
+    gaps = critical_gaps(
+        completeness_report,
+        has_stability=bool(facts.scenario_stability),
+        has_observation=bool(facts.observations),
+        has_exposure=axes.exposure_known,
+        current_protection_known=axes.current_protection_known,
+    )
+    tracked_risk_codes = {
+        str(field.get("code"))
+        for field in (completeness_report or {}).get("fields", [])
+        if field.get("code") in GAP_GUIDANCE and field.get("code") != "risk_rules"
+    }
+    unavailable_risk_codes = {str(item.get("code")) for item in gaps}
+    risk_data_inventory = {
+        "total_categories": len(tracked_risk_codes),
+        "available_categories": len(tracked_risk_codes - unavailable_risk_codes),
+        "unavailable_categories": len(tracked_risk_codes & unavailable_risk_codes),
+        "first_round_recommended": min(5, len(gaps)),
+        "note": "未具备的类别不要求一次性全部补齐，应按优先级分轮补充。",
+    }
+    confidence = confidence_label(
+        worst_stability,
+        facts.observed_terms,
+        axes.exposure_known,
+        len(gaps),
+        has_conflicts=bool(stability_conflicts),
+        temporal_status=facts.temporal_validity["status"],
+    )
+    confidence_assessment = build_confidence_assessment(
+        confidence=confidence,
+        stability=worst_stability,
+        observed_terms=facts.observed_terms,
+        exposure_known=axes.exposure_known,
+        gaps=gaps,
+        conflicts=stability_conflicts,
+        temporal_validity=facts.temporal_validity,
+    )
+    hazard_profiles = build_hazard_profiles(
+        body_types=facts.body_types,
+        hazard_types=facts.hazard_types,
+        gaps=gaps,
+        stability=worst_stability,
+        observed_terms=facts.observed_terms,
+    )
+    calculation_readiness = stability_calculation_readiness(
+        props=facts.props,
+        related=related,
+        rule_library=rule_library,
+        height=facts.height,
+        gradient=facts.gradient,
+    )
+    matched_rules = matched_rule_references(rule_library, facts.hazard_types, worst_stability, facts.observed_terms)
+    return _AssessmentQuality(
+        gaps=gaps,
+        risk_data_inventory=risk_data_inventory,
+        confidence=confidence,
+        confidence_assessment=confidence_assessment,
+        hazard_profiles=hazard_profiles,
+        calculation_readiness=calculation_readiness,
+        matched_rules=matched_rules,
+    )
+
+
+
+def assess_slope(
+    slope: dict[str, Any],
+    related: list[dict[str, Any]],
+    completeness_report: dict[str, Any] | None,
+    rule_library: dict[str, Any],
+) -> dict[str, Any]:
+    facts = _collect_slope_evidence(slope, related)
+    basis, worst_stability, stability_conflicts, stability_concern = _screening_basis(facts)
+    priority, reasons = screening_priority(
+        body_types=facts.body_types,
+        hazard_types=facts.hazard_types,
+        stability=worst_stability,
+        observed_terms=facts.observed_terms,
+        height=facts.height,
+        gradient=facts.gradient,
+        hazard_identity_reliable=facts.hazard_identity_reliable,
+        supporting_context_available=facts.supporting_context_available,
     )
     manual_rule_matches = evaluate_manual_rules(
         rule_library,
         {
-            **props,
-            "hazard_type": hazard_types,
-            "hazard_body": body_types,
-            "slope_height_m": height,
-            "slope_gradient_deg": gradient,
-            "observed_terms": observed_terms,
+            **facts.props,
+            "hazard_type": facts.hazard_types,
+            "hazard_body": facts.body_types,
+            "slope_height_m": facts.height,
+            "slope_gradient_deg": facts.gradient,
+            "observed_terms": facts.observed_terms,
             "stability_factor": (worst_stability or {}).get("fs"),
             "stability_status": (worst_stability or {}).get("status"),
         },
@@ -483,143 +695,50 @@ def assess_slope(
         )
     if not basis:
         reasons.append("现有资料不足以形成灾害筛查依据")
-
-    current_protection_known = props.get("protection_condition") not in (None, "", "未核查") or any(
-        fact["node"].get("props", {}).get("current_condition") not in {None, "", "unknown"}
-        for fact in protection
-    )
-    exposure_known = bool(exposure) or bool(props.get("exposure")) or bool(props.get("consequence_level"))
-    consequence_level = consequence_from_exposure(exposure, props)
-    likelihood_level = likelihood_from_stability(worst_stability, observed_terms)
-    static_susceptibility = static_susceptibility_assessment(
-        body_types=body_types,
-        hazard_types=hazard_types,
-        stability=worst_stability,
-        historical_terms=historical_observed_terms,
-        height=height,
-        gradient=gradient,
-        hazard_identity_reliable=hazard_identity_reliable,
-    )
-    dynamic_alert = dynamic_alert_assessment(
-        observed_terms=observed_terms,
-        props=props,
-        current_observations=observations,
-        temporal_validity=temporal_validity,
-    )
-    consequence_assessment = {
-        "level": consequence_level or "无法判断",
-        "status": "available" if consequence_level else "missing",
-        "interpretation": (
-            "已有暴露/后果等级，可用于参考矩阵；仍需核对数据范围和日期。"
-            if consequence_level else
-            "缺少交通量、人员、道路中断和重要设施信息，不能形成综合风险。"
-        ),
-    }
-    provisional_risk_level = risk_matrix(likelihood_level, consequence_level)
-    formal_gate = formal_risk_gate(
-        rule_library=rule_library,
-        likelihood_level=likelihood_level,
-        consequence_level=consequence_level,
-        current_dynamic_evidence=dynamic_alert["current_evidence_available"],
-        dynamic_rule_result_available=dynamic_alert["threshold_evaluated"],
-        conflicts=stability_conflicts,
-    )
-    formal_risk_level = provisional_risk_level if formal_gate["ready"] else None
-
-    gaps = critical_gaps(
-        completeness_report,
-        has_stability=bool(scenario_stability),
-        has_observation=bool(observations),
-        has_exposure=exposure_known,
-        current_protection_known=current_protection_known,
-    )
-    tracked_risk_codes = {
-        str(field.get("code"))
-        for field in (completeness_report or {}).get("fields", [])
-        if field.get("code") in GAP_GUIDANCE and field.get("code") != "risk_rules"
-    }
-    unavailable_risk_codes = {str(item.get("code")) for item in gaps}
-    risk_data_inventory = {
-        "total_categories": len(tracked_risk_codes),
-        "available_categories": len(tracked_risk_codes - unavailable_risk_codes),
-        "unavailable_categories": len(tracked_risk_codes & unavailable_risk_codes),
-        "first_round_recommended": min(5, len(gaps)),
-        "note": "未具备的类别不要求一次性全部补齐，应按优先级分轮补充。",
-    }
-    confidence = confidence_label(
-        worst_stability,
-        observed_terms,
-        exposure_known,
-        len(gaps),
-        has_conflicts=bool(stability_conflicts),
-        temporal_status=temporal_validity["status"],
-    )
-    confidence_assessment = build_confidence_assessment(
-        confidence=confidence,
-        stability=worst_stability,
-        observed_terms=observed_terms,
-        exposure_known=exposure_known,
-        gaps=gaps,
-        conflicts=stability_conflicts,
-        temporal_validity=temporal_validity,
-    )
-    hazard_profiles = build_hazard_profiles(
-        body_types=body_types,
-        hazard_types=hazard_types,
-        gaps=gaps,
-        stability=worst_stability,
-        observed_terms=observed_terms,
-    )
-    calculation_readiness = stability_calculation_readiness(
-        props=props,
-        related=related,
-        rule_library=rule_library,
-        height=height,
-        gradient=gradient,
-    )
-    matched_rules = matched_rule_references(rule_library, hazard_types, worst_stability, observed_terms)
+    axes = _risk_axes(facts, rule_library, worst_stability, stability_conflicts)
+    quality = _assessment_quality(facts, axes, related, completeness_report, rule_library, worst_stability, stability_conflicts)
     return {
         "slope_id": slope["id"],
-        "business_id": props.get("slope_id"),
+        "business_id": facts.props.get("slope_id"),
         "slope_label": slope.get("label"),
-        "route_code": props.get("route_code_cache"),
-        "station": f"{props.get('start_station_raw', '')}-{props.get('end_station_raw', '')}".strip("-"),
-        "hazard_types": hazard_types,
-        "hazard_body_types": body_types,
+        "route_code": facts.props.get("route_code_cache"),
+        "station": f"{facts.props.get('start_station_raw', '')}-{facts.props.get('end_station_raw', '')}".strip("-"),
+        "hazard_types": facts.hazard_types,
+        "hazard_body_types": facts.body_types,
         "assessment_status": "screening_only_not_formal_risk",
         "screening_priority_code": priority,
         "screening_priority": PRIORITY_LABELS[priority],
         "screening_reasons": unique(reasons),
         "stability_concern": stability_concern,
-        "stability_scenarios": stability_scenarios,
-        "historical_deformation_terms": historical_observed_terms,
-        "static_susceptibility": static_susceptibility,
-        "dynamic_alert": dynamic_alert,
-        "consequence_assessment": consequence_assessment,
-        "hazard_profiles": hazard_profiles,
-        "stability_calculation_readiness": calculation_readiness,
-        "temporal_validity": temporal_validity,
+        "stability_scenarios": facts.stability_scenarios,
+        "historical_deformation_terms": facts.historical_observed_terms,
+        "static_susceptibility": axes.static_susceptibility,
+        "dynamic_alert": axes.dynamic_alert,
+        "consequence_assessment": axes.consequence_assessment,
+        "hazard_profiles": quality.hazard_profiles,
+        "stability_calculation_readiness": quality.calculation_readiness,
+        "temporal_validity": facts.temporal_validity,
         "data_conflicts": stability_conflicts,
-        "likelihood_level": likelihood_level,
-        "likelihood_interpretation": "基于历史稳定性工况和近期异常的定性关注，不是时间概率。" if likelihood_level else "资料不足，未形成发生可能性等级。",
-        "consequence_level": consequence_level,
-        "provisional_risk_matrix_level": provisional_risk_level,
-        "formal_risk_gate": formal_gate,
-        "formal_risk_level": formal_risk_level,
-        "confidence": confidence,
-        "confidence_assessment": confidence_assessment,
+        "likelihood_level": axes.likelihood_level,
+        "likelihood_interpretation": "基于历史稳定性工况和近期异常的定性关注，不是时间概率。" if axes.likelihood_level else "资料不足，未形成发生可能性等级。",
+        "consequence_level": axes.consequence_level,
+        "provisional_risk_matrix_level": axes.provisional_risk_level,
+        "formal_risk_gate": axes.formal_gate,
+        "formal_risk_level": axes.formal_risk_level,
+        "confidence": quality.confidence,
+        "confidence_assessment": quality.confidence_assessment,
         "risk_data_completeness": (completeness_report or {}).get("risk_data_completeness", 0),
         "screening_basis_status": {
-            "hazard_identity_reliable": hazard_identity_reliable,
-            "supporting_context_available": supporting_context_available,
-            "minimum_basis_met": hazard_identity_reliable or supporting_context_available or bool(worst_stability) or bool(observed_terms),
+            "hazard_identity_reliable": facts.hazard_identity_reliable,
+            "supporting_context_available": facts.supporting_context_available,
+            "minimum_basis_met": facts.hazard_identity_reliable or facts.supporting_context_available or bool(worst_stability) or bool(facts.observed_terms),
         },
-        "risk_data_inventory": risk_data_inventory,
+        "risk_data_inventory": quality.risk_data_inventory,
         "basis": basis,
-        "matched_rule_references": matched_rules,
+        "matched_rule_references": quality.matched_rules,
         "executed_manual_rules": manual_rule_matches,
-        "critical_data_gaps": gaps,
-        "recommended_action": recommended_action(priority, worst_stability, current_protection_known),
+        "critical_data_gaps": quality.gaps,
+        "recommended_action": recommended_action(priority, worst_stability, axes.current_protection_known),
         "limitations": [
             "这是资料驱动的宏观复核优先级，不是正式风险等级。",
             "缺失项不会按安全值处理，因而不能将P3/P4解释为低风险。",

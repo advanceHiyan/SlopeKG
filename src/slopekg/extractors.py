@@ -5,19 +5,14 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any
 
+from .identity import STATION_RE, ROUTE_CODE_RE, normalize_station_match, normalize_reference_station, infer_route_code_from_values
 from .engineering import attach_engineering_records, extract_engineering_tables
 from .observation import observation_clauses, positive_mention, belongs_to_station
 from .source_candidates import orientation_candidates, body_material_claims, preceding_section_station
 
 
-STATION_RE = re.compile(
-    r"K\s*(?P<start_km>\d+)\s*\+\s*(?P<start_m>\d+)\s*[-～~]\s*"
-    r"(?:K\s*)?(?:(?P<end_km>\d+)\s*\+)?\s*(?P<end_m>\d+)",
-    re.IGNORECASE,
-)
 GPS_RE = re.compile(r"GPS\s*(?P<no>\d+)\s+(?P<x>\d{5,6}(?:\.\d+)?)\s+(?P<y>\d{6,8}(?:\.\d+)?)\s+(?P<z>\d{2,4}(?:\.\d+)?)", re.IGNORECASE)
 FS_PAIR_RE = re.compile(r"(?P<actual>\d+\.\d+)\s*>\s*(?P<required>\d+\.\d+)")
-ROUTE_CODE_RE = re.compile(r"\b([GSXY]\d{2,4})\b", re.IGNORECASE)
 HAZARD_TERMS = ["潜在不稳定边坡", "不稳定边坡", "顺层坡滑移", "路基沉降", "路基下沉", "路基垮塌", "坡面滑塌", "危岩体", "崩塌", "滑坡", "落石"]
 REGISTRY_TITLE_TERMS = ["灾害点一览表", "沿线灾害一览表", "灾害一览表", "灾害分布表"]
 
@@ -1142,15 +1137,6 @@ def candidate_row(station: str, page: int, block: dict[str, Any], method: str, c
     }
 
 
-def normalize_station_match(match: re.Match[str] | None) -> str | None:
-    if not match:
-        return None
-    start_km = int(match.group("start_km"))
-    start_m = int(match.group("start_m"))
-    end_km_raw = match.group("end_km")
-    end_km = int(end_km_raw) if end_km_raw else start_km
-    end_m = int(match.group("end_m"))
-    return f"K{start_km}+{start_m:03d}-K{end_km}+{end_m:03d}"
 
 
 def mark_station_resolution(candidate: dict[str, Any]) -> None:
@@ -1263,9 +1249,6 @@ def station_span_m(station: str) -> float | None:
     return float(abs(end - start))
 
 
-def infer_route_code_from_values(*values: Any) -> str:
-    match = ROUTE_CODE_RE.search(" ".join(str(value or "") for value in values))
-    return match.group(1).upper() if match else "ROUTE"
 
 
 def discover_single_site_document(
@@ -1530,9 +1513,6 @@ def apply_extracted_candidates(graph: dict[str, Any], extracted: dict[str, Any])
     return graph
 
 
-def normalize_reference_station(value: str) -> str:
-    match = STATION_RE.search(value.replace("～", "-").replace("~", "-"))
-    return normalize_station_match(match) or value
 
 
 def point_matches(point: dict[str, Any], expected: tuple[float, float, float], tolerance: float = 0.002) -> bool:

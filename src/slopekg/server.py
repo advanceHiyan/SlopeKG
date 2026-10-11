@@ -5,10 +5,6 @@ import ipaddress
 import json
 import mimetypes
 import re
-import threading
-import time
-import uuid
-from datetime import datetime
 from email import policy
 from email.parser import BytesParser
 from http import HTTPStatus
@@ -17,14 +13,14 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, quote, unquote, urlparse
 
+from . import queries
+from .jobs import PipelineJobManager, PdfDirectoryWatcher, automatic_basic_options
 from .config import PATHS
 from .exporter import export_risk_standalone_html, export_standalone_html
 from .manual import (
-    apply_slope_overrides,
     delete_manual_rule,
     delete_slope_override,
     manual_schema,
-    merged_rule_library,
     save_manual_rule,
     save_slope_override,
     slope_override_record,
@@ -32,9 +28,8 @@ from .manual import (
 from .multimodal import multimodal_contract
 from .pipeline import DemoPipeline
 from .rule_extraction import RuleExtractionPipeline
-from .risk import build_risk_screening
-from .schema import INTERFACES, attribute_dictionary_payload, build_completeness, interface_payload, schema_payload
-from .storage import ensure_dir, read_json, read_jsonl
+from .schema import INTERFACES, attribute_dictionary_payload, interface_payload, schema_payload
+from .storage import ensure_dir, read_json
 
 
 MAX_UPLOAD_REQUEST_BYTES = 512 * 1024 * 1024
@@ -89,7 +84,9 @@ def safe_pdf_name(value: str) -> str:
     name = re.sub(r"\s+", " ", name).strip(" .")
     if not name or Path(name).suffix.lower() != ".pdf":
         raise ValueError("只支持扩展名为 .pdf 的文件")
-    return name[:240]
+    # Keep the validated suffix even when a long name must be shortened.
+    suffix = Path(name).suffix
+    return name[:240 - len(suffix)] + suffix if len(name) > 240 else name
 
 
 def safe_export_name(value: str) -> str:
@@ -142,236 +139,10 @@ def parse_pdf_uploads(content_type: str, raw: bytes) -> list[tuple[str, bytes]]:
     return pending
 
 
-def document_inventory() -> dict[str, Any]:
-    documents = read_jsonl(PATHS.parsed_dir / "documents.jsonl")
-    pages = read_jsonl(PATHS.parsed_dir / "pages.jsonl")
-    text_blocks = read_jsonl(PATHS.parsed_dir / "text_blocks.jsonl")
-    tables = read_jsonl(PATHS.parsed_dir / "tables.jsonl")
-    ocr_tasks = read_jsonl(PATHS.parsed_dir / "ocr_tasks.jsonl")
-    by_name = {row.get("file_name"): row for row in documents}
-    page_by_doc: dict[str, dict[str, int]] = {}
-    for row in pages:
-        stats = page_by_doc.setdefault(row.get("document_id", ""), {})
-        page_type = row.get("page_type", "unknown")
-        stats[page_type] = stats.get(page_type, 0) + 1
-    text_by_doc: dict[str, int] = {}
-    for row in text_blocks:
-        doc_id = row.get("document_id", "")
-        text_by_doc[doc_id] = text_by_doc.get(doc_id, 0) + 1
-    table_by_doc: dict[str, int] = {}
-    for row in tables:
-        doc_id = row.get("document_id", "")
-        table_by_doc[doc_id] = table_by_doc.get(doc_id, 0) + 1
-    ocr_by_doc: dict[str, dict[str, int]] = {}
-    for row in ocr_tasks:
-        stats = ocr_by_doc.setdefault(row.get("document_id", ""), {})
-        status = row.get("status", "unknown")
-        stats[status] = stats.get(status, 0) + 1
-
-    rows = []
-    ensure_dir(PATHS.raw_dir)
-    for file in sorted(PATHS.raw_dir.glob("*.pdf"), key=lambda item: item.name.lower()):
-        parsed_record = by_name.get(file.name)
-        doc_id = parsed_record.get("id") if parsed_record else None
-        stat = file.stat()
-        current = bool(
-            parsed_record
-            and parsed_record.get("source_size_bytes") == stat.st_size
-            and parsed_record.get("source_mtime_ns") == stat.st_mtime_ns
-        )
-        stale = bool(parsed_record and not current)
-        rows.append(
-            {
-                "file_name": file.name,
-                "size_bytes": stat.st_size,
-                "modified_at": datetime.fromtimestamp(stat.st_mtime).isoformat(timespec="seconds"),
-                "parsed": current,
-                "stale": stale,
-                "change_status": "current" if current else ("changed" if stale else "new"),
-                "document_id": doc_id,
-                "kind": parsed_record.get("kind") if parsed_record else None,
-                "pages": parsed_record.get("pages") if parsed_record else None,
-                "parse_scope": parsed_record.get("parse_scope") if parsed_record else None,
-                "page_types": page_by_doc.get(doc_id, {}) if doc_id else {},
-                "text_blocks": text_by_doc.get(doc_id, 0) if doc_id else 0,
-                "tables": table_by_doc.get(doc_id, 0) if doc_id else 0,
-                "ocr_status_counts": ocr_by_doc.get(doc_id, {}) if doc_id else {},
-            }
-        )
-    return {
-        "count": len(rows),
-        "parsed_count": sum(1 for row in rows if row["parsed"]),
-        "unparsed_count": sum(1 for row in rows if not row["parsed"]),
-        "stale_count": sum(1 for row in rows if row["stale"]),
-        "rows": rows,
-    }
-
-
-class PipelineJobManager:
-    def __init__(self, pipeline: Any, *, completion_message: str = "PDF解析、信息抽取和图谱生成已完成") -> None:
-        self.pipeline = pipeline
-        self.completion_message = completion_message
-        self.lock = threading.Lock()
-        self.jobs: dict[str, dict[str, Any]] = {}
-        self.latest_id: str | None = None
-
-    def start(self, options: dict[str, Any], *, trigger: str = "manual") -> tuple[dict[str, Any], bool]:
-        with self.lock:
-            active = next((job for job in self.jobs.values() if job["status"] in {"queued", "running"}), None)
-            if active:
-                return self._copy(active), False
-            job_id = uuid.uuid4().hex[:12]
-            now = datetime.now().isoformat(timespec="seconds")
-            job = {
-                "id": job_id,
-                "status": "queued",
-                "progress": 0,
-                "stage": "queued",
-                "message": "任务已进入队列",
-                "created_at": now,
-                "started_at": None,
-                "updated_at": now,
-                "finished_at": None,
-                "options": options,
-                "trigger": trigger,
-                "result": None,
-                "error": None,
-            }
-            self.jobs[job_id] = job
-            self.latest_id = job_id
-            self._trim()
-        threading.Thread(target=self._run, args=(job_id,), daemon=True, name=f"pipeline-{job_id}").start()
-        return self.get(job_id) or {}, True
-
-    def _run(self, job_id: str) -> None:
-        self._update(job_id, status="running", started_at=datetime.now().isoformat(timespec="seconds"))
-
-        def on_progress(percent: int, stage: str, message: str) -> None:
-            self._update(job_id, progress=max(0, min(100, int(percent))), stage=stage, message=message)
-
-        try:
-            options = self.get(job_id)["options"]  # type: ignore[index]
-            state = self.pipeline.run(progress_callback=on_progress, **options)
-            now = datetime.now().isoformat(timespec="seconds")
-            self._update(
-                job_id,
-                status="completed",
-                progress=100,
-                stage="completed",
-                message=self.completion_message,
-                result=state,
-                finished_at=now,
-            )
-        except Exception as exc:  # pragma: no cover - surfaced through the job API
-            now = datetime.now().isoformat(timespec="seconds")
-            self._update(
-                job_id,
-                status="failed",
-                stage="failed",
-                message="处理失败，请查看错误信息",
-                error=str(exc),
-                finished_at=now,
-            )
-
-    def _update(self, job_id: str, **values: Any) -> None:
-        with self.lock:
-            job = self.jobs.get(job_id)
-            if not job:
-                return
-            job.update(values)
-            job["updated_at"] = datetime.now().isoformat(timespec="seconds")
-
-    def get(self, job_id: str) -> dict[str, Any] | None:
-        with self.lock:
-            job = self.jobs.get(job_id)
-            return self._copy(job) if job else None
-
-    def latest(self) -> dict[str, Any] | None:
-        return self.get(self.latest_id) if self.latest_id else None
-
-    def _trim(self) -> None:
-        completed = [key for key, job in self.jobs.items() if job["status"] not in {"queued", "running"}]
-        for key in completed[:-19]:
-            self.jobs.pop(key, None)
-
-    @staticmethod
-    def _copy(job: dict[str, Any]) -> dict[str, Any]:
-        return json.loads(json.dumps(job, ensure_ascii=False))
-
-
 PIPELINE = DemoPipeline()
 JOB_MANAGER = PipelineJobManager(PIPELINE)
 RULE_PIPELINE = RuleExtractionPipeline()
 RULE_JOB_MANAGER = PipelineJobManager(RULE_PIPELINE, completion_message="候选规则库、公式库和证据链已生成")
-
-
-def automatic_basic_options() -> dict[str, Any]:
-    """Fast, deterministic publication used whenever the source directory changes."""
-    return {
-        "ocr_pages": 1000,
-        "force_ocr": False,
-        "parse_mode": "basic",
-        "llm_model": "deepseek-v4-flash",
-        "reuse_parsed": False,
-        "ocr_scope": "changed",
-        "ocr_device": "auto",
-        "ocr_workers": 4,
-        "ocr_batch_size": 0,
-    }
-
-
-class PdfDirectoryWatcher:
-    """Poll rawPDF and schedule a basic rebuild after files have stopped changing."""
-
-    def __init__(self, manager: PipelineJobManager, interval_seconds: float = 2.0) -> None:
-        self.manager = manager
-        self.interval_seconds = interval_seconds
-        self._candidate: tuple[tuple[str, int, int], ...] | None = None
-        self._stable_polls = 0
-        self._scheduled_snapshot: tuple[tuple[str, int, int], ...] | None = None
-        self._stop = threading.Event()
-        self._thread: threading.Thread | None = None
-
-    def start(self) -> None:
-        if self._thread and self._thread.is_alive():
-            return
-        self._thread = threading.Thread(target=self._run, daemon=True, name="rawpdf-auto-update")
-        self._thread.start()
-
-    def stop(self) -> None:
-        self._stop.set()
-
-    def snapshot(self) -> tuple[tuple[str, int, int], ...]:
-        ensure_dir(PATHS.raw_dir)
-        rows = []
-        for file in sorted(PATHS.raw_dir.glob("*.pdf"), key=lambda item: item.name.lower()):
-            stat = file.stat()
-            rows.append((file.name, stat.st_size, stat.st_mtime_ns))
-        return tuple(rows)
-
-    def check_once(self) -> bool:
-        snapshot = self.snapshot()
-        if snapshot != self._candidate:
-            self._candidate = snapshot
-            self._stable_polls = 1
-            return False
-        self._stable_polls += 1
-        inventory = document_inventory()
-        if self._stable_polls < 2 or not inventory["unparsed_count"]:
-            return False
-        if snapshot == self._scheduled_snapshot:
-            return False
-        _, created = self.manager.start(automatic_basic_options(), trigger="directory_watch")
-        if created:
-            self._scheduled_snapshot = snapshot
-        return created
-
-    def _run(self) -> None:
-        while not self._stop.wait(self.interval_seconds):
-            try:
-                self.check_once()
-            except Exception as exc:  # pragma: no cover - keep server alive and retry on the next poll
-                print(f"rawPDF auto-update check failed: {exc}")
 
 
 PDF_WATCHER = PdfDirectoryWatcher(JOB_MANAGER)
@@ -398,18 +169,94 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self.send_header("Location", "/web/index.html")
             self.end_headers()
             return
+        for handler in (
+            self._get_pipeline,
+            self._get_rules,
+            self._get_risk,
+            self._get_graph,
+            self._get_manual,
+            self._get_schema,
+            self._get_assets,
+            self._get_reserved,
+        ):
+            if handler(parsed):
+                return
+        return super().do_GET()
+
+    def do_POST(self) -> None:  # noqa: N802
+        if not self.request_origin_allowed():
+            self.write_json({"error": "cross-origin request denied"}, status=HTTPStatus.FORBIDDEN)
+            return
+        parsed = urlparse(self.path)
+        for handler in (
+            self._post_manual,
+            self._post_pipeline,
+            self._post_rules,
+            self._post_exports,
+            self._post_risk,
+        ):
+            if handler(parsed):
+                return
+        if parsed.path != "/api/pipeline/run":
+            self.write_json({"error": "not found"}, status=HTTPStatus.NOT_FOUND)
+            return
+        try:
+            state = self.pipeline.run(**self.pipeline_options(self.read_json_body()))
+        except Exception as exc:  # pragma: no cover - surfaced to UI
+            self.write_json({"error": str(exc)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+            return
+        self.write_json(state)
+
+    def _get_pipeline(self, parsed: Any) -> bool:
         if parsed.path == "/api/status":
             self.write_json(self.pipeline.status())
-            return
+            return True
         if parsed.path == "/api/documents":
             self.write_json(document_inventory())
-            return
+            return True
         if parsed.path == "/api/pipeline/jobs/latest":
             self.write_json(JOB_MANAGER.latest() or {"status": "none"})
-            return
+            return True
+        if parsed.path.startswith("/api/pipeline/jobs/"):
+            job_id = parsed.path.rsplit("/", 1)[-1]
+            job = JOB_MANAGER.get(job_id)
+            if job is None:
+                self.write_json({"error": f"unknown job: {job_id}"}, status=HTTPStatus.NOT_FOUND)
+            else:
+                self.write_json(job)
+            return True
+        if parsed.path == "/api/evaluation":
+            self.write_json(read_json(PATHS.evaluation_json, {"status": "not_generated"}))
+            return True
+        if parsed.path == "/api/extracted/slopes":
+            rows = self.pipeline.parsed_extracted_table("slopes")
+            self.write_json({"name": "extracted_slopes", "rows": rows, "count": len(rows)})
+            return True
+        if parsed.path == "/api/assertions":
+            rows = self.pipeline.parsed_extracted_table("property_assertions")
+            self.write_json({"name": "property_assertions", "rows": rows, "count": len(rows)})
+            return True
+        if parsed.path == "/api/extracted/llm-candidates":
+            rows = self.pipeline.parsed_extracted_table("llm_candidates")
+            quality = read_json(PATHS.extracted_dir / "llm_evaluation.json", {"status": "not_generated"})
+            self.write_json({"name": "llm_candidates", "rows": rows, "count": len(rows), "quality": quality})
+            return True
+        if parsed.path.startswith("/api/parsed/"):
+            name = parsed.path.rsplit("/", 1)[-1]
+            try:
+                rows = self.pipeline.parsed_table(name)
+            except KeyError:
+                self.write_json({"error": f"unknown parsed table: {name}"}, status=HTTPStatus.NOT_FOUND)
+                return True
+            self.write_json({"name": name, "rows": rows, "count": len(rows)})
+            return True
+        return False
+
+
+    def _get_rules(self, parsed: Any) -> bool:
         if parsed.path == "/api/rules/jobs/latest":
             self.write_json(RULE_JOB_MANAGER.latest() or {"status": "none"})
-            return
+            return True
         if parsed.path.startswith("/api/rules/jobs/"):
             job_id = parsed.path.rsplit("/", 1)[-1]
             job = RULE_JOB_MANAGER.get(job_id)
@@ -417,18 +264,22 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 self.write_json({"error": f"unknown rule job: {job_id}"}, status=HTTPStatus.NOT_FOUND)
             else:
                 self.write_json(job)
-            return
+            return True
         if parsed.path == "/api/rules/library":
             self.write_json(current_rule_library())
-            return
+            return True
         if parsed.path == "/api/rules/documents":
             library = current_rule_library()
             self.write_json({"rows": library.get("documents", []), "count": len(library.get("documents", [])), "stats": library.get("stats", {})})
-            return
+            return True
         if parsed.path == "/api/rules/formulas":
             library = current_rule_library()
             self.write_json({"rows": library.get("formulas", []), "count": len(library.get("formulas", [])), "stats": library.get("stats", {})})
-            return
+            return True
+        return False
+
+
+    def _get_risk(self, parsed: Any) -> bool:
         if parsed.path == "/api/risk/rules":
             library = current_rule_library()
             rules = [row for row in library.get("rules", []) if row.get("risk_engine_candidate")]
@@ -442,7 +293,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                     "message": "候选规则可查询和复核；只有经审核批准的规则才允许进入正式风险计算。",
                 }
             )
-            return
+            return True
         if parsed.path == "/api/risk/screening":
             query = parse_qs(parsed.query)
             slope_id = query.get("slope_id", [None])[0]
@@ -451,83 +302,19 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 rows = [row for row in payload.get("assessments", []) if row.get("slope_id") == slope_id]
                 if not rows:
                     self.write_json({"error": f"unknown slope: {slope_id}"}, status=HTTPStatus.NOT_FOUND)
-                    return
+                    return True
                 payload = {**payload, "assessments": rows}
             self.write_json(payload)
-            return
+            return True
         if parsed.path == "/api/risk/evaluation":
             self.write_json(read_json(
                 PATHS.output_dir / "risk" / "evaluation.json",
                 {"status": "requires_independent_expert_gold_set", "evaluated": 0, "metrics": None},
             ))
-            return
-        if parsed.path.startswith("/api/pipeline/jobs/"):
-            job_id = parsed.path.rsplit("/", 1)[-1]
-            job = JOB_MANAGER.get(job_id)
-            if job is None:
-                self.write_json({"error": f"unknown job: {job_id}"}, status=HTTPStatus.NOT_FOUND)
-            else:
-                self.write_json(job)
-            return
-        if parsed.path == "/api/graph":
-            self.write_json(current_graph())
-            return
-        if parsed.path == "/api/manual/schema":
-            self.write_json(manual_schema())
-            return
-        if parsed.path.startswith("/api/manual/slopes/"):
-            slope_id = parsed.path.rsplit("/", 1)[-1]
-            if not find_slope(slope_id):
-                self.write_json({"error": f"unknown slope: {slope_id}"}, status=HTTPStatus.NOT_FOUND)
-            else:
-                self.write_json(slope_override_record(slope_id))
-            return
-        if parsed.path == "/api/schema":
-            self.write_json(read_json(PATHS.schema_json, schema_payload()))
-            return
-        if parsed.path == "/api/attribute-dictionary":
-            self.write_json(attribute_dictionary_payload())
-            return
-        if parsed.path == "/api/interfaces":
-            self.write_json(read_json(PATHS.interfaces_json, interface_payload()))
-            return
-        if parsed.path == "/api/multimodal/schema":
-            self.write_json(read_json(PATHS.multimodal_contract_json, multimodal_contract()))
-            return
-        if parsed.path == "/api/multimodal/assets":
-            self.write_json(read_json(PATHS.multimodal_catalog_json, {"status": "not_generated", "count": 0, "assets": []}))
-            return
-        if parsed.path == "/api/multimodal/quality":
-            self.write_json(read_json(PATHS.multimodal_quality_json, {"status": "not_generated", "summary": {"assets": 0}, "issues": []}))
-            return
-        if parsed.path == "/api/evaluation":
-            self.write_json(read_json(PATHS.evaluation_json, {"status": "not_generated"}))
-            return
-        if parsed.path == "/api/extracted/slopes":
-            rows = self.pipeline.parsed_extracted_table("slopes")
-            self.write_json({"name": "extracted_slopes", "rows": rows, "count": len(rows)})
-            return
-        if parsed.path == "/api/assertions":
-            rows = self.pipeline.parsed_extracted_table("property_assertions")
-            self.write_json({"name": "property_assertions", "rows": rows, "count": len(rows)})
-            return
-        if parsed.path == "/api/extracted/llm-candidates":
-            rows = self.pipeline.parsed_extracted_table("llm_candidates")
-            quality = read_json(PATHS.extracted_dir / "llm_evaluation.json", {"status": "not_generated"})
-            self.write_json({"name": "llm_candidates", "rows": rows, "count": len(rows), "quality": quality})
-            return
-        if parsed.path == "/api/slopes":
-            graph = current_graph()
-            slopes = [node for node in graph.get("nodes", []) if node.get("type") == "Slope"]
-            self.write_json({"count": len(slopes), "rows": slopes})
-            return
-        if parsed.path.startswith("/api/slopes/"):
-            slope_id = parsed.path.rsplit("/", 1)[-1]
-            self.write_slope_detail(slope_id)
-            return
+            return True
         if parsed.path == "/api/completeness":
             self.write_json(current_completeness())
-            return
+            return True
         if parsed.path.startswith("/api/completeness/"):
             slope_id = parsed.path.rsplit("/", 1)[-1]
             payload = current_completeness()
@@ -536,11 +323,71 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 self.write_json({"error": f"unknown slope: {slope_id}"}, status=HTTPStatus.NOT_FOUND)
             else:
                 self.write_json(report)
-            return
+            return True
         if parsed.path == "/api/risk/readiness":
             slope_id = (parse_qs(parsed.query).get("slope_id") or [None])[0]
             self.write_risk_readiness(slope_id)
-            return
+            return True
+        return False
+
+
+    def _get_graph(self, parsed: Any) -> bool:
+        if parsed.path == "/api/graph":
+            self.write_json(current_graph())
+            return True
+        if parsed.path == "/api/slopes":
+            graph = current_graph()
+            slopes = [node for node in graph.get("nodes", []) if node.get("type") == "Slope"]
+            self.write_json({"count": len(slopes), "rows": slopes})
+            return True
+        if parsed.path.startswith("/api/slopes/"):
+            slope_id = parsed.path.rsplit("/", 1)[-1]
+            self.write_slope_detail(slope_id)
+            return True
+        return False
+
+
+    def _get_manual(self, parsed: Any) -> bool:
+        if parsed.path == "/api/manual/schema":
+            self.write_json(manual_schema())
+            return True
+        if parsed.path.startswith("/api/manual/slopes/"):
+            slope_id = parsed.path.rsplit("/", 1)[-1]
+            if not find_slope(slope_id):
+                self.write_json({"error": f"unknown slope: {slope_id}"}, status=HTTPStatus.NOT_FOUND)
+            else:
+                self.write_json(slope_override_record(slope_id))
+            return True
+        return False
+
+
+    def _get_schema(self, parsed: Any) -> bool:
+        if parsed.path == "/api/schema":
+            self.write_json(read_json(PATHS.schema_json, schema_payload()))
+            return True
+        if parsed.path == "/api/attribute-dictionary":
+            self.write_json(attribute_dictionary_payload())
+            return True
+        if parsed.path == "/api/interfaces":
+            self.write_json(read_json(PATHS.interfaces_json, interface_payload()))
+            return True
+        return False
+
+
+    def _get_assets(self, parsed: Any) -> bool:
+        if parsed.path == "/api/multimodal/schema":
+            self.write_json(read_json(PATHS.multimodal_contract_json, multimodal_contract()))
+            return True
+        if parsed.path == "/api/multimodal/assets":
+            self.write_json(read_json(PATHS.multimodal_catalog_json, {"status": "not_generated", "count": 0, "assets": []}))
+            return True
+        if parsed.path == "/api/multimodal/quality":
+            self.write_json(read_json(PATHS.multimodal_quality_json, {"status": "not_generated", "summary": {"assets": 0}, "issues": []}))
+            return True
+        return False
+
+
+    def _get_reserved(self, parsed: Any) -> bool:
         reserved_paths = {
             "/api/monitoring/observations",
             "/api/environment/latest",
@@ -550,33 +397,21 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         }
         if parsed.path in reserved_paths:
             self.write_reserved_interface(parsed.path, parse_qs(parsed.query))
-            return
-        if parsed.path.startswith("/api/parsed/"):
-            name = parsed.path.rsplit("/", 1)[-1]
-            try:
-                rows = self.pipeline.parsed_table(name)
-            except KeyError:
-                self.write_json({"error": f"unknown parsed table: {name}"}, status=HTTPStatus.NOT_FOUND)
-                return
-            self.write_json({"name": name, "rows": rows, "count": len(rows)})
-            return
-        return super().do_GET()
+            return True
+        return False
 
-    def do_POST(self) -> None:  # noqa: N802
-        if not self.request_origin_allowed():
-            self.write_json({"error": "cross-origin request denied"}, status=HTTPStatus.FORBIDDEN)
-            return
-        parsed = urlparse(self.path)
+
+    def _post_manual(self, parsed: Any) -> bool:
         if parsed.path.startswith("/api/manual/slopes/"):
             slope_id = parsed.path.rsplit("/", 1)[-1]
             if not find_slope(slope_id):
                 self.write_json({"error": f"unknown slope: {slope_id}"}, status=HTTPStatus.NOT_FOUND)
-                return
+                return True
             try:
                 record = save_slope_override(slope_id, self.read_json_body())
             except (TypeError, ValueError) as exc:
                 self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
-                return
+                return True
             assessment = next(
                 (row for row in current_risk_screening().get("assessments", []) if row.get("slope_id") == slope_id),
                 None,
@@ -586,13 +421,13 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 None,
             )
             self.write_json({"status": "saved", "record": record, "assessment": assessment, "completeness": report}, status=HTTPStatus.CREATED)
-            return
+            return True
         if parsed.path == "/api/manual/rules":
             try:
                 rule = save_manual_rule(self.read_json_body())
             except (TypeError, ValueError) as exc:
                 self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
-                return
+                return True
             self.write_json(
                 {
                     "status": "saved",
@@ -601,19 +436,27 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 },
                 status=HTTPStatus.CREATED,
             )
-            return
+            return True
+        return False
+
+
+    def _post_pipeline(self, parsed: Any) -> bool:
         if parsed.path == "/api/documents/upload":
             self.handle_pdf_upload()
-            return
+            return True
         if parsed.path == "/api/pipeline/jobs":
             try:
                 options = self.pipeline_options(self.read_json_body())
                 job, created = JOB_MANAGER.start(options)
             except (TypeError, ValueError) as exc:
                 self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
-                return
+                return True
             self.write_json(job, status=HTTPStatus.ACCEPTED if created else HTTPStatus.CONFLICT)
-            return
+            return True
+        return False
+
+
+    def _post_rules(self, parsed: Any) -> bool:
         if parsed.path == "/api/rules/jobs":
             try:
                 body = self.read_json_body()
@@ -628,9 +471,13 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 job, created = RULE_JOB_MANAGER.start(options, trigger="rule_extraction")
             except (TypeError, ValueError) as exc:
                 self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
-                return
+                return True
             self.write_json(job, status=HTTPStatus.ACCEPTED if created else HTTPStatus.CONFLICT)
-            return
+            return True
+        return False
+
+
+    def _post_exports(self, parsed: Any) -> bool:
         if parsed.path == "/api/export/standalone":
             try:
                 body = self.read_json_body()
@@ -645,7 +492,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 )
             except (TypeError, ValueError, FileNotFoundError) as exc:
                 self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
-                return
+                return True
             self.write_json(
                 {
                     **result,
@@ -654,7 +501,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 },
                 status=HTTPStatus.CREATED,
             )
-            return
+            return True
         if parsed.path == "/api/export/risk-standalone":
             try:
                 body = self.read_json_body()
@@ -663,7 +510,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 result = export_risk_standalone_html(destination, risk_override=current_risk_screening())
             except (TypeError, ValueError, FileNotFoundError) as exc:
                 self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
-                return
+                return True
             self.write_json(
                 {
                     **result,
@@ -672,7 +519,11 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 },
                 status=HTTPStatus.CREATED,
             )
-            return
+            return True
+        return False
+
+
+    def _post_risk(self, parsed: Any) -> bool:
         if parsed.path == "/api/risk/assess":
             try:
                 body = self.read_json_body()
@@ -683,10 +534,10 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 result = next((row for row in payload.get("assessments", []) if row.get("slope_id") == slope_id), None)
                 if result is None:
                     self.write_json({"error": f"unknown slope: {slope_id}"}, status=HTTPStatus.NOT_FOUND)
-                    return
+                    return True
             except (TypeError, ValueError) as exc:
                 self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
-                return
+                return True
             self.write_json(
                 {
                     "status": "screening_completed",
@@ -696,16 +547,8 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                     "message": "已生成宏观复核优先级；这不是正式风险等级。",
                 }
             )
-            return
-        if parsed.path != "/api/pipeline/run":
-            self.write_json({"error": "not found"}, status=HTTPStatus.NOT_FOUND)
-            return
-        try:
-            state = self.pipeline.run(**self.pipeline_options(self.read_json_body()))
-        except Exception as exc:  # pragma: no cover - surfaced to UI
-            self.write_json({"error": str(exc)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
-            return
-        self.write_json(state)
+            return True
+        return False
 
     def do_DELETE(self) -> None:  # noqa: N802
         if not self.request_origin_allowed():
@@ -895,48 +738,32 @@ def run_server(host: str = "127.0.0.1", port: int = 8765) -> None:
     httpd.serve_forever()
 
 
+def document_inventory() -> dict[str, Any]:
+    return queries.document_inventory(PATHS)
+
+
 def empty_rule_library() -> dict[str, Any]:
-    return {
-        "schema_name": "slope_rule_library",
-        "schema_version": "1.0.0-candidate",
-        "publication_status": "not_generated",
-        "execution_enabled": False,
-        "documents": [],
-        "clauses": [],
-        "formulas": [],
-        "threshold_tables": [],
-        "rules": [],
-        "stats": {},
-    }
+    return queries.empty_rule_library()
 
 
 def current_graph() -> dict[str, Any]:
-    base = read_json(PATHS.graph_json, {"nodes": [], "edges": [], "evidence": []})
-    return apply_slope_overrides(base)
+    return queries.current_graph(PATHS)
 
 
 def current_rule_library() -> dict[str, Any]:
-    base = read_json(PATHS.rules_json, empty_rule_library())
-    return merged_rule_library(base)
+    return queries.current_rule_library(PATHS)
 
 
 def current_completeness() -> dict[str, Any]:
-    return build_completeness(current_graph())
+    return queries.current_completeness(PATHS)
 
 
 def find_slope(slope_id: str) -> dict[str, Any] | None:
-    return next(
-        (row for row in current_graph().get("nodes", []) if row.get("id") == slope_id and row.get("type") == "Slope"),
-        None,
-    )
+    return queries.find_slope(slope_id, PATHS)
 
 
 def current_risk_screening() -> dict[str, Any]:
-    graph = current_graph()
-    library = current_rule_library()
-    completeness = build_completeness(graph)
-    return build_risk_screening(graph, library, completeness)
-
+    return queries.current_risk_screening(PATHS)
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run SlopeKG demo backend")

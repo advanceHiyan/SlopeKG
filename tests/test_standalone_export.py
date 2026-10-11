@@ -4,13 +4,19 @@ import json
 import copy
 import re
 import unittest
-from uuid import uuid4
+import tempfile
+from pathlib import Path
+from tests.support import workspace_paths, sample_graph
 
-from slopekg.config import PATHS
 from slopekg.exporter import compact_graph_for_offline, export_risk_standalone_html, export_standalone_html
 
 
 class StandaloneExportTests(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.paths = workspace_paths(Path(directory.name))
+
     def test_visual_provenance_is_preserved_without_mutating_live_graph(self):
         graph = {"meta": {}, "processing_audit": {"candidates": [{"quote": "trace"}]}, "nodes": [{"id": "asset", "type": "VisualAsset", "props": {
             "asset_catalog_member": True, "source_document_id": "doc", "source_page": 83, "sha256": "digest"}}],
@@ -27,9 +33,9 @@ class StandaloneExportTests(unittest.TestCase):
         self.assertEqual(compact["edges"][0]["target"], "asset")
 
     def test_export_is_one_self_contained_html_with_embedded_graph(self) -> None:
-        output = PATHS.output_dir / "share" / f"_export_test_{uuid4().hex}.html"
+        output = self.paths.output_dir / "share" / "graph.html"
         try:
-            result = export_standalone_html(output, graph_mode="active")
+            result = export_standalone_html(output, paths=self.paths, graph_mode="active", graph_override=sample_graph())
             html = output.read_text(encoding="utf-8")
             self.assertGreater(result["nodes"], 0)
             self.assertLess(result["bytes"], 2 * 1024 * 1024)
@@ -45,9 +51,12 @@ class StandaloneExportTests(unittest.TestCase):
             output.unlink(missing_ok=True)
 
     def test_risk_export_is_interactive_single_html_with_embedded_screening(self) -> None:
-        output = PATHS.output_dir / "share" / f"_risk_export_test_{uuid4().hex}.html"
+        output = self.paths.output_dir / "share" / "risk.html"
         try:
-            result = export_risk_standalone_html(output)
+            result = export_risk_standalone_html(output, paths=self.paths, risk_override={
+                "assessments": [{"slope_id": "s1", "screening_priority_code": "P1"}],
+                "summary": {"priority_counts": {"P1": 1}},
+            })
             html = output.read_text(encoding="utf-8")
             self.assertGreater(result["slopes"], 0)
             self.assertLess(result["bytes"], 2 * 1024 * 1024)

@@ -16,7 +16,7 @@ OBJECT = re.compile(r"坡面|坡向|坡角|岩层(?:面|产状)?|层理|层面|�
 
 
 def preceding_section_station(text: str, end: int) -> str | None:
-    from .extractors import STATION_RE, normalize_station_match
+    from .identity import STATION_RE, normalize_station_match
     headings = [m for m in STATION_RE.finditer(text[:end])
                 if re.search(r"\b\d+(?:\.\d+){1,3}\s*$", text[max(0,m.start()-30):m.start()])]
     return normalize_station_match(headings[-1]) if headings else None
@@ -139,7 +139,7 @@ def build_processing_audit(parsed: dict[str, Any], extracted: dict[str, Any], gr
     for edge in graph["edges"]:
         if edge["target"] in nodes:
             children.setdefault(edge["source"], []).append(nodes[edge["target"]])
-    from .graph_builder import stable_id
+    from .identity import stable_id
     rows = []
     for slope in extracted.get("slopes", []):
         target = nodes.get(stable_id("slope", f"{slope.get('route_code')}:{slope['station']}"))

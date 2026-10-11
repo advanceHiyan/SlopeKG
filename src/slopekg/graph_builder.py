@@ -1,17 +1,28 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import re
+from dataclasses import dataclass
 from collections import Counter
 from datetime import datetime
 from html import escape
 from pathlib import Path
 from typing import Any
 
+from .identity import stable_id
 from .schema import SCHEMA_VERSION
 from .engineering import condition
 from .stability import normalize_stability_identity, eligible_whole_slope
+
+
+@dataclass
+class _GraphAssembly:
+    nodes: dict[str, dict[str, Any]]
+    edges: list[dict[str, Any]]
+    evidence: list[dict[str, Any]]
+    documents: dict[str, dict[str, Any]]
+    extracted: dict[str, Any]
+    semantic_assertions: list[dict[str, Any]]
 
 
 def build_automatic_graph(
@@ -77,6 +88,7 @@ def build_automatic_graph(
         add_edge(edges, project_id, document["id"], "HAS_DOCUMENT")
 
     semantic_assertions: list[dict[str, Any]] = []
+    assembly = _GraphAssembly(nodes, edges, evidence, documents, extracted, semantic_assertions)
     for index, slope in enumerate(slopes, start=1):
         station = slope["station"]
         route_code = str(slope.get("route_code") or default_route_code)
@@ -104,241 +116,14 @@ def build_automatic_graph(
         quote_evidence, semantic_evidence = add_quote_evidence(evidence, station, semantic_row, documents)
         all_evidence = list(dict.fromkeys([*evidence_ids, *quote_evidence]))
 
-        lithologies = semantic.get("lithology_terms") or slope.get("lithology_terms", [])
-        strata = semantic.get("stratum_terms") or slope.get("stratum_terms", [])
-        for value in lithologies:
-            node_id = stable_id("lithology", value)
-            add_node(nodes, node_id, value, "Lithology", extraction_method="automatic_semantic" if semantic else "deterministic_dictionary")
-            add_edge(edges, slope_id, node_id, "HAS_LITHOLOGY", evidence=field_evidence("lithology_terms", semantic_evidence, source_evidence, all_evidence))
-        for value in strata:
-            node_id = stable_id("stratum", value)
-            add_node(nodes, node_id, value, "Stratum", extraction_method="automatic_semantic" if semantic else "deterministic_dictionary")
-            add_edge(edges, slope_id, node_id, "HAS_STRATUM", evidence=field_evidence("stratum_terms", semantic_evidence, source_evidence, all_evidence))
+        _add_slope_geology(assembly, all_evidence, semantic, semantic_evidence, slope, slope_id, source_evidence, station)
 
-        source_label = slope.get("source_disaster_label") or slope.get("source_alias", "")
-        hazard_types = canonical_hazard_types(
-            [*semantic.get("hazard_types", []), *semantic.get("failure_modes", []), *infer_hazard_types(source_label)]
-        )
-        body_type = semantic.get("hazard_body_type") or infer_hazard_body(source_label)
-        if body_type or hazard_types:
-            body_id = stable_id("hazard_body", station)
-            add_node(nodes, body_id, f"{station} {body_type or '灾害体'}", "HazardBody", body_type=body_type, failure_modes=semantic.get("failure_modes", []))
-            hazard_evidence = field_evidence("hazard_types", semantic_evidence, source_evidence, all_evidence)
-            add_edge(edges, slope_id, body_id, "CONTAINS_HAZARD_BODY", evidence=hazard_evidence)
-            assessment_id = stable_id("hazard_assessment", station)
-            add_node(
-                nodes,
-                assessment_id,
-                f"{station} 灾害类型自动识别",
-                "HazardSusceptibilityAssessment",
-                candidate_hazard_types=hazard_types,
-                method="document_semantic_extraction",
-                level="未进行易感性分级",
-            )
-            add_edge(edges, slope_id, assessment_id, "HAS_SUSCEPTIBILITY_ASSESSMENT", evidence=hazard_evidence)
-            for hazard_type in hazard_types:
-                type_id = stable_id("hazard_type", hazard_type)
-                add_node(nodes, type_id, hazard_type, "HazardType")
-                add_edge(edges, assessment_id, type_id, "FOR_HAZARD_TYPE", evidence=hazard_evidence)
+        _add_slope_protection(assembly, all_evidence, slope, slope_id, source_evidence, station)
 
-        factors = semantic.get("causal_factors") or slope.get("causal_factor_terms", [])
-        for factor in factors:
-            factor_id = stable_id("factor", factor)
-            add_node(nodes, factor_id, factor, "CausalFactor", extraction_method="automatic_semantic" if semantic else "deterministic_dictionary")
-            add_edge(edges, slope_id, factor_id, "INFLUENCED_BY", evidence=field_evidence("causal_factors", semantic_evidence, source_evidence, all_evidence))
+        stability_keys = _add_native_stability(assembly, all_evidence, slope, slope_id, source_evidence, station)
+        _add_semantic_stability(assembly, semantic, semantic_evidence, slope, slope_id, stability_keys, station)
 
-        structural_planes = unique_object_rows(
-            [*slope.get("structural_planes", []), *semantic.get("structural_planes", [])]
-        )
-        for plane_index, plane in enumerate(structural_planes, start=1):
-            plane_id = stable_id("plane", f"{station}:{plane_index}:{plane.get('name')}")
-            plane_props = {
-                **plane,
-                "extraction_method": "validated_llm_extraction" if plane in semantic.get("structural_planes", []) else "deterministic_section_extraction",
-            }
-            add_node(
-                nodes,
-                plane_id,
-                f"{station} {plane.get('name') or '结构面'}",
-                "StructuralPlane",
-                **plane_props,
-            )
-            add_edge(edges, slope_id, plane_id, "DEVELOPS_STRUCTURAL_PLANE", evidence=field_evidence("structural_planes", semantic_evidence, source_evidence, all_evidence))
-
-        for measure_index, measure in enumerate(slope.get("measures", []), start=1):
-            type_id = stable_id("protection_type", measure)
-            work_id = stable_id("protection_work", f"{station}:{measure_index}:{measure}")
-            category = protection_category(measure)
-            add_node(nodes, type_id, measure, "ProtectionType", category=category, subtype=measure)
-            add_node(
-                nodes,
-                work_id,
-                f"{station} {measure}（设计）",
-                "ProtectionWork",
-                category=category,
-                subtype=measure,
-                implementation_status="documented_design_current_status_unknown",
-                current_condition="unknown",
-            )
-            add_edge(edges, slope_id, work_id, "HAS_PROTECTION_DESIGN", evidence=method_evidence(source_evidence, ["pdfplumber_treatment_table", "treatment_plan_table"], all_evidence))
-            add_edge(edges, work_id, type_id, "INSTANCE_OF")
-
-        for record in slope.get("engineering_records", []):
-            if not record.get("material_parameters"):
-                continue
-            parameter_id = stable_id("material_parameters", record["id"])
-            parameter_evidence = add_scenario_evidence(evidence, station, {
-                "evidence_document_id": record["document_id"], "evidence_page": record["page"],
-                "evidence_text": "\n".join(" | ".join(str(c or "") for c in row) for row in record["rows"]),
-                "evidence_block_ids": [record["id"]], "evidence_bbox": record["bbox"],
-                "extraction_method": record["method"], "supports": ["material_parameters"],
-            }, documents)
-            add_node(nodes, parameter_id, f"{station} 材料参数（第{record['page']}页）", "MaterialParameterSet",
-                     parameters=record["material_parameters"], source_file=record["source_file"],
-                     source_page=record["page"], quality_issues=record["quality_issues"],
-                     review_status=record["review_status"], temporal_scope="historical_document_baseline",
-                     current_status_known=False, applicability="报告计算参数，适用断面与工况需核验")
-            add_edge(edges, slope_id, parameter_id, "HAS_MATERIAL_PARAMETERS", evidence=parameter_evidence)
-
-        stability_keys: set[tuple[Any, ...]] = set()
-        for scenario_index, scenario in enumerate(unique_stability_scenarios(slope.get("stability_scenarios", [])), start=1):
-            stability_keys.add(stability_scenario_key(scenario))
-            scenario_evidence = add_scenario_evidence(evidence, station, scenario, documents)
-            analysis_id = stable_id("stability", f"{station}:survey:{scenario_index}:{scenario.get('condition')}:{scenario.get('safety_factor')}")
-            add_node(
-                nodes,
-                analysis_id,
-                f"{station} {scenario.get('condition')} Fs={scenario.get('safety_factor')}",
-                "StabilityAnalysis",
-                condition=scenario.get("condition"),
-                fs=scenario.get("safety_factor"),
-                required_fs=scenario.get("required_factor"),
-                status=scenario.get("status"),
-                analysis_scope=scenario.get("analysis_scope"),
-                source_kind=scenario.get("source_kind"),
-                value_source=scenario.get("extraction_method", "deterministic_survey_sentence_extraction"),
-                section=scenario.get("section"),
-                body_id=scenario.get("body_id"),
-                failure_mode=scenario.get("failure_mode"),
-                table_evidence_id=scenario.get("table_evidence_id"),
-                quality_issues=scenario.get("quality_issues", []),
-                eligible_for_screening=scenario.get("eligible_for_screening", True) and eligible_whole_slope(scenario),
-            )
-            add_edge(
-                edges,
-                slope_id,
-                analysis_id,
-                "HAS_STABILITY_ANALYSIS",
-                evidence=scenario_evidence or method_evidence(source_evidence, ["section_panel_dictionary"], all_evidence),
-            )
-
-        for fs_index, pair in enumerate(slope.get("safety_factor_pairs", []), start=1):
-            stability_keys.add(stability_scenario_key({
-                "condition": "治理设计工况",
-                "safety_factor": pair.get("actual"),
-                "required_factor": pair.get("required"),
-                "status": "满足要求" if pair.get("actual", 0) >= pair.get("required", 0) else "不满足要求",
-                "analysis_scope": None,
-            }))
-            analysis_id = stable_id("stability", f"{station}:treatment:{fs_index}")
-            add_node(
-                nodes,
-                analysis_id,
-                f"{station} 治理设计 Fs={pair.get('actual')}",
-                "StabilityAnalysis",
-                condition="治理设计工况",
-                fs=pair.get("actual"),
-                required_fs=pair.get("required"),
-                status="满足要求" if pair.get("actual", 0) >= pair.get("required", 0) else "不满足要求",
-                value_source="deterministic_table_extraction",
-            )
-            add_edge(edges, slope_id, analysis_id, "HAS_STABILITY_ANALYSIS", evidence=method_evidence(source_evidence, ["pdfplumber_treatment_table", "treatment_plan_table"], all_evidence))
-        for conclusion_index, conclusion in enumerate(semantic.get("stability_conclusions", []), start=1):
-            conclusion = normalize_stability_identity(conclusion)
-            matching_records = [record for record in extracted.get("engineering_records", [])
-                                if record.get("route_code") == slope.get("route_code")
-                                and (record.get("station") == station or station in record.get("station_candidates", []))
-                                and record.get("page") == conclusion.get("evidence_page")
-                                and (not conclusion.get("evidence_document_id")
-                                     or record.get("document_id") == conclusion["evidence_document_id"])
-                                and any(result.get("safety_factor") == conclusion.get("safety_factor")
-                                        and condition(result.get("condition")) == condition(conclusion.get("condition"))
-                                        for result in record.get("stability_results", []))]
-            # Preserve a shared-section calculation at document scope below;
-            # a semantic duplicate must not invent an exclusive slope owner.
-            if any("shared_section_station_ambiguous" in r.get("quality_issues", []) for r in matching_records):
-                continue
-            matches = [result for record in matching_records for result in record.get("stability_results", [])
-                       if result.get("safety_factor") == conclusion.get("safety_factor")
-                       and condition(result.get("condition")) == condition(conclusion.get("condition"))
-                       and all(not conclusion.get(k) or conclusion[k] == result.get(k)
-                               for k in ("body_id", "failure_mode", "section"))]
-            if len(matches) == 1:
-                for field in ("body_id", "failure_mode", "section", "analysis_scope"):
-                    if matches[0].get(field) is not None:
-                        conclusion[field] = matches[0][field]
-            table_issues = sorted({issue
-                for record in slope.get("engineering_records", [])
-                if record.get("page") == conclusion.get("evidence_page")
-                for result in record.get("stability_results", [])
-                if result.get("safety_factor") == conclusion.get("safety_factor")
-                for issue in record.get("quality_issues", [])})
-            conclusion_key = stability_scenario_key(conclusion)
-            if conclusion_key in stability_keys:
-                continue
-            stability_keys.add(conclusion_key)
-            analysis_id = stable_id("stability", f"{station}:semantic:{conclusion_index}:{conclusion.get('condition')}")
-            add_node(
-                nodes,
-                analysis_id,
-                f"{station} {conclusion.get('condition') or '资料工况'} Fs={conclusion.get('safety_factor')}",
-                "StabilityAnalysis",
-                condition=conclusion.get("condition"),
-                fs=conclusion.get("safety_factor"),
-                required_fs=conclusion.get("required_factor"),
-                status=conclusion.get("status"),
-                analysis_scope=conclusion.get("analysis_scope"),
-                source_kind=conclusion.get("source_kind"),
-                body_id=conclusion.get("body_id"),
-                failure_mode=conclusion.get("failure_mode"),
-                section=conclusion.get("section"),
-                value_source="validated_llm_extraction",
-                quality_issues=table_issues,
-                eligible_for_screening=not table_issues and eligible_whole_slope(conclusion),
-            )
-            add_edge(
-                edges,
-                slope_id,
-                analysis_id,
-                "HAS_STABILITY_ANALYSIS",
-                evidence=matching_stability_evidence(conclusion, semantic_evidence.get("stability_conclusions", []), evidence),
-            )
-
-        observation_payload = {
-            **semantic,
-            "geomorphology": semantic.get("geomorphology") or slope.get("geomorphology"),
-            "deformation_observations": unique_object_rows(
-                [*slope.get("deformation_observations", []), *semantic.get("deformation_observations", [])]
-            ),
-            "hydrology_observations": unique_object_rows(
-                [*slope.get("hydrology_observations", []), *semantic.get("hydrology_observations", [])]
-            ),
-        }
-        add_semantic_observations(nodes, edges, slope_id, station, observation_payload, semantic_evidence, source_evidence, all_evidence)
-        vegetation = semantic.get("vegetation_condition") or slope.get("vegetation_condition")
-        if vegetation:
-            vegetation_id = stable_id("vegetation", f"{station}:{json.dumps(vegetation, ensure_ascii=False, sort_keys=True)}")
-            vegetation_props = vegetation if isinstance(vegetation, dict) else {"density": vegetation}
-            add_node(nodes, vegetation_id, f"{station} 植被调查", "VegetationSurvey", **vegetation_props)
-            add_edge(
-                edges,
-                slope_id,
-                vegetation_id,
-                "HAS_VEGETATION_SURVEY",
-                evidence=field_evidence("vegetation_condition", semantic_evidence, source_evidence, all_evidence),
-            )
-
-        semantic_assertions.extend(build_semantic_assertions(station, semantic_row, semantic_evidence, all_evidence))
+        _add_slope_observations(assembly, all_evidence, semantic, semantic_evidence, semantic_row, slope, slope_id, source_evidence, station)
 
     # Project/route-level recommended parameters are source data, not missing
     # slope associations. Keep them attached to their document and never let
@@ -469,6 +254,296 @@ def public_source_record(slope: dict[str, Any]) -> dict[str, Any]:
         "evidence_block_ids",
     }
     return {key: value for key, value in slope.items() if key not in excluded}
+
+
+
+def _add_slope_geology(
+    assembly: _GraphAssembly,
+    all_evidence: list[str],
+    semantic: dict[str, Any],
+    semantic_evidence: dict[str, Any],
+    slope: dict[str, Any],
+    slope_id: str,
+    source_evidence: dict[str, Any],
+    station: str,
+) -> None:
+    lithologies = semantic.get("lithology_terms") or slope.get("lithology_terms", [])
+    strata = semantic.get("stratum_terms") or slope.get("stratum_terms", [])
+    for value in lithologies:
+        node_id = stable_id("lithology", value)
+        add_node(assembly.nodes, node_id, value, "Lithology", extraction_method="automatic_semantic" if semantic else "deterministic_dictionary")
+        add_edge(assembly.edges, slope_id, node_id, "HAS_LITHOLOGY", evidence=field_evidence("lithology_terms", semantic_evidence, source_evidence, all_evidence))
+    for value in strata:
+        node_id = stable_id("stratum", value)
+        add_node(assembly.nodes, node_id, value, "Stratum", extraction_method="automatic_semantic" if semantic else "deterministic_dictionary")
+        add_edge(assembly.edges, slope_id, node_id, "HAS_STRATUM", evidence=field_evidence("stratum_terms", semantic_evidence, source_evidence, all_evidence))
+
+    source_label = slope.get("source_disaster_label") or slope.get("source_alias", "")
+    hazard_types = canonical_hazard_types(
+        [*semantic.get("hazard_types", []), *semantic.get("failure_modes", []), *infer_hazard_types(source_label)]
+    )
+    body_type = semantic.get("hazard_body_type") or infer_hazard_body(source_label)
+    if body_type or hazard_types:
+        body_id = stable_id("hazard_body", station)
+        add_node(assembly.nodes, body_id, f"{station} {body_type or '灾害体'}", "HazardBody", body_type=body_type, failure_modes=semantic.get("failure_modes", []))
+        hazard_evidence = field_evidence("hazard_types", semantic_evidence, source_evidence, all_evidence)
+        add_edge(assembly.edges, slope_id, body_id, "CONTAINS_HAZARD_BODY", evidence=hazard_evidence)
+        assessment_id = stable_id("hazard_assessment", station)
+        add_node(
+            assembly.nodes,
+            assessment_id,
+            f"{station} 灾害类型自动识别",
+            "HazardSusceptibilityAssessment",
+            candidate_hazard_types=hazard_types,
+            method="document_semantic_extraction",
+            level="未进行易感性分级",
+        )
+        add_edge(assembly.edges, slope_id, assessment_id, "HAS_SUSCEPTIBILITY_ASSESSMENT", evidence=hazard_evidence)
+        for hazard_type in hazard_types:
+            type_id = stable_id("hazard_type", hazard_type)
+            add_node(assembly.nodes, type_id, hazard_type, "HazardType")
+            add_edge(assembly.edges, assessment_id, type_id, "FOR_HAZARD_TYPE", evidence=hazard_evidence)
+
+    factors = semantic.get("causal_factors") or slope.get("causal_factor_terms", [])
+    for factor in factors:
+        factor_id = stable_id("factor", factor)
+        add_node(assembly.nodes, factor_id, factor, "CausalFactor", extraction_method="automatic_semantic" if semantic else "deterministic_dictionary")
+        add_edge(assembly.edges, slope_id, factor_id, "INFLUENCED_BY", evidence=field_evidence("causal_factors", semantic_evidence, source_evidence, all_evidence))
+
+    structural_planes = unique_object_rows(
+        [*slope.get("structural_planes", []), *semantic.get("structural_planes", [])]
+    )
+    for plane_index, plane in enumerate(structural_planes, start=1):
+        plane_id = stable_id("plane", f"{station}:{plane_index}:{plane.get('name')}")
+        plane_props = {
+            **plane,
+            "extraction_method": "validated_llm_extraction" if plane in semantic.get("structural_planes", []) else "deterministic_section_extraction",
+        }
+        add_node(
+            assembly.nodes,
+            plane_id,
+            f"{station} {plane.get('name') or '结构面'}",
+            "StructuralPlane",
+            **plane_props,
+        )
+        add_edge(assembly.edges, slope_id, plane_id, "DEVELOPS_STRUCTURAL_PLANE", evidence=field_evidence("structural_planes", semantic_evidence, source_evidence, all_evidence))
+
+
+def _add_slope_protection(
+    assembly: _GraphAssembly,
+    all_evidence: list[str],
+    slope: dict[str, Any],
+    slope_id: str,
+    source_evidence: dict[str, Any],
+    station: str,
+) -> None:
+    for measure_index, measure in enumerate(slope.get("measures", []), start=1):
+        type_id = stable_id("protection_type", measure)
+        work_id = stable_id("protection_work", f"{station}:{measure_index}:{measure}")
+        category = protection_category(measure)
+        add_node(assembly.nodes, type_id, measure, "ProtectionType", category=category, subtype=measure)
+        add_node(
+            assembly.nodes,
+            work_id,
+            f"{station} {measure}（设计）",
+            "ProtectionWork",
+            category=category,
+            subtype=measure,
+            implementation_status="documented_design_current_status_unknown",
+            current_condition="unknown",
+        )
+        add_edge(assembly.edges, slope_id, work_id, "HAS_PROTECTION_DESIGN", evidence=method_evidence(source_evidence, ["pdfplumber_treatment_table", "treatment_plan_table"], all_evidence))
+        add_edge(assembly.edges, work_id, type_id, "INSTANCE_OF")
+
+    for record in slope.get("engineering_records", []):
+        if not record.get("material_parameters"):
+            continue
+        parameter_id = stable_id("material_parameters", record["id"])
+        parameter_evidence = add_scenario_evidence(assembly.evidence, station, {
+            "evidence_document_id": record["document_id"], "evidence_page": record["page"],
+            "evidence_text": "\n".join(" | ".join(str(c or "") for c in row) for row in record["rows"]),
+            "evidence_block_ids": [record["id"]], "evidence_bbox": record["bbox"],
+            "extraction_method": record["method"], "supports": ["material_parameters"],
+        }, assembly.documents)
+        add_node(assembly.nodes, parameter_id, f"{station} 材料参数（第{record['page']}页）", "MaterialParameterSet",
+                 parameters=record["material_parameters"], source_file=record["source_file"],
+                 source_page=record["page"], quality_issues=record["quality_issues"],
+                 review_status=record["review_status"], temporal_scope="historical_document_baseline",
+                 current_status_known=False, applicability="报告计算参数，适用断面与工况需核验")
+        add_edge(assembly.edges, slope_id, parameter_id, "HAS_MATERIAL_PARAMETERS", evidence=parameter_evidence)
+
+
+def _add_native_stability(
+    assembly: _GraphAssembly,
+    all_evidence: list[str],
+    slope: dict[str, Any],
+    slope_id: str,
+    source_evidence: dict[str, Any],
+    station: str,
+) -> set[tuple[Any, ...]]:
+    stability_keys: set[tuple[Any, ...]] = set()
+    for scenario_index, scenario in enumerate(unique_stability_scenarios(slope.get("stability_scenarios", [])), start=1):
+        stability_keys.add(stability_scenario_key(scenario))
+        scenario_evidence = add_scenario_evidence(assembly.evidence, station, scenario, assembly.documents)
+        analysis_id = stable_id("stability", f"{station}:survey:{scenario_index}:{scenario.get('condition')}:{scenario.get('safety_factor')}")
+        add_node(
+            assembly.nodes,
+            analysis_id,
+            f"{station} {scenario.get('condition')} Fs={scenario.get('safety_factor')}",
+            "StabilityAnalysis",
+            condition=scenario.get("condition"),
+            fs=scenario.get("safety_factor"),
+            required_fs=scenario.get("required_factor"),
+            status=scenario.get("status"),
+            analysis_scope=scenario.get("analysis_scope"),
+            source_kind=scenario.get("source_kind"),
+            value_source=scenario.get("extraction_method", "deterministic_survey_sentence_extraction"),
+            section=scenario.get("section"),
+            body_id=scenario.get("body_id"),
+            failure_mode=scenario.get("failure_mode"),
+            table_evidence_id=scenario.get("table_evidence_id"),
+            quality_issues=scenario.get("quality_issues", []),
+            eligible_for_screening=scenario.get("eligible_for_screening", True) and eligible_whole_slope(scenario),
+        )
+        add_edge(
+            assembly.edges,
+            slope_id,
+            analysis_id,
+            "HAS_STABILITY_ANALYSIS",
+            evidence=scenario_evidence or method_evidence(source_evidence, ["section_panel_dictionary"], all_evidence),
+        )
+
+    for fs_index, pair in enumerate(slope.get("safety_factor_pairs", []), start=1):
+        stability_keys.add(stability_scenario_key({
+            "condition": "治理设计工况",
+            "safety_factor": pair.get("actual"),
+            "required_factor": pair.get("required"),
+            "status": "满足要求" if pair.get("actual", 0) >= pair.get("required", 0) else "不满足要求",
+            "analysis_scope": None,
+        }))
+        analysis_id = stable_id("stability", f"{station}:treatment:{fs_index}")
+        add_node(
+            assembly.nodes,
+            analysis_id,
+            f"{station} 治理设计 Fs={pair.get('actual')}",
+            "StabilityAnalysis",
+            condition="治理设计工况",
+            fs=pair.get("actual"),
+            required_fs=pair.get("required"),
+            status="满足要求" if pair.get("actual", 0) >= pair.get("required", 0) else "不满足要求",
+            value_source="deterministic_table_extraction",
+        )
+        add_edge(assembly.edges, slope_id, analysis_id, "HAS_STABILITY_ANALYSIS", evidence=method_evidence(source_evidence, ["pdfplumber_treatment_table", "treatment_plan_table"], all_evidence))
+    return stability_keys
+
+
+def _add_semantic_stability(
+    assembly: _GraphAssembly,
+    semantic: dict[str, Any],
+    semantic_evidence: dict[str, Any],
+    slope: dict[str, Any],
+    slope_id: str,
+    stability_keys: set[tuple[Any, ...]],
+    station: str,
+) -> None:
+    for conclusion_index, conclusion in enumerate(semantic.get("stability_conclusions", []), start=1):
+        conclusion = normalize_stability_identity(conclusion)
+        matching_records = [record for record in assembly.extracted.get("engineering_records", [])
+                            if record.get("route_code") == slope.get("route_code")
+                            and (record.get("station") == station or station in record.get("station_candidates", []))
+                            and record.get("page") == conclusion.get("evidence_page")
+                            and (not conclusion.get("evidence_document_id")
+                                 or record.get("document_id") == conclusion["evidence_document_id"])
+                            and any(result.get("safety_factor") == conclusion.get("safety_factor")
+                                    and condition(result.get("condition")) == condition(conclusion.get("condition"))
+                                    for result in record.get("stability_results", []))]
+        # Preserve a shared-section calculation at document scope below;
+        # a semantic duplicate must not invent an exclusive slope owner.
+        if any("shared_section_station_ambiguous" in r.get("quality_issues", []) for r in matching_records):
+            continue
+        matches = [result for record in matching_records for result in record.get("stability_results", [])
+                   if result.get("safety_factor") == conclusion.get("safety_factor")
+                   and condition(result.get("condition")) == condition(conclusion.get("condition"))
+                   and all(not conclusion.get(k) or conclusion[k] == result.get(k)
+                           for k in ("body_id", "failure_mode", "section"))]
+        if len(matches) == 1:
+            for field in ("body_id", "failure_mode", "section", "analysis_scope"):
+                if matches[0].get(field) is not None:
+                    conclusion[field] = matches[0][field]
+        table_issues = sorted({issue
+            for record in slope.get("engineering_records", [])
+            if record.get("page") == conclusion.get("evidence_page")
+            for result in record.get("stability_results", [])
+            if result.get("safety_factor") == conclusion.get("safety_factor")
+            for issue in record.get("quality_issues", [])})
+        conclusion_key = stability_scenario_key(conclusion)
+        if conclusion_key in stability_keys:
+            continue
+        stability_keys.add(conclusion_key)
+        analysis_id = stable_id("stability", f"{station}:semantic:{conclusion_index}:{conclusion.get('condition')}")
+        add_node(
+            assembly.nodes,
+            analysis_id,
+            f"{station} {conclusion.get('condition') or '资料工况'} Fs={conclusion.get('safety_factor')}",
+            "StabilityAnalysis",
+            condition=conclusion.get("condition"),
+            fs=conclusion.get("safety_factor"),
+            required_fs=conclusion.get("required_factor"),
+            status=conclusion.get("status"),
+            analysis_scope=conclusion.get("analysis_scope"),
+            source_kind=conclusion.get("source_kind"),
+            body_id=conclusion.get("body_id"),
+            failure_mode=conclusion.get("failure_mode"),
+            section=conclusion.get("section"),
+            value_source="validated_llm_extraction",
+            quality_issues=table_issues,
+            eligible_for_screening=not table_issues and eligible_whole_slope(conclusion),
+        )
+        add_edge(
+            assembly.edges,
+            slope_id,
+            analysis_id,
+            "HAS_STABILITY_ANALYSIS",
+            evidence=matching_stability_evidence(conclusion, semantic_evidence.get("stability_conclusions", []), assembly.evidence),
+        )
+
+
+def _add_slope_observations(
+    assembly: _GraphAssembly,
+    all_evidence: list[str],
+    semantic: dict[str, Any],
+    semantic_evidence: dict[str, Any],
+    semantic_row: dict[str, Any],
+    slope: dict[str, Any],
+    slope_id: str,
+    source_evidence: dict[str, Any],
+    station: str,
+) -> None:
+    observation_payload = {
+        **semantic,
+        "geomorphology": semantic.get("geomorphology") or slope.get("geomorphology"),
+        "deformation_observations": unique_object_rows(
+            [*slope.get("deformation_observations", []), *semantic.get("deformation_observations", [])]
+        ),
+        "hydrology_observations": unique_object_rows(
+            [*slope.get("hydrology_observations", []), *semantic.get("hydrology_observations", [])]
+        ),
+    }
+    add_semantic_observations(assembly.nodes, assembly.edges, slope_id, station, observation_payload, semantic_evidence, source_evidence, all_evidence)
+    vegetation = semantic.get("vegetation_condition") or slope.get("vegetation_condition")
+    if vegetation:
+        vegetation_id = stable_id("vegetation", f"{station}:{json.dumps(vegetation, ensure_ascii=False, sort_keys=True)}")
+        vegetation_props = vegetation if isinstance(vegetation, dict) else {"density": vegetation}
+        add_node(assembly.nodes, vegetation_id, f"{station} 植被调查", "VegetationSurvey", **vegetation_props)
+        add_edge(
+            assembly.edges,
+            slope_id,
+            vegetation_id,
+            "HAS_VEGETATION_SURVEY",
+            evidence=field_evidence("vegetation_condition", semantic_evidence, source_evidence, all_evidence),
+        )
+
+    assembly.semantic_assertions.extend(build_semantic_assertions(station, semantic_row, semantic_evidence, all_evidence))
 
 
 def slope_props(slope: dict[str, Any], semantic: dict[str, Any], route_code: str, index: int, start_m: int | None, end_m: int | None) -> dict[str, Any]:
@@ -902,14 +977,15 @@ def add_node(nodes: dict[str, dict[str, Any]], node_id: str, label: str, node_ty
 
 def add_edge(edges: list[dict[str, Any]], source: str, target: str, relation: str, **props: Any) -> None:
     signature = (source, target, relation, json.dumps(props, ensure_ascii=False, sort_keys=True, default=str))
-    if any((row["source"], row["target"], row["relation"], json.dumps(row["props"], ensure_ascii=False, sort_keys=True, default=str)) == signature for row in edges):
+    if any(
+        (row["source"], row["target"], row["relation"]) == signature[:3]
+        and json.dumps(row["props"], ensure_ascii=False, sort_keys=True, default=str) == signature[3]
+        for row in edges
+    ):
         return
     edges.append({"id": f"e{len(edges)+1:04d}", "source": source, "target": target, "relation": relation, "props": props})
 
 
-def stable_id(prefix: str, value: str) -> str:
-    digest = hashlib.sha1(value.encode("utf-8")).hexdigest()[:12]
-    return f"{prefix}_{digest}"
 
 
 def infer_route_code(parsed: dict[str, list[dict[str, Any]]], slopes: list[dict[str, Any]]) -> str:

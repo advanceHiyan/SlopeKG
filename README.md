@@ -210,6 +210,20 @@ GET  /api/exposure
 }
 ```
 
+## 测试与代码分工
+
+在已安装项目依赖的 Python 环境中运行：
+
+```powershell
+python scripts/run_tests.py
+python scripts/run_tests.py --suite integration
+python scripts/run_tests.py --suite all
+```
+
+默认只运行使用临时目录和匿名样例的单元测试，不需要原始 PDF、生成成果或 API 密钥。集成测试验证本地资料的抽取与图谱回归，需要先生成 `output/demo/parsed/` 下的解析数据；缺少输入时会明确报错。私有资料及生成数据仍保留在本地。
+
+`identity.py` 统一桩号、路线与稳定标识；`jobs.py` 管理后台任务和 PDF 目录监听；`queries.py` 负责读取成果及合并人工修订；`server.py` 按业务分组处理 HTTP 路由。图谱构建按地质、防护、稳定性和观测分别组装，风险评估按证据、判断依据、风险轴和数据质量逐步处理。
+
 ## OCR
 
 默认 OCR 方案是 PaddleOCR：

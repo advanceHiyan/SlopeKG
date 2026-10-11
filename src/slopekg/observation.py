@@ -42,6 +42,6 @@ def supported_observation(item: dict, source: str, *, domain: str) -> bool:
 
 
 def belongs_to_station(item: dict, station: str) -> bool:
-    from .extractors import STATION_RE, normalize_station_match
+    from .identity import STATION_RE, normalize_station_match
     mentions = {normalize_station_match(m) for m in STATION_RE.finditer(str(item.get("description") or ""))}
     return not mentions or station in mentions

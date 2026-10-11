@@ -287,7 +287,7 @@ def stitch_factor_tables(tables, order, blocks):
 
 
 def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    from .extractors import STATION_RE, normalize_station_match, infer_route_code_from_values
+    from .identity import STATION_RE, normalize_station_match, infer_route_code_from_values
 
     documents = {doc["id"]: doc for doc in parsed.get("documents", [])}
     pages = {(p["document_id"], p["page"]): p for p in parsed.get("pages", [])}

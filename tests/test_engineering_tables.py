@@ -6,11 +6,8 @@ from unittest.mock import patch
 
 from slopekg.config import PATHS
 from slopekg.engineering import extract_parameter_cells, extract_factor_cells, extract_engineering_tables
-from slopekg.extractors import extract_domain_candidates
-from slopekg.graph_builder import build_automatic_graph, unique_stability_scenarios
+from slopekg.graph_builder import unique_stability_scenarios
 from slopekg.risk import worst_stability_record, stability_record
-from slopekg.storage import read_json, read_jsonl
-from scripts.evaluate_engineering_extraction import evaluate
 from scripts.rebuild_from_sidecars import revalidate_cached
 
 
@@ -90,38 +87,6 @@ class EngineeringTableTests(unittest.TestCase):
         self.assertEqual(record["association_basis"], "document_level_recommended_parameters")
         self.assertEqual(record["review_status"], "accepted_document_scope")
         self.assertEqual(record["quality_issues"], [])
-
-
-class EngineeringCorpusTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.parsed = {k: read_jsonl(PATHS.parsed_dir / f"{k}.jsonl") for k in ("documents", "pages", "text_blocks", "tables")}
-        cls.extracted = extract_domain_candidates(cls.parsed)
-
-    def test_visually_reviewed_gold_tables(self):
-        gold = read_json(PATHS.root / "tests/fixtures/engineering_gold.json")
-        report = evaluate(self.extracted["engineering_records"], gold["cases"])
-        self.assertEqual(report["cases_passed"], report["cases_total"], report)
-
-    def test_provenance_and_conservative_graph_integration(self):
-        graph = build_automatic_graph(self.parsed, self.extracted, [])
-        self.assertEqual(sum(n["type"] == "Slope" for n in graph["nodes"]), 62)
-        self.assertTrue(any(n["type"] == "MaterialParameterSet" for n in graph["nodes"]))
-        records = [n for n in graph["nodes"] if n["type"] == "StabilityAnalysis" and n["props"].get("quality_issues")]
-        self.assertTrue(records)
-        self.assertTrue(all(n["props"]["eligible_for_screening"] is False for n in records))
-        self.assertTrue(all(r.get("source_file") and r.get("page") and r.get("bbox") for r in self.extracted["engineering_records"]))
-        document_parameters = [n for n in graph["nodes"] if n["type"] == "MaterialParameterSet"
-                               and n["props"].get("association_scope") == "document"]
-        self.assertEqual(len(document_parameters), 1)
-        self.assertFalse(document_parameters[0]["props"]["eligible_for_screening"])
-
-    def test_control_points_are_not_slope_endpoints(self):
-        self.assertEqual(len(self.extracted["coordinates"]), 13)
-        for row in self.extracted["coordinates"]:
-            self.assertTrue(row["control_points"])
-            self.assertIsNone(row["start_coordinate"])
-            self.assertIsNone(row["end_coordinate"])
 
 
 if __name__ == "__main__":

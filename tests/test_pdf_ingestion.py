@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import unittest
+import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
+from tests.support import workspace_paths
 
 from slopekg.server import (
     DENIED_STATIC_PATH,
@@ -25,6 +27,11 @@ class PdfUploadValidationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             safe_pdf_name("边坡资料.docx")
 
+    def test_long_pdf_name_keeps_its_extension(self):
+        name = safe_pdf_name("边" * 260 + ".PDF")
+        self.assertEqual(len(name), 240)
+        self.assertTrue(name.endswith(".PDF"))
+
     def test_export_name_is_sanitized_and_forced_to_html(self):
         self.assertEqual(safe_export_name(r"..\交通部:成果*展示"), "交通部_成果_展示.html")
         self.assertEqual(safe_export_name("自定义名称.HTML"), "自定义名称.html")
@@ -37,7 +44,12 @@ class PdfUploadValidationTests(unittest.TestCase):
             self.assertEqual(unique_destination(Path("uploads"), "资料.pdf").name, "资料_1.pdf")
 
     def test_document_inventory_reports_raw_pdfs(self):
-        payload = document_inventory()
+        with tempfile.TemporaryDirectory() as directory:
+            paths = workspace_paths(Path(directory))
+            paths.raw_dir.mkdir(parents=True)
+            (paths.raw_dir / "样例.pdf").write_bytes(b"%PDF-1.4\n%%EOF")
+            with patch("slopekg.server.PATHS", paths):
+                payload = document_inventory()
         self.assertGreaterEqual(payload["count"], 1)
         self.assertEqual(payload["count"], len(payload["rows"]))
         self.assertTrue(all(row["file_name"].lower().endswith(".pdf") for row in payload["rows"]))
@@ -58,7 +70,29 @@ class PdfUploadValidationTests(unittest.TestCase):
         watcher = PdfDirectoryWatcher(manager, interval_seconds=0.01)
         snapshot = (("新增资料.pdf", 123, 456),)
         with patch.object(watcher, "snapshot", return_value=snapshot), patch(
-            "slopekg.server.document_inventory", return_value={"unparsed_count": 1}
+            "slopekg.jobs.read_jsonl", return_value=[]
+        ), patch("slopekg.server.document_inventory") as inventory:
+            self.assertFalse(watcher.check_once())
+            self.assertTrue(watcher.check_once())
+            self.assertFalse(watcher.check_once())
+        manager.start.assert_called_once()
+        inventory.assert_not_called()
+
+    def test_directory_watcher_skips_current_files_and_detects_changed_files(self):
+        manager = Mock()
+        manager.start.return_value = ({"id": "auto"}, True)
+        watcher = PdfDirectoryWatcher(manager)
+        documents = [{"file_name": "资料.pdf", "source_size_bytes": 123, "source_mtime_ns": 456}]
+        with patch.object(watcher, "snapshot", return_value=(("资料.pdf", 123, 456),)), patch(
+            "slopekg.jobs.read_jsonl", return_value=documents
+        ) as read_rows:
+            self.assertFalse(watcher.check_once())
+            self.assertFalse(watcher.check_once())
+            manager.start.assert_not_called()
+            self.assertEqual(read_rows.call_count, 1)
+            self.assertEqual(read_rows.call_args.args[0].name, "documents.jsonl")
+        with patch.object(watcher, "snapshot", return_value=(("资料.pdf", 124, 457),)), patch(
+            "slopekg.jobs.read_jsonl", return_value=documents
         ):
             self.assertFalse(watcher.check_once())
             self.assertTrue(watcher.check_once())
