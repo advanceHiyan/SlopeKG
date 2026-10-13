@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 from copy import deepcopy
 from datetime import date, datetime
 import json
@@ -141,10 +143,12 @@ def delete_slope_override(slope_id: str, paths: DemoPaths = PATHS) -> bool:
 def apply_slope_overrides(graph: dict[str, Any], paths: DemoPaths = PATHS) -> dict[str, Any]:
     result = deepcopy(graph)
     records = read_json(paths.slope_overrides_json, {"records": {}}).get("records", {})
+    applied = 0
     for node in result.get("nodes", []):
         if node.get("type") != "Slope" or node.get("id") not in records:
             continue
         record = records[node["id"]]
+        applied += 1
         values = deepcopy(record.get("fields", {}))
         props = node.setdefault("props", {})
         props.update(values)
@@ -160,7 +164,7 @@ def apply_slope_overrides(graph: dict[str, Any], paths: DemoPaths = PATHS) -> di
             "fields": sorted(values), "observed_at": record.get("observed_at"),
             "updated_at": record.get("updated_at"), "source_type": record.get("source_type"),
         }
-    result.setdefault("meta", {})["manual_override_count"] = len(records)
+    result.setdefault("meta", {})["manual_override_count"] = applied
     return result
 
 
@@ -206,9 +210,10 @@ def save_manual_rule(body: dict[str, Any], paths: DemoPaths = PATHS) -> dict[str
             unsupported.append(f"条件{index}缺少比较值")
         if operator in {"gt", "gte", "lt", "lte"}:
             try:
-                float(normalized_value)
-            except (TypeError, ValueError):
-                unsupported.append(f"条件{index}的比较值必须为数字")
+                if not math.isfinite(float(normalized_value)):
+                    raise ValueError("nonfinite threshold")
+            except (TypeError, ValueError, OverflowError):
+                unsupported.append(f"条件{index}的比较值必须为有限数字")
     match = str(body.get("match") or "all").strip()
     if match not in {"all", "any"}:
         unsupported.append("条件组合只支持 all 或 any")
@@ -289,8 +294,10 @@ def normalize_field_value(spec: dict[str, Any], value: Any) -> Any:
     if spec["type"] == "number":
         try:
             number = float(value)
-        except (TypeError, ValueError) as exc:
+        except (TypeError, ValueError, OverflowError) as exc:
             raise ValueError(f"{spec['label']}必须为数字") from exc
+        if not math.isfinite(number):
+            raise ValueError(f"{spec['label']}必须为有限数字")
         if number < spec.get("min", number) or number > spec.get("max", number):
             raise ValueError(f"{spec['label']}超出允许范围")
         return number
@@ -311,7 +318,7 @@ def normalize_rule_value(operator: str, value: Any) -> Any:
 
 
 def clean_text(value: Any, limit: int) -> str:
-    return str(value or "").strip()[:limit]
+    return str("" if value is None else value).strip()[:limit]
 
 
 def human_condition_text(conditions: list[dict[str, Any]], match: str) -> str:

@@ -14,15 +14,15 @@ from .exporter import export_risk_standalone_html, export_standalone_html
 from .graph_builder import attach_visual_assets, build_automatic_graph, write_graphml
 from .multimodal import build_multimodal_outputs
 from .llm import llm_status, read_deepseek_key
-from .manual import apply_slope_overrides, merged_rule_library
+from .manual import apply_slope_overrides
 from .ocr import OcrRunner, with_layout_groups
-from .parsers import PdfParser
+from .geometry import project_ocr_boxes
+from .parsers import PdfParser, file_sha256
 from .quality import evaluate_automatic_pipeline
-from .risk import build_risk_screening
-from .risk_evaluation import evaluate_risk_screening
+from .queries import assess_graph, evaluate_risk_result
 from .schema import build_completeness, interface_payload, schema_payload
 from .semantic import run_semantic_extraction
-from .storage import ensure_dir, read_json, read_jsonl, write_json, write_jsonl
+from .storage import discover_pdf_files, ensure_dir, read_json, read_jsonl, write_json, write_jsonl
 
 
 class PipelineAlreadyRunningError(RuntimeError):
@@ -156,6 +156,7 @@ class DemoPipeline:
             row for row in read_jsonl(self.paths.parsed_dir / "ocr_results.jsonl")
             if ocr_result_is_current(row, current_tasks.get(row.get("task_id")))
         ]
+        existing_ocr_results = project_ocr_boxes(existing_ocr_results, parsed["ocr_tasks"], self.paths.root)
         checkpoint_tasks = mark_cached_ocr_tasks(parsed["ocr_tasks"], existing_ocr_results)
         checkpoint_parsed = {**parsed, "ocr_results": existing_ocr_results}
         if existing_ocr_results:
@@ -215,9 +216,15 @@ class DemoPipeline:
         basic_semantic_summary = run_semantic_extraction(extracted, enabled=False, model=llm_model)[1]
         progress(68, "graph", "正在构建可独立使用的基础图谱")
         basic_graph, basic_evaluation = self.build_graph(
-            parsed, ocr_tasks, ocr_results, extracted, [], basic_semantic_summary, parse_mode="basic", activate=parse_mode == "basic"
+            parsed, ocr_tasks, ocr_results, extracted, [], basic_semantic_summary, parse_mode="basic", activate=True
         )
         if parse_mode == "deep":
+            # Keep the full OCR basic result usable if semantic extraction fails.
+            self.publish_state(
+                parsed, ocr_tasks, ocr_results, basic_graph, extracted,
+                basic_evaluation, basic_semantic_summary,
+                parse_mode="basic", publication_stage="completed",
+            )
             if not read_deepseek_key():
                 raise RuntimeError("深度解析已选择，但 DeepSeek API key 未配置；基础图谱已经生成")
             cached_semantic = read_jsonl(self.paths.extracted_dir / "llm_candidates.jsonl")
@@ -233,6 +240,27 @@ class DemoPipeline:
                     f"深度语义识别与校验 {station}（{current}/{total}）",
                 ),
             )
+            failures = int(semantic_summary.get("failures", 0))
+            skipped = int(semantic_summary.get("skipped_count", 0))
+            passed = int(semantic_summary.get("passed", 0))
+            if failures or skipped or not semantic_summary.get("candidates"):
+                # An incomplete attempt must not overwrite a validated deep layer.
+                write_jsonl(self.paths.extracted_dir / "llm_attempt.jsonl", semantic_rows)
+                write_json(self.paths.extracted_dir / "llm_attempt_summary.json", semantic_summary)
+                if not extracted.get("slopes"):
+                    stage, message = "semantic_not_applicable", "基础处理完成；本资料没有工程深度解析对象"
+                elif failures and not passed:
+                    stage = "semantic_failed"
+                    message = f"深度解析失败：{failures}个失败、{skipped}个跳过；基础结果可用，已有深度结果保留"
+                else:
+                    stage = "semantic_partial"
+                    message = f"深度解析未完成：{passed}个通过、{failures}个失败、{skipped}个跳过；基础结果可用，已有深度结果保留"
+                state = self.publish_state(
+                    parsed, ocr_tasks, ocr_results, basic_graph, extracted, basic_evaluation,
+                    semantic_summary, parse_mode="basic", publication_stage=stage,
+                )
+                progress(100, stage, message)
+                return state
             progress(90, "graph", "正在构建深度图谱、字段证据链和章节完整性报告")
             graph, evaluation = self.build_graph(
                 parsed, ocr_tasks, ocr_results, extracted, semantic_rows, semantic_summary, parse_mode="deep", activate=True
@@ -260,6 +288,12 @@ class DemoPipeline:
         parsed = {name: read_jsonl(self.paths.parsed_dir / f"{name}.jsonl") for name in names}
         if not parsed["documents"] or not parsed["pages"]:
             raise FileNotFoundError("Parsed sidecars are missing; run without --reuse-parsed first")
+        files = {file.name: file for file in discover_pdf_files(self.paths.raw_dir)}
+        records = {row.get("file_name"): row for row in parsed["documents"]}
+        if set(files) != set(records) or any(
+            not source_file_matches_record(file, records.get(name)) for name, file in files.items()
+        ):
+            raise ValueError("Parsed sidecars do not match current PDFs; run without --reuse-parsed")
         parsed["changed_document_ids"] = []
         return parsed
 
@@ -268,7 +302,7 @@ class DemoPipeline:
         progress_callback: Callable[[int, int, str, int], None] | None = None,
     ) -> dict[str, list[dict[str, Any]]]:
         parser = PdfParser(self.paths.root)
-        pdf_files = sorted(self.paths.raw_dir.glob("*.pdf"))
+        pdf_files = discover_pdf_files(self.paths.raw_dir)
         if not pdf_files:
             raise FileNotFoundError(f"No PDF files found in {self.paths.raw_dir}")
         sidecar_names = ["documents", "pages", "text_blocks", "tables", "ocr_tasks"]
@@ -325,6 +359,7 @@ class DemoPipeline:
         existing_results = read_jsonl(self.paths.parsed_dir / "ocr_results.jsonl")
         current_tasks = {row.get("id"): row for row in all_tasks}
         existing_results = [row for row in existing_results if ocr_result_is_current(row, current_tasks.get(row.get("task_id")))]
+        existing_results = project_ocr_boxes(existing_results, all_tasks, self.paths.root)
         prepared_tasks = tasks if force else mark_cached_ocr_tasks(tasks, existing_results)
         runner = OcrRunner(
             self.paths.root,
@@ -419,17 +454,8 @@ class DemoPipeline:
         graph["meta"]["dependencies"] = dependency_report()
         graph["meta"]["llm"] = {**llm_status(), "enabled": semantic_summary.get("enabled", False), "run": semantic_summary}
         effective_graph = apply_slope_overrides(graph, self.paths)
-        completeness = build_completeness(effective_graph)
-        rule_library = merged_rule_library(
-            read_json(self.paths.rules_json, {"execution_enabled": False, "publication_status": "not_generated", "rules": []}),
-            self.paths,
-        )
-        risk_screening = build_risk_screening(effective_graph, rule_library, completeness)
-        risk_gold_path = self.paths.root / "data" / "validation" / "risk_gold.json"
-        risk_evaluation = evaluate_risk_screening(
-            risk_screening,
-            read_json(risk_gold_path, {"labels": []}) if risk_gold_path.exists() else {"labels": []},
-        )
+        completeness, risk_screening = assess_graph(effective_graph, self.paths)
+        risk_evaluation = evaluate_risk_result(risk_screening, self.paths)
         graph["meta"]["completeness"] = completeness["summary"]
         self.write_graph_outputs(graph, parse_mode=parse_mode, activate=activate)
         write_json(self.paths.schema_json, schema_payload())
@@ -502,6 +528,17 @@ class DemoPipeline:
             "updated_at": datetime.now().isoformat(timespec="seconds"),
             "parse_mode": parse_mode,
             "publication_stage": publication_stage,
+            "requested_parse_mode": "deep" if publication_stage.startswith("semantic_") else parse_mode,
+            "processing_status": ("failed" if publication_stage == "semantic_failed" else
+                                  "partial" if publication_stage == "semantic_partial" else "completed"),
+            "processing_message": (
+                f"深度解析未完成：{semantic_summary.get('passed', 0)}个通过、"
+                f"{semantic_summary.get('failures', 0)}个失败、{semantic_summary.get('skipped_count', 0)}个跳过；"
+                "基础结果可用，已有深度结果保留"
+                if publication_stage in {"semantic_failed", "semantic_partial"} else
+                "基础处理完成；本资料没有工程深度解析对象"
+                if publication_stage == "semantic_not_applicable" else None
+            ),
             "base_layer_available": self.paths.basic_graph_json.exists(),
             "deep_layer_available": deep_fresh,
             "deep_layer_stale": deep_exists and not deep_fresh,
@@ -516,6 +553,7 @@ class DemoPipeline:
                 "ocr_results": len(ocr_results),
                 "ocr_status_counts": ocr_status_counts,
                 "ocr_device_counts": ocr_device_counts,
+                "ocr_geometry_issues": sum(bool(row.get("geometry_issue")) for row in ocr_results),
             },
             "graph": graph["meta"]["stats"],
             "completeness": graph["meta"].get("completeness", {}),
@@ -627,11 +665,11 @@ class DemoPipeline:
 
 def graph_matches_documents(graph: dict[str, Any], documents: list[dict[str, Any]]) -> bool:
     expected = {
-        (row.get("file_name"), row.get("source_size_bytes"), row.get("source_mtime_ns"))
+        (row.get("file_name"), row.get("source_size_bytes"), row.get("source_mtime_ns"), row.get("source_sha256"))
         for row in documents
     }
     actual = {
-        (row.get("file_name"), row.get("size_bytes"), row.get("mtime_ns"))
+        (row.get("file_name"), row.get("size_bytes"), row.get("mtime_ns"), row.get("sha256"))
         for row in graph.get("meta", {}).get("pipeline", {}).get("source_documents", [])
     }
     return bool(expected) and expected == actual
@@ -646,11 +684,22 @@ def ocr_result_is_current(result: dict[str, Any], task: dict[str, Any] | None) -
 
 def mark_cached_ocr_tasks(tasks: list[dict[str, Any]], results: list[dict[str, Any]]) -> list[dict[str, Any]]:
     done_ids = {row.get("task_id") for row in results}
-    return [{**task, "status": "done"} if task.get("id") in done_ids else task for task in tasks]
+    rows = []
+    for task in tasks:
+        if task.get("id") in done_ids:
+            rows.append({**task, "status": "done"})
+        elif task.get("status") == "done" and task.get("items") != 0:
+            rows.append({**task, "status": "pending"})
+        else:
+            rows.append(task)
+    return rows
 
 
 def source_file_matches_record(file: Path, record: dict[str, Any] | None) -> bool:
     if not record:
         return False
     stat = file.stat()
-    return record.get("source_size_bytes") == stat.st_size and record.get("source_mtime_ns") == stat.st_mtime_ns
+    if record.get("source_size_bytes") != stat.st_size or record.get("source_mtime_ns") != stat.st_mtime_ns:
+        return False
+    expected_hash = record.get("source_sha256")
+    return not expected_hash or file_sha256(file) == expected_hash

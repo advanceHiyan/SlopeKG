@@ -1,8 +1,8 @@
 const api = window.SlopeKGApi;
 const page = document.body.dataset.page;
 
-function badge(status) {
-  return `<span class="badge ${api.escapeHtml(status)}">${api.escapeHtml(api.statusLabel(status))}</span>`;
+function badge(status, label = api.statusLabel(status)) {
+  return `<span class="badge ${api.escapeHtml(status)}">${api.escapeHtml(label)}</span>`;
 }
 
 function percent(value) {
@@ -14,14 +14,15 @@ function metric(value, label) {
 }
 
 async function dashboard() {
-  const [status, completeness, interfaces] = await Promise.all([
+  const [status, completeness, interfaces, monitoring] = await Promise.all([
     api.getJson("/api/status", {}),
     api.getJson("/api/completeness", { summary: {}, reports: [] }),
     api.getJson("/api/interfaces", { interfaces: [], status_counts: {} }),
+    api.getJson("/api/monitoring/catalog", { series: [] }),
   ]);
   const graph = status.graph || {};
   const summary = completeness.summary || {};
-  const reserved = (interfaces.interfaces || []).filter((item) => item.status !== "implemented").length;
+  const reserved = (interfaces.interfaces || []).filter((item) => !item.status.startsWith("implemented")).length;
   document.querySelector("#dashboardMetrics").innerHTML = [
     metric(summary.slopes ?? graph.node_type_counts?.Slope ?? 0, "候选边坡"),
     metric(graph.nodes ?? "-", "图谱节点"),
@@ -31,7 +32,7 @@ async function dashboard() {
   document.querySelector("#dashboardBoundary").innerHTML = [
     ["实例数据", `${status.parsed?.documents ?? 0}份PDF、${status.parsed?.pages ?? 0}页已进入逐页自适应解析`],
     ["实体状态", `${summary.slopes ?? graph.node_type_counts?.Slope ?? 0}个候选边坡，边界和编号可继续现场复核`],
-    ["动态数据", "监测、近期气象、巡检和养护接口已预留但未接入"],
+    ["动态数据", monitoring.series?.length ? `会昌${monitoring.files}表历史监测已接入；字段与测点归属待核。近期气象、巡检和养护仍待接入。` : "监测、近期气象、巡检和养护接口已预留但未接入"],
     ["风险能力", "仅提供就绪检查，不输出正式风险等级"],
   ].map(([name, value]) => `<div class="detail-row"><small>${name}</small>${value}</div>`).join("");
   setupStandaloneExport();
@@ -146,8 +147,8 @@ async function dataStatusPage() {
   document.querySelector("#statusMetrics").innerHTML = [
     metric(summary.slopes || 0, "候选边坡"),
     metric(percent(summary.average_risk_data_completeness), "平均完整度"),
-    metric(rows.filter((row) => row.status === "implemented").length, "已实现接口"),
-    metric(rows.filter((row) => row.status !== "implemented").length, "待接入/待确认接口"),
+    metric(rows.filter((row) => row.status.startsWith("implemented")).length, "已实现/样例接口"),
+    metric(rows.filter((row) => !row.status.startsWith("implemented")).length, "待接入/待确认接口"),
   ].join("");
   document.querySelector("#interfaceRows").innerHTML = rows.map((row) => `<tr><td class="code-path">${api.escapeHtml(row.path)}</td><td>${api.escapeHtml(row.method)}</td><td>${api.escapeHtml(row.domain)}</td><td>${badge(row.status)}</td><td>${api.escapeHtml(row.description)}</td></tr>`).join("");
   const coverageRows = Object.entries(evaluation.active_graph_coverage || evaluation.automatic_coverage || {});
@@ -166,7 +167,9 @@ async function dataStatusPage() {
   const ocrCounts = status.parsed?.ocr_status_counts || {};
   const strategyDescription = { native_text: "原生文字+章节解析", table: "原生版面+表格抽取", drawing: "矢量图纸+标题栏局部OCR", scanned: "扫描页整页OCR", mixed: "原生文字与OCR合并" };
   const strategyRows = Object.entries(pageTypes).map(([type, count]) => `<div class="detail-row"><small>${api.escapeHtml(strategyDescription[type] || type)}</small><strong>${api.escapeHtml(count)} 页</strong> ${badge(type === "native_text" || type === "table" ? "implemented" : "pending")}</div>`);
-  strategyRows.push(`<div class="detail-row"><small>OCR执行状态</small>完成 ${api.escapeHtml(ocrCounts.done || 0)} / 失败 ${api.escapeHtml(ocrCounts.failed || 0)} / 待执行 ${api.escapeHtml(ocrCounts.pending || 0)} ${badge((ocrCounts.failed || 0) > 0 ? "failed" : "pending")}</div>`);
+  const unfinishedOcr = Object.entries(ocrCounts).filter(([name]) => !["done", "failed"].includes(name)).reduce((sum, [, count]) => sum + Number(count || 0), 0);
+  const ocrState = (ocrCounts.failed || 0) > 0 ? ["failed", "有失败任务"] : unfinishedOcr > 0 ? ["pending", "待处理"] : (ocrCounts.done || 0) > 0 ? ["completed", "已完成"] : ["not_applicable", "无OCR任务"];
+  strategyRows.push(`<div class="detail-row"><small>OCR执行状态</small>完成 ${api.escapeHtml(ocrCounts.done || 0)} / 失败 ${api.escapeHtml(ocrCounts.failed || 0)} / 待执行 ${api.escapeHtml(unfinishedOcr)} ${badge(...ocrState)}</div>`);
   document.querySelector("#parserStrategyRows").innerHTML = strategyRows.join("");
   document.querySelector("#missingRows").innerHTML = (completeness.reports || []).map((report) => {
     const missing = (report.fields || []).filter((item) => item.status !== "available").slice(0, 8);
@@ -313,8 +316,8 @@ async function riskPage() {
         <div class="detail-row"><small>复核理由</small>${api.escapeHtml((row.screening_reasons || []).join("；"))}</div>
       </div>
       <div class="detail-block"><h3>分灾种检查</h3><div class="risk-basis-list">${profiles}</div></div>
-      <details class="detail-block"><summary>稳定性程序化计算：${calculation.ready ? "输入已具备，待审核运行" : `尚缺${(calculation.blocking_items || []).length}项硬条件`}</summary><p class="section-subtitle">${api.escapeHtml(calculation.boundary || "")}</p><ul class="boundary-list">${Object.entries(calculation.checks || {}).map(([code, passed]) => `<li>${passed ? "✓" : "✗"} ${api.escapeHtml(code)}</li>`).join("")}</ul></details>
-      <details class="detail-block"><summary>正式结论门槛：${gate.ready ? "已满足，仍需审核" : `尚缺${(gate.blocking_items || []).length}项`}</summary><p class="section-subtitle">${api.escapeHtml(gate.message || "")}</p><ul class="boundary-list">${Object.entries(gate.checks || {}).map(([code, passed]) => `<li>${passed ? "✓" : "✗"} ${api.escapeHtml(code)}</li>`).join("")}</ul></details>
+      <details class="detail-block"><summary>稳定性程序化计算：${calculation.ready ? "已接入并验证，待审核运行" : `尚缺${(calculation.blocking_items || []).length}项硬条件`}</summary><p class="section-subtitle">${api.escapeHtml(calculation.boundary || "")}</p><ul class="boundary-list">${Object.entries(calculation.checks || {}).map(([code, passed]) => `<li>${passed ? "✓" : "✗"} ${api.escapeHtml(calculation.check_labels?.[code] || code)}</li>`).join("")}</ul></details>
+      <details class="detail-block"><summary>正式结论门槛：${gate.ready ? "已满足，仍需审核" : `尚缺${(gate.blocking_items || []).length}项`}</summary><p class="section-subtitle">${api.escapeHtml(gate.message || "")}</p><ul class="boundary-list">${Object.entries(gate.checks || {}).map(([code, passed]) => `<li>${passed ? "✓" : "✗"} ${api.escapeHtml(gate.check_labels?.[code] || code)}</li>`).join("")}</ul></details>
       <div class="detail-block"><h3>命中依据</h3><div class="risk-basis-list">${basis}</div></div>
       ${scenarios ? `<div class="detail-block"><h3>稳定性工况</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>工况</th><th>Fs</th><th>原报告结论</th><th>时效边界</th></tr></thead><tbody>${scenarios}</tbody></table></div></div>` : ""}
       <div class="detail-block"><h3>建议动作</h3><ol class="action-list">${(row.recommended_action || []).map((item) => `<li>${api.escapeHtml(item)}</li>`).join("")}</ol></div>

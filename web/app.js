@@ -944,7 +944,9 @@ function formatPropValue(value) {
 }
 
 function evidenceItem(item) {
-  const fileUrl = `/data/rawPDF/${encodeURIComponent(item.source_file)}`;
+  const page = Number(item.page);
+  const pageAnchor = Number.isInteger(page) && page > 0 ? `#page=${page}` : "";
+  const fileUrl = `/data/rawPDF/${encodeURIComponent(item.source_file)}${pageAnchor}`;
   return `
     <div class="evidence-item">
       <div><a href="${fileUrl}" target="_blank" rel="noreferrer">${escapeHtml(item.source_file)}</a></div>

@@ -29,12 +29,16 @@ def evaluate_risk_screening(screening: dict[str, Any], gold: dict[str, Any] | No
 
     pairs = []
     rejected = []
+    label_counts = Counter(str(row.get("slope_id") or "") for row in labels)
     for row in labels:
         slope_id = str(row.get("slope_id") or "")
         actual = str(row.get("expert_priority") or "").upper()
         prediction = predictions.get(slope_id)
         if not slope_id or actual not in PRIORITY_ORDER:
             rejected.append({"slope_id": slope_id or None, "reason": "invalid_or_missing_expert_priority"})
+            continue
+        if label_counts[slope_id] > 1:
+            rejected.append({"slope_id": slope_id, "reason": "duplicate_slope_label"})
             continue
         if not prediction:
             rejected.append({"slope_id": slope_id, "reason": "slope_not_found_in_screening"})

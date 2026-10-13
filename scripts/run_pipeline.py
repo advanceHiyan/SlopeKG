@@ -23,7 +23,7 @@ def main() -> None:
     parser.add_argument("--deep", action="store_true", help="Shortcut for --mode deep")
     parser.add_argument("--no-llm", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--llm-model", default="deepseek-v4-flash")
-    parser.add_argument("--reuse-parsed", action="store_true", help="Reuse existing PDF sidecars; only rerun extraction and graph generation")
+    parser.add_argument("--reuse-parsed", action="store_true", help="Reuse PDF sidecars only if they still match current source files")
     args = parser.parse_args()
     try:
         state = DemoPipeline().run(
@@ -32,13 +32,15 @@ def main() -> None:
             ocr_device=args.ocr_device,
             ocr_workers=args.ocr_workers,
             ocr_batch_size=args.ocr_batch_size,
-            parse_mode="deep" if args.deep and not args.no_llm else args.mode,
+            parse_mode="basic" if args.no_llm else ("deep" if args.deep else args.mode),
             llm_model=args.llm_model,
             reuse_parsed=args.reuse_parsed,
         )
-    except PipelineAlreadyRunningError as exc:
+    except (PipelineAlreadyRunningError, ValueError, FileNotFoundError) as exc:
         parser.error(str(exc))
     print(json.dumps(state, ensure_ascii=False, indent=2))
+    if state.get("processing_status") in {"partial", "failed"}:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

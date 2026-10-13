@@ -12,7 +12,7 @@ from pypdf import PdfReader
 from .config import PATHS, DemoPaths
 from .llm import call_deepseek_json, llm_status
 from .ocr import call_paddle_ocr, make_paddle_ocr
-from .storage import ensure_dir, read_json, write_json, write_jsonl
+from .storage import discover_pdf_files, ensure_dir, read_json, write_json, write_jsonl
 
 
 RULE_PROMPT_VERSION = "slope-rule-extraction-v1-evidence-bound"
@@ -290,9 +290,10 @@ class RuleExtractionPipeline:
     def catalog_documents(self) -> list[dict[str, Any]]:
         documents: list[dict[str, Any]] = []
         seen: set[Path] = set()
+        source_files = discover_pdf_files(self.paths.raw_dir, recursive=True)
         for profile in RULE_SOURCE_PROFILES:
             matches = [
-                path for path in self.paths.raw_dir.rglob("*.pdf")
+                path for path in source_files
                 if profile["pattern"].lower() in path.name.lower()
             ]
             for pdf in matches:
@@ -300,7 +301,9 @@ class RuleExtractionPipeline:
                     continue
                 seen.add(pdf)
                 documents.append(document_record(pdf, self.paths, profile))
-        for pdf in sorted(self.paths.raw_dir.glob("G*.pdf")):
+        for pdf in discover_pdf_files(self.paths.raw_dir):
+            if not pdf.name.casefold().startswith("g"):
+                continue
             if pdf in seen:
                 continue
             profile = {

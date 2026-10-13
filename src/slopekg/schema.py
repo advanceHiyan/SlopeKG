@@ -7,6 +7,7 @@ from typing import Any
 
 from .config import ATTRIBUTE_DICTIONARY_FILE
 from .multimodal import MULTIMODAL_SCHEMA_VERSION, multimodal_contract
+from .inspection_history import HISTORY_INTERFACES
 
 
 SCHEMA_VERSION = "1.1.0-layered-parsing"
@@ -51,6 +52,9 @@ NODE_TYPES: dict[str, dict[str, Any]] = {
     "PointCloudAsset": {"label_zh": "点云资产", "category": "multimodal"},
     "ThreeDModelAsset": {"label_zh": "三维模型资产", "category": "multimodal"},
     "MonitoringSeries": {"label_zh": "监测时序", "category": "multimodal"},
+    "MonitoringSite": {"label_zh": "候选监测工点", "category": "monitoring"},
+    "MonitoringPoint": {"label_zh": "来源监测点", "category": "monitoring"},
+    "DataTableAsset": {"label_zh": "原始数据表", "category": "evidence"},
     "DerivedMetric": {"label_zh": "派生指标", "category": "multimodal"},
     "ProcessingRun": {"label_zh": "处理运行", "category": "provenance"},
     "QualityReport": {"label_zh": "质量报告", "category": "quality"},
@@ -87,6 +91,7 @@ RELATION_TYPES: dict[str, dict[str, str]] = {
     "AFFECTS_PROTECTION_WORK": {"label_zh": "损毁对象"},
     "HAS_VEGETATION_SURVEY": {"label_zh": "具有植被调查"},
     "HAS_MONITORING_PROGRAM": {"label_zh": "具有监测方案"},
+    "HAS_MONITORING_POINT": {"label_zh": "包含来源监测点"},
     "CONTAINS_CLAUSE": {"label_zh": "包含条文"},
     "DEFINES_FORMULA": {"label_zh": "定义公式"},
     "DEFINES_THRESHOLD_TABLE": {"label_zh": "定义阈值表"},
@@ -149,6 +154,7 @@ DOMAIN_CHECKS: list[dict[str, Any]] = [
 
 
 INTERFACES: list[dict[str, Any]] = [
+    *HISTORY_INTERFACES,
     {"path": "/api/documents", "method": "GET", "status": "implemented", "domain": "ingestion", "description": "PDF资料清单、解析状态和逐页策略统计"},
     {"path": "/api/documents/upload", "method": "POST", "status": "implemented", "domain": "ingestion", "description": "安全上传一个或多个PDF，自动校验类型、大小并避免覆盖同名文件"},
     {"path": "/api/pipeline/jobs", "method": "POST", "status": "implemented", "domain": "ingestion", "description": "按 parse_mode=basic|deep 启动基础解析或可选深度解析任务"},

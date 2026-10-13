@@ -4,7 +4,11 @@ import argparse
 import ipaddress
 import json
 import mimetypes
+import math
 import re
+import tempfile
+import threading
+from contextlib import contextmanager
 from email import policy
 from email.parser import BytesParser
 from http import HTTPStatus
@@ -26,6 +30,12 @@ from .manual import (
     slope_override_record,
 )
 from .multimodal import multimodal_contract
+from .monitoring import (
+    export_monitoring_report, monitoring_graph, monitoring_interfaces,
+    observation_payload, public_catalog, replay_payload, source_file,
+)
+from .inspection_history import HISTORY_INTERFACES, public_history_catalog, history_payload, history_source, history_interfaces
+from .monitoring_baseline import baseline_payload, baseline_interfaces
 from .pipeline import DemoPipeline
 from .rule_extraction import RuleExtractionPipeline
 from .schema import INTERFACES, attribute_dictionary_payload, interface_payload, schema_payload
@@ -44,6 +54,7 @@ PUBLIC_STATIC_PREFIXES = (
     "/output/demo/web/data/",
 )
 DENIED_STATIC_PATH = "__slopekg_access_denied__"
+_UPLOAD_LOCK = threading.Lock()
 
 
 def origin_matches_host(origin: str | None, host: str | None) -> bool:
@@ -118,6 +129,78 @@ def unique_destination(directory: Path, file_name: str) -> Path:
         index += 1
 
 
+def save_pdf_upload(directory: Path, file_name: str, data: bytes) -> Path:
+    """Publish a complete upload and serialize name allocation in this server."""
+    ensure_dir(directory)
+    handle = tempfile.NamedTemporaryFile(dir=directory, prefix=".upload-", suffix=".tmp", delete=False)
+    temporary = Path(handle.name)
+    try:
+        with handle:
+            handle.write(data)
+        with _UPLOAD_LOCK:
+            destination = unique_destination(directory, file_name)
+            temporary.replace(destination)
+        return destination
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+@contextmanager
+def reserve_export_destination(directory: Path, file_name: str):
+    """Reserve a report name atomically even when requests arrive together."""
+    ensure_dir(directory)
+    while True:
+        destination = unique_destination(directory, file_name)
+        try:
+            with destination.open("xb"):
+                pass
+            break
+        except FileExistsError:
+            continue
+    try:
+        yield destination
+    except BaseException:
+        destination.unlink(missing_ok=True)
+        raise
+
+
+def reject_json_constant(value: str) -> None:
+    raise ValueError(f"JSON不能包含非有限数值：{value}")
+
+
+def finite_json_number(value: str) -> float:
+    number = float(value)
+    if not math.isfinite(number):
+        reject_json_constant(value)
+    return number
+
+
+def boolean_option(body: dict[str, Any], name: str, default: bool = False) -> bool:
+    value = body.get(name, default)
+    if not isinstance(value, bool):
+        raise ValueError(f"{name} 必须是布尔值 true 或 false")
+    return value
+
+
+def parse_upload_options(content_type: str, raw: bytes) -> dict[str, Any]:
+    message = BytesParser(policy=policy.default).parsebytes(
+        f"Content-Type: {content_type}\r\nMIME-Version: 1.0\r\n\r\n".encode("utf-8") + raw
+    )
+    fields = [part for part in message.iter_parts()
+              if part.get_param("name", header="content-disposition") == "options" and not part.get_filename()]
+    if not fields:
+        return {}
+    if len(fields) != 1:
+        raise ValueError("上传参数只能提供一次")
+    try:
+        options = json.loads((fields[0].get_payload(decode=True) or b"").decode("utf-8"))
+    except (ValueError, UnicodeDecodeError) as exc:
+        raise ValueError("上传参数必须是有效JSON对象") from exc
+    if not isinstance(options, dict):
+        raise ValueError("上传参数必须是对象")
+    return options
+
+
 def parse_pdf_uploads(content_type: str, raw: bytes) -> list[tuple[str, bytes]]:
     message = BytesParser(policy=policy.default).parsebytes(
         f"Content-Type: {content_type}\r\nMIME-Version: 1.0\r\n\r\n".encode("utf-8") + raw
@@ -177,6 +260,9 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self._get_manual,
             self._get_schema,
             self._get_assets,
+            self._get_monitoring,
+            self._get_monitoring_baseline,
+            self._get_inspection_history,
             self._get_reserved,
         ):
             if handler(parsed):
@@ -201,7 +287,12 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self.write_json({"error": "not found"}, status=HTTPStatus.NOT_FOUND)
             return
         try:
-            state = self.pipeline.run(**self.pipeline_options(self.read_json_body()))
+            options = self.pipeline_options(self.read_json_body())
+        except (TypeError, ValueError) as exc:
+            self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+            return
+        try:
+            state = self.pipeline.run(**options)
         except Exception as exc:  # pragma: no cover - surfaced to UI
             self.write_json({"error": str(exc)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
             return
@@ -307,10 +398,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self.write_json(payload)
             return True
         if parsed.path == "/api/risk/evaluation":
-            self.write_json(read_json(
-                PATHS.output_dir / "risk" / "evaluation.json",
-                {"status": "requires_independent_expert_gold_set", "evaluated": 0, "metrics": None},
-            ))
+            self.write_json(current_risk_evaluation())
             return True
         if parsed.path == "/api/completeness":
             self.write_json(current_completeness())
@@ -369,7 +457,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self.write_json(attribute_dictionary_payload())
             return True
         if parsed.path == "/api/interfaces":
-            self.write_json(read_json(PATHS.interfaces_json, interface_payload()))
+            self.write_json(baseline_interfaces(history_interfaces(monitoring_interfaces(read_json(PATHS.interfaces_json, interface_payload()), PATHS), PATHS), PATHS))
             return True
         return False
 
@@ -399,6 +487,75 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self.write_reserved_interface(parsed.path, parse_qs(parsed.query))
             return True
         return False
+
+    def _get_monitoring(self, parsed: Any) -> bool:
+        routes = {
+            "/api/monitoring/catalog", "/api/monitoring/observations", "/api/monitoring/replay",
+            "/api/monitoring/graph", "/api/monitoring/source",
+        }
+        if parsed.path not in routes:
+            return False
+        query = parse_qs(parsed.query, keep_blank_values=True)
+        try:
+            if parsed.path == "/api/monitoring/catalog":
+                self.write_json(public_catalog(PATHS))
+            elif parsed.path == "/api/monitoring/observations":
+                self.write_json(observation_payload(query, PATHS))
+            elif parsed.path == "/api/monitoring/replay":
+                self.write_json(replay_payload(query, PATHS))
+            elif parsed.path == "/api/monitoring/graph":
+                self.write_json(monitoring_graph(PATHS))
+            else:
+                source = source_file(query.get("series_id", [""])[0], PATHS)
+                content = source.read_bytes()
+                self.send_response(HTTPStatus.OK)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                self.send_header("Content-Disposition", f"attachment; filename*=UTF-8''{quote(source.name)}")
+                self.send_header("Content-Length", str(len(content)))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(content)
+        except KeyError as exc:
+            self.write_json({"error": str(exc)}, status=HTTPStatus.NOT_FOUND)
+        except (TypeError, ValueError) as exc:
+            self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+        except (FileNotFoundError, OSError) as exc:
+            self.write_json({"error": str(exc)}, status=HTTPStatus.CONFLICT)
+        return True
+
+    def _get_monitoring_baseline(self, parsed: Any) -> bool:
+        if parsed.path != "/api/monitoring/baseline":
+            return False
+        try:
+            self.write_json(baseline_payload(PATHS))
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            self.write_json({"status": "data_unavailable", "error": str(exc), "series": [], "risk_eligible": False, "deployment_ready": False}, status=HTTPStatus.CONFLICT)
+        return True
+
+    def _get_inspection_history(self, parsed: Any) -> bool:
+        if parsed.path not in {r['path'] for r in HISTORY_INTERFACES}:
+            return False
+        try:
+            if parsed.path.endswith('/catalog'):
+                self.write_json(public_history_catalog(PATHS))
+            elif parsed.path.endswith('/source'):
+                source, content = history_source(PATHS)
+                self.send_response(HTTPStatus.OK)
+                self.send_cors_headers()
+                self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                self.send_header('Content-Disposition', f"attachment; filename*=UTF-8''{quote(source.name)}")
+                self.send_header('Content-Length', str(len(content)))
+                self.send_header('Cache-Control', 'no-store')
+                self.end_headers()
+                self.wfile.write(content)
+            else:
+                self.write_json(history_payload(parse_qs(parsed.query, keep_blank_values=True), PATHS))
+        except (ValueError, TypeError) as exc:
+            self.write_json({'error': str(exc)}, status=HTTPStatus.BAD_REQUEST)
+        except (OSError, KeyError) as exc:
+            self.write_json({'error': str(exc)}, status=HTTPStatus.CONFLICT)
+        return True
 
 
     def _post_manual(self, parsed: Any) -> bool:
@@ -464,9 +621,9 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 if not llm_model or len(llm_model) > 100:
                     raise ValueError("大模型名称不合法")
                 options = {
-                    "use_llm": bool(body.get("use_llm", True)),
+                    "use_llm": boolean_option(body, "use_llm", True),
                     "llm_model": llm_model,
-                    "force_ocr": bool(body.get("force_ocr", False)),
+                    "force_ocr": boolean_option(body, "force_ocr"),
                 }
                 job, created = RULE_JOB_MANAGER.start(options, trigger="rule_extraction")
             except (TypeError, ValueError) as exc:
@@ -478,6 +635,18 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
 
 
     def _post_exports(self, parsed: Any) -> bool:
+        if parsed.path == "/api/export/monitoring":
+            try:
+                body = self.read_json_body()
+                file_name = safe_export_name(str(body.get("file_name") or "会昌监测历史回放"))
+                query = {key: [str(body[key])] for key in ("start", "end") if key in body}
+                with reserve_export_destination(PATHS.output_dir / "share", file_name) as destination:
+                    result = export_monitoring_report(destination, query, PATHS)
+            except (TypeError, ValueError, OSError) as exc:
+                self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+                return True
+            self.write_json({**result, "file_name": destination.name, "download_url": f"/output/demo/share/{quote(destination.name)}"}, status=HTTPStatus.CREATED)
+            return True
         if parsed.path == "/api/export/standalone":
             try:
                 body = self.read_json_body()
@@ -488,7 +657,6 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                     destination,
                     graph_mode=graph_mode,
                     graph_override=current_graph() if graph_mode == "active" else None,
-                    completeness_override=current_completeness() if graph_mode == "active" else None,
                 )
             except (TypeError, ValueError, FileNotFoundError) as exc:
                 self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
@@ -572,7 +740,8 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         llm_model = str(body.get("llm_model", "deepseek-v4-flash")).strip()
         if not llm_model or len(llm_model) > 100:
             raise ValueError("大模型名称不合法")
-        parse_mode = str(body.get("parse_mode") or ("deep" if body.get("use_llm") is True else "basic")).strip().lower()
+        legacy_use_llm = boolean_option(body, "use_llm")
+        parse_mode = str(body.get("parse_mode") or ("deep" if legacy_use_llm else "basic")).strip().lower()
         if parse_mode not in {"basic", "deep"}:
             raise ValueError("parse_mode 只能为 basic 或 deep")
         ocr_scope = str(body.get("ocr_scope", "all")).strip().lower()
@@ -585,10 +754,10 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         ocr_batch_size = max(0, min(32, int(body.get("ocr_batch_size", 0))))
         return {
             "ocr_pages": ocr_pages,
-            "force_ocr": bool(body.get("force_ocr", False)),
+            "force_ocr": boolean_option(body, "force_ocr"),
             "parse_mode": parse_mode,
             "llm_model": llm_model,
-            "reuse_parsed": bool(body.get("reuse_parsed", False)),
+            "reuse_parsed": boolean_option(body, "reuse_parsed"),
             "ocr_scope": ocr_scope,
             "ocr_device": ocr_device,
             "ocr_workers": ocr_workers,
@@ -610,14 +779,17 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         raw = self.rfile.read(length)
         try:
             pending = parse_pdf_uploads(content_type, raw)
-        except ValueError as exc:
+            options = self.pipeline_options({
+                **automatic_basic_options(), **parse_upload_options(content_type, raw),
+                "parse_mode": "basic", "reuse_parsed": False, "ocr_scope": "changed",
+            })
+        except (ValueError, TypeError, OverflowError) as exc:
             self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
             return
         ensure_dir(PATHS.raw_dir)
         saved = []
         for file_name, data in pending:
-            destination = unique_destination(PATHS.raw_dir, file_name)
-            destination.write_bytes(data)
+            destination = save_pdf_upload(PATHS.raw_dir, file_name, data)
             saved.append(
                 {
                     "original_name": file_name,
@@ -626,7 +798,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                     "renamed": destination.name != file_name,
                 }
             )
-        job, created = JOB_MANAGER.start(automatic_basic_options(), trigger="upload")
+        job, created = JOB_MANAGER.start(options, trigger="upload")
         self.write_json(
             {
                 "count": len(saved),
@@ -688,12 +860,20 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
 
     def read_json_body(self) -> dict[str, Any]:
         length = int(self.headers.get("Content-Length") or 0)
-        if length <= 0:
+        if length < 0:
+            raise ValueError("Content-Length 不能为负数")
+        if length == 0:
             return {}
         if length > 1024 * 1024:
             raise ValueError("JSON请求体过大")
-        raw = self.rfile.read(length).decode("utf-8")
-        return json.loads(raw or "{}")
+        data = self.rfile.read(length)
+        if len(data) != length:
+            raise ValueError("JSON请求体不完整")
+        raw = data.decode("utf-8")
+        body = json.loads(raw, parse_constant=reject_json_constant, parse_float=finite_json_number)
+        if not isinstance(body, dict):
+            raise ValueError("JSON请求体必须是对象")
+        return body
 
     def write_json(self, data: Any, status: HTTPStatus = HTTPStatus.OK) -> None:
         payload = json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
@@ -732,10 +912,14 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
 
 
 def run_server(host: str = "127.0.0.1", port: int = 8765) -> None:
-    PDF_WATCHER.start()
     httpd = ThreadingHTTPServer((host, port), SlopeKGHandler)
-    print(f"SlopeKG demo server: http://{host}:{port}/web/index.html")
-    httpd.serve_forever()
+    try:
+        PDF_WATCHER.start()
+        print(f"SlopeKG demo server: http://{host}:{port}/web/index.html")
+        httpd.serve_forever()
+    finally:
+        PDF_WATCHER.stop()
+        httpd.server_close()
 
 
 def document_inventory() -> dict[str, Any]:
@@ -764,6 +948,10 @@ def find_slope(slope_id: str) -> dict[str, Any] | None:
 
 def current_risk_screening() -> dict[str, Any]:
     return queries.current_risk_screening(PATHS)
+
+
+def current_risk_evaluation() -> dict[str, Any]:
+    return queries.current_risk_evaluation(PATHS)
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run SlopeKG demo backend")

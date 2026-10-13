@@ -41,6 +41,30 @@ pip install -r requirements.txt
 
 ## 运行流水线
 
+### 会昌监测样例
+
+已有会昌原始资料时，运行 `python scripts/import_huichang_monitoring.py` 导入首轮八份表。然后启动或重启本地服务，从“数据与接口”进入“会昌监测历史回放”，或打开 `/web/monitoring.html`。
+
+样例保留原始时间、数值、工作表、行号和校验和，支持日期回放、分量选择、原表下载及离线报告。默认回放2026-05-25至2026-09-01；无记录日不插值，零值原样保留。单位、分量含义、日累计基准和逐设备归属仍需确认。详见[会昌监测接入说明](docs/会昌监测样例接入说明.md)。
+
+### 历史巡查检索
+
+运行 `python scripts/import_inspection_history.py` 导入本批原始巡查表，从“数据与接口→历史巡查检索”打开 `/web/inspection-history.html`。2022年边坡与桥梁记录分开保存，可按日期、桩号、方向、桥名和病害原文检索，保留其他原始列及单元格位置，支持校验后的原表下载。
+
+历史层不推测路线或对应边坡，不替代 `/api/inspections` 的近期巡检，也不进入当前风险计算。导入失败保留已发布版本；原表变化后需重导入，派生数据损坏会明确拒读。
+
+### 全流程功能核查
+
+`python scripts/check_workflow.py --isolated` 会用临时本机端口核对当前已发布成果，不启动目录监听、PDF重解析、OCR或模型。也可用 `--base-url http://127.0.0.1:8766` 检查已运行的服务。
+
+加上 `--exports` 验证图谱、筛查、监测三类报告的生成与下载，测试报告使用独立名称，不覆盖已有文件。用 `--output 路径.json` 保存检查记录。检查失败退出码为1；缺少数据或未开启导出显示 `waiting`，整体显示 `partial`，不会冒充验收通过。这是功能和版本一致性检查，不代表抽取准确率、预测效果或工程风险验收。详见[全流程核查与下一步](docs/全流程核查与下一步.md)。
+
+### 会昌原值基线实验
+
+运行`python scripts/evaluate_huichang_baseline.py`，从“数据与接口→会昌原值基线实验”打开`/web/monitoring-baseline.html`。仅选择已接入的地表位移与裂缝两表，在相同历史目标上比较保持值和固定7日变化，不随机划分、不插值、不删零或跳变。
+
+需要离线报告时加`--html output/demo/share/会昌原值基线实验.html`。来源或代码版本变化时需重跑。未知单位不阻止原值数值对照，但结果不能解释为物理速率、风险事件、概率或在线效果。完整能力与条件见[整体能力与数据条件](docs/整体能力与数据条件.md)。
+
 ```bash
 python scripts/run_pipeline.py --ocr-pages 3
 ```
@@ -174,6 +198,18 @@ GET  /api/extracted/slopes
 GET  /api/assertions
 GET  /api/extracted/llm-candidates
 GET  /api/risk/readiness?slope_id={slope_id}
+GET  /api/monitoring/catalog
+GET  /api/monitoring/observations
+GET  /api/monitoring/replay
+GET  /api/monitoring/graph
+GET  /api/monitoring/baseline
+GET  /api/monitoring/source?series_id={series_id}
+GET  /api/inspections/history
+GET  /api/inspections/history/catalog
+GET  /api/inspections/history/source
+POST /api/export/standalone
+POST /api/export/risk-standalone
+POST /api/export/monitoring
 GET  /api/risk/rules
 GET  /api/risk/screening
 POST /api/risk/assess
@@ -189,7 +225,6 @@ POST /api/pipeline/run
 以下接口已预留但尚未连接真实数据源：
 
 ```text
-GET  /api/monitoring/observations
 GET  /api/environment/latest
 GET  /api/maintenance/events
 GET  /api/inspections
@@ -241,13 +276,15 @@ python scripts/run_tests.py --suite all
 
 ## 大模型
 
-主流水线在检测到项目密钥后默认调用 DeepSeek，对复杂机理文本进行语义抽取；输出必须通过JSON结构、原文页码和逐字引句校验后才会进入自动图谱。可用 `--no-llm` 禁用并降级到确定性抽取：
+主流水线默认运行基础解析，不调用外部大模型。选择 `--mode deep` 或 `--deep` 后，才使用配置的 DeepSeek 密钥进行语义抽取；输出必须通过 JSON 结构、原文页码和逐字引句校验后才会进入深度图谱。兼容选项 `--no-llm` 始终强制使用基础解析：
 
 ```powershell
-python scripts/run_pipeline.py --ocr-pages 0 --llm-model deepseek-v4-flash
+python scripts/run_pipeline.py --mode deep --ocr-pages 0 --llm-model deepseek-v4-flash
 ```
 
-命令同时输出 `llm_evaluation.json`，记录结构校验、原文引句验证率和缓存命中情况。人工金标准只用于周期性离线审计，不参与生产图谱生成。
+深度解析同时输出 `llm_evaluation.json`，记录结构校验、原文引句验证率和缓存命中情况。大模型阶段失败时保留已经完成 OCR 的基础结果。人工金标准只用于周期性离线审计，不参与生产图谱生成。
+
+`--reuse-parsed` 仅在解析缓存与当前 PDF 一致时复用；源文件发生变化时需去掉该选项重新解析。离线导出按所选 basic/deep/active 模式读取对应结果，并带上最新人工修订；缺少深度图谱或源版本不一致时会明确报错。
 
 密钥读取顺序（项目专用密钥优先，避免被机器上的旧环境变量覆盖）：
 

@@ -7,6 +7,9 @@ from pathlib import Path
 from typing import Any
 
 from .config import PATHS, DemoPaths
+from .manual import apply_slope_overrides
+from .queries import current_risk_screening, evaluate_risk_result
+from .schema import build_completeness
 from .storage import read_json
 from .storage import _atomic_write_text
 
@@ -34,16 +37,21 @@ def export_standalone_html(
     graph_file = graph_files.get(graph_mode)
     if graph_file is None:
         raise ValueError("graph_mode must be basic, deep, or active")
-    if graph_mode == "deep" and graph_file.exists() and paths.graph_json.exists():
-        deep_graph = read_json(graph_file, {})
+    if graph_mode != "active" and graph_file.exists() and paths.graph_json.exists():
+        mode_graph = read_json(graph_file, {})
         active_graph = read_json(paths.graph_json, {})
-        if source_signature(deep_graph) != source_signature(active_graph):
-            raise ValueError("深度图谱与当前PDF版本不一致，请先执行深度解析，或导出当前图谱")
-    if not graph_file.exists() and graph_mode == "deep":
-        graph_file = paths.graph_json
+        if source_signature(mode_graph) != source_signature(active_graph):
+            raise ValueError("所选图谱与当前PDF版本不一致，请先执行对应模式解析，或导出当前图谱")
     graph = graph_override if graph_mode == "active" and graph_override is not None else read_json(graph_file, None)
     if not graph:
         raise FileNotFoundError(f"Graph output is missing: {graph_file}")
+    if graph_override is None or graph_mode != "active":
+        graph = apply_slope_overrides(graph, paths)
+
+    state_file = {
+        "active": paths.state_json, "basic": paths.basic_state_json, "deep": paths.deep_state_json,
+    }[graph_mode]
+    evaluation_file = paths.evaluation_json if graph_mode == "active" else paths.output_dir / f"evaluation.{graph_mode}.json"
 
     graph_for_export = compact_graph_for_offline(graph)
     payload = {
@@ -54,23 +62,14 @@ def export_standalone_html(
             "source_graph": str(graph_file.relative_to(paths.root)),
         },
         "graph": graph_for_export,
-        "state": read_json(paths.state_json, {}),
-        "completeness": completeness_override if completeness_override is not None else read_json(paths.completeness_json, {}),
-        "evaluation": read_json(paths.evaluation_json, {}),
+        "state": read_json(state_file, {}),
+        "completeness": completeness_override if completeness_override is not None else build_completeness(graph),
+        "evaluation": read_json(evaluation_file, {}),
         "schema": read_json(paths.schema_json, {}),
     }
-    serialized = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
-    template = TEMPLATE_FILE.read_text(encoding="utf-8")
-    if "__SLOPEKG_EMBEDDED_DATA__" not in template:
-        raise ValueError("Standalone template data marker is missing")
-    html = template.replace("__SLOPEKG_EMBEDDED_DATA__", serialized)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    _atomic_write_text(output, html)
-    digest = hashlib.sha256(html.encode("utf-8")).hexdigest()
+    written = _write_embedded_report(output, TEMPLATE_FILE, "__SLOPEKG_EMBEDDED_DATA__", payload)
     return {
-        "output": str(output),
-        "bytes": output.stat().st_size,
-        "sha256": digest,
+        **written,
         "graph_mode": graph_mode,
         "nodes": len(graph.get("nodes", [])),
         "edges": len(graph.get("edges", [])),
@@ -86,7 +85,12 @@ def export_risk_standalone_html(
 ) -> dict[str, Any]:
     """Export the current macro risk screening as an interactive single HTML file."""
     risk_file = paths.output_dir / "risk" / "screening.json"
-    risk = risk_override if risk_override is not None else read_json(risk_file, None)
+    if risk_override is not None:
+        risk = risk_override
+    elif paths.graph_json.exists():
+        risk = current_risk_screening(paths)
+    else:
+        risk = read_json(risk_file, None)
     if not risk:
         raise FileNotFoundError(f"Risk screening output is missing: {risk_file}")
 
@@ -97,25 +101,28 @@ def export_risk_standalone_html(
             "source": str(risk_file.relative_to(paths.root)),
         },
         "risk": risk,
-        "evaluation": read_json(paths.output_dir / "risk" / "evaluation.json", {
-            "status": "requires_independent_expert_gold_set", "evaluated": 0, "metrics": None,
-        }),
+        "evaluation": evaluate_risk_result(risk, paths),
     }
-    serialized = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
-    template = RISK_TEMPLATE_FILE.read_text(encoding="utf-8")
-    if "__SLOPEKG_RISK_DATA__" not in template:
-        raise ValueError("Risk standalone template data marker is missing")
-    html = template.replace("__SLOPEKG_RISK_DATA__", serialized)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    _atomic_write_text(output, html)
-    digest = hashlib.sha256(html.encode("utf-8")).hexdigest()
+    written = _write_embedded_report(output, RISK_TEMPLATE_FILE, "__SLOPEKG_RISK_DATA__", payload)
     assessments = risk.get("assessments", [])
     return {
-        "output": str(output),
-        "bytes": output.stat().st_size,
-        "sha256": digest,
+        **written,
         "slopes": len(assessments),
         "priority_counts": risk.get("summary", {}).get("priority_counts", {}),
+    }
+
+
+def _write_embedded_report(output: Path, template_file: Path, marker: str, payload: dict[str, Any]) -> dict[str, Any]:
+    serialized = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+    template = template_file.read_text(encoding="utf-8")
+    if marker not in template:
+        raise ValueError("Standalone template data marker is missing")
+    html = template.replace(marker, serialized)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    _atomic_write_text(output, html)
+    return {
+        "output": str(output), "bytes": len(html.encode("utf-8")),
+        "sha256": hashlib.sha256(html.encode("utf-8")).hexdigest(),
     }
 
 

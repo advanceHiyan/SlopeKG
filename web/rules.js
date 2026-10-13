@@ -313,6 +313,8 @@
   }
 
   function setJob(job) {
+    window.clearTimeout(pollTimer);
+    pollTimer = null;
     const progress = Number(job.progress || 0);
     document.getElementById("ruleJobBar").style.width = `${Math.max(0, Math.min(100, progress))}%`;
     document.getElementById("ruleJobMessage").textContent = job.status === "failed"
@@ -321,18 +323,28 @@
     const running = ["queued", "running"].includes(job.status);
     document.getElementById("runRuleExtraction").disabled = running;
     if (running) {
-      window.clearTimeout(pollTimer);
       pollTimer = window.setTimeout(() => pollJob(job.id), 900);
     }
   }
 
   async function pollJob(id) {
-    const job = await api.getJson(`/api/rules/jobs/${encodeURIComponent(id)}`, { status: "failed", error: "无法读取任务状态" });
-    setJob(job);
-    if (job.status === "completed") {
-      await loadLibrary();
-      renderSourceMetrics();
-      renderSources();
+    try {
+      const job = await api.getJson(`/api/rules/jobs/${encodeURIComponent(id)}`);
+      setJob(job);
+      if (job.status === "completed") {
+        await loadLibrary();
+        renderSourceMetrics();
+        renderSources();
+      }
+    } catch (error) {
+      if (error.status === 404) {
+        setJob({ status: "failed", error: "任务记录不存在，服务可能已重启，请刷新页面确认结果。" });
+        return;
+      }
+      document.getElementById("ruleJobMessage").textContent = `任务状态读取失败，稍后重试：${error.message}`;
+      document.getElementById("runRuleExtraction").disabled = true;
+      window.clearTimeout(pollTimer);
+      pollTimer = window.setTimeout(() => pollJob(id), 900);
     }
   }
 

@@ -1,5 +1,7 @@
 data/rawPDF/
 /data/yjw的评估结果/
+/data/初步问题筛查/
+/data/202610/
 output/demo/cache/
 output/demo/*.log
 output/demo/tmp*/

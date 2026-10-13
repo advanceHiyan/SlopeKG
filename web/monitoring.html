@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>会昌监测历史回放 - SlopeKG</title><link rel="stylesheet" href="./pages.css"/><link rel="stylesheet" href="./monitoring.css"/></head>
+<body class="portal-body"><header class="site-header"><div class="site-header-inner"><a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a><nav class="site-nav"><a href="./index.html">总览</a><a href="./graph.html">关系图谱</a><a href="./data-status.html">数据与接口</a><a class="active" href="./monitoring.html">监测回放</a><a href="./risk.html">风险研判</a></nav></div></header>
+<main class="page-main"><div class="page-heading"><div><h1>会昌监测历史回放</h1><p id="siteDescription">正在读取会昌样例…</p></div><button id="exportMonitoring" type="button" disabled>导出当前日期报告</button></div>
+<div id="monitorBoundary" class="notice">历史原始监测回放；单位、分量、基准及测点归属待核；不输出风险等级或失稳预测。</div>
+<div id="monitorError" class="notice" role="alert" hidden></div><p id="exportMessage" role="status"></p>
+<p><a href="./monitoring-baseline.html" class="baseline-entry">查看原值离线基线实验 →</a>（不是风险预测）</p>
+<section id="monitorMetrics" class="grid metrics-grid"></section>
+<section class="card monitor-controls"><label>开始日期<input type="date" id="monitorStart"/></label><label>结束日期<input type="date" id="monitorEnd"/></label><button id="loadReplay" type="button" disabled>读取日期范围</button><label class="replay-slider">回放至 <output id="replayDate"></output><input id="replaySlider" type="range" min="0" value="0"/></label></section>
+<p id="aggregationNote" class="monitor-note"></p><section id="monitorCharts" class="monitor-chart-grid" aria-label="八类监测曲线"></section>
+<section class="card monitor-section"><h2>原始观测与来源</h2><div class="monitor-controls"><label>监测系列<select id="monitorSeries"></select></label><button id="rawPrevious" type="button" disabled>上一页</button><button id="rawNext" type="button" disabled>下一页</button><span id="rawCount" role="status"></span><a id="sourceDownload" hidden>下载核验后的原表</a></div>
+<div class="table-wrap"><table class="data-table"><thead><tr><th>原始时间</th><th>原始值</th><th>记录标记</th><th>原表位置</th></tr></thead><tbody id="monitorRawRows"></tbody></table></div></section>
+<section class="card monitor-section"><h2>字段与整批数据质量</h2><p>以下统计覆盖整份源表。零值和最大相邻变化需结合设备和现场记录解释；回放曲线保留无记录日。</p><div class="table-wrap"><table class="data-table"><thead><tr><th>指标 / 设备</th><th>单位与分量</th><th>时间与间隔</th><th>零值 / 原值变化</th><th>来源</th></tr></thead><tbody id="monitorQualityRows"></tbody></table></div></section>
+<section class="card monitor-section"><h2>来源关系摘要</h2><p id="monitorGraphSummary"></p><div class="table-wrap"><table class="data-table"><thead><tr><th>候选工点</th><th>来源设备</th><th>监测系列</th><th>原始文件</th><th>质量摘要</th></tr></thead><tbody id="monitorGraphRows"></tbody></table></div></section>
+</main><script src="./api.js"></script><script src="./monitoring.js"></script></body></html>

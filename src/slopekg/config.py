@@ -106,6 +106,14 @@ class DemoPaths:
     def multimodal_contract_json(self) -> Path:
         return self.multimodal_dir / "data_contract.json"
 
+    @property
+    def monitoring_dir(self) -> Path:
+        return self.output_dir / "monitoring"
+
+    @property
+    def inspection_history_dir(self) -> Path:
+        return self.output_dir / "inspection_history"
+
 
 PATHS = DemoPaths()
 

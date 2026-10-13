@@ -7,8 +7,10 @@ from typing import Any
 from .config import PATHS, DemoPaths
 from .manual import apply_slope_overrides, merged_rule_library
 from .risk import build_risk_screening
+from .risk_evaluation import evaluate_risk_screening
 from .schema import build_completeness
-from .storage import ensure_dir, read_json, read_jsonl
+from .storage import discover_pdf_files, ensure_dir, read_json, read_jsonl
+from .parsers import file_sha256
 
 def document_inventory(paths: DemoPaths = PATHS) -> dict[str, Any]:
     documents = read_jsonl(paths.parsed_dir / "documents.jsonl")
@@ -38,7 +40,7 @@ def document_inventory(paths: DemoPaths = PATHS) -> dict[str, Any]:
 
     rows = []
     ensure_dir(paths.raw_dir)
-    for file in sorted(paths.raw_dir.glob("*.pdf"), key=lambda item: item.name.lower()):
+    for file in discover_pdf_files(paths.raw_dir):
         parsed_record = by_name.get(file.name)
         doc_id = parsed_record.get("id") if parsed_record else None
         stat = file.stat()
@@ -47,6 +49,11 @@ def document_inventory(paths: DemoPaths = PATHS) -> dict[str, Any]:
             and parsed_record.get("source_size_bytes") == stat.st_size
             and parsed_record.get("source_mtime_ns") == stat.st_mtime_ns
         )
+        if current and parsed_record.get("source_sha256"):
+            try:
+                current = file_sha256(file) == parsed_record["source_sha256"]
+            except OSError:
+                current = False
         stale = bool(parsed_record and not current)
         rows.append(
             {
@@ -112,7 +119,20 @@ def find_slope(slope_id: str, paths: DemoPaths = PATHS) -> dict[str, Any] | None
 
 
 def current_risk_screening(paths: DemoPaths = PATHS) -> dict[str, Any]:
-    graph = current_graph(paths)
+    return assess_graph(current_graph(paths), paths)[1]
+
+
+def assess_graph(graph: dict[str, Any], paths: DemoPaths = PATHS) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Assess one effective graph snapshot using the current reviewed rules."""
     library = current_rule_library(paths)
     completeness = build_completeness(graph)
-    return build_risk_screening(graph, library, completeness)
+    return completeness, build_risk_screening(graph, library, completeness)
+
+
+def evaluate_risk_result(screening: dict[str, Any], paths: DemoPaths = PATHS) -> dict[str, Any]:
+    gold = read_json(paths.root / "data" / "validation" / "risk_gold.json", {"labels": []})
+    return evaluate_risk_screening(screening, gold)
+
+
+def current_risk_evaluation(paths: DemoPaths = PATHS) -> dict[str, Any]:
+    return evaluate_risk_result(current_risk_screening(paths), paths)

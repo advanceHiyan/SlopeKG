@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>会昌原值基线实验 - SlopeKG</title><link rel="stylesheet" href="./pages.css"/><link rel="stylesheet" href="./monitoring.css"/><style>#baselineProtocol,#baselineError{overflow-wrap:anywhere}#baselineError{color:#9d2929}#baselineChart svg{display:block}</style></head>
+<body class="portal-body"><header class="site-header"><div class="site-header-inner"><a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a><nav class="site-nav"><a href="./index.html">总览</a><a href="./data-status.html">数据与接口</a><a href="./monitoring.html">监测回放</a><a class="active" href="./monitoring-baseline.html">原值实验</a><a href="./risk.html">风险研判</a></nav></div></header>
+<main class="page-main"><div class="page-heading"><div><h1>会昌原值基线实验</h1><p>比较“保持上次值”和“延续最近7日平均变化”。这是已记录日期的离线数值实验，不是风险预警。</p></div><button id="baselineReload" type="button">重新读取实验</button></div>
+<div id="baselineBoundary" class="notice">单位、分量、基准、设备对应和数据发布时间待核。实验不发布未来预报、风险等级或概率。</div>
+<p id="baselineError" role="alert" hidden></p><p id="baselineStatus" role="status"></p>
+<section class="card monitor-controls"><label>原表及分量<select id="baselineComponent" disabled></select></label><label>时间段<select id="baselineSplit" disabled><option value="test">末段测试（开发留出）</option><option value="validation">中段验证</option></select></label></section>
+<section class="card monitor-section"><h2>比较规则与来源</h2><div id="baselineProtocol" class="detail-list"></div><a id="baselineSource" hidden>下载核验后的原表</a></section>
+<section class="card monitor-section"><h2>同一批目标上的预测误差</h2><p>MAE为平均绝对误差，RMSE更重视大误差，均为原值数值尺度，不是已核实的毫米或速率。MASE用训练段的相邻原值变化作尺度；训练段恒定时无定义。误差小不等于现场安全。</p><div class="table-wrap"><table class="data-table"><thead><tr><th>方法</th><th>共同计分目标数</th><th>MAE</th><th>RMSE</th><th>平均有向误差</th><th>MASE</th></tr></thead><tbody id="baselineMetrics"></tbody></table></div><p id="baselineCoverage"></p></section>
+<section class="card monitor-section"><h2>原值与一步预测对照</h2><p>蓝色为实际原值，绿色为保持值，橙色为7日变化。中间没有可评目标时断开，不插值。这里只展示已知结果的历史对照。</p><div id="baselineChart"></div></section>
+<section class="card monitor-section"><h2>最近20条可复核对照</h2><div class="table-wrap"><table class="data-table"><thead><tr><th>预测所用日期 → 目标日期</th><th>实际原值</th><th>保持值</th><th>7日变化</th><th>目标原表位置</th></tr></thead><tbody id="baselineRows"></tbody></table></div></section>
+</main><script src="./api.js"></script><script src="./monitoring-baseline.js"></script></body></html>

@@ -103,6 +103,7 @@ def run_semantic_extraction(
     supplemental_calls = 0
     gaps_detected = 0
     gaps_resolved = 0
+    skipped = []
     slopes = extracted.get("slopes", [])
     if limit is not None:
         slopes = slopes[:limit]
@@ -113,6 +114,8 @@ def run_semantic_extraction(
             break
         samples = select_source_samples(slope)
         if not samples:
+            skipped.append({"route_code": slope.get("route_code"), "station": slope["station"],
+                            "reason": "no_section_source_samples"})
             if progress_callback:
                 progress_callback(slope_index, total_slopes, slope["station"])
             continue
@@ -259,6 +262,9 @@ def run_semantic_extraction(
             "section_gaps_detected": gaps_detected,
             "section_gaps_resolved": gaps_resolved,
             "failures": failures,
+            "requested_slopes": total_slopes,
+            "skipped_count": len(skipped),
+            "skipped": skipped,
         }
     )
     return rows, summary

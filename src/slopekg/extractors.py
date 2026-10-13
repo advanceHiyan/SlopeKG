@@ -9,6 +9,7 @@ from .identity import STATION_RE, ROUTE_CODE_RE, normalize_station_match, normal
 from .engineering import attach_engineering_records, extract_engineering_tables
 from .observation import observation_clauses, positive_mention, belongs_to_station
 from .source_candidates import orientation_candidates, body_material_claims, preceding_section_station
+from .geometry import rectangle
 
 
 GPS_RE = re.compile(r"GPS\s*(?P<no>\d+)\s+(?P<x>\d{5,6}(?:\.\d+)?)\s+(?P<y>\d{6,8}(?:\.\d+)?)\s+(?P<z>\d{2,4}(?:\.\d+)?)", re.IGNORECASE)
@@ -1000,7 +1001,9 @@ PROTECTION_TERMS = ["坡面清危", "挂网锚喷", "主动防护网", "局部�
 def split_page_panels(blocks: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     panels = {"left": [], "right": []}
     for block in blocks:
-        bbox = block.get("bbox") or [0, 0, 0, 0]
+        if block.get("bbox_coordinate_space") == "unmapped_image_pixels":
+            continue
+        bbox = rectangle(block.get("bbox")) or [0, 0, 0, 0]
         center = (float(bbox[0]) + float(bbox[2])) / 2
         panels["left" if center < 600 else "right"].append(block)
     for values in panels.values():
@@ -1310,12 +1313,12 @@ def discover_single_site_document(
 
 
 def bbox_value(block: dict[str, Any], index: int) -> float:
-    bbox = block.get("bbox") or [0, 0, 0, 0]
+    bbox = rectangle(block.get("bbox")) or [0, 0, 0, 0]
     return float(bbox[index])
 
 
 def panel_bbox(blocks: list[dict[str, Any]]) -> list[float] | None:
-    boxes = [block.get("bbox") for block in blocks if block.get("bbox")]
+    boxes = [box for block in blocks if (box := rectangle(block.get("bbox"))) is not None]
     if not boxes:
         return None
     return [min(box[0] for box in boxes), min(box[1] for box in boxes), max(box[2] for box in boxes), max(box[3] for box in boxes)]

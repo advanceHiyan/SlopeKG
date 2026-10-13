@@ -4,10 +4,11 @@ from dataclasses import dataclass
 from collections import Counter
 from datetime import date, datetime
 import re
+import math
 from typing import Any
 
 
-RISK_ENGINE_VERSION = "multi-axis-screening-v2.0"
+RISK_ENGINE_VERSION = "multi-axis-screening-v2.1"
 # Operational freshness bands are data-quality defaults, not engineering warning
 # thresholds.  They only decide whether a manually supplied observation may be
 # described as "recent"; projects can revise them after the review workflow is
@@ -971,20 +972,39 @@ def stability_calculation_readiness(
         "slip_surface_or_structural_model": bool(props.get("slip_surface_geometry")) or "StructuralPlane" in node_types,
         "groundwater_scenario": bool(props.get("groundwater_scenario")),
         "seismic_scenario_parameters": bool(props.get("seismic_coefficient") or props.get("seismic_parameters")),
+        # No reviewed numerical solver or independently checked reference case
+        # is registered in this application yet. Formula metadata is not code.
+        "solver_implemented": False,
+        "reference_case_verified": False,
     }
     hard_requirements = (
         "method_formula_approved", "full_section_or_block_geometry",
         "material_strength_parameters", "slip_surface_or_structural_model",
     )
+    metadata_presence = all(checks[code] for code in hard_requirements)
+    hard_requirements = (*hard_requirements, "solver_implemented", "reference_case_verified")
     ready = all(checks[code] for code in hard_requirements)
     return {
         "status": "ready_for_reviewed_solver" if ready else "not_executable",
         "ready": ready,
+        "metadata_presence_checks_passed": metadata_presence,
+        "implementation_status": "solver_not_implemented",
         "candidate_method_family": "极限平衡法（具体方法和适用破坏模式待审核）",
         "checks": checks,
+        "check_labels": {
+            "method_formula_approved": "方法公式已有审核启用记录",
+            "full_section_or_block_geometry": "已提供断面或块体几何条目（完整性待具体方法核验）",
+            "basic_height_and_gradient": "已有坡高和坡角",
+            "material_strength_parameters": "已有材料参数条目（参数及单位仍需核验）",
+            "slip_surface_or_structural_model": "已有滑面或结构面条目（适用破坏模式仍需核验）",
+            "groundwater_scenario": "已提供地下水工况条目",
+            "seismic_scenario_parameters": "已提供地震工况条目",
+            "solver_implemented": "已接入该方法的可执行专业计算程序",
+            "reference_case_verified": "已用完整对照算例验证程序结果",
+        },
         "blocking_items": [code for code in hard_requirements if not checks[code]],
         "approved_method_ids": [row.get("id") for row in approved_methods],
-        "boundary": "现有报告中的Fs作为历史计算结果和测试依据保存；在输入、公式、单位及适用条件未齐全前不自动复算。",
+        "boundary": "现有报告Fs仅是历史计算结果。资料条目存在不等于输入完整；当前未接入并验证专业求解器，不自动复算。具体方法、输入、单位、工况和完整对照算例须逐项核验。",
     }
 
 
@@ -1005,13 +1025,24 @@ def formal_risk_gate(
         "current_dynamic_evidence": bool(current_dynamic_evidence),
         "approved_dynamic_rule_result": bool(dynamic_rule_result_available),
         "no_unresolved_stability_conflict": not conflicts,
+        "formal_release_supported": False,
     }
     missing = [code for code, passed in checks.items() if not passed]
     return {
         "ready": not missing,
         "checks": checks,
+        "metadata_presence_checks_passed": all(passed for code, passed in checks.items() if code != "formal_release_supported"),
+        "check_labels": {
+            "approved_rule_set": "规则集已有审核发布和启用记录",
+            "hazard_or_likelihood_available": "已有危险性关注依据（不是已校准概率）",
+            "consequence_available": "已有后果资料",
+            "current_dynamic_evidence": "已有近期动态证据",
+            "approved_dynamic_rule_result": "已有经审核动态规则的计算结果",
+            "no_unresolved_stability_conflict": "没有待处理的稳定性资料冲突",
+            "formal_release_supported": "正式风险发布功能已经验证并启用",
+        },
         "blocking_items": missing,
-        "message": "满足正式矩阵计算门槛，仍需按发布流程审核。" if not missing else "未满足正式风险发布门槛，仅输出分项关注与复核顺序。",
+        "message": "当前程序只支持筛查，正式风险发布未启用；资料条目齐备也不自动发布风险等级。" if checks["formal_release_supported"] is False else "未满足正式风险发布门槛，仅输出分项关注与复核顺序。",
     }
 
 
@@ -1424,12 +1455,15 @@ def evaluate_manual_rules(library: dict[str, Any], context: dict[str, Any]) -> l
 
 
 def evaluate_condition(actual: Any, operator: Any, expected: Any) -> bool:
+    missing = actual is None or (isinstance(actual, (str, list, tuple, set, dict)) and not actual)
     if operator == "exists":
-        return actual not in (None, "", [], {})
+        return not missing
+    if missing:
+        return False
     if operator == "contains":
         if isinstance(actual, (list, tuple, set)):
             return any(str(expected) in str(item) for item in actual)
-        return str(expected) in str(actual or "")
+        return str(expected) in str(actual)
     if operator == "in":
         choices = expected if isinstance(expected, list) else [expected]
         if isinstance(actual, (list, tuple, set)):
@@ -1449,6 +1483,14 @@ def evaluate_condition(actual: Any, operator: Any, expected: Any) -> bool:
             return left_number == right_number
         return str(actual) == str(expected)
     if operator == "neq":
+        if isinstance(actual, (int, float, str)):
+            try:
+                if not math.isfinite(float(actual)):
+                    return False
+            except OverflowError:
+                return False
+            except (TypeError, ValueError):
+                pass  # Non-numeric text still supports string comparisons.
         return not evaluate_condition(actual, "eq", expected)
     return False
 
@@ -1562,8 +1604,9 @@ def maximum_number(*values: Any) -> float | None:
 
 def safe_float(value: Any) -> float | None:
     try:
-        return float(value)
-    except (TypeError, ValueError):
+        number = float(value)
+        return number if math.isfinite(number) else None
+    except (TypeError, ValueError, OverflowError):
         return None
 
 

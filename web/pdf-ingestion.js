@@ -32,13 +32,16 @@
   let activeJobId = null;
   let pollTimer = null;
   let jobIsBusy = false;
+  let requestIsBusy = false;
 
   const stageLabels = {
     queued: "等待执行", preparing: "准备输入", parsing: "逐页解析", ocr: "按需OCR",
     extracting: "属性抽取", semantic: "语义识别", graph: "图谱构建", writing: "写入结果",
     completed: "已完成", failed: "处理失败", upload: "上传文件",
+    semantic_failed: "深度解析失败", semantic_partial: "深度解析未完成",
+    semantic_not_applicable: "无深度解析对象",
   };
-  const statusLabels = { none: "暂无任务", queued: "排队中", running: "处理中", completed: "已完成", failed: "失败" };
+  const statusLabels = { none: "暂无任务", queued: "排队中", running: "处理中", completed: "已完成", failed: "失败", partial: "部分完成" };
 
   function formatBytes(bytes) {
     const value = Number(bytes || 0);
@@ -59,9 +62,7 @@
   }
 
   function renderSelectedFiles() {
-    const valid = selectedFiles.length > 0 && selectedFiles.every((file) => file.name.toLowerCase().endsWith(".pdf") && file.size > 0 && file.size <= 256 * 1024 ** 2);
-    elements.uploadOnly.disabled = !valid || jobIsBusy;
-    elements.uploadRun.disabled = !valid || jobIsBusy;
+    updateActionButtons();
     if (!selectedFiles.length) {
       elements.selected.innerHTML = '<div class="detail-empty">尚未选择文件。</div>';
       return;
@@ -99,16 +100,15 @@
       parsed.ocr_device_counts && Object.keys(parsed.ocr_device_counts).length ? ["实际OCR设备", Object.entries(parsed.ocr_device_counts).map(([name, count]) => `${name}：${count}页`).join(" / ")] : null,
       parsed.documents != null ? ["完成结果", `${parsed.documents} 份PDF / ${parsed.pages} 页 / ${result.graph?.nodes ?? 0} 个节点`] : null,
       llm.candidates != null ? ["语义校验", `${llm.passed ?? 0}/${llm.candidates} 通过`] : null,
+      llm.skipped_count ? ["未进入深度解析", `${llm.skipped_count} 个对象没有可用章节，需核对来源范围`] : null,
     ].filter(Boolean).map(([label, value]) => `<div class="detail-row"><small>${escapeHtml(label)}</small>${escapeHtml(value)}</div>`).join("");
     elements.error.hidden = !job.error;
     elements.error.textContent = job.error || "";
     const busy = ["queued", "running"].includes(job.status);
     jobIsBusy = busy;
     renderSelectedFiles();
-    elements.rerun.disabled = busy;
-    elements.deepRun.disabled = busy;
     if (busy) schedulePoll();
-    if (["completed", "failed"].includes(job.status)) {
+    if (["completed", "partial", "failed"].includes(job.status)) {
       clearTimeout(pollTimer);
       pollTimer = null;
       loadOverview();
@@ -125,6 +125,11 @@
     try {
       renderJob(await getJson(`/api/pipeline/jobs/${encodeURIComponent(activeJobId)}`));
     } catch (error) {
+      if (error.status === 404) {
+        const message = "任务记录不存在，服务可能已重启，请刷新页面确认结果。";
+        renderJob({ id: activeJobId, status: "failed", stage: "failed", message, error: message });
+        return;
+      }
       elements.message.textContent = `任务状态读取失败：${error.message}`;
       schedulePoll();
     }
@@ -134,6 +139,7 @@
     return new Promise((resolve, reject) => {
       const data = new FormData();
       files.forEach((file) => data.append("files", file, file.name));
+      data.append("options", JSON.stringify(jobOptions("basic")));
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/api/documents/upload");
       xhr.upload.onprogress = (event) => {
@@ -197,11 +203,18 @@
   }
 
   function setBusy(busy) {
-    elements.uploadOnly.disabled = busy || !selectedFiles.length;
-    elements.uploadRun.disabled = busy || !selectedFiles.length;
-    elements.rerun.disabled = busy || jobIsBusy;
-    elements.reextract.disabled = busy || jobIsBusy;
-    elements.deepRun.disabled = busy || jobIsBusy;
+    requestIsBusy = busy;
+    updateActionButtons();
+  }
+
+  function updateActionButtons() {
+    const valid = selectedFiles.length > 0 && selectedFiles.every((file) => file.name.toLowerCase().endsWith(".pdf") && file.size > 0 && file.size <= 256 * 1024 ** 2);
+    const busy = requestIsBusy || jobIsBusy;
+    elements.uploadOnly.disabled = busy || !valid;
+    elements.uploadRun.disabled = busy || !valid;
+    elements.rerun.disabled = busy;
+    elements.reextract.disabled = busy;
+    elements.deepRun.disabled = busy;
   }
 
   function renderMetrics(inventory, status) {

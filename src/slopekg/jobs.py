@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 from .config import PATHS, DemoPaths
-from .storage import ensure_dir, read_jsonl
+from .storage import discover_pdf_files, ensure_dir, read_jsonl
 
 class PipelineJobManager:
     def __init__(self, pipeline: Any, *, completion_message: str = "PDF解析、信息抽取和图谱生成已完成") -> None:
@@ -34,7 +34,7 @@ class PipelineJobManager:
                 "started_at": None,
                 "updated_at": now,
                 "finished_at": None,
-                "options": options,
+                "options": self._copy(options),
                 "trigger": trigger,
                 "result": None,
                 "error": None,
@@ -42,7 +42,13 @@ class PipelineJobManager:
             self.jobs[job_id] = job
             self.latest_id = job_id
             self._trim()
-        threading.Thread(target=self._run, args=(job_id,), daemon=True, name=f"pipeline-{job_id}").start()
+        try:
+            threading.Thread(target=self._run, args=(job_id,), daemon=True, name=f"pipeline-{job_id}").start()
+        except Exception as exc:
+            self._update(
+                job_id, status="failed", stage="failed", message="无法启动后台任务",
+                error=str(exc), finished_at=datetime.now().isoformat(timespec="seconds"),
+            )
         return self.get(job_id) or {}, True
 
     def _run(self, job_id: str) -> None:
@@ -55,13 +61,16 @@ class PipelineJobManager:
             options = self.get(job_id)["options"]  # type: ignore[index]
             state = self.pipeline.run(progress_callback=on_progress, **options)
             now = datetime.now().isoformat(timespec="seconds")
+            status = state.get("processing_status", "completed")
+            status = status if status in {"completed", "partial", "failed"} else "completed"
             self._update(
                 job_id,
-                status="completed",
+                status=status,
                 progress=100,
-                stage="completed",
-                message=self.completion_message,
+                stage=state.get("publication_stage", status) if status != "completed" else "completed",
+                message=state.get("processing_message") or self.completion_message,
                 result=state,
+                error=state.get("processing_message") if status == "failed" else None,
                 finished_at=now,
             )
         except Exception as exc:  # pragma: no cover - surfaced through the job API
@@ -132,16 +141,19 @@ class PdfDirectoryWatcher:
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
             return
+        self._stop.clear()
         self._thread = threading.Thread(target=self._run, daemon=True, name="rawpdf-auto-update")
         self._thread.start()
 
     def stop(self) -> None:
         self._stop.set()
+        if self._thread and self._thread.is_alive() and self._thread is not threading.current_thread():
+            self._thread.join(timeout=5.0)
 
     def snapshot(self) -> tuple[tuple[str, int, int], ...]:
         ensure_dir(self.paths.raw_dir)
         rows = []
-        for file in sorted(self.paths.raw_dir.glob("*.pdf"), key=lambda item: item.name.lower()):
+        for file in discover_pdf_files(self.paths.raw_dir):
             stat = file.stat()
             rows.append((file.name, stat.st_size, stat.st_mtime_ns))
         return tuple(rows)

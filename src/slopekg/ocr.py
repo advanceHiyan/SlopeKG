@@ -9,7 +9,8 @@ from typing import Any, Callable
 
 from .config import configure_runtime_cache
 from .deps import bundled_poppler_exe, has_module
-from .storage import ensure_dir
+from .storage import ensure_dir, write_json
+from .geometry import rectangle, project_ocr_boxes
 
 
 class OcrRunner:
@@ -130,11 +131,11 @@ class OcrRunner:
                             [],
                         )
                         continue
-                    page_results = normalize_paddle_result(task, raw, image_path, self.root)
+                    page_results = project_ocr_boxes(normalize_paddle_result(task, raw, image_path, self.root), [task], self.root)
                     completed(done_task(task, image_path, page_results, self.root, self.last_device), page_results)
                 continue
             for task, image_path, raw in zip(batch_tasks, batch_paths, batch_raw):
-                page_results = normalize_paddle_result(task, raw, image_path, self.root)
+                page_results = project_ocr_boxes(normalize_paddle_result(task, raw, image_path, self.root), [task], self.root)
                 completed(done_task(task, image_path, page_results, self.root, self.last_device), page_results)
 
         updated_tasks = [updates_by_id.get(task["id"], task) for task in tasks]
@@ -213,6 +214,13 @@ def render_with_pymupdf(source: Path, page_number: int, target: Path, region: st
             matrix.prerotate(rotation)
         pixmap = page.get_pixmap(matrix=matrix, clip=clip, alpha=False)
         pixmap.save(target)
+        transform = page.rotation_matrix * matrix
+        transform.e -= pixmap.x
+        transform.f -= pixmap.y
+        write_json(Path(str(target) + ".geometry.json"), {
+            "schema_version": 1, "pdf_to_image": list(transform), "page": page_number,
+            "region": region, "image_width": pixmap.width, "image_height": pixmap.height,
+        })
     finally:
         document.close()
     return target
@@ -276,11 +284,19 @@ def with_layout_groups(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             if len(candidates) != 1:
                 continue
             second, b = candidates[0]
-            groups.append({**first, "id": f"{first['id']}__join__{second['id']}",
-                           "text": str(first["text"]).strip() + str(second["text"]).strip(),
-                           "bbox": [min(a[0], b[0]), a[1], max(a[2], b[2]), b[3]],
-                           "method": "ocr_layout_join", "review_status": "pending",
-                           "source_item_ids": [first["id"], second["id"]]})
+            joined = {**first, "id": f"{first['id']}__join__{second['id']}",
+                      "text": str(first["text"]).strip() + str(second["text"]).strip(),
+                      "bbox": [min(a[0], b[0]), a[1], max(a[2], b[2]), b[3]],
+                      "method": "ocr_layout_join", "review_status": "pending",
+                      "source_item_ids": [first["id"], second["id"]]}
+            pixels_a, pixels_b = rectangle(first.get("image_bbox")), rectangle(second.get("image_bbox"))
+            if pixels_a and pixels_b:
+                joined["image_bbox"] = [min(pixels_a[0], pixels_b[0]), min(pixels_a[1], pixels_b[1]),
+                                        max(pixels_a[2], pixels_b[2]), max(pixels_a[3], pixels_b[3])]
+            if "bbox_original" in first:
+                # A synthetic join has two raw source boxes, not one.
+                joined["bbox_original"] = None
+            groups.append(joined)
     return [*originals, *groups]
 
 
@@ -422,7 +438,9 @@ def make_result_row(
         "file_name": task["file_name"],
         "page": task["page"],
         "text": str(text),
-        "bbox": to_jsonable(bbox),
+        "bbox": rectangle(to_jsonable(bbox)),
+        "bbox_original": to_jsonable(bbox),
+        "bbox_coordinate_space": "image_pixels",
         "confidence": to_float(confidence),
         "engine": "PaddleOCR",
         "image_path": rel(image_path, root),

@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import hashlib
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -10,6 +12,32 @@ from typing import Any, Iterable
 def ensure_dir(path: Path) -> Path:
     path.mkdir(parents=True, exist_ok=True)
     return path
+
+
+def verify_file_sha256(path: Path, expected: str) -> None:
+    """Validate immutable generated evidence; recheck when its file stats change."""
+    if not isinstance(expected, str) or len(expected) != 64:
+        raise OSError("数据校验记录缺失，请重新导入")
+    stat = path.stat()
+    _verified_digest(str(path.resolve()), expected, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)
+
+
+@lru_cache(maxsize=32)
+def _verified_digest(path: str, expected: str, size: int, modified: int, changed: int) -> None:
+    digest = hashlib.sha256()
+    with open(path, "rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    if digest.hexdigest() != expected:
+        raise OSError("数据文件与已发布的校验和不一致，请重新导入")
+
+
+def discover_pdf_files(directory: Path, *, recursive: bool = False) -> list[Path]:
+    candidates = directory.rglob("*") if recursive else directory.glob("*")
+    return sorted(
+        (path for path in candidates if path.suffix.casefold() == ".pdf" and path.is_file()),
+        key=lambda path: str(path.relative_to(directory)).casefold(),
+    )
 
 
 def read_json(path: Path, default: Any = None) -> Any:
