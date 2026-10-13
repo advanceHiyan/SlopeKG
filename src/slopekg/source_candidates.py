@@ -141,7 +141,20 @@ def build_processing_audit(parsed: dict[str, Any], extracted: dict[str, Any], gr
             children.setdefault(edge["source"], []).append(nodes[edge["target"]])
     from .identity import stable_id
     rows = []
+    for heading in extracted.get("section_catalog", []):
+        if not heading.get("stations"):
+            continue
+        rows.append(dict(kind="section_subject", disposition=heading["resolution_status"],
+                         source_id=heading["id"], document_id=heading["document_id"],
+                         page=heading["page"], bbox=heading.get("bbox"),
+                         station_candidates=heading["stations"], parent_station=heading.get("parent_station"),
+                         quote=heading["source_text"], evidence_block_ids=heading["evidence_block_ids"],
+                         supporting_evidence=heading.get("supporting_evidence", [])))
     for slope in extracted.get("slopes", []):
+        if not slope.get("section_text_samples"):
+            rows.append(dict(kind="root_source_coverage", disposition="no_retained_section_source",
+                             route_code=slope.get("route_code"), station=slope["station"],
+                             document_id=slope.get("document_id"), page=slope.get("page")))
         target = nodes.get(stable_id("slope", f"{slope.get('route_code')}:{slope['station']}"))
         planes = [n["props"] for n in children.get(target["id"], []) if n["type"] == "StructuralPlane"] if target else []
         known = {(plane_role(str(p.get("name", ""))), p.get("dip_direction"), p.get("dip_angle")) for p in planes}
@@ -183,6 +196,6 @@ def build_processing_audit(parsed: dict[str, Any], extracted: dict[str, Any], gr
         row["id"] = "candidate_" + hashlib.sha256(signature.encode()).hexdigest()[:20]
         unique[row["id"]] = row
     result = list(unique.values())
-    return {"schema_version": 1, "scope": "retained_section_samples_and_table_sidecars",
+    return {"schema_version": 1, "scope": "section_catalog_retained_samples_and_table_sidecars",
             "is_accuracy_measurement": False, "summary": dict(Counter(r["disposition"] for r in result)),
             "candidates": result}

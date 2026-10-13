@@ -8,6 +8,7 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from typing import Any
+from .sections import numbered_headings, body_parent
 
 
 def compact(value: Any) -> str:
@@ -292,12 +293,18 @@ def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, 
     documents = {doc["id"]: doc for doc in parsed.get("documents", [])}
     pages = {(p["document_id"], p["page"]): p for p in parsed.get("pages", [])}
     allowed = defaultdict(set)
+    document_subjects = defaultdict(set)
     for slope in registry:
         allowed[slope.get("route_code")].add(slope["station"])
+        document_subjects[slope.get("document_id")].add(slope["station"])
     blocks = defaultdict(list)
     for block in parsed.get("text_blocks", []):
         if block.get("bbox"):
             blocks[block["document_id"]].append(block)
+    root_depth = {doc_id: min([h["depth"] for block in rows
+                              for h in numbered_headings(str(block.get("text", ""))) if h["stations"]
+                              and not body_parent(h, document_subjects[doc_id])] or [0])
+                  for doc_id, rows in blocks.items()}
 
     def order(item):
         page = pages.get((item["document_id"], item["page"]), {})
@@ -329,19 +336,21 @@ def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, 
             if position > order(anchor):
                 continue
             text = str(block.get("text", ""))
-            match = STATION_RE.search(text)
-            # Ignore figure/table captions, prose, headers and route extent strings.
-            if match and re.fullmatch(r"\s*\d+(?:\.\d+){1,3}\s*", text[:match.start()]):
-                stations = list(dict.fromkeys(normalize_station_match(m) for m in STATION_RE.finditer(text)
-                                             if normalize_station_match(m) in allowed[route]))
-                if stations:
-                    candidates.append((position, stations, block))
+            for heading in numbered_headings(text):
+                # Unknown subjects and sibling chapters are boundaries too.
+                # Resolve the nearest heading before applying the whitelist.
+                if heading["stations"] or heading["depth"] <= root_depth.get(table["document_id"], 3):
+                    parent = body_parent(heading, document_subjects[table["document_id"]])
+                    candidates.append((position, [parent] if parent else heading["stations"], block))
             if position[:2] == order(anchor)[:2] and 0 <= anchor["bbox"][1] - block["bbox"][3] < 110:
                 nearby.append(block)
         nearest = max(candidates, key=lambda item: item[0]) if candidates else None
         # Do not drag an old section through a long run of unrelated appendices.
         station_candidates = nearest[1] if nearest and table["page"] - nearest[0][0] <= 3 else []
-        station = station_candidates[0] if len(station_candidates) == 1 else None
+        station = (station_candidates[0] if len(station_candidates) == 1
+                   and station_candidates[0] in allowed[route] else None)
+        nearest_headings = numbered_headings(nearest[2]["text"]) if nearest else []
+        scoped_heading = next((h for h in nearest_headings if body_parent(h, document_subjects[table["document_id"]])), None)
         single_site = {s["station"] for s in registry if s.get("document_id") == table["document_id"]}
         single_site_association = station is None and not nearest and len(single_site) == 1
         if single_site_association:
@@ -371,6 +380,8 @@ def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, 
             issues.append("shared_section_station_ambiguous")
         if station is None and not document_scope:
             issues.append("station_unresolved")
+        if station_candidates and any(s not in allowed[route] for s in station_candidates):
+            issues.append("section_subject_not_registered")
         title_match = STATION_RE.search(caption)
         if title_match and normalize_station_match(title_match) != station:
             issues.append("caption_station_mismatch")
@@ -384,11 +395,14 @@ def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, 
             "id": table["id"], "document_id": table["document_id"], "source_file": doc.get("file_name"),
             "page": table["page"], "bbox": table["bbox"], "route_code": route, "station": station,
             "station_candidates": station_candidates,
+            "source_section_station_candidates": scoped_heading["stations"] if scoped_heading else station_candidates,
+            "section_subject_scope": "危岩体" if scoped_heading else None,
             "source_fragments": table.get("source_fragments", []),
             "association_scope": "document" if document_scope else "slope" if station else "unresolved",
             "association_basis": (
                 "document_level_recommended_parameters" if document_scope
                 else "single_site_document" if single_site_association
+                else "contained_rock_body_section" if scoped_heading and station
                 else "preceding_numbered_section" if station
                 else "shared_numbered_section" if len(station_candidates) > 1 else "unresolved"
             ),

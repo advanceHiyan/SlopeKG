@@ -10,6 +10,7 @@ from .engineering import attach_engineering_records, extract_engineering_tables
 from .observation import observation_clauses, positive_mention, belongs_to_station
 from .source_candidates import orientation_candidates, body_material_claims, preceding_section_station
 from .geometry import rectangle
+from .sections import build_section_catalog, numbered_headings, body_parent, UNRESOLVED_SECTION
 
 
 GPS_RE = re.compile(r"GPS\s*(?P<no>\d+)\s+(?P<x>\d{5,6}(?:\.\d+)?)\s+(?P<y>\d{6,8}(?:\.\d+)?)\s+(?P<z>\d{2,4}(?:\.\d+)?)", re.IGNORECASE)
@@ -34,6 +35,32 @@ def extract_domain_candidates(parsed: dict[str, list[dict[str, Any]]]) -> dict[s
     registry_source_rows = dedupe_by_route_station(
         [row for doc_id in survey_ids for row in extract_slope_registry(documents[doc_id], by_page, tables)]
     )
+    registry_source_count = len(registry_source_rows)
+    section_catalog = [heading for doc_id in survey_ids
+                       for heading in build_section_catalog(
+                           documents[doc_id], by_page,
+                           [row for row in registry_source_rows if row.get("document_id") == doc_id],
+                           {int(p["page"]): float(p.get("width") or 1200) for p in pages if p["document_id"] == doc_id})]
+    # Reconcile independently discovered subjects; never rewrite a malformed
+    # inventory row or infer an alias from a neighbouring station number.
+    for heading in section_catalog:
+        if heading["resolution_status"] != "corroborated_heading":
+            continue
+        document = documents[heading["document_id"]]
+        support = heading["supporting_evidence"]
+        candidate = candidate_row(
+            heading["stations"][0], heading["page"],
+            {**heading, "id": heading["evidence_block_ids"][0]},
+            "corroborated_numbered_section", 0.9,
+            route_code=infer_route_code_from_values(document.get("file_name"), document.get("title")),
+            source_disaster_label=hazard_label(heading["title"]),
+            section_catalog_id=heading["id"],
+            supporting_evidence=support,
+        )
+        candidate["evidence_block_ids"] = union(candidate["evidence_block_ids"], [row["block_id"] for row in support])
+        mark_station_resolution(candidate)
+        registry_source_rows.append(candidate)
+    registry_source_rows = dedupe_by_route_station(registry_source_rows)
     registry_issues = [row for row in registry_source_rows if not row.get("eligible_as_slope_root", True)]
     registry = [row for row in registry_source_rows if row.get("eligible_as_slope_root", True)]
     coordinates = dedupe_by_station([row for doc_id in design_ids for row in extract_coordinates(doc_id, by_page)])
@@ -75,6 +102,9 @@ def extract_domain_candidates(parsed: dict[str, list[dict[str, Any]]]) -> dict[s
         "slopes": merged,
         "registry": registry,
         "registry_issues": registry_issues,
+        "section_catalog": section_catalog,
+        "section_resolution_issues": [h for h in section_catalog if h["resolution_status"] in
+                                      {"invalid_station", "unconfirmed_heading", "shared_subjects"}],
         "coordinates": coordinates,
         "treatments": treatments,
         "geometry": geometry,
@@ -82,9 +112,13 @@ def extract_domain_candidates(parsed: dict[str, list[dict[str, Any]]]) -> dict[s
         "engineering_records": engineering_records,
         "assertions": assertions,
         "stats": {
-            "registry_source_rows": len(registry_source_rows),
+            "registry_source_rows": registry_source_count,
+            "registry_reconciled_rows": len(registry_source_rows),
             "registry_rows": len(registry),
             "registry_records_needing_review": len(registry_issues),
+            "section_catalog_headings": len(section_catalog),
+            "roots_from_corroborated_sections": sum(r.get("method") == "corroborated_numbered_section" for r in registry),
+            "section_subjects_needing_review": sum(h["resolution_status"] in {"invalid_station", "unconfirmed_heading", "shared_subjects"} for h in section_catalog),
             "registry_rows_by_route": dict(registry_rows_by_route),
             "coordinate_rows": len(coordinates),
             "treatment_rows": len(treatments),
@@ -351,7 +385,7 @@ def extract_geometry_candidates(
         if doc_id not in allowed:
             continue
         for panel_name, panel_blocks in split_page_panels(blocks).items():
-            panel_text = " ".join(block["text"].replace("\n", " ") for block in panel_blocks)
+            panel_text = "\n".join(block["text"] for block in panel_blocks)
             qualified_stations = []
             for station_match in STATION_RE.finditer(panel_text):
                 context = panel_text[station_match.start() : min(len(panel_text), station_match.end() + 60)]
@@ -398,10 +432,10 @@ STRUCTURE_TERMS = ["顺向坡", "顺层坡", "逆向坡", "反倾坡", "斜交�
 FACTOR_TERMS = ["降雨", "风化", "节理裂隙", "地表水", "地下水", "道路开挖", "坡脚开挖", "人工开挖", "褶皱构造"]
 SECTION_DOMAIN_WORDS = [
     "基本情况", "变形", "稳定性", "防护措施", "岩性", "结构面", "节理",
-    "坡度", "地层", "植被", "地下水", "地表水", "水文地质", "垮塌",
+    "坡度", "坡高", "地层", "植被", "地下水", "地表水", "水文地质", "垮塌",
 ]
 STRUCTURAL_PLANE_RE = re.compile(
-    r"(?P<name>坡面|岩层面|岩层|岩体|[LJ]\s*\d+|结构面\s*[LJ]?\s*\d*)"
+    r"(?P<name>坡面|岩层面|岩层|岩体|[LJ]\s*\d+|结构面(?:\s*[LJ]\s*\d+)?)"
     r"(?:名称)?(?:的)?(?:相对完整[，,])?(?:产状)?(?:为|是)?\s*[:：]*\s*"
     r"(?P<dip_direction>\d{1,3}(?:\.\d+)?)\s*[°º]?\s*[∠/]\s*(?P<dip_angle>\d{1,2}(?:\.\d+)?)\s*[°º]?"
 )
@@ -421,6 +455,11 @@ def extract_section_facts(
     allowed = document_ids
     grouped: dict[str, dict[str, Any]] = {}
     active_station_by_panel: dict[str, str] = {}
+    heading_depths: dict[str, list[int]] = defaultdict(list)
+    for (doc_id, _), blocks in by_page.items():
+        heading_depths[doc_id].extend(h["depth"] for block in blocks
+                                    for h in numbered_headings(block["text"]) if h["stations"]
+                                    and not body_parent(h, (stations_by_document or {}).get(doc_id, set())))
     for (doc_id, page), blocks in sorted(by_page.items(), key=lambda item: (item[0][0], item[0][1])):
         if doc_id not in allowed:
             continue
@@ -431,7 +470,7 @@ def extract_section_facts(
             if STATION_RE.search(panel_text) and re.search(r"\.{5,}|…{3,}", panel_text):
                 active_station_by_panel.pop(doc_id, None)
                 continue
-            if not any(word in panel_text for word in SECTION_DOMAIN_WORDS):
+            if not any(word in panel_text for word in SECTION_DOMAIN_WORDS) and not numbered_headings(panel_text):
                 continue
             # Reports read down the left column, then down the right column.
             # Carry the latest subject in reading order, not yesterday's
@@ -443,6 +482,7 @@ def extract_section_facts(
                 allowed_stations,
                 active_station_by_panel.get(panel_key),
                 document_stations,
+                root_heading_depth=min(heading_depths.get(doc_id) or [0]),
             )
             for station, segment_text in segments:
                 values = extract_section_values(segment_text, station=station)
@@ -538,6 +578,7 @@ def station_section_segments(
     allowed_stations: set[str],
     active_station: str | None,
     document_stations: set[str],
+    *, root_heading_depth: int | None = None,
 ) -> tuple[list[tuple[str, str]], str | None]:
     """Split a page panel by numbered slope headings and retain continuation text.
 
@@ -548,15 +589,15 @@ def station_section_segments(
     """
     occurrences: list[tuple[int, int, str]] = []
     headings: list[tuple[int, int, str]] = []
+    source_headings = numbered_headings(text)
     for match in STATION_RE.finditer(text):
         station = normalize_station_match(match)
-        if station not in allowed_stations:
-            continue
         context = text[max(0, match.start() - 50) : min(len(text), match.end() + 90)]
         if not any(word in context for word in ["左侧", "右侧", "危岩体", "边坡", "崩塌", "滑坡", "沉降", "下沉", "垮塌"]):
             continue
         occurrence = (match.start(), match.end(), station)
-        occurrences.append(occurrence)
+        if station in allowed_stations:
+            occurrences.append(occurrence)
         raw_prefix = text[max(0, match.start() - 25) : match.start()]
         prefix = re.sub(r"\s+", "", raw_prefix)
         numbered_heading = (re.search(r"(?:^|\s)\d+\.\d+(?:\.\d+)?\s*$", raw_prefix)
@@ -567,8 +608,21 @@ def station_section_segments(
         # The last member of a joint heading is not a new exclusive subject.
         if len(occurrences) > 1 and re.fullmatch(r"\s*[、及和,，]\s*", text[occurrences[-2][1]:match.start()]):
             explicit_subject = None
+        if station not in allowed_stations:
+            if numbered_heading:
+                parent = next((body_parent(h, document_stations) for h in source_headings
+                               if station in h["stations"]), None)
+                headings.append((match.start(), match.end(), parent or UNRESOLVED_SECTION))
+            continue
         if numbered_heading or panorama_caption or explicit_subject:
             headings.append(occurrence)
+
+    root_depths = [h["depth"] for h in source_headings if h["stations"] and not body_parent(h, document_stations)]
+    root_depth = root_heading_depth if root_heading_depth is not None else (min(root_depths) if root_depths else 3)
+    for heading in source_headings:
+        if not heading["stations"] and heading["depth"] <= root_depth:
+            headings.append((heading["start"], heading["end"], UNRESOLVED_SECTION))
+    headings.sort(key=lambda item: item[0])
 
     segments: list[tuple[str, str]] = []
     if headings:
@@ -578,6 +632,8 @@ def station_section_segments(
                 segments.append((str(active_station), preamble))
         for index, (start, _end, station) in enumerate(headings):
             stop = headings[index + 1][0] if index + 1 < len(headings) else len(text)
+            if station not in allowed_stations:
+                continue
             segment = text[start:stop].strip()
             if segment:
                 members = [station]
@@ -610,6 +666,8 @@ def station_section_segments(
 
     if active_station in allowed_stations:
         return [(str(active_station), text.strip())], None
+    if active_station == UNRESOLVED_SECTION:
+        return [], None
     unique_mentions = list(dict.fromkeys(station for _start, _end, station in occurrences))
     if len(unique_mentions) == 1:
         return [(unique_mentions[0], text.strip())], None

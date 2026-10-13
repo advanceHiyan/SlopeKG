@@ -64,7 +64,10 @@ class EngineeringCorpusTests(unittest.TestCase):
 
     def test_provenance_and_conservative_graph_integration(self):
         graph = build_automatic_graph(self.parsed, self.extracted, [])
-        self.assertEqual(sum(n["type"] == "Slope" for n in graph["nodes"]), 62)
+        self.assertEqual(sum(n["type"] == "Slope" for n in graph["nodes"]), len(self.extracted["registry"]))
+        supplemental = [r for r in self.extracted["registry"] if r.get("method") == "corroborated_numbered_section"]
+        self.assertTrue(supplemental)
+        self.assertTrue(all(r.get("supporting_evidence") and r.get("section_catalog_id") for r in supplemental))
         self.assertTrue(any(n["type"] == "MaterialParameterSet" for n in graph["nodes"]))
         records = [n for n in graph["nodes"] if n["type"] == "StabilityAnalysis" and n["props"].get("quality_issues")]
         self.assertTrue(records)
