@@ -20,6 +20,7 @@ from urllib.parse import parse_qs, quote, unquote, urlparse
 from . import queries
 from .jobs import PipelineJobManager, PdfDirectoryWatcher, automatic_basic_options
 from .config import PATHS
+from .llm import DEFAULT_DEEPSEEK_MODEL
 from .exporter import export_risk_standalone_html, export_standalone_html
 from .manual import (
     delete_manual_rule,
@@ -617,14 +618,19 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         if parsed.path == "/api/rules/jobs":
             try:
                 body = self.read_json_body()
-                llm_model = str(body.get("llm_model", "deepseek-v4-flash")).strip()
+                llm_model = str(body.get("llm_model", DEFAULT_DEEPSEEK_MODEL)).strip()
                 if not llm_model or len(llm_model) > 100:
                     raise ValueError("大模型名称不合法")
                 options = {
                     "use_llm": boolean_option(body, "use_llm", True),
                     "llm_model": llm_model,
                     "force_ocr": boolean_option(body, "force_ocr"),
+                    "include_unselected": boolean_option(body, "include_unselected"),
+                    "page_selection": body.get("page_selection"),
                 }
+                if options["page_selection"] is not None:
+                    from .rule_extraction import validate_page_selection
+                    validate_page_selection(RULE_PIPELINE.catalog_documents(), options["page_selection"])
                 job, created = RULE_JOB_MANAGER.start(options, trigger="rule_extraction")
             except (TypeError, ValueError) as exc:
                 self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
@@ -737,7 +743,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
 
     def pipeline_options(self, body: dict[str, Any]) -> dict[str, Any]:
         ocr_pages = max(0, min(1000, int(body.get("ocr_pages", 1000))))
-        llm_model = str(body.get("llm_model", "deepseek-v4-flash")).strip()
+        llm_model = str(body.get("llm_model", DEFAULT_DEEPSEEK_MODEL)).strip()
         if not llm_model or len(llm_model) > 100:
             raise ValueError("大模型名称不合法")
         legacy_use_llm = boolean_option(body, "use_llm")

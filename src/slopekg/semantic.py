@@ -6,7 +6,7 @@ import re
 from datetime import datetime
 from typing import Any, Callable
 
-from .llm import call_deepseek_json
+from .llm import DEFAULT_DEEPSEEK_MODEL, call_deepseek_json
 from .observation import supported_observation, belongs_to_station
 
 
@@ -87,7 +87,7 @@ def run_semantic_extraction(
     extracted: dict[str, Any],
     *,
     enabled: bool,
-    model: str = "deepseek-v4-flash",
+    model: str = DEFAULT_DEEPSEEK_MODEL,
     cached_rows: list[dict[str, Any]] | None = None,
     limit: int | None = None,
     progress_callback: Callable[[int, int, str], None] | None = None,

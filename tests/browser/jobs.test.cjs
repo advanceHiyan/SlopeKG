@@ -116,3 +116,31 @@ test('PDF evidence links carry only valid physical page numbers', async t => {
   for (const href of links.slice(2)) assert.doesNotMatch(href, /#page=/);
   assert.ok(links[0].includes(encodeURIComponent('边坡 设计.pdf')));
 });
+
+test('knowledge pages can be selected per document without changing automatic defaults', async t => {
+  const { page } = await jobPage(t, 'rules', 0, 'none');
+  await page.route('**/api/rules/library', route => route.fulfill({ json: {
+    documents: [{id:'reference',title:'匿名分类资料',pages:5,selected_pages:[],processing_status:'cataloged_only'}],
+    rules:[], formulas:[], stats:{}
+  }}));
+  await page.reload();
+  await page.locator('[data-page-selection="reference"]').fill('1-3,5');
+  await page.locator('#ruleIncludeUnselected').check();
+  let options;
+  await page.route('**/api/rules/jobs', async route => {
+    options=route.request().postDataJSON();
+    return route.fulfill({status:202,json:{id:'selected',status:'completed',progress:100,message:'done'}});
+  });
+  await page.locator('#runRuleExtraction').click();
+  await page.waitForFunction(()=>document.querySelector('#runRuleExtraction').disabled===false);
+  assert.deepEqual(options.page_selection,{reference:'1-3,5'});
+  assert.equal(options.include_unselected,true);
+});
+
+test('legacy artifacts are not presented as matching the running implementation', async t => {
+  const { page } = await jobPage(t, 'pdf', 0, 'none');
+  await page.route('**/api/status', route => route.fulfill({json:{version_status:'unversioned',updated_at:'2020-01-01',parsed:{}}}));
+  await page.reload();
+  await page.waitForFunction(()=>document.querySelector('#artifactVersion').textContent.includes('旧成果'));
+  assert.match(await page.locator('#artifactVersion').textContent(),/2020-01-01/);
+});

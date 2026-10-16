@@ -7,6 +7,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 from .config import PATHS, DemoPaths
+from .llm import DEFAULT_DEEPSEEK_MODEL
 from .storage import discover_pdf_files, ensure_dir, read_jsonl
 
 class PipelineJobManager:
@@ -116,7 +117,7 @@ def automatic_basic_options() -> dict[str, Any]:
         "ocr_pages": 1000,
         "force_ocr": False,
         "parse_mode": "basic",
-        "llm_model": "deepseek-v4-flash",
+        "llm_model": DEFAULT_DEEPSEEK_MODEL,
         "reuse_parsed": False,
         "ocr_scope": "changed",
         "ocr_device": "auto",

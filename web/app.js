@@ -216,7 +216,7 @@ async function runPipeline() {
     const response = await fetch("/api/pipeline/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ocr_pages: ocrPages, parse_mode: "deep", llm_model: "deepseek-v4-flash" }),
+      body: JSON.stringify({ ocr_pages: ocrPages, parse_mode: "deep" }),
     });
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);

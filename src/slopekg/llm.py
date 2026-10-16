@@ -3,13 +3,16 @@ from __future__ import annotations
 import os
 import json
 import urllib.request
-from pathlib import Path
 from typing import Any
 
 from .config import ROOT
 
 
-# DeepSeek V4 documents a 384K maximum output. Keep this provider-specific
+# Official model/pricing documentation checked 2026-10-15. Legacy V4 Flash
+# aliases now route to V4.1 Flash; use the canonical ID for new requests.
+DEFAULT_DEEPSEEK_MODEL = "deepseek-flash"
+DEEPSEEK_API_BASE = "https://api.deepseek.com"
+# DeepSeek V4.1 documents a 384K maximum output. Keep this provider-specific
 # limit in one place so callers do not silently use smaller, scattered values.
 DEEPSEEK_MAX_OUTPUT_TOKENS = 384 * 1024
 
@@ -17,24 +20,14 @@ DEEPSEEK_MAX_OUTPUT_TOKENS = 384 * 1024
 def deepseek_key_info() -> tuple[str | None, str | None]:
     """Return the key and its non-sensitive source label.
 
-    The repository-local ignored secret intentionally wins over machine-wide
-    environment variables so this project cannot accidentally use another
-    project's account or an older key.
+    This project uses its dedicated ignored secret only. A missing/empty file
+    must not silently charge a machine-wide or another project's account.
     """
-    candidates = [
-        (ROOT / ".secrets" / "deepseek_api_key.txt", "project_secret_file"),
-        (Path.home() / ".deepseek_api_key", "user_secret_file"),
-        (Path.home() / ".config" / "deepseek" / "api_key", "user_config_file"),
-    ]
-    for candidate, source in candidates:
-        if candidate.exists():
-            value = candidate.read_text(encoding="utf-8").strip()
-            if value:
-                return value, source
-    for name in ("DEEPSEEK_API_KEY", "DEEPSEEK_V4_API_KEY"):
-        value = os.environ.get(name, "").strip()
+    candidate = ROOT / ".secrets" / "deepseek_api_key.txt"
+    if candidate.is_file():
+        value = candidate.read_text(encoding="utf-8").strip()
         if value:
-            return value, f"environment:{name}"
+            return value, "project_secret_file"
     return None, None
 
 
@@ -46,7 +39,10 @@ def llm_status() -> dict[str, Any]:
     key, source = deepseek_key_info()
     return {
         "provider": "deepseek",
-        "recommended_model": "deepseek-v4-flash",
+        "recommended_model": DEFAULT_DEEPSEEK_MODEL,
+        "model_version": "DeepSeek-V4.1-Flash",
+        "provider_input_modalities": ["text", "image"],
+        "pipeline_input_modalities": ["text"],
         "enabled": False,
         "key_available": bool(key),
         "key_source": source,
@@ -59,14 +55,18 @@ def call_deepseek_json(
     *,
     system_prompt: str,
     user_prompt: str,
-    model: str = "deepseek-v4-flash",
+    model: str = DEFAULT_DEEPSEEK_MODEL,
     max_tokens: int = DEEPSEEK_MAX_OUTPUT_TOKENS,
     timeout: int = 300,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     key = read_deepseek_key()
     if not key:
-        raise RuntimeError("DeepSeek API key is not configured")
-    base_url = os.environ.get("DEEPSEEK_API_BASE", "https://api.deepseek.com").rstrip("/")
+        raise RuntimeError("Project DeepSeek API key is missing: .secrets/deepseek_api_key.txt")
+    base_url = os.environ.get("DEEPSEEK_API_BASE", DEEPSEEK_API_BASE).rstrip("/")
+    if base_url not in {DEEPSEEK_API_BASE, DEEPSEEK_API_BASE + "/v1"}:
+        raise ValueError("Project DeepSeek credentials may only be sent to https://api.deepseek.com")
+    if not 1 <= max_tokens <= DEEPSEEK_MAX_OUTPUT_TOKENS:
+        raise ValueError("max_tokens must be between 1 and 393216")
     payload = {
         "model": model,
         "messages": [
@@ -85,12 +85,24 @@ def call_deepseek_json(
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(request, timeout=timeout) as response:
+    # Do not forward project credentials if a server redirects the request.
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            raise RuntimeError("DeepSeek API redirect refused")
+
+    with urllib.request.build_opener(NoRedirect()).open(request, timeout=timeout) as response:
         result = json.loads(response.read().decode("utf-8"))
-    content = result["choices"][0]["message"]["content"]
+    choice = result["choices"][0]
+    if choice.get("finish_reason") != "stop":
+        raise RuntimeError(f"DeepSeek response did not complete: {choice.get('finish_reason')}")
+    content = choice["message"]["content"]
     parsed = json.loads(content)
+    if not isinstance(parsed, dict):
+        raise ValueError("DeepSeek JSON response must be an object")
     metadata = {
+        "requested_model": model,
         "model": result.get("model", model),
+        "finish_reason": choice.get("finish_reason"),
         "usage": result.get("usage", {}),
         "id": result.get("id"),
         "system_fingerprint": result.get("system_fingerprint"),

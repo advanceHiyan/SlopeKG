@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from slopekg.config import PATHS
+from slopekg.llm import DEFAULT_DEEPSEEK_MODEL
 from slopekg.extractors import extract_domain_candidates
 from slopekg.pipeline import DemoPipeline, pipeline_run_guard, source_file_matches_record, ocr_result_is_current
 from slopekg.ocr import with_layout_groups
@@ -52,13 +53,13 @@ def main():
         extracted = extract_domain_candidates(parsed)
         state = read_json(PATHS.state_json, {})
         mode = state.get("parse_mode", "basic")
-        basic_summary = semantic_summary([], enabled=False, model="deepseek-v4-flash")
+        basic_summary = semantic_summary([], enabled=False, model=DEFAULT_DEEPSEEK_MODEL)
         graph, evaluation = pipeline.build_graph(parsed, parsed["ocr_tasks"], ocr, extracted, [], basic_summary,
                                                  parse_mode="basic", activate=mode != "deep")
         summary = basic_summary
         if mode == "deep":
             rows = revalidate_cached(extracted, read_jsonl(PATHS.extracted_dir / "llm_candidates.jsonl"))
-            summary = semantic_summary(rows, enabled=True, model="deepseek-v4-flash")
+            summary = semantic_summary(rows, enabled=True, model=DEFAULT_DEEPSEEK_MODEL)
             summary.update(api_calls=0, cache_revalidated=sum(r.get("reuse_mode") == "offline_source_revalidation_no_api" for r in rows), mode="offline_source_revalidation_no_api")
             graph, evaluation = pipeline.build_graph(parsed, parsed["ocr_tasks"], ocr, extracted, rows, summary,
                                                      parse_mode="deep", activate=True)

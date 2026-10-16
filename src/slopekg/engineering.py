@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from typing import Any
-from .sections import numbered_headings, body_parent
+from .sections import document_section_catalogs, body_parent, heading_subjects, root_heading_depth, source_position
 
 
 def compact(value: Any) -> str:
@@ -287,24 +287,25 @@ def stitch_factor_tables(tables, order, blocks):
     return output
 
 
-def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, Any]],
+                               *, section_catalog: list[dict] | None = None) -> list[dict[str, Any]]:
     from .identity import STATION_RE, normalize_station_match, infer_route_code_from_values
 
     documents = {doc["id"]: doc for doc in parsed.get("documents", [])}
     pages = {(p["document_id"], p["page"]): p for p in parsed.get("pages", [])}
     allowed = defaultdict(set)
-    document_subjects = defaultdict(set)
     for slope in registry:
         allowed[slope.get("route_code")].add(slope["station"])
-        document_subjects[slope.get("document_id")].add(slope["station"])
     blocks = defaultdict(list)
     for block in parsed.get("text_blocks", []):
         if block.get("bbox"):
             blocks[block["document_id"]].append(block)
-    root_depth = {doc_id: min([h["depth"] for block in rows
-                              for h in numbered_headings(str(block.get("text", ""))) if h["stations"]
-                              and not body_parent(h, document_subjects[doc_id])] or [0])
-                  for doc_id, rows in blocks.items()}
+    section_catalog = document_section_catalogs(parsed, registry) if section_catalog is None else section_catalog
+    catalog_by_doc = {doc_id: [h for h in section_catalog if h["document_id"] == doc_id] for doc_id in documents}
+    widths_by_doc = {doc_id: {int(p["page"]): float(p.get("width") or 1200) for p in parsed.get("pages", [])
+                             if p["document_id"] == doc_id} for doc_id in documents}
+    root_depth = {doc_id: root_heading_depth(rows, allowed[infer_route_code_from_values(
+        documents[doc_id].get("file_name"), documents[doc_id].get("title"))]) for doc_id, rows in catalog_by_doc.items()}
 
     def order(item):
         page = pages.get((item["document_id"], item["page"]), {})
@@ -331,17 +332,14 @@ def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, 
         candidates = []
         nearby = []
         anchor = table.get("header_fragment", table)
+        for heading in catalog_by_doc.get(table["document_id"], []):
+            position = source_position(heading, widths_by_doc.get(table["document_id"], {}))
+            if position <= order(anchor) and (heading["stations"] or heading["depth"] <= root_depth.get(table["document_id"], 0)):
+                candidates.append((position, heading_subjects(heading, allowed[route]), heading))
         for block in blocks[table["document_id"]]:
             position = order(block)
             if position > order(anchor):
                 continue
-            text = str(block.get("text", ""))
-            for heading in numbered_headings(text):
-                # Unknown subjects and sibling chapters are boundaries too.
-                # Resolve the nearest heading before applying the whitelist.
-                if heading["stations"] or heading["depth"] <= root_depth.get(table["document_id"], 3):
-                    parent = body_parent(heading, document_subjects[table["document_id"]])
-                    candidates.append((position, [parent] if parent else heading["stations"], block))
             if position[:2] == order(anchor)[:2] and 0 <= anchor["bbox"][1] - block["bbox"][3] < 110:
                 nearby.append(block)
         nearest = max(candidates, key=lambda item: item[0]) if candidates else None
@@ -349,8 +347,7 @@ def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, 
         station_candidates = nearest[1] if nearest and table["page"] - nearest[0][0] <= 3 else []
         station = (station_candidates[0] if len(station_candidates) == 1
                    and station_candidates[0] in allowed[route] else None)
-        nearest_headings = numbered_headings(nearest[2]["text"]) if nearest else []
-        scoped_heading = next((h for h in nearest_headings if body_parent(h, document_subjects[table["document_id"]])), None)
+        scoped_heading = nearest[2] if nearest and body_parent(nearest[2], allowed[route]) else None
         single_site = {s["station"] for s in registry if s.get("document_id") == table["document_id"]}
         single_site_association = station is None and not nearest and len(single_site) == 1
         if single_site_association:
@@ -406,8 +403,10 @@ def extract_engineering_tables(parsed: dict[str, Any], registry: list[dict[str, 
                 else "preceding_numbered_section" if station
                 else "shared_numbered_section" if len(station_candidates) > 1 else "unresolved"
             ),
-            "section_heading": nearest[2]["text"] if nearest else None,
+            "section_heading": nearest[2]["source_text"] if nearest else None,
             "section_heading_page": nearest[2]["page"] if nearest else None,
+            "section_catalog_id": nearest[2]["id"] if nearest else None,
+            "section_heading_block_ids": nearest[2]["evidence_block_ids"] if nearest else [],
             "caption": caption, "context_text": context,
             "calculation_subject_context": subject_context,
             "rows": table.get("rows", []), "material_parameters": material, "stability_results": factors,

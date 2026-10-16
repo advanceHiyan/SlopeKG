@@ -165,7 +165,6 @@
       ocr_batch_size: Math.max(0, Math.min(32, Number(elements.ocrBatchSize.value || 0))),
       force_ocr: elements.forceOcr.checked,
       parse_mode: parseMode,
-      llm_model: "deepseek-v4-flash",
       reuse_parsed: reuseParsed,
     };
   }
@@ -265,6 +264,14 @@
       const [inventory, status] = await Promise.all([getJson("/api/documents"), getJson("/api/status", {})]);
       renderMetrics(inventory, status);
       renderDocuments(inventory);
+      const versionLabels = { current: "成果由当前实现生成", unversioned: "旧成果未记录实现版本，请核验后更新", different_implementation: "成果与当前实现不同，请核验后更新" };
+      const marker = document.getElementById("artifactVersion");
+      if (marker) {
+        const layers = status.layer_versions || {};
+        const layerLabels = { current: "当前实现", unversioned: "旧成果无版本记录", different_implementation: "其他实现生成", absent: "未生成" };
+        const detail = Object.keys(layers).map(name => `${name}：${layerLabels[layers[name]] || "未知"}`).join("；");
+        marker.textContent = `${versionLabels[status.version_status] || "成果版本未知"}；生成时间：${status.updated_at || "未生成"}${detail ? `；${detail}` : ""}`;
+      }
     } catch (error) {
       elements.rows.innerHTML = `<tr><td colspan="6">状态加载失败：${escapeHtml(error.message)}</td></tr>`;
     }

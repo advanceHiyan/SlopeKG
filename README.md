@@ -279,20 +279,16 @@ python scripts/run_tests.py --suite all
 主流水线默认运行基础解析，不调用外部大模型。选择 `--mode deep` 或 `--deep` 后，才使用配置的 DeepSeek 密钥进行语义抽取；输出必须通过 JSON 结构、原文页码和逐字引句校验后才会进入深度图谱。兼容选项 `--no-llm` 始终强制使用基础解析：
 
 ```powershell
-python scripts/run_pipeline.py --mode deep --ocr-pages 0 --llm-model deepseek-v4-flash
+python scripts/run_pipeline.py --mode deep --ocr-pages 0 --llm-model deepseek-flash
 ```
 
 深度解析同时输出 `llm_evaluation.json`，记录结构校验、原文引句验证率和缓存命中情况。大模型阶段失败时保留已经完成 OCR 的基础结果。人工金标准只用于周期性离线审计，不参与生产图谱生成。
 
 `--reuse-parsed` 仅在解析缓存与当前 PDF 一致时复用；源文件发生变化时需去掉该选项重新解析。离线导出按所选 basic/deep/active 模式读取对应结果，并带上最新人工修订；缺少深度图谱或源版本不一致时会明确报错。
 
-密钥读取顺序（项目专用密钥优先，避免被机器上的旧环境变量覆盖）：
+密钥只读取 `.secrets/deepseek_api_key.txt`（已由 `.gitignore` 整体排除）。缺失或空文件直接报错，不回退到用户目录或机器环境变量，避免误用其他账户。项目密钥只允许发送到 `https://api.deepseek.com`，兼容其 `/v1` 路径；自定义第三方 `DEEPSEEK_API_BASE` 会被拒绝，重定向也不会携带密钥继续请求。
 
-1. `.secrets/deepseek_api_key.txt`（已由 `.gitignore` 整体排除）
-2. `%USERPROFILE%\.deepseek_api_key`
-3. `%USERPROFILE%\.config\deepseek\api_key`
-4. 环境变量 `DEEPSEEK_API_KEY`
-5. 环境变量 `DEEPSEEK_V4_API_KEY`
+2026-10-15核对[官网模型说明](https://api-docs.deepseek.com/quick_start/pricing/)及实际 `/models` 返回：默认模型 `deepseek-flash` 对应 DeepSeek-V4.1-Flash，支持文字和图像，最大输出393216 tokens。旧 `deepseek-v4-flash` 名称已转到新模型，不能用它建立历史模型对照。目前正式 deep 流水线仍发送文字；图像实验脚本和结果保存在本地 `.private/reviews/20261015_deepseek_vision/`，不代表已将视觉识别接入生产抽取。
 
 当前大模型适合用于：
 

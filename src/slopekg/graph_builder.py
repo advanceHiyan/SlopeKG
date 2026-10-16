@@ -97,7 +97,7 @@ def build_automatic_graph(
         slope_id = stable_id("slope", f"{route_code}:{station}")
         semantic_row = semantic_by_key.get((route_code, station)) or semantic_by_station.get(station, {})
         semantic = semantic_row.get("candidate", {})
-        props = slope_props(slope, semantic, route_code, index, start_m, end_m)
+        props = slope_props(slope, semantic, route_code, index, start_m, end_m, source_documents=documents)
         add_node(
             nodes,
             slope_id,
@@ -546,7 +546,7 @@ def _add_slope_observations(
     assembly.semantic_assertions.extend(build_semantic_assertions(station, semantic_row, semantic_evidence, all_evidence))
 
 
-def slope_props(slope: dict[str, Any], semantic: dict[str, Any], route_code: str, index: int, start_m: int | None, end_m: int | None) -> dict[str, Any]:
+def slope_props(slope: dict[str, Any], semantic: dict[str, Any], route_code: str, index: int, start_m: int | None, end_m: int | None, *, source_documents: dict | None = None) -> dict[str, Any]:
     start_raw, end_raw = slope["station"].split("-", 1)
     slope_length = slope.get("slope_length_m") or semantic.get("slope_length_m")
     height_min = slope.get("slope_height_min_m")
@@ -558,6 +558,10 @@ def slope_props(slope: dict[str, Any], semantic: dict[str, Any], route_code: str
     return {
         "slope_id": f"{route_code}-AUTO-{index:03d}",
         "source_no": slope.get("no"),
+        "source_disagreements": [{**issue, "alternatives": [
+            {**alternative, "sources": [{**source, "source_file": (source_documents or {}).get(source.get("document_id"), {}).get("file_name")}
+                                        for source in alternative["sources"]]}
+            for alternative in issue["alternatives"]]} for issue in slope.get("source_disagreements", [])],
         "source_alias": slope.get("source_alias") or slope["station"],
         "route_code_cache": route_code,
         "start_station_raw": start_raw,

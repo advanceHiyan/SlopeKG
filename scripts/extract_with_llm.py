@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 
 from slopekg.config import PATHS  # noqa: E402
-from slopekg.llm import call_deepseek_json  # noqa: E402
+from slopekg.llm import DEFAULT_DEEPSEEK_MODEL, call_deepseek_json  # noqa: E402
 from slopekg.storage import read_json, read_jsonl, write_json, write_jsonl  # noqa: E402
 
 
@@ -66,7 +66,7 @@ def build_quality_summary(rows: list[dict]) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Use DeepSeek V4 Flash for complex slope-section candidate extraction")
     parser.add_argument("--limit", type=int, default=2)
-    parser.add_argument("--model", default="deepseek-v4-flash")
+    parser.add_argument("--model", default=DEFAULT_DEEPSEEK_MODEL)
     parser.add_argument("--evaluate-existing", action="store_true", help="只重算既有候选质量指标，不调用模型")
     args = parser.parse_args()
     if args.evaluate_existing:

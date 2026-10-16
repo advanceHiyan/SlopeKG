@@ -13,7 +13,7 @@ from .extractors import extract_domain_candidates
 from .exporter import export_risk_standalone_html, export_standalone_html
 from .graph_builder import attach_visual_assets, build_automatic_graph, write_graphml
 from .multimodal import build_multimodal_outputs
-from .llm import llm_status, read_deepseek_key
+from .llm import DEFAULT_DEEPSEEK_MODEL, llm_status, read_deepseek_key
 from .manual import apply_slope_overrides
 from .ocr import OcrRunner, with_layout_groups
 from .geometry import project_ocr_boxes
@@ -21,6 +21,7 @@ from .parsers import PdfParser, file_sha256
 from .quality import evaluate_automatic_pipeline
 from .queries import assess_graph, evaluate_risk_result
 from .schema import build_completeness, interface_payload, schema_payload
+from .provenance import runtime_identity, version_status
 from .semantic import run_semantic_extraction
 from .storage import discover_pdf_files, ensure_dir, read_json, read_jsonl, write_json, write_jsonl
 
@@ -112,7 +113,7 @@ class DemoPipeline:
         force_ocr: bool = False,
         parse_mode: str = "basic",
         use_llm: bool | None = None,
-        llm_model: str = "deepseek-v4-flash",
+        llm_model: str = DEFAULT_DEEPSEEK_MODEL,
         reuse_parsed: bool = False,
         ocr_scope: str = "all",
         ocr_device: str = "auto",
@@ -428,6 +429,7 @@ class DemoPipeline:
         evaluation = evaluate_automatic_pipeline(extracted, semantic_summary, graph)
         evaluation["multimodal"] = multimodal["quality"]["summary"]
         graph["meta"]["pipeline"] = {
+            "producer": runtime_identity(),
             "mode": "basic" if parse_mode == "basic" else "deep",
             "layers": ["adaptive_pdf_parse", "deterministic_extraction"] + (["validated_llm_semantics"] if parse_mode == "deep" else []),
             "documents": len(parsed["documents"]),
@@ -526,6 +528,7 @@ class DemoPipeline:
         deep_fresh = deep_exists and graph_matches_documents(deep_graph, parsed["documents"])
         return {
             "updated_at": datetime.now().isoformat(timespec="seconds"),
+            "producer": graph.get("meta", {}).get("pipeline", {}).get("producer"),
             "parse_mode": parse_mode,
             "publication_stage": publication_stage,
             "requested_parse_mode": "deep" if publication_stage.startswith("semantic_") else parse_mode,
@@ -637,6 +640,15 @@ class DemoPipeline:
                 },
             }
         state["graph_available"] = self.paths.graph_json.exists()
+        state["runtime"] = runtime_identity()
+        state["version_status"] = version_status(state.get("producer"))
+        state["layer_versions"] = {
+            name: version_status(read_json(path, {}).get("producer")) if graph_path.exists() else "absent"
+            for name, path, graph_path in (
+                ("basic", self.paths.basic_state_json, self.paths.basic_graph_json),
+                ("deep", self.paths.deep_state_json, self.paths.deep_graph_json),
+            )
+        }
         return state
 
     def parsed_table(self, name: str) -> list[dict[str, Any]]:

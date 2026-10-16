@@ -10,7 +10,7 @@ from typing import Any, Callable
 from pypdf import PdfReader
 
 from .config import PATHS, DemoPaths
-from .llm import call_deepseek_json, llm_status
+from .llm import DEFAULT_DEEPSEEK_MODEL, call_deepseek_json, llm_status
 from .ocr import call_paddle_ocr, make_paddle_ocr
 from .storage import discover_pdf_files, ensure_dir, read_json, write_json, write_jsonl
 
@@ -126,8 +126,10 @@ class RuleExtractionPipeline:
         self,
         *,
         use_llm: bool = True,
-        llm_model: str = "deepseek-v4-flash",
+        llm_model: str = DEFAULT_DEEPSEEK_MODEL,
         force_ocr: bool = False,
+        page_selection: dict[str, str] | None = None,
+        include_unselected: bool = False,
         progress_callback: Callable[[int, str, str], None] | None = None,
     ) -> dict[str, Any]:
         def progress(percent: int, stage: str, message: str) -> None:
@@ -138,6 +140,9 @@ class RuleExtractionPipeline:
         ensure_dir(self.paths.rules_dir)
         ensure_dir(self.paths.rules_dir / "pages")
         documents = self.catalog_documents()
+        if not isinstance(include_unselected, bool):
+            raise ValueError("include_unselected 必须是布尔值")
+        selections = validate_page_selection(documents, page_selection)
         cached_pages = {
             (row.get("document_id"), int(row.get("page", 0)), row.get("source_sha256")): row
             for row in read_json(self.paths.rules_dir / "page_text.json", [])
@@ -149,7 +154,11 @@ class RuleExtractionPipeline:
         for document in documents:
             pdf = self.paths.root / document["path"]
             native_pages = extract_native_candidate_pages(pdf, document)
-            target_pages = sorted(set(document.get("target_pages", [])) | set(native_pages))
+            automatic_pages = sorted(set(document.get("target_pages", [])) | set(native_pages))
+            choice = selections.get(document["id"], "auto")
+            target_pages = select_rule_pages(choice, document["pages"], automatic_pages,
+                include_unselected=include_unselected and document["source_type"] not in {"engineering_application", "duplicate_reference"})
+            document["selection_basis"] = choice if choice != "auto" else ("automatic_fallback_all" if not automatic_pages and target_pages else "automatic")
             document["selected_pages"] = target_pages
             document["selected_page_count"] = len(target_pages)
             for page_no in target_pages:
@@ -179,6 +188,11 @@ class RuleExtractionPipeline:
                     "ocr",
                     f"规则页识别 {document['code']} 第{page_no}页（{processed}/{max(selected_total, processed)}）",
                 )
+            own_pages = [row for row in page_rows if row["document_id"] == document["id"]]
+            document["read_pages"] = [row["page"] for row in own_pages if row.get("text_chars", 0) > 0]
+            document["empty_pages"] = [row["page"] for row in own_pages if not row.get("text_chars", 0)]
+            document["processing_status"] = ("cataloged_only" if not target_pages else
+                                              "content_read" if document["read_pages"] else "read_empty")
         write_json(self.paths.rules_dir / "page_text.json", page_rows)
         write_jsonl(self.paths.rules_dir / "page_text.jsonl", page_rows)
 
@@ -235,6 +249,11 @@ class RuleExtractionPipeline:
             for row in deduplicate_rules([*deterministic_rules, *llm_rules, *table_rules])
         ]
         formulas = deduplicate_formulas([*formulas, *llm_formulas])
+        for document in documents:
+            count = sum(row.get("document_id") == document["id"] for row in [*clauses, *rules, *formulas])
+            document["extracted_candidate_count"] = count
+            document["content_status"] = ("candidates_extracted" if count else
+                                           "read_no_candidates" if document.get("read_pages") else document["processing_status"])
         library = {
             "schema_name": "slope_rule_library",
             "schema_version": "1.0.0-candidate",
@@ -320,6 +339,42 @@ class RuleExtractionPipeline:
         return documents
 
 
+def select_rule_pages(choice: str, total: int, automatic: list[int], *, include_unselected: bool = False) -> list[int]:
+    """One page grammar for every source; explicit choices never expand silently."""
+    if not isinstance(choice, str):
+        raise ValueError("选页必须是auto、all、none或页码范围")
+    choice = choice.strip().lower()
+    if choice == "auto":
+        return sorted(set(automatic)) if automatic else (list(range(1, total + 1)) if include_unselected else [])
+    if choice == "all":
+        return list(range(1, total + 1))
+    if choice == "none":
+        return []
+    pages = set()
+    for token in choice.replace("，", ",").split(","):
+        match = re.fullmatch(r"\s*(\d+)\s*(?:-\s*(\d+))?\s*", token)
+        if not match:
+            raise ValueError("选页格式错误，例如1-3,5；也可填写auto、all或none")
+        start, stop = int(match[1]), int(match[2] or match[1])
+        if not 1 <= start <= stop <= total:
+            raise ValueError(f"选页必须在1到{total}之间，且范围起点不大于终点")
+        pages.update(range(start, stop + 1))
+    return sorted(pages)
+
+
+def validate_page_selection(documents: list[dict[str, Any]], choices: Any) -> dict[str, str]:
+    if choices is None:
+        return {}
+    if not isinstance(choices, dict):
+        raise ValueError("page_selection必须是资料ID到选页表达式的对象")
+    by_id = {row["id"]: row for row in documents}
+    for doc_id, choice in choices.items():
+        if doc_id not in by_id:
+            raise ValueError(f"选页资料不存在：{doc_id}")
+        select_rule_pages(choice, by_id[doc_id]["pages"], [])
+    return choices
+
+
 def document_record(pdf: Path, paths: DemoPaths, profile: dict[str, Any]) -> dict[str, Any]:
     source_hash = sha256_file(pdf)
     reader = PdfReader(str(pdf))
@@ -380,9 +435,10 @@ def extract_rule_page(
         use_native = len(compact) >= 120 and mojibake_ratio(native) < 0.08
         image_name = f"{document['id']}_p{page_no:04d}.png"
         image_path = image_dir / image_name
-        if not image_path.exists():
-            pixmap = page.get_pixmap(matrix=fitz.Matrix(2.2, 2.2), alpha=False)
-            pixmap.save(image_path)
+        # Called only for a cache miss or forced extraction. The stable page
+        # image name must be refreshed too, or changed PDFs show old evidence.
+        pixmap = page.get_pixmap(matrix=fitz.Matrix(2.2, 2.2), alpha=False)
+        pixmap.save(image_path)
     finally:
         fitz_doc.close()
     if use_native:

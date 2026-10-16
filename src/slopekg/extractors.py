@@ -10,7 +10,9 @@ from .engineering import attach_engineering_records, extract_engineering_tables
 from .observation import observation_clauses, positive_mention, belongs_to_station
 from .source_candidates import orientation_candidates, body_material_claims, preceding_section_station
 from .geometry import rectangle
-from .sections import build_section_catalog, numbered_headings, body_parent, UNRESOLVED_SECTION
+from .source_conflicts import FACT_FIELDS, source_disagreements
+from .sections import (build_section_catalog, document_section_catalogs, numbered_headings,
+                       body_parent, heading_subjects, root_heading_depth, panel_heading_offsets, UNRESOLVED_SECTION)
 
 
 GPS_RE = re.compile(r"GPS\s*(?P<no>\d+)\s+(?P<x>\d{5,6}(?:\.\d+)?)\s+(?P<y>\d{6,8}(?:\.\d+)?)\s+(?P<z>\d{2,4}(?:\.\d+)?)", re.IGNORECASE)
@@ -36,15 +38,11 @@ def extract_domain_candidates(parsed: dict[str, list[dict[str, Any]]]) -> dict[s
         [row for doc_id in survey_ids for row in extract_slope_registry(documents[doc_id], by_page, tables)]
     )
     registry_source_count = len(registry_source_rows)
-    section_catalog = [heading for doc_id in survey_ids
-                       for heading in build_section_catalog(
-                           documents[doc_id], by_page,
-                           [row for row in registry_source_rows if row.get("document_id") == doc_id],
-                           {int(p["page"]): float(p.get("width") or 1200) for p in pages if p["document_id"] == doc_id})]
+    section_catalog = document_section_catalogs(parsed, registry_source_rows)
     # Reconcile independently discovered subjects; never rewrite a malformed
     # inventory row or infer an alias from a neighbouring station number.
     for heading in section_catalog:
-        if heading["resolution_status"] != "corroborated_heading":
+        if heading["resolution_status"] != "corroborated_heading" or heading["document_id"] not in survey_ids:
             continue
         document = documents[heading["document_id"]]
         support = heading["supporting_evidence"]
@@ -71,11 +69,16 @@ def extract_domain_candidates(parsed: dict[str, list[dict[str, Any]]]) -> dict[s
     for row in registry:
         if row.get("document_id"):
             stations_by_document[str(row["document_id"])].add(row["station"])
+    for doc_id in design_ids:
+        route = infer_route_code_from_values(documents[doc_id].get("file_name"), documents[doc_id].get("title"))
+        stations_by_document[doc_id] = {r["station"] for r in registry if r.get("route_code") == route}
     section_facts = extract_section_facts(
         domain_document_ids,
         by_page,
         {row["station"] for row in registry},
         stations_by_document,
+        section_catalog=section_catalog,
+        page_widths={(p["document_id"], int(p["page"])): float(p.get("width") or 1200) for p in pages},
     )
 
     route_by_document = {
@@ -87,7 +90,7 @@ def extract_domain_candidates(parsed: dict[str, list[dict[str, Any]]]) -> dict[s
             row.setdefault("route_code", route_by_document.get(row.get("document_id"), "ROUTE"))
 
     merged = merge_slope_candidates(registry, coordinates, treatments, geometry, section_facts)
-    engineering_records = extract_engineering_tables(parsed, registry)
+    engineering_records = extract_engineering_tables(parsed, registry, section_catalog=section_catalog)
     attach_engineering_records(merged, engineering_records)
     assertions = build_assertions(merged)
     page_type_counts: dict[str, int] = defaultdict(int)
@@ -432,7 +435,7 @@ STRUCTURE_TERMS = ["顺向坡", "顺层坡", "逆向坡", "反倾坡", "斜交�
 FACTOR_TERMS = ["降雨", "风化", "节理裂隙", "地表水", "地下水", "道路开挖", "坡脚开挖", "人工开挖", "褶皱构造"]
 SECTION_DOMAIN_WORDS = [
     "基本情况", "变形", "稳定性", "防护措施", "岩性", "结构面", "节理",
-    "坡度", "坡高", "地层", "植被", "地下水", "地表水", "水文地质", "垮塌",
+    "坡度", "坡高", "地层", "植被", "地下水", "地表水", "水文地质", "垮塌", "裂缝",
 ]
 STRUCTURAL_PLANE_RE = re.compile(
     r"(?P<name>坡面|岩层面|岩层|岩体|[LJ]\s*\d+|结构面(?:\s*[LJ]\s*\d+)?)"
@@ -451,26 +454,32 @@ def extract_section_facts(
     by_page: dict[tuple[str, int], list[dict[str, Any]]],
     allowed_stations: set[str],
     stations_by_document: dict[str, set[str]] | None = None,
+    *, section_catalog: list[dict] | None = None,
+    page_widths: dict[tuple[str, int], float] | None = None,
 ) -> list[dict[str, Any]]:
     allowed = document_ids
     grouped: dict[str, dict[str, Any]] = {}
     active_station_by_panel: dict[str, str] = {}
-    heading_depths: dict[str, list[int]] = defaultdict(list)
-    for (doc_id, _), blocks in by_page.items():
-        heading_depths[doc_id].extend(h["depth"] for block in blocks
-                                    for h in numbered_headings(block["text"]) if h["stations"]
-                                    and not body_parent(h, (stations_by_document or {}).get(doc_id, set())))
+    if section_catalog is None:
+        section_catalog = [h for doc_id in document_ids for h in build_section_catalog(
+            {"id": doc_id}, by_page,
+            [{"station": s} for s in (stations_by_document or {}).get(doc_id, allowed_stations)])]
+    catalogs = {doc_id: [h for h in section_catalog if h["document_id"] == doc_id] for doc_id in document_ids}
+    depths = {doc_id: root_heading_depth(rows, (stations_by_document or {}).get(doc_id, allowed_stations))
+              for doc_id, rows in catalogs.items()}
     for (doc_id, page), blocks in sorted(by_page.items(), key=lambda item: (item[0][0], item[0][1])):
         if doc_id not in allowed:
             continue
-        for panel_name, panel_blocks in split_page_panels(blocks).items():
-            panel_text = " ".join(block["text"].replace("\n", " ") for block in panel_blocks)
+        for panel_name, panel_blocks in split_page_panels(
+                blocks, midpoint=(page_widths or {}).get((doc_id, page), 1200) / 2).items():
+            panel_text = "\n".join(block["text"] for block in panel_blocks)
+            panel_headings = panel_heading_offsets(catalogs[doc_id], panel_blocks)
             # Contents entries are not section starts. Otherwise the last TOC
             # station owns the introductory chapters until its actual section.
             if STATION_RE.search(panel_text) and re.search(r"\.{5,}|…{3,}", panel_text):
                 active_station_by_panel.pop(doc_id, None)
                 continue
-            if not any(word in panel_text for word in SECTION_DOMAIN_WORDS) and not numbered_headings(panel_text):
+            if not any(word in panel_text for word in SECTION_DOMAIN_WORDS) and not panel_headings:
                 continue
             # Reports read down the left column, then down the right column.
             # Carry the latest subject in reading order, not yesterday's
@@ -482,7 +491,8 @@ def extract_section_facts(
                 allowed_stations,
                 active_station_by_panel.get(panel_key),
                 document_stations,
-                root_heading_depth=min(heading_depths.get(doc_id) or [0]),
+                root_heading_depth=depths[doc_id],
+                section_headings=panel_headings,
             )
             for station, segment_text in segments:
                 values = extract_section_values(segment_text, station=station)
@@ -523,6 +533,11 @@ def extract_section_facts(
                     ),
                 )
                 row["lithology_terms"] = union(row["lithology_terms"], terms_in_text(segment_text, LITHOLOGY_TERMS, longest_first=True))
+                for field in FACT_FIELDS & values.keys():
+                    if values[field] not in (None, ""):
+                        row.setdefault("_section_value_candidates", []).append(dict(
+                            field=field, value=values[field], evidence=dict(document_id=doc_id,
+                            page=page, method="section_panel_dictionary", block_ids=[b["id"] for b in panel_blocks])))
                 row["scoped_geometry"] = union(row["scoped_geometry"], [
                     {**item, "document_id": doc_id, "page": page} for item in scoped_geometry
                 ])
@@ -579,6 +594,7 @@ def station_section_segments(
     active_station: str | None,
     document_stations: set[str],
     *, root_heading_depth: int | None = None,
+    section_headings: list[dict] | None = None,
 ) -> tuple[list[tuple[str, str]], str | None]:
     """Split a page panel by numbered slope headings and retain continuation text.
 
@@ -589,7 +605,15 @@ def station_section_segments(
     """
     occurrences: list[tuple[int, int, str]] = []
     headings: list[tuple[int, int, str]] = []
-    source_headings = numbered_headings(text)
+    source_headings = numbered_headings(text) if section_headings is None else section_headings
+    if section_headings is not None:
+        for heading in source_headings:
+            if not heading["stations"]:
+                continue
+            subjects = heading_subjects(heading, document_stations)
+            owner = subjects[0] if subjects and all(s in allowed_stations for s in subjects) else UNRESOLVED_SECTION
+            match = STATION_RE.search(text, heading["start"], heading["end"])
+            headings.append((heading["start"], match.end() if match else heading["end"], owner))
     for match in STATION_RE.finditer(text):
         station = normalize_station_match(match)
         context = text[max(0, match.start() - 50) : min(len(text), match.end() + 90)]
@@ -598,10 +622,14 @@ def station_section_segments(
         occurrence = (match.start(), match.end(), station)
         if station in allowed_stations:
             occurrences.append(occurrence)
+        if section_headings is not None and any(h["start"] <= match.start() < h["end"] for h in source_headings):
+            continue  # Boundary already resolved by the source catalog.
         raw_prefix = text[max(0, match.start() - 25) : match.start()]
         prefix = re.sub(r"\s+", "", raw_prefix)
         numbered_heading = (re.search(r"(?:^|\s)\d+\.\d+(?:\.\d+)?\s*$", raw_prefix)
                             or re.search(r"(?:^|[^\d.图表])\d+\.\d+(?:\.\d+)?$", prefix))
+        if section_headings is not None:
+            numbered_heading = False
         panorama_caption = re.search(r"图\d+\.\d+-\d+$", prefix) and re.match(
             r"[^。]{0,35}(?:全景图|全貌)", text[match.end():])
         explicit_subject = re.match(r"\s*(?:段)?(?:边坡|崩塌|滑坡)(?:岩体|地层|位于|高)", text[match.end():])
@@ -1056,14 +1084,14 @@ def extract_stability_scenarios(text: str) -> list[dict[str, Any]]:
 PROTECTION_TERMS = ["坡面清危", "挂网锚喷", "主动防护网", "局部单独锚杆", "单独长锚杆", "框架锚杆", "放坡", "截水沟", "排水沟", "急流槽"]
 
 
-def split_page_panels(blocks: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+def split_page_panels(blocks: list[dict[str, Any]], *, midpoint: float = 600) -> dict[str, list[dict[str, Any]]]:
     panels = {"left": [], "right": []}
     for block in blocks:
         if block.get("bbox_coordinate_space") == "unmapped_image_pixels":
             continue
         bbox = rectangle(block.get("bbox")) or [0, 0, 0, 0]
         center = (float(bbox[0]) + float(bbox[2])) / 2
-        panels["left" if center < 600 else "right"].append(block)
+        panels["left" if center < midpoint else "right"].append(block)
     for values in panels.values():
         values.sort(key=lambda row: (bbox_value(row, 1), bbox_value(row, 0)))
     return panels
@@ -1081,6 +1109,7 @@ def treatment_table_blocks(blocks: list[dict[str, Any]]) -> list[dict[str, Any]]
 
 
 def merge_slope_candidates(*groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    disagreements = source_disagreements(groups)
     merged: dict[tuple[str, str], dict[str, Any]] = {}
     for rows in groups:
         for row in rows:
@@ -1099,6 +1128,8 @@ def merge_slope_candidates(*groups: list[dict[str, Any]]) -> list[dict[str, Any]
             for key, value in row.items():
                 if key in {"station", "sources", "confidence"} or value in (None, "", [], {}):
                     continue
+                if key == "_section_value_candidates":
+                    continue
                 if isinstance(value, list) and isinstance(target.get(key), list):
                     target[key] = union(target[key], value)
                 elif key not in target or target[key] in (None, "", [], {}):
@@ -1108,6 +1139,7 @@ def merge_slope_candidates(*groups: list[dict[str, Any]]) -> list[dict[str, Any]
             target["confidence"] = max(float(target["confidence"]), float(row["confidence"]))
     output = sorted(merged.values(), key=lambda row: (str(row.get("route_code") or "ROUTE"), station_start_m(row["station"])))
     for row in output:
+        row["source_disagreements"] = disagreements.get((row["route_code"], row["station"]), [])
         # “岩体” does not identify a joint. Where an explicitly typed bedding
         # observation repeats that pair, retain the typed observation only.
         planes = row.get('structural_planes', [])

@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 
 from slopekg.pipeline import DemoPipeline, PipelineAlreadyRunningError  # noqa: E402
+from slopekg.llm import DEFAULT_DEEPSEEK_MODEL  # noqa: E402
 
 
 def main() -> None:
@@ -22,7 +23,7 @@ def main() -> None:
     parser.add_argument("--mode", choices=["basic", "deep"], default="basic", help="basic is fully local; deep adds validated LLM semantics")
     parser.add_argument("--deep", action="store_true", help="Shortcut for --mode deep")
     parser.add_argument("--no-llm", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--llm-model", default="deepseek-v4-flash")
+    parser.add_argument("--llm-model", default=DEFAULT_DEEPSEEK_MODEL)
     parser.add_argument("--reuse-parsed", action="store_true", help="Reuse PDF sidecars only if they still match current source files")
     args = parser.parse_args()
     try:

@@ -130,6 +130,7 @@ async function loadSlopeDetail(slopeId, rowElement) {
       <div class="detail-row"><small>关联节点</small>${api.escapeHtml(Object.entries(relatedCounts).map(([k,v]) => `${k}:${v}`).join(" / ") || "无")}</div>
     </div>
     ${parameterTables ? `<h3 style="margin-top:18px">已提取的材料计算参数</h3>${parameterTables}` : ""}
+    ${(props.source_disagreements || []).length ? `<h3>来源分歧待核</h3><p>保留不同取值及出处。当前字段值尚未据此裁决；须先核对是否同一对象、范围和工况。</p>${props.source_disagreements.map(issue => `<details class="detail-block"><summary>${api.escapeHtml(issue.field)}</summary>${issue.alternatives.map(option => `<p>原文候选：${api.escapeHtml(JSON.stringify(option.value))}；来源：${api.escapeHtml(option.sources.map(source => `第${source.page ?? "?"}页（${source.source_file || "来源待核"}）`).join("；"))}</p>`).join("")}</details>`).join("")}` : ""}
     <h3 style="margin-top:18px">缺失或待接入（${missing.length}）</h3>
     <div class="field-grid">${missing.map((item) => `<div class="field-item"><strong>${api.escapeHtml(item.label_zh)}</strong>${badge(item.status)}<br/><small>${api.escapeHtml(item.requirement || "")}${item.interface ? ` · ${api.escapeHtml(item.interface)}` : ""}</small></div>`).join("")}</div>
     <p style="margin-top:16px"><a href="./graph.html">在关系图谱中查看</a></p>`;

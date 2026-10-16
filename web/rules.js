@@ -12,6 +12,11 @@
     candidate_pending_formula_review: "公式待核验",
     approved: "已批准",
     source_cataloged: "已登记",
+    cataloged_only: "仅登记·未选页",
+    read_empty: "已读取·无有效文字",
+    content_read: "已读取内容",
+    read_no_candidates: "已读取·未形成候选",
+    candidates_extracted: "已提取候选·待审核",
     partial_fuzzy: "模糊证据·待核验",
     official_standard: "正式规范",
     technical_guideline: "技术指南",
@@ -306,9 +311,9 @@
         <td><strong>${e(row.code || row.title)}</strong><span class="table-subtext">${e(row.title)}</span><span class="source-path">${e(row.path)}</span></td>
         <td>${e(row.authority)}<span class="table-subtext">${e(label(row.priority))} / ${e(label(row.source_type))}</span></td>
         <td>${e(row.pages)}</td>
-        <td>${e(row.selected_page_count || 0)}<span class="table-subtext">${e((row.selected_pages || []).join("、") || "未选页")}</span></td>
+        <td>${e(row.selected_page_count || 0)}<span class="table-subtext">${e((row.selected_pages || []).join("、") || "未选页")}</span><label>下次读取页<input data-page-selection="${e(row.id)}" aria-label="${e(row.title)}选页" placeholder="auto / all / none / 1-3,5" value="auto"/></label></td>
         <td>${e((row.topics || []).join("、"))}</td>
-        <td><span class="badge ${e(row.review_status)}">${e(label(row.review_status))}</span></td>
+        <td><span class="badge">${e(label(row.content_status || row.processing_status || row.review_status))}</span></td>
       </tr>`).join("");
   }
 
@@ -359,7 +364,8 @@
         body: JSON.stringify({
           use_llm: document.getElementById("ruleUseLlm").checked,
           force_ocr: document.getElementById("ruleForceOcr").checked,
-          llm_model: "deepseek-v4-flash",
+          include_unselected: Boolean(document.getElementById("ruleIncludeUnselected")?.checked),
+          page_selection: Object.fromEntries(Array.from(document.querySelectorAll("[data-page-selection]")).map(input => [input.dataset.pageSelection, input.value.trim() || "auto"])),
         }),
       });
       const job = await response.json();
