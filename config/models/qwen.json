@@ -1,0 +1,11 @@
+{
+  "name": "transport-project-qwen",
+  "base_url": "https://ws-wgwn7v4f8lco06n1.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+  "credential_endpoint": "https://ws-wgwn7v4f8lco06n1.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+  "model": "qwen3.8-max-0902",
+  "api_key_file": ".secrets/bailian_transport_project.env",
+  "api_key_field": "BAILIAN_PROJECT_API_KEY",
+  "token_parameter": "max_completion_tokens",
+  "max_output_tokens": 131072,
+  "request_options": {"enable_thinking": true, "reasoning_effort": "xhigh", "vl_high_resolution_images": true}
+}

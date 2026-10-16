@@ -1,0 +1,19 @@
+{
+  "overview_edge": 1600,
+  "detail_edge": 3000,
+  "reread_edge": 4500,
+  "window_pages": 4,
+  "max_calls": 200,
+  "max_prompt_chars": 24000,
+  "max_images": 6,
+  "max_image_pixels": 24000000,
+  "max_pixels_per_image": 12000000,
+  "max_image_bytes": 30000000,
+  "max_regions_per_page": 64,
+  "max_rereads_per_region": 2,
+  "audit_rounds": 2,
+  "max_audit_regions": 8,
+  "use_native_text": true,
+  "use_existing_ocr": true,
+  "retry_failed": false
+}

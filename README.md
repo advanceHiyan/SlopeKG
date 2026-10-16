@@ -4,6 +4,8 @@
 
 Git 仓库保留源码、测试和技术说明。`output/`、`outputs/` 下的 OCR 图片、解析中间数据、生成图谱、离线展示及交付归档不随 Git 上传；请使用本地原始资料运行下述流水线生成。移除 Git 跟踪不会删除本地已有成果。
 
+独立多模态识别入口已增加：`--recognizer multimodal --pdf <PDF路径> --model-profile config/models/deepseek.json`。原来的basic/deep路线仍默认使用`--recognizer legacy`。新路线先由模型识别版面和语义切分，再按区域细读、放大、核验和查漏；结果独立保存，暂不自动写入正式图谱。[方案、运行方式和执行对照](docs/多模态识别流程方案与执行.md)说明OCR协作、模型切换、预算和当前验收边界。增加`--prepare-only`可只在本地准备清单，不调用模型。
+
 本项目是公路边坡多源多模态知识图谱的第一版工程 Demo。生产流水线不依赖人工种子，当前已实现：
 
 - 全页自适应 PDF 解析 sidecar：documents/pages/text_blocks/tables/ocr_tasks；按页选择原生版面、表格抽取、整页 OCR 或图纸标题栏 OCR。

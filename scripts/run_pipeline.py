@@ -25,7 +25,16 @@ def main() -> None:
     parser.add_argument("--no-llm", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--llm-model", default=DEFAULT_DEEPSEEK_MODEL)
     parser.add_argument("--reuse-parsed", action="store_true", help="Reuse PDF sidecars only if they still match current source files")
+    parser.add_argument("--recognizer", choices=["legacy", "multimodal"], default="legacy",
+                        help="Select the existing basic/deep route or the independent visual route")
+    parser.add_argument("--pdf", type=Path, action="append", help="Explicit PDF input; repeat for multiple files (multimodal only)")
+    parser.add_argument("--model-profile", type=Path, help="JSON endpoint/model/credential profile (multimodal only)")
+    parser.add_argument("--review-profile", type=Path, help="Optional separate model for source verification and coverage audit")
+    parser.add_argument("--visual-settings", type=Path, help="JSON visual context/render/call budgets")
+    parser.add_argument("--prepare-only", action="store_true", help="Inventory PDFs locally without any model/API/OCR execution")
     args = parser.parse_args()
+    if args.recognizer == "multimodal" and args.no_llm:
+        parser.error("--no-llm belongs to legacy; use --prepare-only for local-only multimodal preparation")
     try:
         state = DemoPipeline().run(
             ocr_pages=args.ocr_pages,
@@ -36,10 +45,22 @@ def main() -> None:
             parse_mode="basic" if args.no_llm else ("deep" if args.deep else args.mode),
             llm_model=args.llm_model,
             reuse_parsed=args.reuse_parsed,
+            recognizer=args.recognizer,
+            input_pdfs=args.pdf,
+            model_profile=args.model_profile,
+            review_profile=args.review_profile,
+            visual_settings=json.loads(args.visual_settings.read_text(encoding="utf-8-sig")) if args.visual_settings else None,
+            prepare_only=args.prepare_only,
         )
     except (PipelineAlreadyRunningError, ValueError, FileNotFoundError) as exc:
         parser.error(str(exc))
-    print(json.dumps(state, ensure_ascii=False, indent=2))
+    display = state
+    if args.recognizer == "multimodal":
+        from slopekg.config import PATHS
+        display = {key: state[key] for key in ("recognizer", "processing_status", "summary", "precision", "recall", "metric_note")}
+        display["result_file"] = str(PATHS.output_dir / "recognition" / "run.json")
+        display["planning_estimates"] = [d.get("planning_estimate") for d in state["documents"]]
+    print(json.dumps(display, ensure_ascii=False, indent=2))
     if state.get("processing_status") in {"partial", "failed"}:
         raise SystemExit(1)
 

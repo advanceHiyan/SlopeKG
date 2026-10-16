@@ -120,7 +120,38 @@ class DemoPipeline:
         ocr_workers: int = 4,
         ocr_batch_size: int = 0,
         progress_callback: Callable[[int, str, str], None] | None = None,
+        recognizer: str = "legacy",
+        input_pdfs: list[Path] | None = None,
+        model_profile: Path | None = None,
+        review_profile: Path | None = None,
+        visual_settings: dict[str, Any] | None = None,
+        prepare_only: bool = False,
     ) -> dict[str, Any]:
+        if recognizer not in {"legacy", "multimodal"}:
+            raise ValueError("recognizer must be 'legacy' or 'multimodal'")
+        if recognizer == "multimodal":
+            from .model_client import ModelProfile, CompatibleVisionClient
+            from .visual_document import ExistingOcrEvidence
+            from .visual_pipeline import VisualPipeline, VisualSettings
+            if not input_pdfs or model_profile is None:
+                raise ValueError("Multimodal recognition requires explicit input_pdfs and model_profile")
+            if use_llm is not None or parse_mode != "basic" or reuse_parsed:
+                raise ValueError("Legacy deep/use_llm/reuse options cannot select multimodal behavior")
+            profile = ModelProfile.load(Path(model_profile))
+            reviewer = CompatibleVisionClient(ModelProfile.load(Path(review_profile)), self.paths.root) if review_profile else None
+            settings = VisualSettings(**(visual_settings or {}))
+            if progress_callback:
+                progress_callback(1, "multimodal", "开始独立的多模态识别，原有图谱保持独立")
+            state = VisualPipeline(CompatibleVisionClient(profile, self.paths.root),
+                self.paths.output_dir / "recognition", settings=settings,
+                ocr_evidence=ExistingOcrEvidence(self.paths.parsed_dir) if settings.use_existing_ocr else None,
+                review_model=reviewer
+            ).run([Path(p) for p in input_pdfs], prepare_only=prepare_only)
+            if progress_callback:
+                progress_callback(100, state["processing_status"], "多模态识别结果与覆盖状态已保存")
+            return state
+        if input_pdfs is not None or model_profile is not None or review_profile is not None or visual_settings is not None or prepare_only:
+            raise ValueError("Visual options require recognizer='multimodal'")
         if use_llm is not None:
             parse_mode = "deep" if use_llm else "basic"
         if parse_mode not in {"basic", "deep"}:

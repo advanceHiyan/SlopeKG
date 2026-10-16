@@ -1,0 +1,10 @@
+{
+  "name": "project-kimi",
+  "base_url": "https://api.moonshot.cn/v1",
+  "credential_endpoint": "https://api.moonshot.cn/v1",
+  "model": "kimi-k3",
+  "api_key_file": ".secrets/kimi_api_key.txt",
+  "token_parameter": "max_completion_tokens",
+  "max_output_tokens": 131072,
+  "request_options": {"reasoning_effort": "max"}
+}
