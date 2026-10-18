@@ -1,0 +1,23 @@
+.recognition-card { margin-top: 16px; }
+.recognition-controls { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; }
+.recognition-controls label { display: grid; gap: 6px; font-size: 13px; }
+.recognition-controls select, .recognition-controls input, #recognitionStatusFilter, #recognitionFileSearch { min-height: 36px; border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; background: white; max-width: 100%; }
+.recognition-controls input { width: 120px; }
+.recognition-confirm { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; line-height: 1.6; }
+.recognition-doc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 16px 0 8px; }
+.recognition-doc-head strong span { color: var(--muted); font-weight: 400; }
+.recognition-files { max-height: 230px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; }
+.recognition-file { display: flex; gap: 10px; align-items: center; padding: 10px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.recognition-file:last-child { border-bottom: 0; }
+.recognition-file span { flex: 1; overflow-wrap: anywhere; }
+.recognition-file small { color: var(--muted); white-space: nowrap; }
+.recognition-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 12px; }
+.recognition-card details { max-width: 430px; overflow-wrap: anywhere; margin-top: 8px; }
+.recognition-card summary, .legacy-controls summary { cursor: pointer; }
+.legacy-controls { margin-top: 16px; }
+.job-progress-track.indeterminate span { width: 35% !important; opacity: .6; }
+@media (max-width: 600px) {
+  .recognition-doc-head { align-items: stretch; flex-direction: column; }
+  .recognition-controls label:first-child { width: 100%; }
+  .recognition-card .card-title-row { flex-wrap: wrap; }
+}

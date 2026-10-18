@@ -15,5 +15,8 @@
   "max_audit_regions": 8,
   "use_native_text": true,
   "use_existing_ocr": true,
-  "retry_failed": false
+  "retry_failed": false,
+  "model_concurrency": 1,
+  "crop_padding": 0.01,
+  "independent_review": true
 }

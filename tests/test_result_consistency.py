@@ -129,7 +129,7 @@ class ResultConsistencyTests(unittest.TestCase):
             write_json(self.paths.state_json, {"publication_stage": kwargs.get("publication_stage"), "parse_mode": kwargs.get("parse_mode")})
             return {}
 
-        with patch.object(pipeline, "parse_documents", return_value=copy.deepcopy(parsed)), patch.object(pipeline, "run_ocr", return_value=([], [])), patch.object(pipeline, "build_graph", side_effect=build), patch.object(pipeline, "publish_state", side_effect=publish), patch("slopekg.pipeline.extract_domain_candidates", return_value={}), patch("slopekg.pipeline.run_semantic_extraction", return_value=([], {})), patch("slopekg.pipeline.read_deepseek_key", return_value=None):
+        with patch.object(pipeline, "parse_documents", return_value=copy.deepcopy(parsed)), patch.object(pipeline, "run_ocr", return_value=([], [])), patch.object(pipeline, "build_graph", side_effect=build), patch.object(pipeline, "publish_state", side_effect=publish), patch("slopekg.legacy_pipeline.extract_domain_candidates", return_value={}), patch("slopekg.legacy_pipeline.run_semantic_extraction", return_value=([], {})), patch("slopekg.legacy_pipeline.read_deepseek_key", return_value=None):
             with self.assertRaises(RuntimeError):
                 pipeline.run(parse_mode="deep")
         active = json.loads(self.paths.graph_json.read_text(encoding="utf-8"))

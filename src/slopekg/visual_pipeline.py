@@ -1,191 +1,76 @@
-"""Bounded, resumable layout -> model segmentation -> reading -> review -> audit."""
+"""PDF workflow orchestration; model transport, evidence and review live in separate layers."""
 from __future__ import annotations
-
-from dataclasses import asdict, dataclass
-import hashlib
-import json
+import asyncio
+from dataclasses import asdict
 from pathlib import Path
-import re
 from typing import Callable
-import unicodedata
-
 from .model_client import JsonVisionModel, ModelError, content_hash
-from .storage import read_json, write_json, write_jsonl
-from .visual_contract import (VERSION, SYSTEM, LAYOUT, SEGMENT, READ, VERIFY, AUDIT,
-                              FACT_KEYS, ContractError, bbox, inside,
-                              page_card, reading, resolve_conflicts, consolidate, rows, text)
+from .storage import write_json, write_jsonl
+from .visual_contract import (VERSION, LAYOUT, SEGMENT, READ, AUDIT, FACT_KEYS,
+                              ContractError, bbox, inside, page_card, reading,
+                              resolve_conflicts, consolidate, rows, text)
 from .visual_document import VisualDocument
-
-
-@dataclass(frozen=True)
-class VisualSettings:
-    overview_edge: int = 1600
-    detail_edge: int = 3000
-    reread_edge: int = 4500
-    window_pages: int = 4
-    max_calls: int = 200
-    max_prompt_chars: int = 24000
-    max_images: int = 6
-    max_image_pixels: int = 24000000
-    max_pixels_per_image: int = 12000000
-    max_image_bytes: int = 30000000
-    max_regions_per_page: int = 64
-    max_rereads_per_region: int = 2
-    audit_rounds: int = 2
-    max_audit_regions: int = 8
-    use_native_text: bool = True
-    use_existing_ocr: bool = True
-    retry_failed: bool = False
-
-    def __post_init__(self):
-        for key in ("overview_edge", "detail_edge", "reread_edge"):
-            if not 256 <= getattr(self, key) <= 10000:
-                raise ValueError("Render edges must be 256..10000")
-        if not (1 <= self.window_pages <= 16 and 1 <= self.max_calls <= 100000
-                and 8000 <= self.max_prompt_chars <= 1000000 and 2 <= self.max_images <= 32
-                and self.max_image_pixels >= 1000000 and self.max_pixels_per_image >= 65536 and self.max_image_bytes >= 100000
-                and 1 <= self.max_regions_per_page <= 1024 and 0 <= self.max_rereads_per_region <= 8
-                and 1 <= self.audit_rounds <= 4 and 1 <= self.max_audit_regions <= 64):
-            raise ValueError("Invalid visual pipeline budget")
-
-
-def compact(value) -> str:
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
-
-
-def normalized(value: str) -> str:
-    # NFKC would collapse superscript units; preserve m² versus m³.
-    return re.sub(r"\s+", "", unicodedata.normalize("NFC", value))
-
-
-def literal_supported(value: str, quote: str, *, unit: bool = False) -> bool:
-    """Literal support with token boundaries: 4.5 != 4.51, m != mm or m².
-
-    This is a generic lexical guard, not a unit conversion or semantic judge.
-    """
-    value = normalized(value)
-    quote = unicodedata.normalize("NFC", quote) if unit else normalized(quote)
-    if not value:
-        return True
-    pattern = r"\s*".join(re.escape(c) for c in value) if unit else re.escape(value)
-    for match in re.finditer(pattern, quote):
-        before = quote[match.start() - 1] if match.start() else ""
-        after = quote[match.end()] if match.end() < len(quote) else ""
-        if unit:
-            def unit_part(char):
-                return bool(char) and ((char.isascii() and char.isalpha()) or char.isdigit() or char in "/^⁻⁺")
-            # A numeric value directly before a unit is expected. Prefix letters
-            # and following powers/compound units change the unit's meaning.
-            if (before and before.isascii() and before.isalpha()) or before in ("/", "^") or unit_part(after):
-                continue
-            following = quote[match.end():].lstrip()
-            if following.startswith(("/", "^", "⁻", "⁺")):
-                continue
-        else:
-            if value[0].isdigit() and before and (before.isdigit() or before in ".−-"):
-                continue
-            if value[-1].isdigit() and after and (after.isdigit() or (after == "." and match.end() + 1 < len(quote)
-                                                                                    and quote[match.end() + 1].isdigit())):
-                continue
-        return True
-    return False
-
-
-def pack(units: list, budget: int) -> list[list]:
-    """Partition all units; never silently truncate a tail to meet a budget."""
-    batches, current, size = [], [], 2
-    for unit in units:
-        cost = len(compact(unit)) + 1
-        if cost + 2 > budget:
-            raise ContractError("One structured item exceeds prompt budget")
-        if current and size + cost > budget:
-            batches.append(current)
-            current, size = [], 2
-        current.append(unit)
-        size += cost
-    if current:
-        batches.append(current)
-    return batches
+from .visual_settings import VisualSettings
+from .visual_batching import compact, pack, audit_units, layout_anchors, verification_batches
+from .visual_evidence import normalized, literal_supported, source_contains
+from .visual_runtime import VisualRuntime
+from .visual_review import VisualReviewer
+from .visual_sources import content_coverage, related_sources, unaccounted_content
 
 
 class VisualPipeline:
     def __init__(self, model: JsonVisionModel, output_dir: Path, *, settings: VisualSettings | None = None,
-                 ocr_evidence: Callable | None = None, review_model: JsonVisionModel | None = None):
+                 ocr_evidence: Callable | None = None, review_model: JsonVisionModel | None = None,
+                 progress_callback: Callable | None = None):
         self.model, self.output_dir = model, output_dir.resolve()
         self.review_model = review_model or model
         self.settings = settings or VisualSettings()
-        self.ocr_evidence = ocr_evidence
-        self.calls = self.cache_hits = 0
-        self.receipts: list[dict] = []
+        self.ocr_evidence, self.progress_callback = ocr_evidence, progress_callback
+        self.runtime = VisualRuntime(model, self.review_model, self.output_dir, self.settings)
+        self.reviewer = VisualReviewer(self.settings, self.runtime.ask_async)
 
-    def _ask(self, stage: str, instruction: str, context: dict, images: list, validate: Callable) -> dict:
-        model = self.review_model if stage in {"verify", "audit"} else self.model
-        prompt = instruction + "\n输入：" + compact(context)
-        if len(prompt) + len(SYSTEM) > self.settings.max_prompt_chars:
-            raise ContractError("Prompt budget exceeded; request was not sent")
-        if (len(images) > self.settings.max_images
-                or sum(i.width * i.height for i in images) > self.settings.max_image_pixels
-                or sum(i.path.stat().st_size for i in images) > self.settings.max_image_bytes):
-            raise ContractError("Image budget exceeded; request was not sent")
-        identity = {"version": VERSION, "stage": stage, "model": model.identity(),
-                    "system": SYSTEM, "prompt": prompt,
-                    "images": [{"label": i.label, "sha256": hashlib.sha256(i.path.read_bytes()).hexdigest()}
-                               for i in images]}
-        key = content_hash(identity)
-        path = self.output_dir / "cache" / (key + ".json")
-        cached = read_json(path, {})
-        if cached.get("status") == "completed":
-            answer = validate(cached["answer"])
-            self.cache_hits += 1
-            self.receipts.append({"stage": stage, "cache_key": key, "cache_hit": True, **cached["receipt"]})
-            return answer
-        if cached and not self.settings.retry_failed:
-            raise ModelError("Previous failed/interrupted call requires explicit retry_failed; not charged again")
-        if self.calls >= self.settings.max_calls:
-            raise ModelError("Run call budget exhausted; unfinished work retained")
-        self.calls += 1
-        previous_attempts = cached.get("attempts", [])
-        marker = {"status": "started", "stage": stage, "cache_key": key,
-                  "attempts": previous_attempts + [{"status": "started"}]}
-        write_json(path, marker)  # Persist before transmitting a potentially billable request.
-        raw, receipt = None, None
-        try:
-            raw, receipt = model.complete(system=SYSTEM, prompt=prompt, images=images)
-            receipt = {**receipt, "requested_model_profile": model.identity()}
-            answer = validate(raw)
-        except Exception as exc:
-            # Runtime errors from injected clients can contain secrets; persist types only.
-            safe = str(exc) if isinstance(exc, (ModelError, ContractError)) else type(exc).__name__
-            marker.update(status="failed", error=safe)
-            marker["attempts"][-1] = {"status": "failed", "error": safe}
-            receipt = receipt or getattr(exc, "receipt", None)
-            if receipt:
-                marker["receipt"] = receipt
-                marker["attempts"][-1]["receipt"] = receipt
-                self.receipts.append({"stage": stage, "cache_key": key, "status": "failed", "cache_hit": False, **receipt})
-            if raw is not None:
-                marker["invalid_answer"] = raw
-            write_json(path, marker)
-            raise ModelError(f"{stage}: {safe}") from None
-        marker["attempts"][-1] = {"status": "completed"}
-        write_json(path, {**marker, "status": "completed", "answer": answer, "receipt": receipt})
-        self.receipts.append({"stage": stage, "cache_key": key, "cache_hit": False, **receipt})
-        return answer
+    @property
+    def calls(self):
+        return self.runtime.calls
 
-    def run(self, pdfs: list[Path], *, prepare_only: bool = False) -> dict:
-        from .pipeline import pipeline_run_guard
+    @property
+    def cache_hits(self):
+        return self.runtime.cache_hits
+
+    @property
+    def peak_concurrency(self):
+        return self.runtime.peak_concurrency
+
+    @property
+    def receipts(self):
+        return self.runtime.receipts
+
+    async def _ask_async(self, *args):
+        return await self.runtime.ask_async(*args)
+
+    def run(self, pdfs: list[Path], *, prepare_only: bool = False,
+            page_selections: dict[str, list[int]] | None = None) -> dict:
+        return asyncio.run(self.arun(pdfs, prepare_only=prepare_only, page_selections=page_selections))
+
+
+    async def arun(self, pdfs: list[Path], *, prepare_only: bool = False,
+                   page_selections: dict[str, list[int]] | None = None) -> dict:
+        from .pipeline_lock import pipeline_run_guard
         from .provenance import runtime_identity
         if not pdfs:
             raise ValueError("Explicit input PDFs required")
         sources = [p.resolve(strict=True) for p in pdfs]
         if len(set(sources)) != len(sources) or any(p.suffix.lower() != ".pdf" for p in sources):
             raise ValueError("Duplicate or non-PDF input")
+        selections = {str(Path(p).resolve()): numbers for p, numbers in (page_selections or {}).items()}
+        if set(selections) - {str(p) for p in sources}:
+            raise ValueError("Page selection refers to an input that was not supplied")
         if any(self.output_dir == p.parent or self.output_dir in p.parents for p in sources):
             raise ValueError("Output directory must not contain input PDFs")
         self.output_dir.mkdir(parents=True, exist_ok=True)
         with pipeline_run_guard(self.output_dir / ".visual.lock"):
-            self.calls = self.cache_hits = 0
-            self.receipts = []
+            self.runtime.reset()
+            self._work_slots = asyncio.Semaphore(self.settings.model_concurrency)
             result = {"schema_version": VERSION, "recognizer": "multimodal", "producer": runtime_identity(),
                       "model": self.model.identity(), "review_model": self.review_model.identity(),
                       "settings": asdict(self.settings), "documents": [],
@@ -196,7 +81,7 @@ class VisualPipeline:
                 result.update(processing_status="running", current_input=str(source))
                 write_json(self.output_dir / "run.json", result)
                 try:
-                    report = self._document(source, prepare_only)
+                    report = await self._document(source, prepare_only, selections.get(str(source)))
                 except Exception as exc:
                     report = {"path": str(source), "status": "failed", "error": type(exc).__name__,
                               "pages": [], "facts": []}
@@ -213,6 +98,7 @@ class VisualPipeline:
             write_json(self.output_dir / "run.json", result)
             return result
 
+
     def _finish(self, result: dict) -> dict:
         docs = result["documents"]
         states = [d["status"] for d in docs]
@@ -224,55 +110,81 @@ class VisualPipeline:
                              "facts": len(facts), "verified_model": sum(f["status"] == "verified_model" for f in facts),
                              "pending": sum(f["status"] == "pending" for f in facts),
                              "rejected": sum(f["status"] == "rejected" for f in facts),
-                             "calls": self.calls, "cache_hits": self.cache_hits}
+                             "calls": self.calls, "cache_hits": self.cache_hits, "peak_concurrency": self.peak_concurrency}
         result["receipts"] = list(self.receipts)
         result["environment_variables_used"] = sorted({v for r in self.receipts for v in r.get("environment_variables_used", [])})
         return result
 
-    def _document(self, source: Path, prepare_only: bool) -> dict:
+
+    async def _document(self, source: Path, prepare_only: bool, selected_pages: list[int] | None = None) -> dict:
         doc = VisualDocument(source, self.output_dir)
         report = {"id": doc.id, "path": str(source), "source_sha256": doc.sha256,
                   "status": "prepared" if prepare_only else "partial", "pages": [], "facts": []}
         try:
+            numbers = list(range(1, len(doc.pdf) + 1)) if selected_pages is None else selected_pages
+            if (not isinstance(numbers, list) or not numbers or any(type(n) is not int or n < 1 or n > len(doc.pdf) for n in numbers)
+                    or len(set(numbers)) != len(numbers)):
+                raise ValueError("Invalid physical page selection")
+            numbers = sorted(numbers)
+            report.update(source_page_count=len(doc.pdf), selected_pages=numbers,
+                          scope="whole_document" if len(numbers) == len(doc.pdf) else "selected_pages_only")
             report["pages"] = [{**doc.page_info(number), "status": "prepared", "regions": [], "errors": [], "audit": []}
-                               for number in range(1, len(doc.pdf) + 1)]
+                               for number in numbers]
             report["planning_estimate"] = {
-                "calls_assuming_one_region_per_page": 4 * len(doc.pdf) + (len(doc.pdf) + self.settings.window_pages - 1) // self.settings.window_pages,
-                "note": "Estimate only: one layout, one read, one verification batch and one audit per page; extra regions/rereads cost more.",
+                "calls_assuming_one_region_per_page": (4 + int(self.settings.independent_review)) * len(numbers) + (len(numbers) + self.settings.window_pages - 1) // self.settings.window_pages,
+                "note": "Estimate only: layout, read, optional blind read, verification and audit; dense regions/repair need additional calls.",
                 "run_call_limit": self.settings.max_calls, "limit_scope": "all documents in this run"}
-            for state in report["pages"]:
-                number = state["page"]
-                if not prepare_only:
+            async def layout_page(state):
+                async with self._work_slots:
+                    number = state["page"]
                     try:
-                        state["card"] = self._ask("layout", LAYOUT, {"document_id": doc.id, "sha256": doc.sha256, "page": number},
+                        anchors = doc.geometric_evidence(number)
+                        if not self.settings.use_native_text:
+                            anchors=[{k:v for k,v in a.items() if k!="text"} for a in anchors]
+                        state["geometric_anchors"] = anchors
+                        # Geometry is still useful when all anchor text would
+                        # exceed the context budget. Full evidence is retained.
+                        wire_anchors,representation=layout_anchors(anchors,self.settings.max_prompt_chars//2)
+                        state["layout_anchor_representation"]=representation
+                        def layout_card(answer):
+                            card=page_card(answer,number,anchors,self.settings.crop_padding)
+                            for region in card["regions"]:
+                                region["pre_guard_bbox"]=list(region["bbox"])
+                                region["bbox"]=doc.safe_bounds(number,region["bbox"])
+                                region["crop_guard"]="source_cells_no_text_inference"
+                            return card
+                        state["card"] = await self._ask_async("layout", LAYOUT, {"document_id": doc.id, "sha256": doc.sha256,
+                            "page": number, "page_width":state["width"],"page_height":state["height"],"geometric_anchors":wire_anchors,
+                            "geometry_hints":{"representation":representation,"source_anchor_count":len(anchors),
+                                "instruction":"锚点是可选辅助。若列表为空，直接按全页图提出语义区域且anchor_ids为空；原始几何仍由程序保留用于裁图边界与查漏。"}},
                             [doc.render(number, edge=self.settings.overview_edge,
                                         max_pixels=min(self.settings.max_pixels_per_image, self.settings.max_image_pixels - 8192))],
-                            lambda a: page_card(a, number))
+                            layout_card)
                     except (ModelError, ContractError) as exc:
                         state["errors"].append(str(exc))
                         # Universal recovery is the full original page, not a document-specific template.
                         state["card"] = {"page": number, "title": "", "summary": "layout unresolved", "blank": False,
                                          "regions": [{"id": "unresolved", "kind": "unknown", "bbox": [0,0,1,1],
                                                       "objects": [], "summary": "full-page recovery"}]}
-                self._checkpoint(report)
+                    self._checkpoint(report)
             if prepare_only:
-                return report
-            assignments = self._segment(doc, report)
-            for state in report["pages"]:
-                number = state["page"]
-                hints = self._hints(doc, number)
-                state["auxiliary_evidence"] = hints
-                regions = state["card"]["regions"]
-                for region in regions[:self.settings.max_regions_per_page]:
-                    rid = f"p{number}:{region['id']}"
-                    self._read_region(doc, state, {**region, "id": rid}, assignments.get(rid, {}), hints, report)
-                if len(regions) > self.settings.max_regions_per_page:
-                    state["errors"].append("Region budget exhausted; remaining regions NOT read")
-                    state["unread_regions"] = regions[self.settings.max_regions_per_page:]
-                self._audit(doc, state, hints, report)
-                state["status"] = ("completed" if not state["errors"] and state["audit"][-1].get("complete")
-                                   and all(r["status"] == "completed" for r in state["regions"]) else "partial")
                 self._checkpoint(report)
+                return report
+            outcomes = await asyncio.gather(*(layout_page(state) for state in report["pages"]), return_exceptions=True)
+            for state, outcome in zip(report["pages"], outcomes):
+                if isinstance(outcome, BaseException):
+                    state["errors"].append("Layout failure: " + type(outcome).__name__)
+                    state.setdefault("card", {"page":state["page"],"title":"","summary":"layout unresolved","blank":False,
+                        "regions":[{"id":"unresolved","kind":"unknown","bbox":[0,0,1,1],"objects":[],"summary":"full-page recovery"}]})
+            assignments = await self._segment(doc, report)
+            # Complete each bounded dependency window before spending the
+            # entire file budget on more primary reads. Prior windows remain
+            # available only through explicit source continuation links.
+            for offset in range(0,len(report['pages']),self.settings.window_pages):
+                report['active_window']=[offset+1,min(offset+self.settings.window_pages,len(report['pages']))]
+                await self._recognize_window(doc,report,assignments,report['pages'][offset:offset+self.settings.window_pages])
+            report.pop('active_window',None)
+            report["facts"].sort(key=lambda f: (f["page"], f["region_id"], f["id"]))
             report["facts"] = consolidate(report["facts"])
             resolve_conflicts(report["facts"])
             report["status"] = "completed" if all(p["status"] == "completed" for p in report["pages"]) else "partial"
@@ -298,10 +210,96 @@ class VisualPipeline:
         finally:
             doc.close()
 
+
+    async def _recognize_window(self, doc, report, assignments, states):
+        jobs=[]
+        async def read_job(state,region):
+            async with self._work_slots:
+                number = state["page"]
+                hints=state["auxiliary_evidence"]
+                rid=f"p{number}:{region['id']}"
+                target={**region,"id":rid}
+                assignment=assignments.get(rid,{})
+                entry=await self._read_region(doc,state,target,assignment,hints,report,defer_review=True)
+                return (state,target,assignment,hints,entry)
+        for state in states:
+            state["auxiliary_evidence"]=self._hints(doc,state["page"])
+            if len(state["card"]["regions"]) > self.settings.max_regions_per_page:
+                state["errors"].append("Region budget exhausted; remaining regions NOT read")
+                state["unread_regions"]=state["card"]["regions"][self.settings.max_regions_per_page:]
+        # Round-robin page frontiers prevent an early dense page from
+        # consuming every reading slot before later pages get a first look.
+        units=[(s,s["card"]["regions"][i])
+               for i in range(min(self.settings.max_regions_per_page,max(len(s["card"]["regions"]) for s in states)))
+               for s in states if i<len(s["card"]["regions"])]
+        outcomes = await asyncio.gather(*(read_job(state,r) for state,r in units), return_exceptions=True)
+        for (state,region),outcome in zip(units,outcomes):
+            if isinstance(outcome, BaseException):
+                state.update(status="partial")
+                state["errors"].append("Region failure: " + type(outcome).__name__)
+                for fact in report["facts"]:
+                    if fact["page"] == state["page"] and fact["region_id"]==f"p{state['page']}:{region['id']}":
+                        fact.update(status="pending", reason="region_failed")
+            elif outcome[-1].get("reading"):
+                jobs.append(outcome)
+        # A bounded breadth-first frontier: every primary region gets a
+        # source reading before any review or optional recursive zoom.
+        # Parallel reviewers share the request semaphore, so first batches
+        # from other regions can run before one dense region's next batch.
+        async def review_job(job):
+            state,target,assignment,hints,entry=job
+            await self._complete_region(doc,state,target,assignment,hints,report,entry,defer_recovery=True)
+        await asyncio.gather(*(review_job(job) for job in jobs))
+        async def audit_page(state):
+            async with self._work_slots:
+                await self._audit(doc,state,state.get("auxiliary_evidence",{}),report)
+                state["status"]=("completed" if not state["errors"] and state["audit"][-1].get("complete")
+                                 and all(r["status"]=="completed" for r in state["regions"]) else "partial")
+                self._checkpoint(report)
+        async def audit_frontier(states):
+            outcomes=await asyncio.gather(*(audit_page(state) for state in states),return_exceptions=True)
+            for state,outcome in zip(states,outcomes):
+                if isinstance(outcome,BaseException):
+                    state["status"]="partial"
+                    state["errors"].append("Audit failure: "+type(outcome).__name__)
+        # Independent coverage gets a turn before optional uncertainty zooms
+        # consume the remaining budget. Any later source changes require a
+        # fresh audit; the earlier certificate is never reused as success.
+        await audit_frontier(states)
+        recovery_jobs=[]
+        parents=[]
+        for state,target,assignment,hints,entry in jobs:
+            for request in entry.get("reread_requests",[]):
+                refined=await self._read_region(doc,state,request["target"],assignment,hints,report,
+                                               depth=1,rotation=request["rotation"],defer_review=True)
+                request["region_id"]=refined["id"]
+                parents.append((entry,request,refined))
+                if refined.get("reading"):
+                    recovery_jobs.append((state,request["target"],assignment,hints,refined))
+        await asyncio.gather(*(review_job(job) for job in recovery_jobs))
+        for entry,request,refined in parents:
+            if refined["status"]=="completed":
+                entry["unresolved"]=[i for i in entry["unresolved"] if i!=request["issue"]]
+            entry["status"]="completed" if not entry["unresolved"] and not entry.get("review_contract_issues") else "partial"
+        changed_pages={job[0]["page"] for job in recovery_jobs}
+        if changed_pages:
+            await audit_frontier([s for s in states if s["page"] in changed_pages])
+
     def _checkpoint(self, report: dict):
         write_json(self.output_dir / "documents" / (report["id"] + ".json"), report)
+        if self.progress_callback:
+            pages=report['pages']
+            read=sum(bool(r.get('reading')) for p in pages for r in p['regions'])
+            adopted=sum(f['status']=='verified_model' for f in report['facts'])
+            stage=('visual_audit' if any(p['audit'] for p in pages) else
+                   'visual_review' if any(f.get('review') for f in report['facts']) else
+                   'visual_read' if read else 'visual_layout')
+            # No fabricated end-to-end percentage from a variable-sized call
+            # budget. Keep that progress indeterminate, show observed counts.
+            self.progress_callback(0,stage,f"{len(pages)}页；已细读{read}个区域；候选{len(report['facts'])}条；自动核验通过{adopted}条；调用{self.calls}/{self.settings.max_calls}")
 
-    def _segment(self, doc: VisualDocument, report: dict) -> dict:
+
+    async def _segment(self, doc: VisualDocument, report: dict) -> dict:
         assignments = {}
         for offset in range(0, len(report["pages"]), self.settings.window_pages):
             window = report["pages"][offset:offset + self.settings.window_pages]
@@ -339,7 +337,7 @@ class VisualPipeline:
                             if a["continues_from"] and order[a["continues_from"]] >= order[a["region"]]:
                                 raise ContractError("Segmentation continuation must reference an earlier region")
                         return answer
-                    answer = self._ask("segment", SEGMENT,
+                    answer = await self._ask_async("segment", SEGMENT,
                         {"document_id": doc.id, "sha256": doc.sha256, "owned_regions": batch,
                          "context_regions": context, "previous_boundary": [assignments[u["region"]] for u in previous
                                                                            if u["region"] in assignments]}, [], validate)
@@ -350,14 +348,26 @@ class VisualPipeline:
                         # It remains a model hypothesis and must be visually verified.
                         if prior.get("subject") and prior["subject"] == assignment["subject"]:
                             assignment["source_context_page"] = prior.get("source_context_page", pages[assignment["continues_from"]])
+                            assignment["section_scope"] = prior.get("section_scope",assignment["continues_from"])
                         else:
                             assignment["source_context_page"] = pages[assignment["region"]]
+                            assignment["section_scope"] = assignment["region"]
                         assignments[assignment["region"]] = assignment
             except (ContractError, ModelError) as exc:
                 for state in window:
                     state["errors"].append(str(exc))
         report["assignments"] = list(assignments.values())
+        # Model-declared continuation links provide source context, never an
+        # automatic assertion that adjacent objects or facts are the same.
+        lookup={f"p{s['page']}:{r['id']}":{"region_id":f"p{s['page']}:{r['id']}","page":s["page"],"bbox":r["bbox"]}
+                for s in report["pages"] for r in s["card"]["regions"]}
+        for identifier,assignment in assignments.items():
+            links=[assignment.get("continues_from","")]
+            links += [key for key,value in assignments.items() if value.get("continues_from")==identifier]
+            assignment["source_context_regions"]=[lookup[key] for key in dict.fromkeys(links)
+                if key in lookup and abs(lookup[key]["page"]-lookup[identifier]["page"]) <= self.settings.window_pages][:2]
         return assignments
+
 
     def _hints(self, doc: VisualDocument, number: int) -> dict:
         hints = {"native": doc.native_evidence(number) if self.settings.use_native_text else [],
@@ -369,22 +379,30 @@ class VisualPipeline:
                 hints["ocr"] = {"status": "failed", "rows": []}
         return hints
 
-    def _images(self, doc, number, region, rotation=0, reread=False, assignment=None):
-        # At most one previous-page overview, one current overview and the native crop.
+
+    def _images(self, doc, number, region, rotation=0, reread=False, assignment=None, pixel_budget=None):
+        # Bounded linked-page context, current overview and the original source crop.
         has_context = self.settings.max_images >= 3 and number > 1
-        pixels = self.settings.max_image_pixels - 16384
+        pixels = (pixel_budget or self.settings.max_image_pixels) - 16384
         cap = self.settings.max_pixels_per_image
+        related=[r for r in (assignment or {}).get("source_context_regions",[]) if abs(r["page"]-number)<=self.settings.window_pages]
+        related=related[:max(0,self.settings.max_images-2-int(has_context))]
+        crop_pixels=min(cap,int(pixels*.55/max(1,len(related)+1)))
         images = [doc.render(number, edge=self.settings.overview_edge, max_pixels=min(cap, int(pixels * .25))),
                   doc.render(number, region, edge=self.settings.reread_edge if reread else self.settings.detail_edge,
-                             rotation=rotation, max_pixels=min(cap, int(pixels * .55)))]
+                             rotation=rotation, max_pixels=crop_pixels)]
         if has_context:
             anchor = (assignment or {}).get("source_context_page", number - 1)
-            if anchor == number:
+            if anchor == number or abs(anchor-number)>self.settings.window_pages:
                 anchor = number - 1
             images.insert(0, doc.render(anchor, edge=min(1600, self.settings.overview_edge), max_pixels=min(cap, int(pixels * .20))))
+        for context in related:
+            images.append(doc.render(context['page'],context["bbox"],edge=self.settings.reread_edge if reread else self.settings.detail_edge,
+                                     max_pixels=crop_pixels))
         return images
 
-    def _read_region(self, doc, state, target, assignment, hints, report, depth=0, rotation=0):
+
+    async def _read_region(self, doc, state, target, assignment, hints, report, depth=0, rotation=0, defer_review=False):
         number = state["page"]
         entry = {"id": target["id"], "bbox": target["bbox"], "status": "partial", "depth": depth}
         state["regions"].append(entry)
@@ -395,99 +413,140 @@ class VisualPipeline:
                 # entire target. Optional hints must not displace source images/context.
                 evidence = {"status": "omitted_from_prompt_over_budget", "retained_in_page_result": True}
             context = {"document_id": doc.id, "sha256": doc.sha256, "page": number,
-                       "target": target, "segmentation_hint": assignment, "auxiliary_evidence": evidence}
+                       "target": {k: target[k] for k in ("id","bbox","kind") if k in target},
+                       "segmentation_hint": assignment, "auxiliary_evidence": evidence}
+            if target.get("repair_feedback"):
+                context["repair_feedback"]=target["repair_feedback"]
+            if "parent_bbox" in target:
+                context["recovery_geometry"]={k:target[k] for k in ("parent_bbox","issue_bbox")}
             images = self._images(doc, number, target["bbox"], rotation, depth > 0, assignment)
             def validate(answer):
                 reading(answer)
-                for item in answer["facts"] + answer["tables"] + answer["dimensions"] + answer["uncertainties"]:
-                    if not inside(item["bbox"], target["bbox"]):
-                        raise ContractError("Reader extracted evidence outside target region")
                 return answer
-            answer = self._ask("read", READ, context, images, validate)
+            answer = await self._ask_async("read", READ, context, images, validate)
             entry["reading"] = answer
+            entry['content_coverage'] = content_coverage(answer)
+            outside = [item for kind in ("tables","dimensions","uncertainties") for item in answer[kind]
+                       if not inside(item["bbox"], target["bbox"])]
             candidates = []
             for raw in answer["facts"]:
                 fact = {**raw, "id": content_hash([doc.id, number, target["id"], depth, raw])[:24],
                         "document_id": doc.id, "page": number, "source_sha256": doc.sha256,
                         "region_id": target["id"], "status": "pending", "reason": "awaiting_source_review"}
+                fact["section_scope"] = assignment.get("section_scope",target["id"].split(":zoom",1)[0])
+                fact["object_binding"] = "section_scoped_source_phrase"
+                anchor=doc.locate_quote(number,raw["quote"],target["bbox"]) if self.settings.use_native_text else None
+                if anchor:
+                    fact.update(model_bbox=raw["bbox"],bbox=anchor["bbox"],geometry_source="unique_source_quote_anchor",source_anchor_id=anchor["id"])
                 candidates.append(fact)
                 report["facts"].append(fact)
-            # Re-render from source for review; never let two calls merely agree
-            # on the same low-resolution artifact when a better view is available.
-            review_images = self._images(doc, number, target["bbox"], rotation, True, assignment) if candidates else []
-            self._verify(doc, number, target, candidates, answer["transcript"], review_images, assignment)
-            unresolved = []
-            for index, issue in enumerate(answer["uncertainties"]):
-                # Earlier readings under an ambiguous crop cannot win by majority vote.
-                for candidate in candidates:
-                    a, b = candidate["bbox"], issue["bbox"]
-                    if a[0] < b[2] and a[2] > b[0] and a[1] < b[3] and a[3] > b[1]:
-                        candidate.update(status="pending", reason="ambiguous_source_requires_reread")
-                if depth == 0 and index < self.settings.max_rereads_per_region:
-                    refined = self._read_region(doc, state, {"id": target["id"] + f":zoom{index}",
-                        "bbox": issue["bbox"], "kind": "reread", "summary": issue["reason"], "objects": []},
-                        assignment, hints, report, depth + 1, issue.get("rotation", 0))
-                    if refined["status"] != "completed":
-                        unresolved.append(issue)
-                else:
-                    unresolved.append(issue)
-            entry["unresolved"] = unresolved
-            entry["status"] = "completed" if not unresolved else "partial"
+                if not inside(fact["bbox"],target["bbox"]): outside.append(fact)
+            entry["boundary_issues"] = [{"bbox":item["bbox"],"reason":"outside coarse target; retained for expanded reread"}
+                                        for item in outside]
+            entry["rotation"]=rotation
+            entry["outside_boxes"]=[item["bbox"] for item in outside]
+            self._checkpoint(report)  # Preserve source readings before a slow/interruptible review.
+            if not defer_review:
+                await self._complete_region(doc,state,target,assignment,hints,report,entry)
         except (ModelError, ContractError) as exc:
             entry["error"] = str(exc)
         self._checkpoint(report)
         return entry
 
-    def _verify(self, doc, number, target, candidates, transcript, images, assignment):
-        for batch in pack(candidates, self.settings.max_prompt_chars // 2):
-            expected = {f["id"] for f in batch}
-            def validate(answer):
-                found = rows(answer.get("verdicts"), "verdicts")
-                if len(found) != len(expected) or {v.get("id") for v in found} != expected:
-                    raise ContractError("Reviewer lost or duplicated facts")
-                for verdict in found:
-                    if verdict.get("decision") not in {"supported", "uncertain", "rejected"}:
-                        raise ContractError("Invalid review decision")
-                    for key in ("object_supported", "field_supported", "value_supported", "unit_supported", "scope_supported", "role_supported",
-                                "qualifiers_supported", "condition_supported", "time_supported"):
-                        if type(verdict.get(key)) is not bool:
-                            raise ContractError("Missing independent review check")
-                    text(verdict.get("quote"), "review quote", empty=True)
-                    text(verdict.get("reason"), "review reason", empty=True)
-                return answer
-            answer = self._ask("verify", VERIFY, {"document_id": doc.id, "sha256": doc.sha256,
-                "page": number, "target": target, "segmentation_hint": assignment, "candidates": batch}, images, validate)
-            by_id = {v["id"]: v for v in answer["verdicts"]}
-            for fact in batch:
-                review = by_id[fact["id"]]
-                fact["review"] = review
-                checks = [review[k] for k in ("object_supported", "field_supported", "value_supported", "unit_supported", "scope_supported", "role_supported",
-                                              "qualifiers_supported", "condition_supported", "time_supported")]
-                literal_tokens = [(fact[k], k == "unit") for k in ("value", "unit", "qualifier") if fact[k]]
-                grounded = (normalized(fact["quote"]) in normalized(transcript)
-                            and all(literal_supported(token, fact["quote"], unit=unit) for token, unit in literal_tokens)
-                            and bool(normalized(review["quote"]))
-                            and normalized(review["quote"]) in normalized(transcript)
-                            and all(literal_supported(token, review["quote"], unit=unit) for token, unit in literal_tokens))
-                explicit = all(fact[k].strip().lower() not in {"unknown", "unresolved", ""} for k in ("object", "scope", "role"))
-                if review["decision"] == "rejected":
-                    fact.update(status="rejected", reason="review_rejected")
-                elif review["decision"] == "supported" and all(checks) and grounded and explicit:
-                    fact.update(status="verified_model", reason="source_and_semantics_checked_by_model")
-                else:
-                    fact.update(status="pending", reason="insufficient_source_or_semantic_support")
 
-    def _audit(self, doc, state, hints, report):
+    async def _complete_region(self,doc,state,target,assignment,hints,report,entry,defer_recovery=False):
+        number=state["page"];depth=entry["depth"];rotation=entry.get("rotation",0)
+        answer=entry["reading"]
+        candidates=[f for f in report["facts"] if f["page"]==number and f["region_id"]==entry["id"]]
+        outside=entry.get("outside_boxes",[])
+        try:
+            # Re-render from source for review; never let two calls merely agree
+            # on the same low-resolution artifact when a better view is available.
+            # Shared high-resolution region preserves headers and conditions;
+            # uncertainty recovery, rather than mandatory tight crops, zooms in.
+            review_images = self._images(doc, number, target["bbox"], rotation, True, assignment,
+                                         pixel_budget=self.settings.max_image_pixels) if candidates else []
+            independent=None
+            if candidates and self.settings.independent_review:
+                independent=await self._ask_async('blind_read', READ,
+                    {'document_id':doc.id,'sha256':doc.sha256,'page':number,
+                     'target':{k:target[k] for k in ('id','bbox','kind') if k in target},
+                     'purpose':'independent_source_read; no previous candidates, transcript or segmentation answers'},
+                    review_images, reading)
+                entry['independent_read']=independent
+            review_errors=await self.reviewer.review(doc, number, target, [f for f in candidates if inside(f["bbox"],target["bbox"])],
+                               answer["transcript"], review_images, assignment,
+                               support_context=related_sources(report,number,entry['id'],assignment,self.settings.window_pages),
+                               independent_read=independent,
+                               table_source=bool(answer["tables"]),
+                               checkpoint=lambda:self._checkpoint(report))
+            entry["review_contract_issues"]=review_errors
+            for fact in candidates:
+                if not inside(fact["bbox"], target["bbox"]):
+                    fact.update(status="pending", reason="evidence_outside_coarse_target")
+            unresolved = []
+            issues = list(answer["uncertainties"])
+            for index,fact in enumerate(candidates):
+                if fact.get('reason') in {'independent_source_disagreement','incomplete_or_unbound_fields'}:
+                    issues.append({'bbox':fact['bbox'],'reason':fact['reason'], 'kind':'binding',
+                                   'rotation':0,'fact_indices':[index]})
+            if outside:
+                # The crop was proposed by a model and is approximate. Expand
+                # within the source page rather than clipping facts or guessing
+                # that an adjacent object's evidence belongs to this region.
+                union = [min([target["bbox"][0]]+[b[0] for b in outside]),
+                         min([target["bbox"][1]]+[b[1] for b in outside]),
+                         max([target["bbox"][2]]+[b[2] for b in outside]),
+                         max([target["bbox"][3]]+[b[3] for b in outside])]
+                issues.insert(0,{"bbox":union,"reason":"Expand model-proposed crop to resolve out-of-target evidence",
+                                 "rotation":0,"boundary_recovery":True,"kind":"crop_boundary"})
+            entry["reread_requests"]=[]
+            for index, issue in enumerate(issues):
+                # Earlier readings under an ambiguous crop cannot win by majority vote.
+                for fact_index,candidate in enumerate(candidates):
+                    a, b = candidate["bbox"], issue["bbox"]
+                    if (not issue.get("boundary_recovery") and
+                            ("fact_indices" not in issue or fact_index in issue["fact_indices"]) and
+                            a[0] < b[2] and a[2] > b[0] and a[1] < b[3] and a[3] > b[1]):
+                        candidate.update(status="pending", reason="ambiguous_source_requires_reread")
+                if depth == 0 and index < self.settings.max_rereads_per_region:
+                    box=(doc.recovery_bounds(number,target["bbox"],issue["bbox"],issue.get("edges",[]))
+                         if issue.get("kind")=="crop_boundary" else doc.safe_bounds(number,issue["bbox"]))
+                    refined_target={"id":target["id"]+f":zoom{index}","bbox":box,"kind":"reread",
+                                    "summary":issue["reason"],"objects":[],"parent_bbox":target["bbox"],
+                                    "issue_bbox":issue["bbox"]}
+                    if defer_recovery:
+                        entry["reread_requests"].append({"target":refined_target,"rotation":issue.get("rotation",0),"issue":issue})
+                        unresolved.append(issue)
+                        continue
+                    refined = await self._read_region(doc,state,refined_target,assignment,hints,report,depth+1,issue.get("rotation",0))
+                    if refined["status"] != "completed":
+                        unresolved.append(issue)
+                else:
+                    unresolved.append(issue)
+            entry["unresolved"] = unresolved
+            entry["status"] = "completed" if not unresolved and not review_errors else "partial"
+        except (ModelError, ContractError) as exc:
+            entry["error"] = str(exc)
+        self._checkpoint(report)
+        return entry
+
+
+    async def _audit(self, doc, state, hints, report):
         number = state["page"]
         for round_no in range(self.settings.audit_rounds):
             try:
                 # Compact source readings, not a growing conversation or whole PDF.
-                summaries = [{"region": r["id"], "bbox": r["bbox"], "status": r["status"],
-                              "transcript": r.get("reading", {}).get("transcript", ""),
-                              "tables": r.get("reading", {}).get("tables", []),
-                              "dimensions": r.get("reading", {}).get("dimensions", []),
-                              "facts": [{k: f[k] for k in FACT_KEYS} for f in report["facts"] if f["region_id"] == r["id"]
-                                        and f["page"] == number]} for r in state["regions"]]
+                summaries = [unit for r in state["regions"] for unit in audit_units(r,
+                              [f for f in report["facts"] if f["region_id"]==r["id"] and f["page"]==number],
+                              self.settings.max_prompt_chars//2)]
+                # Dense source geometry is losslessly sharded like transcripts,
+                # rather than repeated in every prompt until no audit can send.
+                uncovered=[a for a in state.get("geometric_anchors",[])
+                    if a["id"] in state["card"].get("unassigned_anchor_ids",[]) and not any(
+                        r.get("reading") and inside(a["bbox"],r["bbox"]) for r in state["regions"])]
+                state["geometrically_uncovered_anchor_ids"]=[a["id"] for a in uncovered]
+                summaries.extend({"part":"unassigned_geometric_anchor","anchor":a} for a in uncovered)
                 shards = pack(summaries, self.settings.max_prompt_chars // 2) or [[]]
                 audits = []
                 for shard in shards:
@@ -500,17 +559,24 @@ class VisualPipeline:
                         if answer["complete"] and (answer["missing_regions"] or answer["issues"]):
                             raise ContractError("Contradictory coverage audit")
                         return answer
-                    audit = self._ask("audit", AUDIT,
+                    audit = await self._ask_async("audit", AUDIT,
                         {"document_id": doc.id, "sha256": doc.sha256, "page": number,
                          "all_regions": [{"id": r["id"], "bbox": r["bbox"], "status": r["status"]} for r in state["regions"]],
                          "readings": shard, "shard_count": len(shards),
-                         "shard_note": "其它已读区域不在本分片内，只对本分片核对遗漏事实，同时检查整页未覆盖区域。"},
+                         "unassigned_geometric_anchors_in_readings":True,
+                         "shard_note": "readings按part拆分：transcript以offset连续切片；table_cell凭table_index/row/column关联；fact_status标记断言是否通过。其它分片缺席不等于未读或漏提，不能因此重读整页。只核对本分片可判断的问题，同时检查all_regions几何上未覆盖的区域。"},
                         [doc.render(number, edge=self.settings.reread_edge,
                                     max_pixels=min(self.settings.max_pixels_per_image, self.settings.max_image_pixels - 8192))], validate)
                     audits.append(audit)
                 missing = [r for a in audits for r in a["missing_regions"]]
+                unmapped=unaccounted_content(state['regions'])
+                if unmapped:
+                    missing += [{'bbox':c['bbox'],'reason':'Source cell/dimension has no explicit fact link or reference-only disposition'} for c in unmapped]
                 current = {"round": round_no, "complete": all(a["complete"] for a in audits),
                            "missing_regions": missing, "issues": [i for a in audits for i in a["issues"]]}
+                if unmapped:
+                    current.update(complete=False,unaccounted_content_count=len(unmapped))
+                    current['issues'].append('Unaccounted source content; transcript coverage is not fact coverage')
                 state["audit"].append(current)
                 if current["complete"]:
                     break
@@ -519,8 +585,26 @@ class VisualPipeline:
                     if len(unique) > self.settings.max_audit_regions:
                         state["errors"].append("Audit recovery budget exhausted; missing regions retained")
                     for index, item in enumerate(list(unique.values())[:self.settings.max_audit_regions]):
-                        self._read_region(doc, state, {"id": f"p{number}:audit{round_no}:{index}", "bbox": item["bbox"],
-                            "kind": "audit_recovery", "objects": [], "summary": item["reason"]}, {}, hints, report)
+                        feedback=[]
+                        for fact in report["facts"]:
+                            a,b=fact["bbox"],item["bbox"]
+                            if (fact["page"]==number and fact["status"]!="verified_model" and
+                                    a[0]<b[2] and a[2]>b[0] and a[1]<b[3] and a[3]>b[1]):
+                                feedback.append({"id":fact["id"],"candidate":{k:fact[k] for k in FACT_KEYS},
+                                    "status":fact["status"],"reason":fact["reason"],
+                                    "checks":fact.get("admission_checks",{}),
+                                    "review_reason":fact.get("review",{}).get("reason","")})
+                        # Bound repair context without hiding omitted diagnostics.
+                        # These are fallible prior candidates, never reference answers.
+                        selected=[]
+                        for f in feedback:
+                            if len(compact(selected+[f]))>self.settings.max_prompt_chars//4:break
+                            selected.append(f)
+                        await self._read_region(doc, state, {"id": f"p{number}:audit{round_no}:{index}", "bbox": item["bbox"],
+                            "kind": "audit_recovery", "objects": [], "summary": item["reason"],
+                            "repair_feedback":{"issue":item["reason"],"candidates":selected,
+                                "omitted_count":len(feedback)-len(selected),
+                                "instruction":"旧候选可能错误。独立读图修复失败字段或保留不确定；不得抄旧值或降低核验要求。"}}, {}, hints, report)
             except (ContractError, ModelError) as exc:
                 state["audit"].append({"round": round_no, "complete": False, "error": str(exc)})
                 break

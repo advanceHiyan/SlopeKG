@@ -4,7 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>PDF解析 - SlopeKG</title>
-    <link rel="stylesheet" href="./pages.css?v=20260714-1" />
+    <link rel="stylesheet" href="./pages.css?v=20261018" />
+    <link rel="stylesheet" href="./recognition.css?v=20261018" />
   </head>
   <body class="portal-body" data-page="pdf-ingestion">
     <header class="site-header"><div class="site-header-inner">
@@ -12,20 +13,37 @@
       <nav class="site-nav"><a href="./index.html">总览</a><a class="active" href="./pdf-ingestion.html">PDF解析</a><a href="./slopes.html">边坡档案</a><a href="./graph.html">关系图谱</a><a href="./rules.html">规则库</a><a href="./data-status.html">数据与接口</a><a href="./risk.html">风险研判</a></nav>
     </div></header>
     <main class="page-main">
-      <div class="page-heading"><div><h1>PDF解析与信息提取</h1><p>基础解析可完全独立运行；深度解析在基础产物上可选调用 DeepSeek，补充复杂语义并逐条校验证据。</p></div><button id="refreshBtn" class="button secondary" type="button">刷新状态</button></div>
+      <div class="page-heading"><div><h1>PDF识别工作台</h1><p>多模态识别与原有基础 / 深度解析分别运行。先看来源与待定项，再决定哪些内容可信。</p></div><button id="refreshBtn" class="button secondary" type="button">刷新状态</button></div>
       <div class="notice info">上传的PDF保存在项目原始资料目录，该目录不会提交到 Git。系统不依赖人工种子即可运行；“已上传”不等于“已解析”，请以任务完成状态和文档清单为准。</div>
 
       <section id="ingestMetrics" class="grid metrics-grid"><div class="loading">加载中…</div></section>
 
+      <section class="card recognition-card" aria-labelledby="recognitionHeading">
+        <div class="card-title-row"><div><h2 id="recognitionHeading">多模态识别</h2><p class="section-subtitle">直接读取原页图像，适用于正文、扫描页、表格和工程图。结果保留在候选区。</p></div><span class="badge pending">独立路线 · 候选结果</span></div>
+        <div class="recognition-controls">
+          <label>读取模型<select id="recognitionModel"><option value="">加载中…</option></select></label>
+          <label>调用上限<input id="recognitionMaxCalls" type="number" min="1" max="100000" value="200" /></label>
+          <label>模型并发<input id="recognitionConcurrency" type="number" min="1" max="32" value="2" /></label>
+        </div>
+        <p id="recognitionEndpoint" class="form-help" aria-live="polite">正在读取本地模型配置…</p>
+        <label class="recognition-confirm"><input id="recognitionAllowExternal" type="checkbox" />允许把下方勾选PDF的原文及页面图像发送到上述模型接口</label>
+        <div class="recognition-doc-head"><strong>选择本次资料 <span id="recognitionSelectedCount">0份</span></strong><input id="recognitionFileSearch" type="search" aria-label="筛选多模态资料" placeholder="按文件名或目录筛选" /></div>
+        <div id="recognitionFiles" class="recognition-files" aria-label="多模态输入资料">正在加载资料…</div>
+        <div class="action-row"><button id="recognitionPrepare" class="button ghost" disabled>仅本地准备</button><button id="recognitionRun" class="button" disabled>识别所选PDF</button></div>
+        <p class="form-help">本地准备不调用模型。识别按调用上限停止，不保证用完上限就读完；自动通过不代表人工确认，也不会自动写入现有图谱。</p>
+        <p id="recognitionError" class="notice error" hidden role="alert"></p>
+      </section>
+
       <section class="grid ingest-layout">
         <div class="card">
-          <h2>添加PDF</h2>
+          <h2>添加资料与旧路线</h2>
           <div id="dropZone" class="pdf-drop-zone" tabindex="0" role="button" aria-label="选择或拖入PDF文件">
             <strong>拖入PDF，或点击选择文件</strong>
             <span>支持多文件；单个文件不超过256 MB，本次请求不超过512 MB</span>
             <input id="pdfInput" type="file" accept="application/pdf,.pdf" multiple hidden />
           </div>
           <div id="selectedFiles" class="selected-files"><div class="detail-empty">尚未选择文件。</div></div>
+          <details open class="legacy-controls"><summary>基础 / 深度解析（旧基线）</summary>
           <div class="ingest-options">
             <label><span>本次最多执行OCR页数</span><input id="ocrPages" type="number" min="0" max="1000" value="1000" /></label>
             <label><span>OCR计算设备</span><select id="ocrDevice"><option value="auto">自动（GPU优先）</option><option value="gpu">仅GPU</option><option value="cpu">仅CPU</option></select></label>
@@ -34,7 +52,9 @@
             <label class="check-option"><input id="forceOcr" type="checkbox" /><span>重新执行已处理过的OCR任务</span></label>
           </div>
           <p class="form-help">批量页数为0时自动选择：CPU逐页、GPU每批4页。页面渲染可并发；单张GPU采用批量推理，避免重复加载多个模型撑爆显存。OCR值为0时仍会完成逐页分类并生成待处理队列。</p>
-          <div class="action-row"><button id="uploadOnlyBtn" class="button" type="button" disabled>上传并自动更新</button><button id="uploadRunBtn" class="button" type="button" disabled hidden>上传并基础解析</button><button id="rerunBtn" class="button ghost" type="button">基础解析全部资料</button><button id="reextractBtn" class="button ghost" type="button">基于现有文本重新抽取</button><button id="deepRunBtn" class="button secondary" type="button">基于基础结果深度解析</button></div>
+          <div class="action-row"><button id="uploadOnlyBtn" class="button" type="button" disabled>上传并基础更新</button><button id="rerunBtn" class="button ghost" type="button">基础解析全部资料</button><button id="reextractBtn" class="button ghost" type="button">基于现有文本重新抽取</button><button id="deepRunBtn" class="button secondary" type="button">旧路线深度解析</button></div>
+          <p class="form-help">基础模式在本地运行并更新图谱；深度模式在基础结果上调用项目DeepSeek做文本语义补充，与多模态原页读取分开。</p>
+          </details>
         </div>
 
         <aside class="card job-card">
@@ -47,11 +67,18 @@
         </aside>
       </section>
 
+      <section class="card recognition-card" aria-labelledby="recognitionResultsHeading">
+        <div class="card-title-row"><div><h2 id="recognitionResultsHeading">最近一次多模态结果</h2><p id="recognitionResultNote" class="section-subtitle">暂无结果；不将自动通过数量换算成人工准确率。</p></div><select id="recognitionStatusFilter" aria-label="筛选候选状态"><option value="">全部候选</option><option value="verified_model">自动核验通过</option><option value="pending">待定</option><option value="rejected">已拒绝</option></select></div>
+        <div id="recognitionMetrics" class="grid metrics-grid"></div>
+        <div class="table-wrap"><table class="data-table"><thead><tr><th>来源</th><th>对象 / 范围</th><th>字段 / 值</th><th>状态与证据</th></tr></thead><tbody id="recognitionRows"><tr><td colspan="4">暂无结果。</td></tr></tbody></table></div>
+        <div class="recognition-pagination"><button id="recognitionPrev" class="button ghost" disabled>上一页</button><span id="recognitionPageInfo">0条</span><button id="recognitionNext" class="button ghost" disabled>下一页</button></div>
+      </section>
+
       <section class="card" style="margin-top:16px">
         <div class="card-title-row"><div><h2>PDF资料与解析状态</h2><p class="section-subtitle">逐份显示页型、原生文本块、表格和OCR队列；缺失项会明确标记。</p></div><span id="documentSummary" class="badge">加载中</span></div>
         <div class="table-wrap"><table class="data-table document-table"><thead><tr><th>文件</th><th>大小</th><th>类型 / 页数</th><th>逐页策略</th><th>抽取产物</th><th>状态</th></tr></thead><tbody id="documentRows"><tr><td colspan="6">加载中…</td></tr></tbody></table></div>
       </section>
     <p id="artifactVersion" class="notice" aria-live="polite">正在核对成果版本…</p></main>
-    <script src="./api.js?v=20260714-1"></script><script src="./pdf-ingestion.js?v=20260721-1"></script>
+    <script src="./api.js?v=20260714-1"></script><script src="./pdf-ingestion.js?v=20261018"></script><script src="./recognition.js?v=20261018"></script>
   </body>
 </html>

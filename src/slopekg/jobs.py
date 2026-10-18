@@ -63,14 +63,18 @@ class PipelineJobManager:
             state = self.pipeline.run(progress_callback=on_progress, **options)
             now = datetime.now().isoformat(timespec="seconds")
             status = state.get("processing_status", "completed")
-            status = status if status in {"completed", "partial", "failed"} else "completed"
+            status = status if status in {"completed", "partial", "failed", "prepared"} else "completed"
+            # Large visual facts/receipts belong to the paginated result API,
+            # not every 900ms job poll or an in-memory JSON copy.
+            result=({k:state.get(k) for k in ('recognizer','processing_status','summary','precision','recall','metric_note')}
+                    if state.get('recognizer')=='multimodal' else state)
             self._update(
                 job_id,
                 status=status,
                 progress=100,
                 stage=state.get("publication_stage", status) if status != "completed" else "completed",
                 message=state.get("processing_message") or self.completion_message,
-                result=state,
+                result=result,
                 error=state.get("processing_message") if status == "failed" else None,
                 finished_at=now,
             )

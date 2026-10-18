@@ -5,7 +5,6 @@
     drop: document.getElementById("dropZone"),
     selected: document.getElementById("selectedFiles"),
     uploadOnly: document.getElementById("uploadOnlyBtn"),
-    uploadRun: document.getElementById("uploadRunBtn"),
     rerun: document.getElementById("rerunBtn"),
     reextract: document.getElementById("reextractBtn"),
     deepRun: document.getElementById("deepRunBtn"),
@@ -41,7 +40,7 @@
     semantic_failed: "深度解析失败", semantic_partial: "深度解析未完成",
     semantic_not_applicable: "无深度解析对象",
   };
-  const statusLabels = { none: "暂无任务", queued: "排队中", running: "处理中", completed: "已完成", failed: "失败", partial: "部分完成" };
+  const statusLabels = { none: "暂无任务", queued: "排队中", running: "处理中", completed: "已完成", failed: "失败", partial: "部分完成", prepared: "本地准备完成" };
 
   function formatBytes(bytes) {
     const value = Number(bytes || 0);
@@ -75,7 +74,9 @@
 
   function setProgress(percent, stage, message, status = "running") {
     const value = Math.max(0, Math.min(100, Number(percent || 0)));
-    elements.percent.textContent = `${Math.round(value)}%`;
+    const indeterminate = stage?.startsWith('visual_') && status === 'running';
+    elements.percent.textContent = indeterminate ? '执行中' : `${Math.round(value)}%`;
+    elements.track.classList.toggle('indeterminate', indeterminate);
     elements.bar.style.width = `${value}%`;
     elements.track.setAttribute("aria-valuenow", String(Math.round(value)));
     elements.stage.textContent = stageLabels[stage] || stage || "等待开始";
@@ -92,11 +93,13 @@
     const result = job.result || {};
     const parsed = result.parsed || {};
     const llm = result.llm?.run || {};
+    const visual = options.recognizer === 'multimodal';
     elements.details.innerHTML = [
       ["任务编号", job.id],
       ["开始时间", job.started_at || job.created_at || "等待中"],
-      ["处理模式", options.parse_mode === "deep" ? "深度解析（基础结果 + DeepSeek）" : "基础解析（不调用大模型）"],
-      ["处理设置", `OCR最多 ${options.ocr_pages ?? 0} 页 / ${String(options.ocr_device || "auto").toUpperCase()} / 渲染并发 ${options.ocr_workers ?? 4} / 批量 ${options.ocr_batch_size || "自动"}`],
+      ["处理模式", visual ? (options.prepare_only ? '多模态 · 仅本地准备' : '多模态 · 原页读取与核验') : options.parse_mode === "deep" ? "旧路线深度解析（基础结果 + 文本模型）" : "基础解析（不调用大模型）"],
+      ["处理设置", visual ? `${options.input_pdfs?.length || 0}份PDF / 上限${options.visual_settings?.max_calls ?? 200}次调用 / 并发${options.visual_settings?.model_concurrency ?? 1}` : `OCR最多 ${options.ocr_pages ?? 0} 页 / ${String(options.ocr_device || "auto").toUpperCase()} / 渲染并发 ${options.ocr_workers ?? 4} / 批量 ${options.ocr_batch_size || "自动"}`],
+      visual && result.summary ? ['候选结果', `${result.summary.facts ?? 0}条 / 自动通过${result.summary.verified_model ?? 0}条 / 待定${result.summary.pending ?? 0}条`] : null,
       parsed.ocr_device_counts && Object.keys(parsed.ocr_device_counts).length ? ["实际OCR设备", Object.entries(parsed.ocr_device_counts).map(([name, count]) => `${name}：${count}页`).join(" / ")] : null,
       parsed.documents != null ? ["完成结果", `${parsed.documents} 份PDF / ${parsed.pages} 页 / ${result.graph?.nodes ?? 0} 个节点`] : null,
       llm.candidates != null ? ["语义校验", `${llm.passed ?? 0}/${llm.candidates} 通过`] : null,
@@ -106,12 +109,14 @@
     elements.error.textContent = job.error || "";
     const busy = ["queued", "running"].includes(job.status);
     jobIsBusy = busy;
+    window.dispatchEvent(new CustomEvent('pipeline:busy', {detail:busy}));
     renderSelectedFiles();
     if (busy) schedulePoll();
-    if (["completed", "partial", "failed"].includes(job.status)) {
+    if (["completed", "partial", "failed", "prepared"].includes(job.status)) {
       clearTimeout(pollTimer);
       pollTimer = null;
       loadOverview();
+      window.dispatchEvent(new CustomEvent('pipeline:finished', {detail:job}));
     }
   }
 
@@ -210,7 +215,6 @@
     const valid = selectedFiles.length > 0 && selectedFiles.every((file) => file.name.toLowerCase().endsWith(".pdf") && file.size > 0 && file.size <= 256 * 1024 ** 2);
     const busy = requestIsBusy || jobIsBusy;
     elements.uploadOnly.disabled = busy || !valid;
-    elements.uploadRun.disabled = busy || !valid;
     elements.rerun.disabled = busy;
     elements.reextract.disabled = busy;
     elements.deepRun.disabled = busy;
@@ -241,6 +245,7 @@
   }
 
   function renderDocuments(inventory) {
+    inventory = {count:0,parsed_count:0,unparsed_count:0,rows:[],...inventory};
     elements.summary.textContent = inventory.unparsed_count
       ? `${inventory.parsed_count}/${inventory.count} 当前；${inventory.unparsed_count} 个待自动更新`
       : `${inventory.parsed_count}/${inventory.count} 已是最新`;
@@ -284,13 +289,13 @@
   ["dragleave", "drop"].forEach((name) => elements.drop.addEventListener(name, (event) => { event.preventDefault(); elements.drop.classList.remove("dragging"); }));
   elements.drop.addEventListener("drop", (event) => setFiles(event.dataTransfer.files));
   elements.uploadOnly.addEventListener("click", handleUpload);
-  elements.uploadRun.addEventListener("click", handleUpload);
   elements.rerun.addEventListener("click", async () => { try { await startJob("basic", false); } catch (error) { elements.error.hidden = false; elements.error.textContent = error.message; } });
   elements.reextract.addEventListener("click", async () => { try { await startJob("basic", true, 0); } catch (error) { elements.error.hidden = false; elements.error.textContent = error.message; } });
   elements.deepRun.addEventListener("click", async () => { try { await startJob("deep", true); } catch (error) { elements.error.hidden = false; elements.error.textContent = error.message; } });
   elements.refresh.addEventListener("click", async () => { await loadOverview(); const latest = await getJson("/api/pipeline/jobs/latest", { status: "none" }); renderJob(latest); });
 
   loadOverview();
+  window.addEventListener('pipeline:job', event => renderJob(event.detail));
   getJson("/api/pipeline/jobs/latest", { status: "none" }).then(renderJob);
   setInterval(() => {
     loadOverview();

@@ -5,6 +5,7 @@ import base64
 from dataclasses import dataclass, field
 import hashlib
 import json
+import http.client
 import os
 from pathlib import Path
 from typing import Any, Callable, Protocol
@@ -89,7 +90,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 class CompatibleVisionClient:
     """OpenAI-compatible wire format, without assuming identical provider options.
 
-    Serial calls by the orchestrator respect accounts with concurrency=1. Unknown
+    Calls use the orchestrator's bounded concurrency. Unknown
     billable outcomes are never retried automatically. A transport is injectable
     for offline contract tests and other model gateways.
     """
@@ -129,7 +130,7 @@ class CompatibleVisionClient:
                              "image_url": {"url": "data:image/png;base64," + encoded,
                                            **self.profile.image_url_options}}])
         payload = {"model": self.profile.model, "stream": False,
-                   "messages": [{"role": "system", "content": system}, {"role": "user", "content": content}],
+                   "messages": [{"role": "system", "content": system}, {"role": "user", "content": content if images else prompt}],
                    "response_format": {"type": "json_object"},
                    self.profile.token_parameter: self.profile.max_output_tokens,
                    **self.profile.request_options}
@@ -149,11 +150,12 @@ class CompatibleVisionClient:
             except urllib.error.HTTPError as exc:
                 raise ModelError(f"Model HTTP {exc.code}; not automatically retried",
                                  receipt={**transport_receipt, "http_status": exc.code}) from None
-            except (OSError, ValueError):
+            except (OSError, ValueError, http.client.HTTPException):
                 raise ModelError("Model transport failed; billing outcome may be unknown", receipt=transport_receipt) from None
         if not isinstance(result, dict):
             raise ModelError("Model returned an invalid response envelope")
-        receipt = {"model": result.get("model", self.profile.model), "id": result.get("id"),
+        receipt = {"requested_model": self.profile.model, "model": result.get("model", self.profile.model), "id": result.get("id"),
+                   "system_fingerprint": result.get("system_fingerprint"),
                    "usage": result.get("usage", {}),
                    "environment_variables_used": [self.profile.api_key_env] if self.profile.api_key_env else []}
         try:

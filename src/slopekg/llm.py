@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import os
-import json
-import urllib.request
 from typing import Any
 
 from .config import ROOT
@@ -67,44 +65,9 @@ def call_deepseek_json(
         raise ValueError("Project DeepSeek credentials may only be sent to https://api.deepseek.com")
     if not 1 <= max_tokens <= DEEPSEEK_MAX_OUTPUT_TOKENS:
         raise ValueError("max_tokens must be between 1 and 393216")
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        "response_format": {"type": "json_object"},
-        "thinking": {"type": "disabled"},
-        "temperature": 0,
-        "max_tokens": max_tokens,
-        "stream": False,
-    }
-    request = urllib.request.Request(
-        f"{base_url}/chat/completions",
-        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-        method="POST",
-    )
-    # Do not forward project credentials if a server redirects the request.
-    class NoRedirect(urllib.request.HTTPRedirectHandler):
-        def redirect_request(self, req, fp, code, msg, headers, newurl):
-            raise RuntimeError("DeepSeek API redirect refused")
-
-    with urllib.request.build_opener(NoRedirect()).open(request, timeout=timeout) as response:
-        result = json.loads(response.read().decode("utf-8"))
-    choice = result["choices"][0]
-    if choice.get("finish_reason") != "stop":
-        raise RuntimeError(f"DeepSeek response did not complete: {choice.get('finish_reason')}")
-    content = choice["message"]["content"]
-    parsed = json.loads(content)
-    if not isinstance(parsed, dict):
-        raise ValueError("DeepSeek JSON response must be an object")
-    metadata = {
-        "requested_model": model,
-        "model": result.get("model", model),
-        "finish_reason": choice.get("finish_reason"),
-        "usage": result.get("usage", {}),
-        "id": result.get("id"),
-        "system_fingerprint": result.get("system_fingerprint"),
-    }
-    return parsed, metadata
+    from .model_client import CompatibleVisionClient, ModelProfile
+    profile = ModelProfile(name="legacy-deepseek-text", base_url=base_url,
+        credential_endpoint=base_url, model=model, api_key_file=".secrets/deepseek_api_key.txt",
+        token_parameter="max_tokens", max_output_tokens=max_tokens, timeout_seconds=timeout,
+        request_options={"thinking":{"type":"disabled"}, "temperature":0})
+    return CompatibleVisionClient(profile, ROOT).complete(system=system_prompt, prompt=user_prompt, images=[])

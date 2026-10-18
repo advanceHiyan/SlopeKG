@@ -6,6 +6,8 @@ Git 仓库保留源码、测试和技术说明。`output/`、`outputs/` 下的 O
 
 独立多模态识别入口已增加：`--recognizer multimodal --pdf <PDF路径> --model-profile config/models/deepseek.json`。原来的basic/deep路线仍默认使用`--recognizer legacy`。新路线先由模型识别版面和语义切分，再按区域细读、放大、核验和查漏；结果独立保存，暂不自动写入正式图谱。[方案、运行方式和执行对照](docs/多模态识别流程方案与执行.md)说明OCR协作、模型切换、预算和当前验收边界。增加`--prepare-only`可只在本地准备清单，不调用模型。
 
+网页入口为[PDF识别工作台](web/pdf-ingestion.html)：选择已配置模型和资料目录内的PDF，可先做本地准备，再显式启动多模态识别；旧basic/OCR/deep保留在独立操作区。结果支持状态筛选、分页、原文证据和PDF页码定位。自动核验通过仍需人工确认，不表示人工准确率或召回率。[识别路线与代码分层](docs/识别路线与代码分层.md)说明模块职责、独立复读、内容查漏和扩展方式。
+
 本项目是公路边坡多源多模态知识图谱的第一版工程 Demo。生产流水线不依赖人工种子，当前已实现：
 
 - 全页自适应 PDF 解析 sidecar：documents/pages/text_blocks/tables/ocr_tasks；按页选择原生版面、表格抽取、整页 OCR 或图纸标题栏 OCR。
@@ -178,6 +180,9 @@ POST /api/documents/upload
 POST /api/pipeline/jobs
 GET  /api/pipeline/jobs/{job_id}
 GET  /api/pipeline/jobs/latest
+GET  /api/recognition/profiles
+GET  /api/recognition/documents
+GET  /api/recognition?status=pending&offset=0&limit=50
 GET  /api/graph
 GET  /api/schema
 GET  /api/attribute-dictionary

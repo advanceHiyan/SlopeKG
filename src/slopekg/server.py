@@ -38,6 +38,7 @@ from .monitoring import (
 from .inspection_history import HISTORY_INTERFACES, public_history_catalog, history_payload, history_source, history_interfaces
 from .monitoring_baseline import baseline_payload, baseline_interfaces
 from .pipeline import DemoPipeline
+from .recognition import visual_job_options, profile_catalog, recognition_documents, recognition_payload
 from .rule_extraction import RuleExtractionPipeline
 from .schema import INTERFACES, attribute_dictionary_payload, interface_payload, schema_payload
 from .storage import ensure_dir, read_json
@@ -300,6 +301,17 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         self.write_json(state)
 
     def _get_pipeline(self, parsed: Any) -> bool:
+        if parsed.path in {'/api/recognition','/api/recognition/profiles','/api/recognition/documents'}:
+            try:
+                query=parse_qs(parsed.query)
+                payload=(profile_catalog(PATHS) if parsed.path.endswith('/profiles') else
+                         recognition_documents(PATHS) if parsed.path.endswith('/documents') else
+                         recognition_payload(PATHS,status=query.get('status',[''])[0],
+                             offset=int(query.get('offset',['0'])[0]),limit=int(query.get('limit',['50'])[0])))
+                self.write_json(payload)
+            except (ValueError,TypeError) as exc:
+                self.write_json({'error':str(exc)},status=HTTPStatus.BAD_REQUEST)
+            return True
         if parsed.path == "/api/status":
             self.write_json(self.pipeline.status())
             return True
@@ -742,6 +754,13 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         self.write_json({"error": "not found"}, status=HTTPStatus.NOT_FOUND)
 
     def pipeline_options(self, body: dict[str, Any]) -> dict[str, Any]:
+        recognizer=body.get('recognizer','legacy')
+        if recognizer=='multimodal':
+            return visual_job_options(PATHS,body)
+        if recognizer!='legacy':
+            raise ValueError('未知识别路线')
+        if any(k in body for k in ('input_pdfs','model_profile','review_profile','visual_settings','prepare_only','allow_external')):
+            raise ValueError('多模态设置需要选择multimodal路线')
         ocr_pages = max(0, min(1000, int(body.get("ocr_pages", 1000))))
         llm_model = str(body.get("llm_model", DEFAULT_DEEPSEEK_MODEL)).strip()
         if not llm_model or len(llm_model) > 100:
@@ -787,6 +806,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             pending = parse_pdf_uploads(content_type, raw)
             options = self.pipeline_options({
                 **automatic_basic_options(), **parse_upload_options(content_type, raw),
+                "recognizer": "legacy",
                 "parse_mode": "basic", "reuse_parsed": False, "ocr_scope": "changed",
             })
         except (ValueError, TypeError, OverflowError) as exc:
