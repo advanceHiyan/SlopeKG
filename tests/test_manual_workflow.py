@@ -12,6 +12,7 @@ from slopekg.manual import (
     merged_rule_library,
     save_manual_rule,
     save_slope_override,
+    manual_schema,
 )
 from slopekg.risk import build_risk_screening
 from slopekg.schema import build_completeness
@@ -52,6 +53,33 @@ class ManualWorkflowTests(unittest.TestCase):
             save_slope_override(
                 "s1", {"fields": {"deformation_observation": "发现新裂缝"}}, self.paths(self.root)
             )
+
+    def test_schema_groups_cover_each_field_once_and_cannot_mutate_next_response(self) -> None:
+        schema = manual_schema()
+        codes = [code for group in schema['slope_field_groups'] for code in group['fields']]
+        self.assertCountEqual(codes, [spec['code'] for spec in schema['slope_fields']])
+        self.assertEqual(len(codes), len(set(codes)))
+        schema['slope_fields'][0]['label'] = 'changed'
+        schema['slope_field_groups'][0]['fields'].clear()
+        fresh = manual_schema()
+        self.assertNotEqual(fresh['slope_fields'][0]['label'], 'changed')
+        self.assertTrue(fresh['slope_field_groups'][0]['fields'])
+
+    def test_boolean_is_not_a_height_and_invalid_input_does_not_overwrite_record(self) -> None:
+        paths = self.paths(self.root)
+        save_slope_override('s1', {'fields': {'slope_height_m': 0}}, paths)
+        before = paths.slope_overrides_json.read_bytes()
+        with self.assertRaisesRegex(ValueError, '布尔值'):
+            save_slope_override('s1', {'fields': {'slope_height_m': True}}, paths)
+        self.assertEqual(paths.slope_overrides_json.read_bytes(), before)
+
+    def test_supplied_observation_date_is_validated_even_without_dynamic_fields(self) -> None:
+        paths = self.paths(self.root)
+        for invalid in ['2026-02-30', '20261020', 'yesterday']:
+            with self.subTest(date=invalid), self.assertRaisesRegex(ValueError, 'YYYY-MM-DD'):
+                save_slope_override('s1', {'fields': {'slope_height_m': 8}, 'observed_at': invalid}, paths)
+        result = save_slope_override('s1', {'fields': {'slope_height_m': 8}, 'observed_at': '2026-10-20'}, paths)
+        self.assertEqual(result['observed_at'], '2026-10-20')
 
     def test_negative_manual_inspection_text_does_not_raise_alarm(self) -> None:
         graph = minimal_graph()

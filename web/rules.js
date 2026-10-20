@@ -69,8 +69,8 @@
     return `<article class="card metric-card"><strong>${e(value ?? 0)}</strong><span>${e(title)}</span></article>`;
   }
 
-  async function loadLibrary() {
-    library = await api.getJson("/api/rules/library", {
+  async function loadLibrary(strict = false) {
+    library = await api.getJson("/api/rules/library", strict ? null : {
       publication_status: "not_generated",
       execution_enabled: false,
       documents: [],
@@ -168,48 +168,31 @@
       <div class="detail-block"><h3>例外/限制</h3><p>${e(exceptions)}</p></div>
       <div class="detail-block"><h3>${isManual ? "逻辑说明" : "原文证据"}</h3><blockquote class="evidence-quote">${e(row.evidence_quote || "无")}</blockquote>${isManual ? "" : sourceLinks(row)}</div>
       <div class="notice">${isManual ? (row.execution_enabled ? "该规则已审核启用，可调整P1—P4复核顺序，但不会生成正式风险等级。" : "该规则已经保存，但未参与风险排序；请检查状态及不可执行原因。") : "此项为自动提取候选。完成规范有效性、数值、比较符号和适用条件审核前，系统不会执行该规则。"}</div>
-      ${isManual ? `<button class="button ghost delete-manual-rule" type="button">删除这条人工规则</button>` : ""}`;
+      ${isManual ? `<button class="button danger small delete-manual-rule" type="button">删除规则</button><p class="manual-save-status" role="status" aria-live="polite"></p>` : ""}`;
     const deleteButton = detail.querySelector(".delete-manual-rule");
     if (deleteButton) deleteButton.addEventListener("click", async () => {
       if (!window.confirm("确定删除这条人工规则吗？")) return;
-      const response = await fetch(`/api/manual/rules/${encodeURIComponent(row.id)}`, { method: "DELETE" });
-      if (!response.ok) return;
-      window.location.reload();
-    });
-  }
-
-  async function setupManualRuleForm() {
-    const schema = await api.getJson("/api/manual/schema", { rule_fields: [], rule_operators: [] });
-    const form = document.getElementById("manualRuleForm");
-    const container = document.getElementById("manualRuleConditions");
-    document.getElementById("toggleRuleForm").addEventListener("click", () => { form.hidden = !form.hidden; });
-    function addCondition() {
-      const row = document.createElement("div");
-      row.className = "manual-condition-row";
-      row.innerHTML = `<select class="condition-field">${schema.rule_fields.map((item) => `<option value="${e(item.code)}">${e(item.label)}</option>`).join("")}</select><select class="condition-operator">${schema.rule_operators.map((item) => `<option value="${e(item.code)}">${e(item.label)}</option>`).join("")}</select><input class="condition-value" placeholder="阈值或文字；多值用逗号分隔"/><button class="button ghost remove-condition" type="button">移除</button>`;
-      row.querySelector(".remove-condition").addEventListener("click", () => { if (container.children.length > 1) row.remove(); });
-      container.appendChild(row);
-    }
-    addCondition();
-    document.getElementById("addRuleCondition").addEventListener("click", addCondition);
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const data = new FormData(form);
-      const conditions = [...container.querySelectorAll(".manual-condition-row")].map((row) => ({ field: row.querySelector(".condition-field").value, operator: row.querySelector(".condition-operator").value, value: row.querySelector(".condition-value").value }));
-      const status = document.getElementById("manualRuleStatus");
-      status.textContent = "正在校验并保存…";
+      deleteButton.disabled = true;
+      const status = detail.querySelector('.manual-save-status');
+      let deleted = false;
       try {
-        const response = await fetch("/api/manual/rules", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: data.get("title"), match: data.get("match"), priority: data.get("priority"), approval_status: data.get("approval_status"), reason: data.get("reason"), logic_note: data.get("logic_note"), conditions }) });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
-        status.textContent = result.message;
-        window.setTimeout(() => window.location.reload(), 700);
-      } catch (error) { status.textContent = `保存失败：${error.message}`; }
+        await api.requestJson(`/api/manual/rules/${encodeURIComponent(row.id)}`, { method: "DELETE" });
+        deleted = true;
+        await loadLibrary(true); renderRuleMetrics(); renderRuleRows();
+        const first = (library.rules || [])[0];
+        if (first) selectRule(first.id);
+        else detail.textContent = '规则已删除，当前没有可显示的规则。';
+      } catch (error) {
+        status.textContent = deleted ? `已删除，但刷新失败：${error.message}。请刷新页面。` : `删除失败：${error.message}`;
+        status.dataset.state = 'error'; status.setAttribute('role','alert');
+      } finally { deleteButton.disabled = deleted; }
     });
   }
 
   async function initRules() {
-    await setupManualRuleForm();
+    await window.SlopeKGManual.mountRuleForm(async result => {
+      await loadLibrary(true); renderRuleMetrics(); renderRuleRows(); selectRule(result.rule.id);
+    });
     await loadLibrary();
     renderRuleMetrics();
     const kinds = [...new Set((library.rules || []).map((row) => row.rule_kind).filter(Boolean))].sort();

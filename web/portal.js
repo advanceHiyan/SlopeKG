@@ -206,18 +206,21 @@ async function riskPage() {
   setupRiskExport();
   const [payload, manualSchema, validation] = await Promise.all([
     api.getJson("/api/risk/screening", { summary: {}, assessments: [], boundary: {} }),
-    api.getJson("/api/manual/schema", { slope_fields: [] }),
+    api.getJson("/api/manual/schema").catch(() => null),
     api.getJson("/api/risk/evaluation", { status: "requires_independent_expert_gold_set", evaluated: 0, metrics: null }),
   ]);
   const rows = payload.assessments || [];
   let selectedId = rows[0]?.slope_id || null;
-  const counts = payload.summary?.priority_counts || {};
-  document.querySelector("#riskMetrics").innerHTML = [
-    ["P1", counts.P1 || 0, "优先复核"], ["P2", counts.P2 || 0, "重点复核"],
-    ["P3", counts.P3 || 0, "常规复核"], ["P4", counts.P4 || 0, "资料补录"],
-    ["NOW", payload.summary?.with_current_dynamic_evidence || 0, "有近期动态证据"],
-    ["CONFLICT", payload.summary?.with_stability_conflicts || 0, "稳定性资料冲突"],
-  ].map(([code, value, label]) => `<article class="card metric-card risk-metric ${code.toLowerCase()}"><strong>${api.escapeHtml(value)}</strong><span>${code.startsWith("P") ? `${code} ` : ""}${label}</span></article>`).join("");
+  function renderRiskMetrics(source) {
+    const counts = source.summary?.priority_counts || {};
+    document.querySelector("#riskMetrics").innerHTML = [
+      ["P1", counts.P1 || 0, "优先复核"], ["P2", counts.P2 || 0, "重点复核"],
+      ["P3", counts.P3 || 0, "常规复核"], ["P4", counts.P4 || 0, "资料补录"],
+      ["NOW", source.summary?.with_current_dynamic_evidence || 0, "有近期动态证据"],
+      ["CONFLICT", source.summary?.with_stability_conflicts || 0, "稳定性资料冲突"],
+    ].map(([code, value, label]) => `<article class="card metric-card risk-metric ${code.toLowerCase()}"><strong>${api.escapeHtml(value)}</strong><span>${code.startsWith("P") ? `${code} ` : ""}${label}</span></article>`).join("");
+  }
+  renderRiskMetrics(payload);
   const validationTarget = document.querySelector("#riskValidation");
   if (validation.status === "evaluated_against_independent_labels") {
     validationTarget.innerHTML = `独立专家样本已评测 <strong>${api.escapeHtml(validation.evaluated)}</strong> 个边坡；重点对象召回率 <strong>${api.escapeHtml(validation.metrics?.urgent_recall_p1_p2 ?? "—")}</strong>，P1严重漏判 <strong>${api.escapeHtml(validation.metrics?.critical_p1_miss_count ?? "—")}</strong> 个。`;
@@ -296,7 +299,8 @@ async function riskPage() {
     const calculation = row.stability_calculation_readiness || {};
     target.className = "card risk-detail";
     target.innerHTML = `
-      <div class="card-title-row"><div><h2>${api.escapeHtml(row.slope_label)}</h2><p class="section-subtitle">${api.escapeHtml(row.business_id || "")}</p></div><div class="detail-actions"><span class="priority-badge ${row.screening_priority_code.toLowerCase()}">${api.escapeHtml(row.screening_priority_code)} ${api.escapeHtml(row.screening_priority)}</span><button class="button secondary manual-edit-toggle" type="button">补录/修正</button></div></div>
+      <div class="card-title-row manual-detail-heading"><div><h2>${api.escapeHtml(row.slope_label)}</h2><p class="section-subtitle">${api.escapeHtml(row.business_id || "")}</p><span class="priority-badge ${row.screening_priority_code.toLowerCase()}">${api.escapeHtml(row.screening_priority_code)} ${api.escapeHtml(row.screening_priority)}</span></div><div class="detail-actions"><button class="button secondary small manual-edit-toggle" type="button" aria-expanded="false">人工录入</button></div></div>
+      <div class="manual-editor" hidden><div class="loading">正在读取人工补录数据…</div></div>
       <div class="notice">${row.formal_risk_level ? `正式风险等级：${api.escapeHtml(row.formal_risk_level)}` : `正式风险等级：暂无法确定。${row.provisional_risk_matrix_level ? `参考矩阵为“${api.escapeHtml(row.provisional_risk_matrix_level)}”，但尚未通过发布门槛。` : "当前只给出分项关注和人工复核优先级。"}`}</div>
       ${basisWarning}
       ${conflicts}
@@ -306,7 +310,6 @@ async function riskPage() {
         <ol>${topGapList || "<li>当前未列出优先补充项。</li>"}</ol>
         <small class="callout-footnote">其余未具备信息：该边坡资料 ${sourceGapCount} 类，待接接口/补录 ${interfaceGapCount} 类。可在下方展开查看。</small>
       </div>
-      <div class="manual-editor" hidden><div class="loading">正在读取人工补录数据…</div></div>
       <div class="detail-list compact">
         <div class="detail-row"><small>静态易发性关注</small>${api.escapeHtml(row.static_susceptibility?.level || "资料不足")}<span class="table-subtext">${api.escapeHtml(row.static_susceptibility?.interpretation || "")}</span></div>
         <div class="detail-row"><small>近期动态状态</small>${api.escapeHtml(row.dynamic_alert?.level || "无法判断")}<span class="table-subtext">${api.escapeHtml(row.dynamic_alert?.interpretation || "")}</span></div>
@@ -324,63 +327,15 @@ async function riskPage() {
       <div class="detail-block"><h3>建议动作</h3><ol class="action-list">${(row.recommended_action || []).map((item) => `<li>${api.escapeHtml(item)}</li>`).join("")}</ol></div>
       <details class="detail-block risk-gap-details"><summary>查看全部${allGaps.length}项缺失数据及采集方法</summary><p class="section-subtitle">已按预计作用排序；制度项不替代现场数据。</p><div class="risk-gap-list">${gaps || "<p>未列出。</p>"}</div></details>
       <div class="detail-block"><h3>结论边界</h3><ul class="boundary-list">${(row.limitations || []).map((item) => `<li>${api.escapeHtml(item)}</li>`).join("")}</ul></div>`;
-    setupManualSlopeEditor(target, row);
+    window.SlopeKGManual.mountSlopeEditor(target, row, manualSchema, () => refreshRisk(row.slope_id));
   }
 
-  async function setupManualSlopeEditor(target, row) {
-    const toggle = target.querySelector(".manual-edit-toggle");
-    const editor = target.querySelector(".manual-editor");
-    toggle.addEventListener("click", async () => {
-      editor.hidden = !editor.hidden;
-      if (editor.hidden || editor.dataset.loaded === "true") return;
-      editor.dataset.loaded = "true";
-      const [record, detail] = await Promise.all([
-        api.getJson(`/api/manual/slopes/${encodeURIComponent(row.slope_id)}`, { fields: {} }),
-        api.getJson(`/api/slopes/${encodeURIComponent(row.slope_id)}`, { slope: { props: {} } }),
-      ]);
-      const existing = detail.slope?.props || {};
-      const controls = (manualSchema.slope_fields || []).map((spec) => {
-        const saved = record.fields?.[spec.code] ?? "";
-        const current = existing[spec.code] ?? (spec.code === "slope_height_m" ? existing.slope_height_max_m : spec.code === "slope_gradient_deg" ? existing.slope_gradient_max_deg : "");
-        const help = current !== "" && current != null ? `当前有效值：${typeof current === "object" ? JSON.stringify(current) : current}` : "当前缺失";
-        const input = spec.type === "enum"
-          ? `<select name="${api.escapeHtml(spec.code)}"><option value="">不设置人工值</option>${(spec.options || []).map((option) => `<option value="${api.escapeHtml(option)}" ${saved === option ? "selected" : ""}>${api.escapeHtml(option)}</option>`).join("")}</select>`
-          : `<input name="${api.escapeHtml(spec.code)}" type="${spec.type === "number" ? "number" : "text"}" value="${api.escapeHtml(saved)}" ${spec.type === "number" ? `step="any" min="${api.escapeHtml(spec.min ?? "")}" max="${api.escapeHtml(spec.max ?? "")}"` : ""}/>`;
-        return `<label class="manual-field"><span>${api.escapeHtml(spec.label)}${spec.dynamic ? " · 近期" : ""}</span>${input}<small>${api.escapeHtml(help)}</small></label>`;
-      }).join("");
-      editor.innerHTML = `<form class="manual-slope-form">
-        <div class="manual-editor-head"><div><h3>人工补录数据</h3><p>仅填写需要覆盖或补充的字段。近期数据必须填写观测日期；空白字段继续使用PDF自动提取值。</p></div><span class="badge ${record.updated_at ? "approved" : "pending"}">${record.updated_at ? "已有人工记录" : "尚未补录"}</span></div>
-        <div class="manual-meta-grid"><label>近期数据日期<input name="observed_at" type="date" value="${api.escapeHtml(record.observed_at || "")}"/></label><label>来源/备注<input name="note" value="${api.escapeHtml(record.note || "")}" placeholder="例如：2026年现场巡检记录"/></label></div>
-        <div class="manual-field-grid">${controls}</div>
-        <div class="action-row"><button class="button" type="submit">保存并重新计算</button><button class="button ghost reset-manual" type="button">撤销全部人工值</button><span class="manual-save-status"></span></div>
-      </form>`;
-      const form = editor.querySelector(".manual-slope-form");
-      const status = editor.querySelector(".manual-save-status");
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const data = new FormData(form);
-        const fields = {};
-        (manualSchema.slope_fields || []).forEach((spec) => {
-          const value = String(data.get(spec.code) || "").trim();
-          if (value !== "") fields[spec.code] = spec.type === "number" ? Number(value) : value;
-        });
-        status.textContent = "正在保存…";
-        try {
-          const response = await fetch(`/api/manual/slopes/${encodeURIComponent(row.slope_id)}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fields, observed_at: data.get("observed_at"), note: data.get("note") }) });
-          const result = await response.json();
-          if (!response.ok) throw new Error(result.error || `HTTP ${response.status}`);
-          status.textContent = "保存成功，正在刷新结果…";
-          window.location.reload();
-        } catch (error) { status.textContent = `保存失败：${error.message}`; }
-      });
-      editor.querySelector(".reset-manual").addEventListener("click", async () => {
-        if (!window.confirm("确定撤销该边坡的全部人工补录值吗？PDF自动提取结果不会删除。")) return;
-        const response = await fetch(`/api/manual/slopes/${encodeURIComponent(row.slope_id)}`, { method: "DELETE" });
-        const result = await response.json();
-        if (!response.ok) { status.textContent = `撤销失败：${result.error || result.status}`; return; }
-        window.location.reload();
-      });
-    });
+  async function refreshRisk(editedId) {
+    const next = await api.getJson("/api/risk/screening");
+    rows.splice(0, rows.length, ...(next.assessments || []));
+    renderRiskMetrics(next);
+    renderRows();
+    if (selectedId === editedId) renderDetail(rows.find(row => row.slope_id === selectedId));
   }
 
   const canDo = (payload.boundary?.can_do || []).map((item) => `<li>${api.escapeHtml(item)}</li>`).join("");
@@ -425,10 +380,6 @@ function setupRiskExport() {
   });
 }
 
-function globalBlockingLabel(code) {
-  return ({ approved_risk_rule_set: "正式风险规则尚未确认", dynamic_data_connectors: "动态监测、气象和巡检数据源尚未连接", human_review_workflow: "风险结论人工审核与发布流程尚未建立" })[code] || code;
-}
-
 (async () => {
   try {
     if (page === "dashboard") await dashboard();
@@ -439,6 +390,7 @@ function globalBlockingLabel(code) {
     let version = `${initialStatus.updated_at || ""}|${initialStatus.publication_stage || ""}|${initialStatus.graph?.nodes || ""}`;
     setInterval(async () => {
       if (document.hidden) return;
+      if (document.querySelector('.manual-editor:not([hidden]) .manual-slope-form')) return;
       const latest = await api.getJson("/api/status", {});
       const next = `${latest.updated_at || ""}|${latest.publication_stage || ""}|${latest.graph?.nodes || ""}`;
       if (version && next !== version) window.location.reload();

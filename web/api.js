@@ -1,4 +1,20 @@
 (function () {
+  async function requestJson(path, { method = "GET", body } = {}) {
+    const response = await fetch(path, {
+      method, cache: "no-store",
+      ...(body === undefined ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
+    });
+    let payload;
+    try { payload = await response.json(); }
+    catch (_) { throw new Error(response.ok ? "接口返回格式异常，请重试" : `HTTP ${response.status}`); }
+    if (!response.ok) {
+      const error = new Error(payload.error || `HTTP ${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
+    return payload;
+  }
+
   async function getJson(path, fallback = null) {
     try {
       const response = await fetch(path, { cache: "no-store" });
@@ -46,5 +62,5 @@
     return labels[status] || status || "未知";
   }
 
-  window.SlopeKGApi = { getJson, escapeHtml, statusLabel };
+  window.SlopeKGApi = { getJson, requestJson, escapeHtml, statusLabel };
 })();

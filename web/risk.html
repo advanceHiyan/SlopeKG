@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>风险研判 - SlopeKG</title>
-  <link rel="stylesheet" href="./pages.css?v=20260911-1"/>
+  <link rel="stylesheet" href="./pages.css?v=20261020-1"/>
 </head>
 <body class="portal-body" data-page="risk">
   <header class="site-header">
@@ -39,7 +39,7 @@
       </div>
     </section>
     <div class="notice">P1–P4 表示人工复核顺序，不是高、中、低风险。选择边坡后可直接补录缺失数据，保存后会重新计算完整度和复核顺序；人工值独立保存，不会被下一次PDF解析覆盖。</div>
-    <section id="riskMetrics" class="grid metrics-grid"><div class="loading">加载中…</div></section>
+    <section id="riskMetrics" class="grid metrics-grid risk-metrics"><div class="loading">加载中…</div></section>
     <section id="riskValidation" class="notice">正在读取独立验证状态…</section>
     <section class="risk-layout">
       <article class="card">
@@ -65,7 +65,8 @@
       <div id="riskBoundary" class="boundary-grid"><div class="loading">加载中…</div></div>
     </section>
   </main>
-  <script src="./api.js?v=20260711-1"></script>
-  <script src="./portal.js?v=20260911-1"></script>
+  <script src="./api.js?v=20261020-1"></script>
+  <script src="./manual-entry.js?v=20261020-1"></script>
+  <script src="./portal.js?v=20261020-1"></script>
 </body>
 </html>
