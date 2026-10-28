@@ -4,6 +4,8 @@ import unittest
 from unittest.mock import Mock, patch
 
 from slopekg.jobs import PipelineJobManager, PdfDirectoryWatcher
+from slopekg.pipeline import DemoPipeline
+from slopekg.storage import read_jsonl, write_jsonl
 from tests.support import workspace_paths
 
 
@@ -42,3 +44,40 @@ class JobManagerTests(unittest.TestCase):
             (paths.raw_dir / "sample.pdf").write_bytes(b"%PDF")
             watcher = PdfDirectoryWatcher(Mock(), paths=paths)
             self.assertEqual([row[0] for row in watcher.snapshot()], ["sample.pdf"])
+
+    def test_watcher_schedules_deleted_pdf_and_parser_removes_its_cached_rows(self):
+        with tempfile.TemporaryDirectory() as directory:
+            paths = workspace_paths(Path(directory))
+            paths.raw_dir.mkdir(parents=True)
+            files = [paths.raw_dir / name for name in ("keep.pdf", "remove.pdf")]
+            for file in files:
+                file.write_bytes(b"%PDF-cached")
+            write_jsonl(paths.parsed_dir / "documents.jsonl", [
+                {"id": file.stem, "file_name": file.name,
+                 "source_size_bytes": file.stat().st_size,
+                 "source_mtime_ns": file.stat().st_mtime_ns}
+                for file in files
+            ])
+            write_jsonl(paths.parsed_dir / "pages.jsonl", [
+                {"id": "page-" + file.stem, "document_id": file.stem} for file in files
+            ])
+            manager = Mock()
+            manager.start.return_value = ({"id": "auto"}, True)
+            watcher = PdfDirectoryWatcher(manager, paths=paths)
+            self.assertFalse(watcher.check_once())
+            self.assertFalse(watcher.check_once())
+            manager.start.assert_not_called()
+
+            files[1].unlink()
+            self.assertFalse(watcher.check_once())  # Wait for a stable directory.
+            self.assertTrue(watcher.check_once())
+            self.assertFalse(watcher.check_once())  # Do not queue the same change twice.
+            manager.start.assert_called_once()
+            self.assertEqual(manager.start.call_args.kwargs["trigger"], "directory_watch")
+            self.assertFalse(manager.start.call_args.args[0]["reuse_parsed"])
+
+            DemoPipeline(paths).parse_documents()
+            self.assertEqual([row["file_name"] for row in read_jsonl(
+                paths.parsed_dir / "documents.jsonl")], ["keep.pdf"])
+            self.assertEqual([row["document_id"] for row in read_jsonl(
+                paths.parsed_dir / "pages.jsonl")], ["keep"])

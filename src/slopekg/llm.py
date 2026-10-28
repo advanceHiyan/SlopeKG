@@ -45,7 +45,7 @@ def llm_status() -> dict[str, Any]:
         "key_available": bool(key),
         "key_source": source,
         "max_output_tokens": DEEPSEEK_MAX_OUTPUT_TOKENS,
-        "note": "大模型是可选深度解析层；基础解析可独立运行，只有通过原文证据校验的深度候选才会进入深度图谱。",
+        "note": "此文字接口用于规范规则抽取；PDF旧文字deep已移除，多模态识别使用独立模型配置。",
     }
 
 

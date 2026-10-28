@@ -13,7 +13,7 @@
       <nav class="site-nav"><a href="./index.html">总览</a><a class="active" href="./pdf-ingestion.html">PDF解析</a><a href="./slopes.html">边坡档案</a><a href="./graph.html">关系图谱</a><a href="./rules.html">规则库</a><a href="./data-status.html">数据与接口</a><a href="./risk.html">风险研判</a></nav>
     </div></header>
     <main class="page-main">
-      <div class="page-heading"><div><h1>PDF识别工作台</h1><p>多模态识别与原有基础 / 深度解析分别运行。先看来源与待定项，再决定哪些内容可信。</p></div><button id="refreshBtn" class="button secondary" type="button">刷新状态</button></div>
+      <div class="page-heading"><div><h1>PDF识别工作台</h1><p>basic、多模态与全文知识识别分别运行。先看来源与待定项，再决定哪些内容可信。</p><a href="./knowledge-recognition.html">进入全文知识识别：发现对象、关联分块、重组知识 →</a></div><button id="refreshBtn" class="button secondary" type="button">刷新状态</button></div>
       <div class="notice info">上传的PDF保存在项目原始资料目录，该目录不会提交到 Git。系统不依赖人工种子即可运行；“已上传”不等于“已解析”，请以任务完成状态和文档清单为准。</div>
 
       <section id="ingestMetrics" class="grid metrics-grid"><div class="loading">加载中…</div></section>
@@ -22,7 +22,7 @@
         <div class="card-title-row"><div><h2 id="recognitionHeading">多模态识别</h2><p class="section-subtitle">直接读取原页图像，适用于正文、扫描页、表格和工程图。结果保留在候选区。</p></div><span class="badge pending">独立路线 · 候选结果</span></div>
         <div class="recognition-controls">
           <label>读取模型<select id="recognitionModel"><option value="">加载中…</option></select></label>
-          <label>调用上限<input id="recognitionMaxCalls" type="number" min="1" max="100000" value="200" /></label>
+          <label>调用上限<input id="recognitionMaxCalls" type="number" min="1" max="100000" value="500" /></label>
           <label>模型并发<input id="recognitionConcurrency" type="number" min="1" max="32" value="2" /></label>
         </div>
         <p id="recognitionEndpoint" class="form-help" aria-live="polite">正在读取本地模型配置…</p>
@@ -43,7 +43,7 @@
             <input id="pdfInput" type="file" accept="application/pdf,.pdf" multiple hidden />
           </div>
           <div id="selectedFiles" class="selected-files"><div class="detail-empty">尚未选择文件。</div></div>
-          <details open class="legacy-controls"><summary>基础 / 深度解析（旧基线）</summary>
+          <details open class="legacy-controls"><summary>基础解析（basic）</summary>
           <div class="ingest-options">
             <label><span>本次最多执行OCR页数</span><input id="ocrPages" type="number" min="0" max="1000" value="1000" /></label>
             <label><span>OCR计算设备</span><select id="ocrDevice"><option value="auto">自动（GPU优先）</option><option value="gpu">仅GPU</option><option value="cpu">仅CPU</option></select></label>
@@ -52,8 +52,8 @@
             <label class="check-option"><input id="forceOcr" type="checkbox" /><span>重新执行已处理过的OCR任务</span></label>
           </div>
           <p class="form-help">批量页数为0时自动选择：CPU逐页、GPU每批4页。页面渲染可并发；单张GPU采用批量推理，避免重复加载多个模型撑爆显存。OCR值为0时仍会完成逐页分类并生成待处理队列。</p>
-          <div class="action-row"><button id="uploadOnlyBtn" class="button" type="button" disabled>上传并基础更新</button><button id="rerunBtn" class="button ghost" type="button">基础解析全部资料</button><button id="reextractBtn" class="button ghost" type="button">基于现有文本重新抽取</button><button id="deepRunBtn" class="button secondary" type="button">旧路线深度解析</button></div>
-          <p class="form-help">基础模式在本地运行并更新图谱；深度模式在基础结果上调用项目DeepSeek做文本语义补充，与多模态原页读取分开。</p>
+          <div class="action-row"><button id="uploadOnlyBtn" class="button" type="button" disabled>上传并基础更新</button><button id="rerunBtn" class="button ghost" type="button">基础解析全部资料</button><button id="reextractBtn" class="button ghost" type="button">基于现有文本重新抽取</button></div>
+          <p class="form-help">基础模式在本地运行并更新图谱；全文知识识别和多模态识别在各自入口运行，分别保留候选结果。</p>
           </details>
         </div>
 

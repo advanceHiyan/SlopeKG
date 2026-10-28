@@ -5,13 +5,11 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts.extract_with_llm import build_quality_summary, candidate_is_schema_valid
 from slopekg.config import PATHS
 from slopekg.extractors import extract_section_values, normalize_reference_station
 from slopekg.llm import deepseek_key_info
 from slopekg.ocr import normalize_paddle_result
 from slopekg.parsers import classify_page
-from slopekg.semantic import stability_support_page, validate_candidate
 
 
 class AdaptivePageStrategyTests(unittest.TestCase):
@@ -81,44 +79,7 @@ class LlmCandidateValidationTests(unittest.TestCase):
             self.assertEqual(key, "unit-test-placeholder")
             self.assertEqual(source, "project_secret_file")
 
-    def test_candidate_schema_and_quality_metrics(self):
-        candidate = {
-            "mechanism_summary": "原文概括",
-            "failure_modes": ["崩塌"],
-            "stability_conclusions": [{"condition": "天然", "safety_factor": 1.2, "status": "基本稳定"}],
-            "causal_factors": ["降雨"],
-            "protection_rationale": "原文建议",
-            "uncertainties": [],
-            "evidence_quotes": [{"page": 3, "quote": "原文"}],
-        }
-        self.assertTrue(candidate_is_schema_valid(candidate))
-        summary = build_quality_summary([{"candidate": candidate, "model": "deepseek-v4-flash", "review_status": "pending"}])
-        self.assertEqual(summary["schema_valid_rate"], 1.0)
-        self.assertEqual(summary["evidence_quote_coverage"], 1.0)
 
-    def test_semantic_fields_without_verified_support_are_removed(self):
-        candidate = {
-            "hazard_body_type": "危岩体",
-            "hazard_types": [],
-            "mechanism_summary": "降雨不利于稳定",
-            "failure_modes": ["危岩体发育"],
-            "lithology_terms": ["灰岩"],
-            "stratum_terms": [],
-            "slope_structure": None,
-            "structural_planes": [],
-            "stability_conclusions": [],
-            "causal_factors": ["降雨"],
-            "protection_rationale": "现场可见危岩体发育",
-            "uncertainties": [],
-            "evidence_quotes": [
-                {"page": 1, "quote": "该边坡为危岩体，降雨不利于稳定", "supports": ["hazard_body_type", "mechanism_summary", "causal_factors"]},
-                {"page": 1, "quote": "现场可见危岩体发育", "supports": ["hazard_body_type", "failure_modes", "protection_rationale"]},
-            ],
-        }
-        cleaned, validation = validate_candidate(candidate, [{"page": 1, "text": "该边坡为危岩体，降雨不利于稳定。现场可见危岩体发育。"}])
-        self.assertTrue(validation["accepted"])
-        self.assertEqual(cleaned["lithology_terms"], [])
-        self.assertEqual(cleaned["hazard_body_type"], "危岩体")
 
     def test_section_values_extract_static_risk_fields_with_history_boundary(self):
         values = extract_section_values(
@@ -136,34 +97,6 @@ class LlmCandidateValidationTests(unittest.TestCase):
         self.assertTrue(values["structural_planes"])
         self.assertFalse(values["deformation_observations"][0]["current_status_known"])
 
-    def test_stability_support_requires_condition_value_and_status_to_cooccur(self):
-        pages = {
-            1: "现状工况稳定系数为1.20，属于欠稳定状态。",
-            2: "暴雨工况用于计算，另表数值为1.15。",
-        }
-        self.assertIsNone(
-            stability_support_page(
-                {
-                    "condition": "暴雨工况",
-                    "safety_factor": 1.15,
-                    "required_factor": None,
-                    "status": "欠稳定",
-                },
-                pages,
-            )
-        )
-        self.assertEqual(
-            stability_support_page(
-                {
-                    "condition": "现状工况",
-                    "safety_factor": 1.2,
-                    "required_factor": None,
-                    "status": "欠稳定",
-                },
-                pages,
-            ),
-            1,
-        )
 
 
 if __name__ == "__main__":

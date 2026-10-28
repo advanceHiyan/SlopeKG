@@ -7,7 +7,6 @@ import uuid
 from datetime import datetime
 from typing import Any
 from .config import PATHS, DemoPaths
-from .llm import DEFAULT_DEEPSEEK_MODEL
 from .storage import discover_pdf_files, ensure_dir, read_jsonl
 
 class PipelineJobManager:
@@ -67,7 +66,7 @@ class PipelineJobManager:
             # Large visual facts/receipts belong to the paginated result API,
             # not every 900ms job poll or an in-memory JSON copy.
             result=({k:state.get(k) for k in ('recognizer','processing_status','summary','precision','recall','metric_note')}
-                    if state.get('recognizer')=='multimodal' else state)
+                    if state.get('recognizer') in {'multimodal', 'knowledge'} else state)
             self._update(
                 job_id,
                 status=status,
@@ -121,7 +120,6 @@ def automatic_basic_options() -> dict[str, Any]:
         "ocr_pages": 1000,
         "force_ocr": False,
         "parse_mode": "basic",
-        "llm_model": DEFAULT_DEEPSEEK_MODEL,
         "reuse_parsed": False,
         "ocr_scope": "changed",
         "ocr_device": "auto",
@@ -175,7 +173,8 @@ class PdfDirectoryWatcher:
         # Auto-update needs only source fingerprints, not page/text/table counts.
         # The full inventory is still available to the documents API.
         documents = {row.get("file_name"): row for row in read_jsonl(self.paths.parsed_dir / "documents.jsonl")}
-        needs_parsing = any(
+        # Deleted PDFs also require a rebuild to drop their cached evidence.
+        needs_parsing = set(documents) != {name for name, _, _ in snapshot} or any(
             name not in documents
             or documents[name].get("source_size_bytes") != size
             or documents[name].get("source_mtime_ns") != modified

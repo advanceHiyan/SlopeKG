@@ -4,7 +4,6 @@ import unittest
 from slopekg.engineering import extract_factor_cells
 from slopekg.extractors import extract_structural_planes, infer_material_nature
 from slopekg.graph_builder import stable_id
-from slopekg.semantic import detect_section_gaps
 from slopekg.source_candidates import build_processing_audit, material_mentions, orientation_candidates
 
 
@@ -37,14 +36,6 @@ class SourceCandidateTests(unittest.TestCase):
                      '地层岩性为灰岩。某个数值215°∠31°。', '地层岩性为灰岩，产状415°∠31°。']:
             self.assertEqual(extract_structural_planes(text), [])
 
-    def test_partial_list_completeness_and_object_switch(self):
-        samples = [{'text':'岩层产状27°∠19°，节理产状215°∠31°。'}]
-        bedding = {'name':'岩层面', 'dip_direction':27, 'dip_angle':19}
-        joint = {'name':'节理', 'dip_direction':215, 'dip_angle':31}
-        self.assertIn('structural_planes', detect_section_gaps({}, samples, {'structural_planes':[bedding]}))
-        self.assertNotIn('structural_planes', detect_section_gaps({'structural_planes':[joint]}, samples, {'structural_planes':[bedding]}))
-        wrong_role = {**joint, 'name':'岩层面'}
-        self.assertIn('structural_planes', detect_section_gaps({'structural_planes':[wrong_role]}, samples, {'structural_planes':[bedding]}))
 
     def test_range_endpoints_and_new_section_never_become_extra_scalar_planes(self):
         for text in ['岩层产状37~92°∠21°。', '岩层产状37°∠21~29°。']:

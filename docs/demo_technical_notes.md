@@ -295,7 +295,7 @@ pip install -r requirements.txt
 重新生成 Demo 数据：
 
 ```bash
-python scripts/run_pipeline.py --ocr-pages 0 --llm-model deepseek-flash
+python scripts/run_pipeline.py --ocr-pages 0
 ```
 
 启动前端：

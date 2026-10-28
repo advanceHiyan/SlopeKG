@@ -39,20 +39,12 @@ class DemoPaths:
         return self.web_data_dir / "basic_graph.json"
 
     @property
-    def deep_graph_json(self) -> Path:
-        return self.web_data_dir / "deep_graph.json"
-
-    @property
     def state_json(self) -> Path:
         return self.output_dir / "pipeline_state.json"
 
     @property
     def basic_state_json(self) -> Path:
         return self.output_dir / "pipeline_state.basic.json"
-
-    @property
-    def deep_state_json(self) -> Path:
-        return self.output_dir / "pipeline_state.deep.json"
 
     @property
     def schema_json(self) -> Path:

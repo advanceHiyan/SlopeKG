@@ -58,14 +58,14 @@ test('a missing rules task explains the lost record and releases the button', as
 test('an existing PDF job disables every processing action', async t => {
   const { page } = await jobPage(t, 'pdf', 0);
   await page.waitForFunction(() => document.querySelector('#jobStatus').textContent === '处理中');
-  for (const id of ['rerunBtn', 'reextractBtn', 'deepRunBtn']) assert.equal(await page.locator('#' + id).isDisabled(), true);
+  for (const id of ['rerunBtn', 'reextractBtn']) assert.equal(await page.locator('#' + id).isDisabled(), true);
 });
 
 test('a missing PDF task stops polling and allows processing again', async t => {
   const { page } = await jobPage(t, 'pdf', 404);
   await page.waitForFunction(() => document.querySelector('#jobStatus').textContent === '失败', null, { timeout: 5000 });
   assert.match(await page.locator('#jobError').textContent(), /任务记录不存在/);
-  for (const id of ['rerunBtn', 'reextractBtn', 'deepRunBtn']) assert.equal(await page.locator('#' + id).isDisabled(), false);
+  for (const id of ['rerunBtn', 'reextractBtn']) assert.equal(await page.locator('#' + id).isDisabled(), false);
 });
 
 test('PDF upload sends the selected settings including zero OCR pages', async t => {
@@ -90,13 +90,13 @@ test('PDF upload sends the selected settings including zero OCR pages', async t 
   assert.deepEqual([selected.ocr_pages, selected.ocr_device, selected.ocr_workers, selected.ocr_batch_size, selected.force_ocr], [0, 'cpu', 2, 3, true]);
 });
 
-test('partial deep processing stops polling and shows skipped coverage', async t => {
+test('partial visual processing stops polling and releases basic actions', async t => {
   const { page, state } = await jobPage(t, 'pdf', 0);
   state.nextStatus = 'partial';
-  state.extra = { stage: 'semantic_partial', message: '基础结果可用，深度未完成', result: { llm: { run: { candidates: 2, passed: 1, skipped_count: 3 } } } };
+  state.extra = { stage: 'visual_partial', message: '部分区域未完成', options: { recognizer: 'multimodal' }, result: { summary: { facts: 5, verified_model: 2, pending: 3 } } };
   await page.waitForFunction(() => document.querySelector('#jobStatus').textContent === '部分完成');
-  assert.match(await page.locator('#jobDetails').textContent(), /3 个对象/);
-  assert.equal(await page.locator('#deepRunBtn').isDisabled(), false);
+  assert.match(await page.locator('#jobDetails').textContent(), /待定3条/);
+  assert.equal(await page.locator('#rerunBtn').isDisabled(), false);
   const polls = state.polls;
   await page.waitForTimeout(1100);
   assert.equal(state.polls, polls);

@@ -7,7 +7,7 @@ from typing import Any
 from .model_client import content_hash
 from .visual_evidence import field_parts_error
 
-VERSION = "visual-v11"
+VERSION = "visual-v12"
 ROLES = {"observation", "design", "recommendation", "calculation", "prediction", "simulation", "reference", "unknown"}
 REVIEW_CHECKS = ("object_supported","field_supported","value_supported","unit_supported","scope_supported",
                  "role_supported","qualifiers_supported","condition_supported","time_supported")
@@ -39,6 +39,17 @@ def rows(value: Any, name: str) -> list[dict]:
     return value
 
 
+def normalize_qualifier_verdict(verdict: dict) -> dict:
+    """One known spelling alias; missing/conflicting checks are never guessed."""
+    alias = verdict.get('qualifier_supported')
+    if 'qualifiers_supported' not in verdict and type(alias) is bool:
+        verdict['qualifiers_supported'] = alias
+        verdict.setdefault('contract_repairs',[]).append('qualifier_supported -> qualifiers_supported')
+    elif 'qualifier_supported' in verdict and alias != verdict.get('qualifiers_supported'):
+        verdict['qualifiers_supported'] = None
+    return verdict
+
+
 def review_result(answer: dict, expected: set[str]) -> dict:
     """Quarantine one malformed verdict without discarding other reviewed facts."""
     raw = rows(answer.get("verdicts"), "verdicts")
@@ -54,12 +65,7 @@ def review_result(answer: dict, expected: set[str]) -> dict:
         if verdict.get("decision") not in {"supported","uncertain","rejected"}:
             errors.append("decision"); verdict["decision"]="uncertain"
         # Normalize one known spelling alias without inventing a semantic answer.
-        alias = verdict.get('qualifier_supported')
-        if 'qualifiers_supported' not in verdict and type(alias) is bool:
-            verdict['qualifiers_supported'] = alias
-            verdict.setdefault('contract_repairs',[]).append('qualifier_supported -> qualifiers_supported')
-        elif 'qualifier_supported' in verdict and alias != verdict.get('qualifiers_supported'):
-            verdict['qualifiers_supported'] = None
+        normalize_qualifier_verdict(verdict)
         for key in REVIEW_CHECKS:
             if type(verdict.get(key)) is not bool:
                 errors.append(key);verdict[key]=False
@@ -258,6 +264,7 @@ def consolidate(facts: list[dict]) -> list[dict]:
             row = {**best, "id": content_hash([key,group_index])[:24], "evidence": [dict(read_id=f["id"], page=f["page"],
                         region_id=f["region_id"], bbox=f["bbox"], quote=f["quote"], support_quotes=f.get("support_quotes",[]),
                         field_evidence=f.get("field_evidence",{}), source_grounding=f.get("source_grounding",[]),
+                        source_bindings=f.get('source_bindings',[]),independent_comparison=f.get('independent_comparison',{}),
                         admission_checks=f.get("admission_checks",{}),
                         review_history=f.get("review_history",[]),
                         support_context=f.get("support_context",[]),

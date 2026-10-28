@@ -47,6 +47,8 @@ def audit_units(region: dict, facts: list[dict], budget: int) -> list[dict]:
             units.append({**common,'part':'unaccounted_source_content','content':item})
     for fact in facts:
         units.append({**common,"part":"fact","fact":{k:fact[k] for k in FACT_KEYS},
+                      'unit_basis':fact.get('unit_basis',''),
+                      'source_bindings':fact.get('source_bindings',[]),
                       "fact_id":fact["id"],"fact_status":fact["status"],"reason":fact.get("reason",""),
                       "admission_checks":fact.get("admission_checks",{})})
     return units or [{**common,"part":"empty_or_unread"}]

@@ -4,9 +4,9 @@
 
 Git 仓库保留源码、测试和技术说明。`output/`、`outputs/` 下的 OCR 图片、解析中间数据、生成图谱、离线展示及交付归档不随 Git 上传；请使用本地原始资料运行下述流水线生成。移除 Git 跟踪不会删除本地已有成果。
 
-独立多模态识别入口已增加：`--recognizer multimodal --pdf <PDF路径> --model-profile config/models/deepseek.json`。原来的basic/deep路线仍默认使用`--recognizer legacy`。新路线先由模型识别版面和语义切分，再按区域细读、放大、核验和查漏；结果独立保存，暂不自动写入正式图谱。[方案、运行方式和执行对照](docs/多模态识别流程方案与执行.md)说明OCR协作、模型切换、预算和当前验收边界。增加`--prepare-only`可只在本地准备清单，不调用模型。
+独立多模态识别入口已增加：`--recognizer multimodal --pdf <PDF路径> --model-profile config/models/deepseek.json`。默认`--recognizer legacy`仅运行本地basic；旧文字deep已于2026-10-25删除。新路线先由模型识别版面和语义切分，再按区域细读、放大、核验和查漏；结果独立保存，暂不自动写入正式图谱。[方案、运行方式和执行对照](docs/多模态识别流程方案与执行.md)说明OCR协作、模型切换、预算和当前验收边界。增加`--prepare-only`可只在本地准备清单，不调用模型。
 
-网页入口为[PDF识别工作台](web/pdf-ingestion.html)：选择已配置模型和资料目录内的PDF，可先做本地准备，再显式启动多模态识别；旧basic/OCR/deep保留在独立操作区。结果支持状态筛选、分页、原文证据和PDF页码定位。自动核验通过仍需人工确认，不表示人工准确率或召回率。[识别路线与代码分层](docs/识别路线与代码分层.md)说明模块职责、独立复读、内容查漏和扩展方式。
+网页入口为[PDF识别工作台](web/pdf-ingestion.html)：选择已配置模型和资料目录内的PDF，可先做本地准备，再显式启动多模态识别；本地basic/OCR保留在独立操作区。结果支持状态筛选、分页、原文证据和PDF页码定位。自动核验通过仍需人工确认，不表示人工准确率或召回率。[识别路线与代码分层](docs/识别路线与代码分层.md)说明模块职责、独立复读、内容查漏和扩展方式。
 
 本项目是公路边坡多源多模态知识图谱的第一版工程 Demo。生产流水线不依赖人工种子，当前已实现：
 
@@ -44,6 +44,8 @@ pip install -r requirements.txt
 当前 Demo 不强制依赖云 OCR。未安装 PaddleOCR 时，OCR 页会渲染并进入 `engine_missing` 状态；安装 PaddleOCR 后再次运行流水线即可尝试本地识别。OCR/Paddle 运行缓存会写入 `output/demo/cache/`，避免污染用户目录。
 
 ## 运行流水线
+
+新增第三路“全文知识识别”：`/web/knowledge-recognition.html`。先发现全文对象，再关联非连续分块，重组为带原文证据的对象事实和关系；与 basic、多模态分别运行和保存结果。支持原生文字，图形未读页单独列出。使用方式与边界见[识别路线与代码分层](docs/识别路线与代码分层.md)。
 
 ### 会昌监测样例
 
@@ -203,7 +205,6 @@ GET  /api/multimodal/quality
 GET  /api/evaluation
 GET  /api/extracted/slopes
 GET  /api/assertions
-GET  /api/extracted/llm-candidates
 GET  /api/risk/readiness?slope_id={slope_id}
 GET  /api/monitoring/catalog
 GET  /api/monitoring/observations
@@ -281,38 +282,31 @@ python scripts/run_tests.py --suite all
 - 保留 RapidOCR/ONNXRuntime 作为CPU轻量OCR fallback；
 - 对扫描页、图纸标题栏按收益排序，不对所有PDF页面无差别OCR。
 
-## 大模型
+## 模型识别
 
-主流水线默认运行基础解析，不调用外部大模型。选择 `--mode deep` 或 `--deep` 后，才使用配置的 DeepSeek 密钥进行语义抽取；输出必须通过 JSON 结构、原文页码和逐字引句校验后才会进入深度图谱。兼容选项 `--no-llm` 始终强制使用基础解析：
+旧文字deep已删除，包括其网页按钮、命令行、候选接口及导出选项；旧参数会报错。删除依据与历史记录边界见[移除说明](docs/旧文字deep移除说明.md)。
+
+基础流程使用本地文字提取、表格、按需OCR和规则抽取，不调用外部模型。需要直接识读原图时，显式选择多模态路线：
 
 ```powershell
-python scripts/run_pipeline.py --mode deep --ocr-pages 0 --llm-model deepseek-flash
+python scripts/run_pipeline.py --recognizer multimodal --pdf "data/rawPDF/资料.pdf" --model-profile config/models/deepseek.json --prepare-only
 ```
 
-深度解析同时输出 `llm_evaluation.json`，记录结构校验、原文引句验证率和缓存命中情况。大模型阶段失败时保留已经完成 OCR 的基础结果。人工金标准只用于周期性离线审计，不参与生产图谱生成。
+`--prepare-only`只做本地准备；正式模型识别需去掉该参数。多模态候选独立保存，不自动写入正式图谱。DeepSeek等模型配置继续保留。
 
-`--reuse-parsed` 仅在解析缓存与当前 PDF 一致时复用；源文件发生变化时需去掉该选项重新解析。离线导出按所选 basic/deep/active 模式读取对应结果，并带上最新人工修订；缺少深度图谱或源版本不一致时会明确报错。
+`--reuse-parsed`只复用与当前原文件一致的基础解析缓存。离线导出支持basic/active；缓存重建只重建basic，不读取旧deep候选。原始资料和历史识别结果保留。
 
-密钥只读取 `.secrets/deepseek_api_key.txt`（已由 `.gitignore` 整体排除）。缺失或空文件直接报错，不回退到用户目录或机器环境变量，避免误用其他账户。项目密钥只允许发送到 `https://api.deepseek.com`，兼容其 `/v1` 路径；自定义第三方 `DEEPSEEK_API_BASE` 会被拒绝，重定向也不会携带密钥继续请求。
-
-2026-10-15核对[官网模型说明](https://api-docs.deepseek.com/quick_start/pricing/)及实际 `/models` 返回：默认模型 `deepseek-flash` 对应 DeepSeek-V4.1-Flash，支持文字和图像，最大输出393216 tokens。旧 `deepseek-v4-flash` 名称已转到新模型，不能用它建立历史模型对照。目前正式 deep 流水线仍发送文字；图像实验脚本和结果保存在本地 `.private/reviews/20261015_deepseek_vision/`，不代表已将视觉识别接入生产抽取。
-
-当前大模型适合用于：
-
-- 灾害成因机制结构化。
-- 稳定性结论抽取。
-- 规范条文解释。
-- 多句关系抽取。
+规范规则抽取的独立模型接口不属于已删除的PDF文字deep；仍使用项目专用密钥和端点限制。
 
 ## 当前数据说明
 
-当前图谱主体是“自动发现 `data/rawPDF/` 下全部PDF + 全页自适应解析 + 确定性精确字段抽取 + 证据约束的大模型语义抽取 + 自动构图”。人工复核可以纠错，但不是运行前置条件。自动化层包括：
+当前图谱主体是“自动发现 `data/rawPDF/` 下全部PDF + 全页自适应解析 + 规则字段抽取 + 自动构图；多模态识别另行显式运行”。人工复核可以纠错，但不是运行前置条件。自动化层包括：
 
 - 截至2026年9月20日，现有9份PDF、651页逐页分类与策略路由（资料量随 `data/rawPDF/` 中文件增减而变化；该资料规模不代表9月新增量）。
 - 带页面坐标的文本块和表格 sidecar。
 - OCR 任务队列。
 - 边坡清单、坐标、治理方案、安全系数、几何与岩性地层候选抽取。
-- 回归精度、字段覆盖率和大模型输出结构评测。
+- 回归检查、字段覆盖率和证据一致性检查。
 - 图谱生成和存储。
 - Schema、完整性报告和接口注册表。
 - 前端触发流水线。

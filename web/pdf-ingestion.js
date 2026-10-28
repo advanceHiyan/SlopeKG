@@ -7,7 +7,6 @@
     uploadOnly: document.getElementById("uploadOnlyBtn"),
     rerun: document.getElementById("rerunBtn"),
     reextract: document.getElementById("reextractBtn"),
-    deepRun: document.getElementById("deepRunBtn"),
     refresh: document.getElementById("refreshBtn"),
     metrics: document.getElementById("ingestMetrics"),
     rows: document.getElementById("documentRows"),
@@ -35,10 +34,8 @@
 
   const stageLabels = {
     queued: "等待执行", preparing: "准备输入", parsing: "逐页解析", ocr: "按需OCR",
-    extracting: "属性抽取", semantic: "语义识别", graph: "图谱构建", writing: "写入结果",
+    extracting: "属性抽取", graph: "图谱构建", writing: "写入结果",
     completed: "已完成", failed: "处理失败", upload: "上传文件",
-    semantic_failed: "深度解析失败", semantic_partial: "深度解析未完成",
-    semantic_not_applicable: "无深度解析对象",
   };
   const statusLabels = { none: "暂无任务", queued: "排队中", running: "处理中", completed: "已完成", failed: "失败", partial: "部分完成", prepared: "本地准备完成" };
 
@@ -92,18 +89,18 @@
     const options = job.options || {};
     const result = job.result || {};
     const parsed = result.parsed || {};
-    const llm = result.llm?.run || {};
+    const knowledge = options.recognizer === 'knowledge';
     const visual = options.recognizer === 'multimodal';
+    const external = visual || knowledge;
+    const limits = knowledge ? options.knowledge_settings : options.visual_settings;
     elements.details.innerHTML = [
       ["任务编号", job.id],
       ["开始时间", job.started_at || job.created_at || "等待中"],
-      ["处理模式", visual ? (options.prepare_only ? '多模态 · 仅本地准备' : '多模态 · 原页读取与核验') : options.parse_mode === "deep" ? "旧路线深度解析（基础结果 + 文本模型）" : "基础解析（不调用大模型）"],
-      ["处理设置", visual ? `${options.input_pdfs?.length || 0}份PDF / 上限${options.visual_settings?.max_calls ?? 200}次调用 / 并发${options.visual_settings?.model_concurrency ?? 1}` : `OCR最多 ${options.ocr_pages ?? 0} 页 / ${String(options.ocr_device || "auto").toUpperCase()} / 渲染并发 ${options.ocr_workers ?? 4} / 批量 ${options.ocr_batch_size || "自动"}`],
-      visual && result.summary ? ['候选结果', `${result.summary.facts ?? 0}条 / 自动通过${result.summary.verified_model ?? 0}条 / 待定${result.summary.pending ?? 0}条`] : null,
+      ["处理模式", knowledge ? (options.prepare_only ? '全文知识 · 仅本地准备' : '全文知识 · 对象发现与知识重组') : visual ? (options.prepare_only ? '多模态 · 仅本地准备' : '多模态 · 原页读取与核验') : "基础解析（不调用大模型）"],
+      ["处理设置", external ? `${options.input_pdfs?.length || 0}份PDF / 上限${limits?.max_calls ?? (knowledge ? 160 : 200)}次调用 / 并发${limits?.model_concurrency ?? 1}` : `OCR最多 ${options.ocr_pages ?? 0} 页 / ${String(options.ocr_device || "auto").toUpperCase()} / 渲染并发 ${options.ocr_workers ?? 4} / 批量 ${options.ocr_batch_size || "自动"}`],
+      external && result.summary ? ['候选结果', `${result.summary.facts ?? 0}条 / 自动通过${result.summary.verified_model ?? 0}条 / 待定${result.summary.pending ?? 0}条`] : null,
       parsed.ocr_device_counts && Object.keys(parsed.ocr_device_counts).length ? ["实际OCR设备", Object.entries(parsed.ocr_device_counts).map(([name, count]) => `${name}：${count}页`).join(" / ")] : null,
       parsed.documents != null ? ["完成结果", `${parsed.documents} 份PDF / ${parsed.pages} 页 / ${result.graph?.nodes ?? 0} 个节点`] : null,
-      llm.candidates != null ? ["语义校验", `${llm.passed ?? 0}/${llm.candidates} 通过`] : null,
-      llm.skipped_count ? ["未进入深度解析", `${llm.skipped_count} 个对象没有可用章节，需核对来源范围`] : null,
     ].filter(Boolean).map(([label, value]) => `<div class="detail-row"><small>${escapeHtml(label)}</small>${escapeHtml(value)}</div>`).join("");
     elements.error.hidden = !job.error;
     elements.error.textContent = job.error || "";
@@ -217,7 +214,6 @@
     elements.uploadOnly.disabled = busy || !valid;
     elements.rerun.disabled = busy;
     elements.reextract.disabled = busy;
-    elements.deepRun.disabled = busy;
   }
 
   function renderMetrics(inventory, status) {
@@ -291,7 +287,6 @@
   elements.uploadOnly.addEventListener("click", handleUpload);
   elements.rerun.addEventListener("click", async () => { try { await startJob("basic", false); } catch (error) { elements.error.hidden = false; elements.error.textContent = error.message; } });
   elements.reextract.addEventListener("click", async () => { try { await startJob("basic", true, 0); } catch (error) { elements.error.hidden = false; elements.error.textContent = error.message; } });
-  elements.deepRun.addEventListener("click", async () => { try { await startJob("deep", true); } catch (error) { elements.error.hidden = false; elements.error.textContent = error.message; } });
   elements.refresh.addEventListener("click", async () => { await loadOverview(); const latest = await getJson("/api/pipeline/jobs/latest", { status: "none" }); renderJob(latest); });
 
   loadOverview();

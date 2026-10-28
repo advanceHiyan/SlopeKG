@@ -177,7 +177,6 @@ INTERFACES: list[dict[str, Any]] = [
     {"path": "/api/evaluation", "method": "GET", "status": "implemented", "domain": "quality", "description": "自动抽取回归评测与解析覆盖指标"},
     {"path": "/api/extracted/slopes", "method": "GET", "status": "implemented", "domain": "extraction", "description": "从PDF原生版面自动抽取的候选边坡数据"},
     {"path": "/api/assertions", "method": "GET", "status": "implemented", "domain": "evidence", "description": "带证据和置信度的候选属性断言"},
-    {"path": "/api/extracted/llm-candidates", "method": "GET", "status": "implemented", "domain": "extraction", "description": "大模型复杂关系候选；始终保持待人工复核状态"},
     {"path": "/api/completeness", "method": "GET", "status": "implemented", "domain": "quality", "description": "全部边坡的数据完整性报告"},
     {"path": "/api/completeness/{slope_id}", "method": "GET", "status": "implemented", "domain": "quality", "description": "单边坡缺失项和风险就绪度"},
     {"path": "/api/monitoring/observations", "method": "GET", "status": "reserved_not_connected", "domain": "monitoring", "description": "位移、裂缝、地下水、孔压等监测数据"},

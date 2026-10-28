@@ -31,12 +31,11 @@ def export_standalone_html(
     """Export the current result as one offline HTML file with embedded data."""
     graph_files = {
         "basic": paths.basic_graph_json,
-        "deep": paths.deep_graph_json,
         "active": paths.graph_json,
     }
     graph_file = graph_files.get(graph_mode)
     if graph_file is None:
-        raise ValueError("graph_mode must be basic, deep, or active")
+        raise ValueError("graph_mode must be basic or active; legacy text deep has been removed")
     if graph_mode != "active" and graph_file.exists() and paths.graph_json.exists():
         mode_graph = read_json(graph_file, {})
         active_graph = read_json(paths.graph_json, {})
@@ -49,7 +48,7 @@ def export_standalone_html(
         graph = apply_slope_overrides(graph, paths)
 
     state_file = {
-        "active": paths.state_json, "basic": paths.basic_state_json, "deep": paths.deep_state_json,
+        "active": paths.state_json, "basic": paths.basic_state_json,
     }[graph_mode]
     evaluation_file = paths.evaluation_json if graph_mode == "active" else paths.output_dir / f"evaluation.{graph_mode}.json"
 

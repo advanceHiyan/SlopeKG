@@ -216,7 +216,7 @@ async function runPipeline() {
     const response = await fetch("/api/pipeline/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ocr_pages: ocrPages, parse_mode: "deep" }),
+      body: JSON.stringify({ ocr_pages: ocrPages, parse_mode: "basic" }),
     });
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
@@ -259,7 +259,6 @@ function renderPipeline() {
   const status = state.status || state.graph.meta.pipeline || {};
   const parsed = status.parsed || state.graph.meta.pipeline || {};
   const deps = status.dependencies || state.graph.meta.dependencies || {};
-  const llm = status.llm || state.graph.meta.llm || {};
   $("#pipelineStats").innerHTML = [
     pipelineStat(parsed.documents ?? "-", "文档"),
     pipelineStat(parsed.pages ?? "-", "页"),
@@ -267,9 +266,8 @@ function renderPipeline() {
     pipelineStat(parsed.ocr_tasks ?? "-", "OCR任务"),
   ].join("");
   const ocrText = deps.paddleocr ? "PaddleOCR 已可用" : "PaddleOCR 未安装，OCR任务已排队";
-  const llmText = llm.enabled ? `DeepSeek 已参与语义抽取（通过 ${llm.run?.passed ?? 0}/${llm.run?.candidates ?? 0}）` : (llm.key_available ? "DeepSeek 已配置，本次未调用" : "DeepSeek 未配置，已使用确定性降级流程");
   const statusCounts = parsed.ocr_status_counts ? formatStatusCounts(parsed.ocr_status_counts) : "";
-  $("#pipelineMessage").textContent = `${ocrText}${statusCounts ? `（${statusCounts}）` : ""}；${llmText}。${status.updated_at ? `上次运行：${status.updated_at}` : ""}`;
+  $("#pipelineMessage").textContent = `${ocrText}${statusCounts ? `（${statusCounts}）` : ""}；基础解析使用本地文字、表格和OCR。${status.updated_at ? `上次运行：${status.updated_at}` : ""}`;
 }
 
 function pipelineStat(value, label) {

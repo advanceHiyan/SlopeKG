@@ -3,6 +3,7 @@ from .visual_batching import verification_batches
 from .visual_contract import FACT_KEYS, VERIFY, REVIEW_CHECKS, review_result
 from .visual_evidence import source_contains, literal_supported, field_is_supported, align_quote
 from .visual_sources import fact_quality_issues
+from .visual_comparison import compare_independent, unresolved_differences
 import re
 
 
@@ -14,8 +15,13 @@ class VisualReviewer:
                       support_context=(), table_source=False, checkpoint=None, independent_read=None):
         errors=[]
         originals={f["id"]:f for f in candidates}
+        for fact in candidates:
+            fact['independent_comparison']=compare_independent(fact,independent_read,candidates)
         wire=[{**{key:f[key] for key in (*FACT_KEYS,"id","quote","bbox")},
                "unit_basis":f.get('unit_basis',''),
+               **({'source_bindings':f['source_bindings']} if f.get('source_bindings') else {}),
+               **({'independent_comparison':f['independent_comparison']}
+                  if f['independent_comparison']['differences'] else {}),
                "support_quotes":f.get("support_quotes",[]),"field_evidence":f.get("field_evidence",{})} for f in candidates]
         crop_slots=max(0,self.settings.max_images-len(images))
         # Every candidate here belongs to the same independently re-rendered
@@ -68,9 +74,13 @@ class VisualReviewer:
                 blind_source_ok=(independent_read is None or supports(source_fragments,True))
                 blind_review_ok=(independent_read is None or supports(review_fragments,True))
                 blind_ok=blind_source_ok and blind_review_ok
+                unresolved=unresolved_differences(fact['independent_comparison'],review)
                 issues=fact_quality_issues(fact,review_fragments)
+                if any(not any(literal_supported(b['text'],q) for q in source_fragments)
+                       for b in fact.get('source_bindings',[]) if b['text'].strip()):
+                    issues.append('source_binding_not_grounded')
                 fact['quality_issues']=issues
-                grounded = source_ok and (review_ok or (independent_read is not None and blind_ok)) and blind_ok and not issues
+                grounded = source_ok and (review_ok or (independent_read is not None and blind_ok)) and blind_ok and not issues and not unresolved
                 fact["support_context"]=[{"quote":q,**{k:r[k] for k in ("region_id","page","bbox")}}
                     for q in dict.fromkeys(source_fragments+review_fragments) if not source_contains(q,transcript,table=table_source)
                     for r in support_context if source_contains(q,r["transcript"],table=r.get("is_table",False))]
@@ -91,6 +101,8 @@ class VisualReviewer:
                     "source_evidence_grounded":supports(source_fragments),"review_evidence_grounded":supports(review_fragments),
                     'independent_source_grounded':blind_source_ok,
                     'independent_review_grounded':blind_review_ok,'field_quality_complete':not issues,
+                    'independent_fields_resolved':not unresolved,
+                    'unresolved_independent_fields':unresolved,
                     "explicit_object_scope_role":explicit,
                     "read_fields_supported":{k:field_is_supported(fact,k,source_fragments,literal_supported) for k in literal_keys},
                     "review_fields_supported":{k:field_is_supported(fact,k,review_fragments,literal_supported) for k in literal_keys}}
@@ -102,6 +114,8 @@ class VisualReviewer:
                     fact.update(status="pending", reason="insufficient_source_or_semantic_support")
                     if not blind_source_ok:
                         fact['reason']='independent_source_disagreement'
+                    elif unresolved:
+                        fact['reason']='independent_field_conflict'
                     elif issues:
                         fact['reason']='incomplete_or_unbound_fields'
             if checkpoint:

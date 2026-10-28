@@ -15,7 +15,7 @@ from .visual_batching import compact, pack, audit_units, layout_anchors, verific
 from .visual_evidence import normalized, literal_supported, source_contains
 from .visual_runtime import VisualRuntime
 from .visual_review import VisualReviewer
-from .visual_sources import content_coverage, related_sources, unaccounted_content
+from .visual_sources import content_coverage, related_sources, unaccounted_content, fact_source_bindings
 
 
 class VisualPipeline:
@@ -170,19 +170,27 @@ class VisualPipeline:
             if prepare_only:
                 self._checkpoint(report)
                 return report
-            outcomes = await asyncio.gather(*(layout_page(state) for state in report["pages"]), return_exceptions=True)
-            for state, outcome in zip(report["pages"], outcomes):
-                if isinstance(outcome, BaseException):
-                    state["errors"].append("Layout failure: " + type(outcome).__name__)
-                    state.setdefault("card", {"page":state["page"],"title":"","summary":"layout unresolved","blank":False,
-                        "regions":[{"id":"unresolved","kind":"unknown","bbox":[0,0,1,1],"objects":[],"summary":"full-page recovery"}]})
-            assignments = await self._segment(doc, report)
-            # Complete each bounded dependency window before spending the
-            # entire file budget on more primary reads. Prior windows remain
-            # available only through explicit source continuation links.
+            assignments = {}
+            # Layout and segmentation share the same bounded frontier as
+            # reading/review. One optional lookahead page preserves boundary
+            # hints, but must not spend the current window's minimum budget.
             for offset in range(0,len(report['pages']),self.settings.window_pages):
-                report['active_window']=[offset+1,min(offset+self.settings.window_pages,len(report['pages']))]
-                await self._recognize_window(doc,report,assignments,report['pages'][offset:offset+self.settings.window_pages])
+                end=min(offset+self.settings.window_pages,len(report['pages']))
+                window=report['pages'][offset:end]
+                layout_states=[s for s in window if 'card' not in s]
+                minimum=(4+int(self.settings.independent_review))*len(window)+1
+                if (end<len(report['pages']) and 'card' not in report['pages'][end]
+                        and self.settings.max_calls-self.calls>minimum):
+                    layout_states.append(report['pages'][end])
+                outcomes=await asyncio.gather(*(layout_page(s) for s in layout_states),return_exceptions=True)
+                for state,outcome in zip(layout_states,outcomes):
+                    if isinstance(outcome,BaseException):
+                        state['errors'].append('Layout failure: '+type(outcome).__name__)
+                        state.setdefault('card',{'page':state['page'],'title':'','summary':'layout unresolved','blank':False,
+                            'regions':[{'id':'unresolved','kind':'unknown','bbox':[0,0,1,1],'objects':[],'summary':'full-page recovery'}]})
+                assignments=await self._segment(doc,report,start=offset,stop=end,assignments=assignments)
+                report['active_window']=[window[0]['page'],window[-1]['page']]
+                await self._recognize_window(doc,report,assignments,window)
             report.pop('active_window',None)
             report["facts"].sort(key=lambda f: (f["page"], f["region_id"], f["id"]))
             report["facts"] = consolidate(report["facts"])
@@ -299,10 +307,12 @@ class VisualPipeline:
             self.progress_callback(0,stage,f"{len(pages)}页；已细读{read}个区域；候选{len(report['facts'])}条；自动核验通过{adopted}条；调用{self.calls}/{self.settings.max_calls}")
 
 
-    async def _segment(self, doc: VisualDocument, report: dict) -> dict:
-        assignments = {}
-        for offset in range(0, len(report["pages"]), self.settings.window_pages):
-            window = report["pages"][offset:offset + self.settings.window_pages]
+    async def _segment(self, doc: VisualDocument, report: dict, *, start=0, stop=None, assignments=None) -> dict:
+        assignments = {} if assignments is None else assignments
+        changed=set()
+        stop=len(report['pages']) if stop is None else stop
+        for offset in range(start, stop, self.settings.window_pages):
+            window = report["pages"][offset:min(stop,offset + self.settings.window_pages)]
             units = [{**r, "region": f"p{s['page']}:{r['id']}", "page": s["page"], "title": s["card"]["title"]}
                      for s in window for r in s["card"]["regions"]]
             try:
@@ -317,7 +327,8 @@ class VisualPipeline:
                         previous = [{**r, "region": f"p{prior['page']}:{r['id']}", "page": prior["page"]}
                                     for r in prior["card"]["regions"][-1:]]
                     following = units[index + len(batch):index + len(batch) + 1]
-                    if not following and offset + len(window) < len(report["pages"]):
+                    if (not following and offset + len(window) < len(report["pages"])
+                            and 'card' in report['pages'][offset+len(window)]):
                         next_page = report["pages"][offset + len(window)]
                         following = [{**r, "region": f"p{next_page['page']}:{r['id']}", "page": next_page["page"]}
                                      for r in next_page["card"]["regions"][:1]]
@@ -353,6 +364,9 @@ class VisualPipeline:
                             assignment["source_context_page"] = pages[assignment["region"]]
                             assignment["section_scope"] = assignment["region"]
                         assignments[assignment["region"]] = assignment
+                        changed.add(assignment['region'])
+                        if assignment['continues_from']:
+                            changed.add(assignment['continues_from'])
             except (ContractError, ModelError) as exc:
                 for state in window:
                     state["errors"].append(str(exc))
@@ -360,10 +374,16 @@ class VisualPipeline:
         # Model-declared continuation links provide source context, never an
         # automatic assertion that adjacent objects or facts are the same.
         lookup={f"p{s['page']}:{r['id']}":{"region_id":f"p{s['page']}:{r['id']}","page":s["page"],"bbox":r["bbox"]}
-                for s in report["pages"] for r in s["card"]["regions"]}
+                for s in report["pages"] for r in s.get("card",{}).get("regions",[])}
+        # Streaming must not rescan every assignment for every prior region
+        # after each window. Index children once, refresh only changed links.
+        children={}
         for identifier,assignment in assignments.items():
+            children.setdefault(assignment.get('continues_from',''),[]).append(identifier)
+        for identifier in changed & assignments.keys():
+            assignment=assignments[identifier]
             links=[assignment.get("continues_from","")]
-            links += [key for key,value in assignments.items() if value.get("continues_from")==identifier]
+            links += children.get(identifier,[])
             assignment["source_context_regions"]=[lookup[key] for key in dict.fromkeys(links)
                 if key in lookup and abs(lookup[key]["page"]-lookup[identifier]["page"]) <= self.settings.window_pages][:2]
         return assignments
@@ -429,10 +449,12 @@ class VisualPipeline:
             outside = [item for kind in ("tables","dimensions","uncertainties") for item in answer[kind]
                        if not inside(item["bbox"], target["bbox"])]
             candidates = []
-            for raw in answer["facts"]:
+            bindings = fact_source_bindings(answer)
+            for index,raw in enumerate(answer["facts"]):
                 fact = {**raw, "id": content_hash([doc.id, number, target["id"], depth, raw])[:24],
                         "document_id": doc.id, "page": number, "source_sha256": doc.sha256,
                         "region_id": target["id"], "status": "pending", "reason": "awaiting_source_review"}
+                fact['source_bindings']=bindings[index]
                 fact["section_scope"] = assignment.get("section_scope",target["id"].split(":zoom",1)[0])
                 fact["object_binding"] = "section_scoped_source_phrase"
                 anchor=doc.locate_quote(number,raw["quote"],target["bbox"]) if self.settings.use_native_text else None
@@ -487,7 +509,7 @@ class VisualPipeline:
             unresolved = []
             issues = list(answer["uncertainties"])
             for index,fact in enumerate(candidates):
-                if fact.get('reason') in {'independent_source_disagreement','incomplete_or_unbound_fields'}:
+                if fact.get('reason') in {'independent_source_disagreement','independent_field_conflict','incomplete_or_unbound_fields'}:
                     issues.append({'bbox':fact['bbox'],'reason':fact['reason'], 'kind':'binding',
                                    'rotation':0,'fact_indices':[index]})
             if outside:

@@ -59,7 +59,8 @@ test('local prepare sends explicit files and no permission to transmit',async t=
   await page.waitForFunction(()=>document.querySelector('#jobStatus').textContent==='本地准备完成');
   assert.equal(requests.length,1);assert.equal(requests[0].prepare_only,true);assert.equal(requests[0].allow_external,false);
   assert.deepEqual(requests[0].input_pdfs,['new/匿名资料.pdf']);
-  assert.equal(await page.locator('#deepRunBtn').isEnabled(),true);
+  assert.equal(await page.locator('#deepRunBtn').count(),0);
+  assert.equal(await page.locator('#rerunBtn').isEnabled(),true);
 });
 
 test('external recognition uses the chosen model and bounded settings',async t=>{

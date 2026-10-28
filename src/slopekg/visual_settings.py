@@ -8,7 +8,7 @@ class VisualSettings:
     detail_edge: int = 3000
     reread_edge: int = 4500
     window_pages: int = 4
-    max_calls: int = 200
+    max_calls: int = 500
     max_prompt_chars: int = 24000
     max_images: int = 6
     max_image_pixels: int = 24000000

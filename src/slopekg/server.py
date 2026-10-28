@@ -39,6 +39,7 @@ from .inspection_history import HISTORY_INTERFACES, public_history_catalog, hist
 from .monitoring_baseline import baseline_payload, baseline_interfaces
 from .pipeline import DemoPipeline
 from .recognition import visual_job_options, profile_catalog, recognition_documents, recognition_payload
+from .knowledge_service import knowledge_job_options, knowledge_payload
 from .rule_extraction import RuleExtractionPipeline
 from .schema import INTERFACES, attribute_dictionary_payload, interface_payload, schema_payload
 from .storage import ensure_dir, read_json
@@ -301,6 +302,15 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         self.write_json(state)
 
     def _get_pipeline(self, parsed: Any) -> bool:
+        if parsed.path == '/api/knowledge-recognition':
+            try:
+                query = parse_qs(parsed.query)
+                self.write_json(knowledge_payload(PATHS, entity_id=query.get('entity_id', [''])[0],
+                    status=query.get('status', [''])[0], offset=int(query.get('offset', ['0'])[0]),
+                    limit=int(query.get('limit', ['50'])[0])))
+            except (ValueError, TypeError) as exc:
+                self.write_json({'error': str(exc)}, status=HTTPStatus.BAD_REQUEST)
+            return True
         if parsed.path in {'/api/recognition','/api/recognition/profiles','/api/recognition/documents'}:
             try:
                 query=parse_qs(parsed.query)
@@ -339,11 +349,6 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         if parsed.path == "/api/assertions":
             rows = self.pipeline.parsed_extracted_table("property_assertions")
             self.write_json({"name": "property_assertions", "rows": rows, "count": len(rows)})
-            return True
-        if parsed.path == "/api/extracted/llm-candidates":
-            rows = self.pipeline.parsed_extracted_table("llm_candidates")
-            quality = read_json(PATHS.extracted_dir / "llm_evaluation.json", {"status": "not_generated"})
-            self.write_json({"name": "llm_candidates", "rows": rows, "count": len(rows), "quality": quality})
             return True
         if parsed.path.startswith("/api/parsed/"):
             name = parsed.path.rsplit("/", 1)[-1]
@@ -755,20 +760,20 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
 
     def pipeline_options(self, body: dict[str, Any]) -> dict[str, Any]:
         recognizer=body.get('recognizer','legacy')
+        if recognizer=='knowledge':
+            return knowledge_job_options(PATHS,body)
         if recognizer=='multimodal':
+            if 'knowledge_settings' in body:
+                raise ValueError('全文知识设置需要knowledge路线')
             return visual_job_options(PATHS,body)
         if recognizer!='legacy':
             raise ValueError('未知识别路线')
-        if any(k in body for k in ('input_pdfs','model_profile','review_profile','visual_settings','prepare_only','allow_external')):
+        if any(k in body for k in ('input_pdfs','model_profile','review_profile','visual_settings','knowledge_settings','prepare_only','allow_external')):
             raise ValueError('多模态设置需要选择multimodal路线')
         ocr_pages = max(0, min(1000, int(body.get("ocr_pages", 1000))))
-        llm_model = str(body.get("llm_model", DEFAULT_DEEPSEEK_MODEL)).strip()
-        if not llm_model or len(llm_model) > 100:
-            raise ValueError("大模型名称不合法")
-        legacy_use_llm = boolean_option(body, "use_llm")
-        parse_mode = str(body.get("parse_mode") or ("deep" if legacy_use_llm else "basic")).strip().lower()
-        if parse_mode not in {"basic", "deep"}:
-            raise ValueError("parse_mode 只能为 basic 或 deep")
+        parse_mode = str(body.get("parse_mode", "basic")).strip().lower()
+        if parse_mode != "basic" or any(k in body for k in ("use_llm", "llm_model")):
+            raise ValueError("旧文字deep已移除；请选择基础解析或多模态识别")
         ocr_scope = str(body.get("ocr_scope", "all")).strip().lower()
         if ocr_scope not in {"all", "changed"}:
             raise ValueError("ocr_scope 只能为 all 或 changed")
@@ -781,7 +786,6 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             "ocr_pages": ocr_pages,
             "force_ocr": boolean_option(body, "force_ocr"),
             "parse_mode": parse_mode,
-            "llm_model": llm_model,
             "reuse_parsed": boolean_option(body, "reuse_parsed"),
             "ocr_scope": ocr_scope,
             "ocr_device": ocr_device,

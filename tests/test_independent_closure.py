@@ -75,8 +75,8 @@ class IndependentClosureTests(unittest.TestCase):
             self.assertEqual(DemoPipeline(paths).status()['version_status'],'unversioned')
             write_json(paths.basic_graph_json, {'nodes':[]})
             write_json(paths.basic_state_json, {'producer':runtime_identity()})
-            write_json(paths.deep_graph_json, {'nodes':[]})
-            self.assertEqual(DemoPipeline(paths).status()['layer_versions'], {'basic':'current','deep':'unversioned'})
+            write_json(paths.web_data_dir / 'deep_graph.json', {'nodes':[]})
+            self.assertEqual(DemoPipeline(paths).status()['layer_versions'], {'basic':'current','deep':'removed'})
 
     def test_competing_values_keep_both_sources_without_rewriting_selected_value(self):
         a=dict(route_code='G777',station='K1+000-K1+100',method='inventory',page=1,confidence=.9,

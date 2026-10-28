@@ -1,4 +1,4 @@
-"""Original basic/OCR/deep and graph publication route; kept independently usable."""
+"""Local basic/OCR parsing and graph publication; no external model calls."""
 from __future__ import annotations
 
 from datetime import datetime
@@ -11,7 +11,6 @@ from .extractors import extract_domain_candidates
 from .exporter import export_risk_standalone_html, export_standalone_html
 from .graph_builder import attach_visual_assets, build_automatic_graph, write_graphml
 from .multimodal import build_multimodal_outputs
-from .llm import DEFAULT_DEEPSEEK_MODEL, llm_status, read_deepseek_key
 from .manual import apply_slope_overrides
 from .ocr import OcrRunner, with_layout_groups
 from .geometry import project_ocr_boxes
@@ -20,7 +19,6 @@ from .quality import evaluate_automatic_pipeline
 from .queries import assess_graph, evaluate_risk_result
 from .schema import build_completeness, interface_payload, schema_payload
 from .provenance import runtime_identity, version_status
-from .semantic import run_semantic_extraction
 from .storage import discover_pdf_files, ensure_dir, read_json, read_jsonl, write_json, write_jsonl
 from .pipeline_lock import single_pipeline_run
 
@@ -35,8 +33,6 @@ class LegacyPipeline:
         ocr_pages: int = 1000,
         force_ocr: bool = False,
         parse_mode: str = "basic",
-        use_llm: bool | None = None,
-        llm_model: str = DEFAULT_DEEPSEEK_MODEL,
         reuse_parsed: bool = False,
         ocr_scope: str = "all",
         ocr_device: str = "auto",
@@ -44,10 +40,8 @@ class LegacyPipeline:
         ocr_batch_size: int = 0,
         progress_callback: Callable[[int, str, str], None] | None = None,
     ) -> dict[str, Any]:
-        if use_llm is not None:
-            parse_mode = "deep" if use_llm else "basic"
-        if parse_mode not in {"basic", "deep"}:
-            raise ValueError("parse_mode must be 'basic' or 'deep'")
+        if parse_mode != "basic":
+            raise ValueError("旧文字deep已移除；请选择basic或multimodal识别路线")
         if ocr_scope not in {"all", "changed"}:
             raise ValueError("ocr_scope must be 'all' or 'changed'")
         if ocr_device not in {"auto", "cpu", "gpu"}:
@@ -87,14 +81,11 @@ class LegacyPipeline:
             checkpoint_parsed["text_blocks"] = [*parsed["text_blocks"], *existing_ocr_results]
         progress(52, "graph", "正在先发布原生文本基础图谱，避免OCR阻塞更新")
         checkpoint_extracted = extract_domain_candidates(checkpoint_parsed)
-        checkpoint_semantic = run_semantic_extraction(checkpoint_extracted, enabled=False, model=llm_model)[1]
         checkpoint_graph, checkpoint_evaluation = self.build_graph(
             checkpoint_parsed,
             checkpoint_tasks,
             existing_ocr_results,
             checkpoint_extracted,
-            [],
-            checkpoint_semantic,
             parse_mode="basic",
             activate=True,
         )
@@ -105,7 +96,6 @@ class LegacyPipeline:
             checkpoint_graph,
             checkpoint_extracted,
             checkpoint_evaluation,
-            checkpoint_semantic,
             parse_mode="basic",
             publication_stage="native_checkpoint",
         )
@@ -137,61 +127,11 @@ class LegacyPipeline:
             parsed["text_blocks"] = [*parsed["text_blocks"], *ocr_results]
         progress(63, "extracting", "正在抽取边坡、工程属性与证据")
         extracted = extract_domain_candidates(parsed)
-        basic_semantic_summary = run_semantic_extraction(extracted, enabled=False, model=llm_model)[1]
         progress(68, "graph", "正在构建可独立使用的基础图谱")
         basic_graph, basic_evaluation = self.build_graph(
-            parsed, ocr_tasks, ocr_results, extracted, [], basic_semantic_summary, parse_mode="basic", activate=True
+            parsed, ocr_tasks, ocr_results, extracted, parse_mode="basic", activate=True
         )
-        if parse_mode == "deep":
-            # Keep the full OCR basic result usable if semantic extraction fails.
-            self.publish_state(
-                parsed, ocr_tasks, ocr_results, basic_graph, extracted,
-                basic_evaluation, basic_semantic_summary,
-                parse_mode="basic", publication_stage="completed",
-            )
-            if not read_deepseek_key():
-                raise RuntimeError("深度解析已选择，但 DeepSeek API key 未配置；基础图谱已经生成")
-            cached_semantic = read_jsonl(self.paths.extracted_dir / "llm_candidates.jsonl")
-            progress(70, "semantic", "正在基础结果上执行大模型深度解析与证据校验")
-            semantic_rows, semantic_summary = run_semantic_extraction(
-                extracted,
-                enabled=True,
-                model=llm_model,
-                cached_rows=cached_semantic,
-                progress_callback=lambda current, total, station: progress(
-                    70 + round(18 * current / max(total, 1)),
-                    "semantic",
-                    f"深度语义识别与校验 {station}（{current}/{total}）",
-                ),
-            )
-            failures = int(semantic_summary.get("failures", 0))
-            skipped = int(semantic_summary.get("skipped_count", 0))
-            passed = int(semantic_summary.get("passed", 0))
-            if failures or skipped or not semantic_summary.get("candidates"):
-                # An incomplete attempt must not overwrite a validated deep layer.
-                write_jsonl(self.paths.extracted_dir / "llm_attempt.jsonl", semantic_rows)
-                write_json(self.paths.extracted_dir / "llm_attempt_summary.json", semantic_summary)
-                if not extracted.get("slopes"):
-                    stage, message = "semantic_not_applicable", "基础处理完成；本资料没有工程深度解析对象"
-                elif failures and not passed:
-                    stage = "semantic_failed"
-                    message = f"深度解析失败：{failures}个失败、{skipped}个跳过；基础结果可用，已有深度结果保留"
-                else:
-                    stage = "semantic_partial"
-                    message = f"深度解析未完成：{passed}个通过、{failures}个失败、{skipped}个跳过；基础结果可用，已有深度结果保留"
-                state = self.publish_state(
-                    parsed, ocr_tasks, ocr_results, basic_graph, extracted, basic_evaluation,
-                    semantic_summary, parse_mode="basic", publication_stage=stage,
-                )
-                progress(100, stage, message)
-                return state
-            progress(90, "graph", "正在构建深度图谱、字段证据链和章节完整性报告")
-            graph, evaluation = self.build_graph(
-                parsed, ocr_tasks, ocr_results, extracted, semantic_rows, semantic_summary, parse_mode="deep", activate=True
-            )
-        else:
-            semantic_rows, semantic_summary = [], basic_semantic_summary
-            graph, evaluation = basic_graph, basic_evaluation
+        graph, evaluation = basic_graph, basic_evaluation
         progress(97, "writing", "正在写入图谱、评测和接口数据")
         state = self.publish_state(
             parsed,
@@ -200,11 +140,10 @@ class LegacyPipeline:
             graph,
             extracted,
             evaluation,
-            semantic_summary,
             parse_mode=parse_mode,
             publication_stage="completed",
         )
-        progress(100, "completed", f"{('深度' if parse_mode == 'deep' else '基础')}解析和图谱生成已完成")
+        progress(100, "completed", "基础解析和图谱生成已完成")
         return state
 
     def load_parsed_documents(self) -> dict[str, list[dict[str, Any]]]:
@@ -328,12 +267,12 @@ class LegacyPipeline:
         ocr_tasks: list[dict[str, Any]],
         ocr_results: list[dict[str, Any]],
         extracted: dict[str, Any],
-        semantic_rows: list[dict[str, Any]],
-        semantic_summary: dict[str, Any],
         parse_mode: str,
         activate: bool,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
-        graph = build_automatic_graph(parsed, extracted, semantic_rows)
+        if parse_mode != "basic":
+            raise ValueError("旧文字deep已移除，基础构图不接受模型候选")
+        graph = build_automatic_graph(parsed, extracted, [])
         multimodal = build_multimodal_outputs(
             [self.paths.assets_dir, self.paths.root / "data" / "multimodal"],
             self.paths.root, self.paths.output_dir / "multimodal",
@@ -349,12 +288,12 @@ class LegacyPipeline:
             ocr_results=ocr_results,
         )
         attach_visual_assets(graph, multimodal["catalog"])
-        evaluation = evaluate_automatic_pipeline(extracted, semantic_summary, graph)
+        evaluation = evaluate_automatic_pipeline(extracted, graph)
         evaluation["multimodal"] = multimodal["quality"]["summary"]
         graph["meta"]["pipeline"] = {
             "producer": runtime_identity(),
-            "mode": "basic" if parse_mode == "basic" else "deep",
-            "layers": ["adaptive_pdf_parse", "deterministic_extraction"] + (["validated_llm_semantics"] if parse_mode == "deep" else []),
+            "mode": "basic",
+            "layers": ["adaptive_pdf_parse", "deterministic_extraction"],
             "documents": len(parsed["documents"]),
             "pages": len(parsed["pages"]),
             "text_blocks": len(parsed["text_blocks"]),
@@ -377,7 +316,6 @@ class LegacyPipeline:
             "note": "图谱仅依据提交文档自动发现、抽取和校验生成；人工复核不是运行前置条件。",
         }
         graph["meta"]["dependencies"] = dependency_report()
-        graph["meta"]["llm"] = {**llm_status(), "enabled": semantic_summary.get("enabled", False), "run": semantic_summary}
         effective_graph = apply_slope_overrides(graph, self.paths)
         completeness, risk_screening = assess_graph(effective_graph, self.paths)
         risk_evaluation = evaluate_risk_result(risk_screening, self.paths)
@@ -394,9 +332,6 @@ class LegacyPipeline:
         write_json(self.paths.extracted_dir / f"processing_audit.{parse_mode}.json", graph["processing_audit"])
         if activate:
             write_jsonl(self.paths.extracted_dir / "property_assertions.jsonl", graph.get("property_assertions", []))
-        if parse_mode == "deep":
-            write_jsonl(self.paths.extracted_dir / "llm_candidates.jsonl", semantic_rows)
-            write_json(self.paths.extracted_dir / "llm_evaluation.json", semantic_summary)
         write_json(self.paths.output_dir / f"evaluation.{parse_mode}.json", evaluation)
         ensure_dir(self.paths.output_dir / "risk")
         write_json(self.paths.output_dir / "risk" / f"screening.{parse_mode}.json", risk_screening)
@@ -411,7 +346,9 @@ class LegacyPipeline:
     def write_graph_outputs(self, graph: dict[str, Any], *, parse_mode: str, activate: bool) -> None:
         ensure_dir(self.paths.graph_dir)
         ensure_dir(self.paths.web_data_dir)
-        mode_graph = self.paths.basic_graph_json if parse_mode == "basic" else self.paths.deep_graph_json
+        if parse_mode != "basic":
+            raise ValueError("旧文字deep已移除，只能发布basic图谱")
+        mode_graph = self.paths.basic_graph_json
         write_json(mode_graph, graph)
         write_json(self.paths.graph_dir / f"{parse_mode}_graph.json", graph)
         write_graphml(self.paths.graph_dir / f"{parse_mode}.graphml", graph)
@@ -434,7 +371,6 @@ class LegacyPipeline:
         graph: dict[str, Any],
         extracted: dict[str, Any],
         evaluation: dict[str, Any],
-        semantic_summary: dict[str, Any],
         parse_mode: str,
         publication_stage: str = "completed",
     ) -> dict[str, Any]:
@@ -446,30 +382,15 @@ class LegacyPipeline:
             device = task.get("device")
             if device:
                 ocr_device_counts[str(device)] = ocr_device_counts.get(str(device), 0) + 1
-        deep_graph = read_json(self.paths.deep_graph_json, {}) if self.paths.deep_graph_json.exists() else {}
-        deep_exists = bool(deep_graph)
-        deep_fresh = deep_exists and graph_matches_documents(deep_graph, parsed["documents"])
         return {
             "updated_at": datetime.now().isoformat(timespec="seconds"),
             "producer": graph.get("meta", {}).get("pipeline", {}).get("producer"),
             "parse_mode": parse_mode,
             "publication_stage": publication_stage,
-            "requested_parse_mode": "deep" if publication_stage.startswith("semantic_") else parse_mode,
-            "processing_status": ("failed" if publication_stage == "semantic_failed" else
-                                  "partial" if publication_stage == "semantic_partial" else "completed"),
-            "processing_message": (
-                f"深度解析未完成：{semantic_summary.get('passed', 0)}个通过、"
-                f"{semantic_summary.get('failures', 0)}个失败、{semantic_summary.get('skipped_count', 0)}个跳过；"
-                "基础结果可用，已有深度结果保留"
-                if publication_stage in {"semantic_failed", "semantic_partial"} else
-                "基础处理完成；本资料没有工程深度解析对象"
-                if publication_stage == "semantic_not_applicable" else None
-            ),
+            "requested_parse_mode": parse_mode,
+            "processing_status": "completed",
             "base_layer_available": self.paths.basic_graph_json.exists(),
-            "deep_layer_available": deep_fresh,
-            "deep_layer_stale": deep_exists and not deep_fresh,
             "dependencies": dependency_report(),
-            "llm": {**llm_status(), "enabled": semantic_summary.get("enabled", False), "run": semantic_summary},
             "parsed": {
                 "documents": len(parsed["documents"]),
                 "pages": len(parsed["pages"]),
@@ -488,7 +409,6 @@ class LegacyPipeline:
             "outputs": {
                 "graph_json": str((self.paths.web_data_dir / "demo_graph.json").relative_to(self.paths.root)),
                 "basic_graph_json": str(self.paths.basic_graph_json.relative_to(self.paths.root)),
-                "deep_graph_json": str(self.paths.deep_graph_json.relative_to(self.paths.root)) if self.paths.deep_graph_json.exists() else None,
                 "graphml": str((self.paths.graph_dir / "demo.graphml").relative_to(self.paths.root)),
                 "parsed_dir": str(self.paths.parsed_dir.relative_to(self.paths.root)),
                 "assets_dir": str(self.paths.assets_dir.relative_to(self.paths.root)),
@@ -508,7 +428,6 @@ class LegacyPipeline:
         graph: dict[str, Any],
         extracted: dict[str, Any],
         evaluation: dict[str, Any],
-        semantic_summary: dict[str, Any],
         *,
         parse_mode: str,
         publication_stage: str,
@@ -520,12 +439,11 @@ class LegacyPipeline:
             graph,
             extracted,
             evaluation,
-            semantic_summary,
             parse_mode,
             publication_stage,
         )
         write_json(self.paths.state_json, state)
-        write_json(self.paths.deep_state_json if parse_mode == "deep" else self.paths.basic_state_json, state)
+        write_json(self.paths.basic_state_json, state)
         standalone_path = self.paths.output_dir / "share" / "SlopeKG_成果展示_离线版.html"
         effective_graph = apply_slope_overrides(graph, self.paths)
         export_result = export_standalone_html(
@@ -542,7 +460,7 @@ class LegacyPipeline:
         state["risk_standalone_export"] = risk_export_result
         state["outputs"]["risk_standalone_html"] = str(risk_standalone_path.relative_to(self.paths.root))
         write_json(self.paths.state_json, state)
-        write_json(self.paths.deep_state_json if parse_mode == "deep" else self.paths.basic_state_json, state)
+        write_json(self.paths.basic_state_json, state)
         return state
 
     def status(self) -> dict[str, Any]:
@@ -551,7 +469,6 @@ class LegacyPipeline:
             state = {
                 "updated_at": None,
                 "dependencies": dependency_report(),
-                "llm": llm_status(),
                 "parsed": {
                     "documents": len(read_jsonl(self.paths.parsed_dir / "documents.jsonl")),
                     "pages": len(read_jsonl(self.paths.parsed_dir / "pages.jsonl")),
@@ -569,9 +486,9 @@ class LegacyPipeline:
             name: version_status(read_json(path, {}).get("producer")) if graph_path.exists() else "absent"
             for name, path, graph_path in (
                 ("basic", self.paths.basic_state_json, self.paths.basic_graph_json),
-                ("deep", self.paths.deep_state_json, self.paths.deep_graph_json),
             )
         }
+        state["layer_versions"]["deep"] = "removed"
         return state
 
     def parsed_table(self, name: str) -> list[dict[str, Any]]:
@@ -591,7 +508,6 @@ class LegacyPipeline:
         allowed = {
             "slopes": "slopes.jsonl",
             "property_assertions": "property_assertions.jsonl",
-            "llm_candidates": "llm_candidates.jsonl",
         }
         if name not in allowed:
             raise KeyError(name)

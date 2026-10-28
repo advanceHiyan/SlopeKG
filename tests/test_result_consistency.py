@@ -29,9 +29,9 @@ class ResultConsistencyTests(unittest.TestCase):
         match = re.search(fr'<script id="{element}" type="application/json">([\s\S]*?)</script>', file.read_text(encoding="utf-8"))
         return json.loads(match.group(1))
 
-    def test_missing_deep_graph_does_not_export_basic_as_deep(self):
+    def test_removed_deep_export_is_rejected(self):
         write_json(self.paths.graph_json, sample_graph())
-        with self.assertRaises(FileNotFoundError):
+        with self.assertRaises(ValueError):
             export_standalone_html(self.paths.output_dir / "deep.html", paths=self.paths, graph_mode="deep")
 
     def test_basic_export_uses_basic_metadata_and_latest_manual_values(self):
@@ -94,12 +94,6 @@ class ResultConsistencyTests(unittest.TestCase):
         write_jsonl(self.paths.parsed_dir / "pages.jsonl", [{"id": "page", "document_id": "doc"}])
         self.assertEqual(DemoPipeline(self.paths).load_parsed_documents()["changed_document_ids"], [])
 
-    def test_no_llm_flag_overrides_both_explicit_deep_options(self):
-        for arguments in (("--mode", "deep", "--no-llm"), ("--deep", "--no-llm")):
-            with self.subTest(arguments=arguments), patch("sys.argv", ["run_pipeline.py", *arguments]), patch("scripts.run_pipeline.DemoPipeline") as factory, redirect_stdout(StringIO()):
-                factory.return_value.run.return_value = {}
-                run_pipeline.main()
-                self.assertEqual(factory.return_value.run.call_args.kwargs["parse_mode"], "basic")
 
     def test_missing_ocr_cache_is_retried_but_successful_blank_page_is_not(self):
         rows = mark_cached_ocr_tasks([
@@ -109,34 +103,6 @@ class ResultConsistencyTests(unittest.TestCase):
         self.assertEqual(rows[0]["status"], "pending")
         self.assertEqual(rows[1]["status"], "done")
 
-    def test_deep_failure_keeps_the_completed_ocr_basic_result_active(self):
-        pipeline = DemoPipeline(self.paths)
-        parsed = {name: [] for name in ("documents", "pages", "text_blocks", "tables", "ocr_tasks")}
-        parsed["documents"] = [{"id": "doc", "file_name": "sample.pdf"}]
-        parsed["pages"] = [{"id": "page", "document_id": "doc"}]
-        stages = []
-
-        def build(*args, **kwargs):
-            mode = kwargs.get("parse_mode")
-            graph = sample_graph()
-            graph["meta"]["test_stage"] = len(stages)
-            stages.append((mode, kwargs.get("activate")))
-            if kwargs.get("activate"):
-                write_json(self.paths.graph_json, graph)
-            return graph, {}
-
-        def publish(*args, **kwargs):
-            write_json(self.paths.state_json, {"publication_stage": kwargs.get("publication_stage"), "parse_mode": kwargs.get("parse_mode")})
-            return {}
-
-        with patch.object(pipeline, "parse_documents", return_value=copy.deepcopy(parsed)), patch.object(pipeline, "run_ocr", return_value=([], [])), patch.object(pipeline, "build_graph", side_effect=build), patch.object(pipeline, "publish_state", side_effect=publish), patch("slopekg.legacy_pipeline.extract_domain_candidates", return_value={}), patch("slopekg.legacy_pipeline.run_semantic_extraction", return_value=([], {})), patch("slopekg.legacy_pipeline.read_deepseek_key", return_value=None):
-            with self.assertRaises(RuntimeError):
-                pipeline.run(parse_mode="deep")
-        active = json.loads(self.paths.graph_json.read_text(encoding="utf-8"))
-        state = json.loads(self.paths.state_json.read_text(encoding="utf-8"))
-        self.assertEqual(active["meta"]["test_stage"], 1)
-        self.assertEqual(state["publication_stage"], "completed")
-        self.assertEqual(state["parse_mode"], "basic")
 
     def test_reuse_parsed_rejects_modified_raw_pdf(self):
         self.paths.raw_dir.mkdir(parents=True)

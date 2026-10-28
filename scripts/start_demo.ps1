@@ -1,7 +1,7 @@
 param(
     [int]$Port = 8766,
     [switch]$RunPipeline,
-    [ValidateSet("basic", "deep")][string]$Mode = "basic",
+    [ValidateSet("basic")][string]$Mode = "basic",
     [int]$OcrPages = 0,
     [ValidateSet("auto", "cpu", "gpu")][string]$OcrDevice = "auto",
     [ValidateRange(1, 16)][int]$OcrWorkers = 4,

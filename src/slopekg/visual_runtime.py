@@ -10,9 +10,12 @@ from .visual_batching import compact
 
 
 class VisualRuntime:
-    def __init__(self, model, review_model, output_dir, settings):
+    def __init__(self, model, review_model, output_dir, settings, *, version=VERSION,
+                 system=SYSTEM, review_stages=("blind_read", "verify", "audit"), recover_invalid_answers=False):
         self.model, self.review_model = model, review_model
         self.output_dir, self.settings = output_dir, settings
+        self.version, self.system, self.review_stages = version, system, review_stages
+        self.recover_invalid_answers = recover_invalid_answers
         self._state_lock = threading.Lock()
         self._request_locks = {}
         self.reset()
@@ -31,16 +34,16 @@ class VisualRuntime:
 
 
     def ask(self, stage: str, instruction: str, context: dict, images: list, validate: Callable) -> dict:
-        model = self.review_model if stage in {"blind_read", "verify", "audit"} else self.model
+        model = self.review_model if stage in self.review_stages else self.model
         prompt = instruction + "\n输入：" + compact(context)
-        if len(prompt) + len(SYSTEM) > self.settings.max_prompt_chars:
+        if len(prompt) + len(self.system) > self.settings.max_prompt_chars:
             raise ContractError("Prompt budget exceeded; request was not sent")
         if (len(images) > self.settings.max_images
                 or sum(i.width * i.height for i in images) > self.settings.max_image_pixels
                 or sum(i.path.stat().st_size for i in images) > self.settings.max_image_bytes):
             raise ContractError("Image budget exceeded; request was not sent")
-        identity = {"version": VERSION, "stage": stage, "model": model.identity(),
-                    "system": SYSTEM, "prompt": prompt,
+        identity = {"version": self.version, "stage": stage, "model": model.identity(),
+                    "system": self.system, "prompt": prompt,
                     "images": [{"label": i.label, "sha256": hashlib.sha256(i.path.read_bytes()).hexdigest()}
                                for i in images]}
         key = content_hash(identity)
@@ -53,6 +56,16 @@ class VisualRuntime:
     def _cached_request(self, key, stage, model, prompt, images, validate):
         path = self.output_dir / "cache" / (key + ".json")
         cached = read_json(path, {})
+        if (self.recover_invalid_answers and cached.get('status') == 'failed'
+                and isinstance(cached.get('invalid_answer'), dict) and cached.get('receipt')):
+            answer = validate(cached['invalid_answer'])
+            write_json(path, {**cached, 'status': 'completed', 'answer': answer,
+                'revalidated_without_request': True, 'original_error': cached.get('error')})
+            with self._state_lock:
+                self.cache_hits += 1
+                self.receipts.append({'stage': stage, 'cache_key': key, 'cache_hit': True,
+                    'revalidated_without_request': True, **cached['receipt']})
+            return answer
         if cached.get("status") == "completed":
             answer = validate(cached["answer"])
             with self._state_lock:
@@ -80,7 +93,7 @@ class VisualRuntime:
                 self._active_calls += 1
                 self.peak_concurrency = max(self.peak_concurrency, self._active_calls)
             try:
-                raw, receipt = model.complete(system=SYSTEM, prompt=prompt, images=images)
+                raw, receipt = model.complete(system=self.system, prompt=prompt, images=images)
             finally:
                 with self._state_lock:
                     self._active_calls -= 1

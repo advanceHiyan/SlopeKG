@@ -140,7 +140,7 @@ async function dataStatusPage() {
   const [completeness, interfaces, evaluation, status] = await Promise.all([
     api.getJson("/api/completeness", { summary: {}, reports: [] }),
     api.getJson("/api/interfaces", { interfaces: [] }),
-    api.getJson("/api/evaluation", { automatic_coverage: {}, parser: {}, discovery: {}, semantic: {} }),
+    api.getJson("/api/evaluation", { automatic_coverage: {}, parser: {}, discovery: {} }),
     api.getJson("/api/status", { parsed: {} }),
   ]);
   const summary = completeness.summary || {};
@@ -154,11 +154,9 @@ async function dataStatusPage() {
   document.querySelector("#interfaceRows").innerHTML = rows.map((row) => `<tr><td class="code-path">${api.escapeHtml(row.path)}</td><td>${api.escapeHtml(row.method)}</td><td>${api.escapeHtml(row.domain)}</td><td>${badge(row.status)}</td><td>${api.escapeHtml(row.description)}</td></tr>`).join("");
   const coverageRows = Object.entries(evaluation.active_graph_coverage || evaluation.automatic_coverage || {});
   const discovery = evaluation.discovery || {};
-  const semantic = evaluation.semantic || {};
   document.querySelector("#evaluationRows").innerHTML = [
     `<tr><td>自动发现边坡</td><td>${discovery.slopes ?? "-"} 个；唯一路线+桩号 ${discovery.unique_slope_keys ?? discovery.unique_stations ?? "-"}</td><td>${discovery.slopes && discovery.slopes === (discovery.unique_slope_keys ?? discovery.unique_stations) ? "通过" : "检查"}</td></tr>`,
     ...coverageRows.map(([name, value]) => `<tr><td>${api.escapeHtml(evaluationLabel(name))}</td><td>${api.escapeHtml(`${value.available ?? "-"}/${value.total ?? "-"}`)}</td><td>${value.coverage == null ? "未覆盖" : percent(value.coverage)}</td></tr>`),
-    `<tr><td>大模型语义校验</td><td>${semantic.passed ?? 0}/${semantic.candidates ?? 0}</td><td>${semantic.pass_rate == null ? "未启用" : percent(semantic.pass_rate)}</td></tr>`,
     `<tr><td>质量门通过率</td><td>${Object.keys(evaluation.quality_gates || {}).length} 项</td><td>${percent(evaluation.quality_gate_pass_rate)}</td></tr>`,
   ].join("");
   const pageTypes = evaluation.parser?.page_type_counts || {};

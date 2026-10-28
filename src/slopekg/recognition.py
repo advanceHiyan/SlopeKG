@@ -82,8 +82,9 @@ def visual_job_options(paths, body):
     prepared=body.get('prepare_only',True)
     if not prepared and body.get('allow_external') is not True:
         raise ValueError('请确认允许将所选PDF发送到所选模型接口')
-    if body.get('parse_mode','basic')!='basic' or body.get('reuse_parsed') or body.get('use_llm'):
-        raise ValueError('多模态与旧basic/deep选项不能混用')
+    if (body.get('parse_mode','basic')!='basic' or body.get('reuse_parsed')
+            or any(key in body for key in ('use_llm','llm_model'))):
+        raise ValueError('多模态与基础缓存或已移除的文字模型选项不能混用')
     profile=profile_path(paths,body.get('model_profile','deepseek'))
     reviewer=profile_path(paths,body['review_profile']) if body.get('review_profile') else None
     # Browser cannot inject endpoint, key path, retry_failed, or arbitrary model options.

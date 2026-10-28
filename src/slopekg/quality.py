@@ -10,7 +10,6 @@ STATION_PATTERN = re.compile(r"^K\d+\+\d{3}-K\d+\+\d{3}$")
 
 def evaluate_automatic_pipeline(
     extracted: dict[str, Any],
-    semantic_summary: dict[str, Any],
     graph: dict[str, Any],
 ) -> dict[str, Any]:
     slopes = extracted.get("slopes", [])
@@ -111,9 +110,6 @@ def evaluate_automatic_pipeline(
         "graph_has_no_dangling_edges": dangling_edges == 0,
         "graph_has_no_orphan_nodes": orphan_nodes == 0,
     }
-    if semantic_summary.get("enabled"):
-        gates["semantic_pass_rate_at_least_90pct"] = float(semantic_summary.get("pass_rate") or 0) >= 0.90
-        gates["semantic_field_evidence_at_least_80pct"] = float(semantic_summary.get("field_evidence_coverage") or 0) >= 0.80
     return {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "evaluation_mode": "automatic_internal_quality_no_manual_seed",
@@ -128,7 +124,6 @@ def evaluate_automatic_pipeline(
         },
         "automatic_coverage": coverage,
         "active_graph_coverage": active_graph_coverage,
-        "semantic": semantic_summary,
         "evidence": {
             "assertions": len(assertions),
             "assertions_with_evidence": with_evidence,

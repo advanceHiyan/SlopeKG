@@ -1,0 +1,9 @@
+.card-title-row { flex-wrap: wrap; }
+.card-title-row select { max-width: 100%; min-width: 0; padding: 6px; }
+.card { min-width: 0; }
+#endpoint, #entityInfo, #coverage, #note, #relations { overflow-wrap: anywhere; }
+.data-table details { max-width: 450px; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .card-title-row select { width: 100%; }
+  .recognition-pagination { flex-wrap: wrap; }
+}

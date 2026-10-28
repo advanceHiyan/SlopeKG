@@ -13,7 +13,7 @@ from slopekg.exporter import DEFAULT_OUTPUT, export_standalone_html  # noqa: E40
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Export SlopeKG as one self-contained offline HTML file")
-    parser.add_argument("--mode", choices=["basic", "deep", "active"], default="active")
+    parser.add_argument("--mode", choices=["basic", "active"], default="active")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
     result = export_standalone_html(args.output.resolve(), graph_mode=args.mode)

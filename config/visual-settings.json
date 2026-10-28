@@ -3,7 +3,7 @@
   "detail_edge": 3000,
   "reread_edge": 4500,
   "window_pages": 4,
-  "max_calls": 200,
+  "max_calls": 500,
   "max_prompt_chars": 24000,
   "max_images": 6,
   "max_image_pixels": 24000000,

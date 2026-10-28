@@ -3,7 +3,6 @@ import unittest
 from slopekg.engineering import extract_factor_cells
 from slopekg.extractors import extract_document_observations, extract_section_values, extract_stability_scenarios, station_section_segments, extract_structural_planes
 from slopekg.observation import supported_observation, belongs_to_station
-from slopekg.semantic import select_source_samples, context_windows
 
 
 class EvaluationRegressionTests(unittest.TestCase):
@@ -28,13 +27,6 @@ class EvaluationRegressionTests(unittest.TestCase):
         self.assertFalse(belongs_to_station({'description':'K1+000~K1+100坡脚可见地下水'},'K2+000-K2+100'))
         self.assertTrue(belongs_to_station({'description':'K1+000~K1+100坡脚可见地下水'},'K1+000-K1+100'))
 
-    def test_no_empty_alias_fallback_and_no_neighbouring_heading(self):
-        slope={'station':'K1+000-K1+100','section_text_samples':[{'page':1,'text':'完全无关的坡脚地下水描述'}]}
-        self.assertEqual(select_source_samples(slope), [])
-        text='3.1 K1+000-K1+100 边坡，天然稳定系数1.2。3.2 K2+000-K2+100 边坡，天然稳定系数0.8。'
-        selected=context_windows(text,['K1+000-K1+100'])
-        self.assertTrue(selected)
-        self.assertNotIn('0.8',''.join(selected))
 
     def test_side_and_cut_slope_angle_are_not_opposite_mountain_or_original_slope(self):
         self.assertEqual(extract_section_values('左侧山体植被发育。该段边坡整体上位于线路右侧山体，坡度50~85°。')['side'],'右侧')

@@ -8,7 +8,6 @@ from tests.support import workspace_paths, sample_graph
 from slopekg.extractors import extract_section_facts, extract_stability_scenarios
 from slopekg.llm import DEEPSEEK_MAX_OUTPUT_TOKENS
 from slopekg.pipeline import DemoPipeline, PipelineAlreadyRunningError, pipeline_run_guard
-from slopekg.semantic import detect_section_gaps, source_fingerprint
 from slopekg.server import SlopeKGHandler, automatic_basic_options
 
 
@@ -44,31 +43,10 @@ class LayeredPipelineTests(unittest.TestCase):
         self.assertEqual(options["ocr_workers"], 16)
         self.assertEqual(options["ocr_batch_size"], 32)
 
-    def test_basic_and_deep_outputs_are_separate(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            paths = workspace_paths(Path(directory))
-            pipeline = DemoPipeline(paths)
-            pipeline.write_graph_outputs(sample_graph(), parse_mode="basic", activate=True)
-            basic_bytes = paths.basic_graph_json.read_bytes()
-            deep = sample_graph()
-            deep["meta"]["mode"] = "deep"
-            pipeline.write_graph_outputs(deep, parse_mode="deep", activate=False)
-            self.assertEqual(paths.basic_graph_json.read_bytes(), basic_bytes)
-            self.assertEqual(paths.graph_json.read_bytes(), basic_bytes)
-            self.assertNotEqual(paths.deep_graph_json.read_bytes(), basic_bytes)
 
     def test_deepseek_uses_documented_maximum_output(self) -> None:
         self.assertEqual(DEEPSEEK_MAX_OUTPUT_TOKENS, 393216)
 
-    def test_deterministic_facts_suppress_redundant_section_gaps(self) -> None:
-        samples = [{"page": 1, "text": "边坡治理措施为挂网锚喷，天然工况稳定系数为1.14。"}]
-        gaps = detect_section_gaps(
-            {},
-            samples,
-            {"measures": ["挂网锚喷"], "stability_scenarios": [{"condition": "天然工况", "safety_factor": 1.14}]},
-        )
-        self.assertNotIn("protection_records", gaps)
-        self.assertNotIn("stability_conclusions", gaps)
 
     def test_survey_stability_conditions_are_extracted_as_distinct_scenarios(self) -> None:
         text = "天然工况下的稳定性系数为1.14，属于基本稳定状态，暴雨工况下稳定性系数为1.04，属于欠稳定状态。"
@@ -183,11 +161,6 @@ class LayeredPipelineTests(unittest.TestCase):
         self.assertEqual(by_station["K2398+300-K2398+439"]["vegetation_condition"]["density"], "茂密")
         self.assertEqual(by_station["K2401+227-K2401+307"]["material_nature"], "岩质")
 
-    def test_semantic_cache_changes_with_deterministic_input(self) -> None:
-        samples = [{"page": 1, "text": "原文"}]
-        first = source_fingerprint("K1+000-K1+100", samples, "deepseek-v4-flash", {"measures": ["放坡"]})
-        second = source_fingerprint("K1+000-K1+100", samples, "deepseek-v4-flash", {"measures": ["锚杆"]})
-        self.assertNotEqual(first, second)
 
 
 if __name__ == "__main__":

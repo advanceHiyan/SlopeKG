@@ -8,16 +8,9 @@ from slopekg.config import PATHS
 from slopekg.engineering import extract_parameter_cells, extract_factor_cells, extract_engineering_tables
 from slopekg.graph_builder import unique_stability_scenarios
 from slopekg.risk import worst_stability_record, stability_record
-from scripts.rebuild_from_sidecars import revalidate_cached
 
 
 class EngineeringTableTests(unittest.TestCase):
-    def test_cached_revalidation_preserves_failed_candidates(self):
-        extracted = {"slopes": [{"route_code": "G555", "station": "K100+100-K100+200"}]}
-        failed = {"route_code": "G555", "station": "K100+100-K100+200", "validation_status": "failed"}
-        with patch("scripts.rebuild_from_sidecars.validate_candidate") as validator:
-            self.assertEqual(revalidate_cached(extracted, [failed]), [failed])
-            validator.assert_not_called()
 
     def test_data_page_has_unique_ids_and_review_panel(self):
         html = (PATHS.web_dir / "data-status.html").read_text(encoding="utf-8")

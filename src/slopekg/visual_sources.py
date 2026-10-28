@@ -3,10 +3,13 @@ import re
 from .visual_evidence import literal_supported
 
 
+def identifier_atoms(value):
+    return set(re.findall(r'(?<![A-Za-z0-9])[A-Za-z]+[A-Za-z0-9.+-]*\d[A-Za-z0-9.+-]*|(?<!\d)\d{5,}(?!\d)', value))
+
+
 def identity_supported(fact, fragments):
     # Numeric tokens are never joined across cells to invent an identifier.
-    atoms=re.findall(r'(?<![A-Za-z0-9])[A-Za-z]+[A-Za-z0-9.+-]*\d[A-Za-z0-9.+-]*|(?<!\d)\d{5,}(?!\d)',
-                     fact['object']+' '+fact['scope'])
+    atoms=identifier_atoms(fact['object']+' '+fact['scope'])
     return all(any(literal_supported(atom,q) for q in fragments) for atom in atoms)
 
 
@@ -34,6 +37,31 @@ def content_coverage(answer):
                     'text':cell['text'],'bbox':table['bbox'],**_link(cell,answer['facts'])})
     for i,d in enumerate(answer.get('dimensions',[])):
         result.append({'kind':'dimension','dimension_index':i,'text':d['text'],'bbox':d['bbox'],**_link(d,answer['facts'])})
+    return result
+
+
+def fact_source_bindings(answer):
+    """Reverse explicit content links, retaining exact row/column addresses.
+
+    Never infer a link because two cells contain the same number. Header paths
+    are model hypotheses and accompany the actual cell text for image review.
+    """
+    result=[[] for _ in answer['facts']]
+    for ti, table in enumerate(answer['tables']):
+        for cell in table['cells']:
+            if cell.get('disposition') != 'fact':
+                continue
+            binding={'kind':'table_cell','table_index':ti,'caption':table['caption'],
+                     'bbox':table['bbox'],**{k:cell[k] for k in
+                         ('row','column','row_span','column_span','text','header')}}
+            for index in cell.get('fact_indices',[]):
+                result[index].append(dict(binding))
+    for di, dimension in enumerate(answer['dimensions']):
+        if dimension.get('disposition') != 'fact':
+            continue
+        binding={'kind':'dimension','dimension_index':di,'text':dimension['text'],'bbox':dimension['bbox']}
+        for index in dimension.get('fact_indices',[]):
+            result[index].append(dict(binding))
     return result
 
 
