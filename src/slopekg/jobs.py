@@ -60,13 +60,28 @@ class PipelineJobManager:
         try:
             options = self.get(job_id)["options"]  # type: ignore[index]
             state = self.pipeline.run(progress_callback=on_progress, **options)
+            if (isinstance(getattr(self.pipeline, 'paths', None), DemoPaths)
+                    and state.get('recognizer') in {'knowledge', 'visual', 'multimodal'}
+                    and state.get('settings', {}).get('record_model_inputs')):
+                from .debug_history import save_snapshot
+                from pathlib import Path
+                route = 'knowledge' if state['recognizer'] == 'knowledge' else 'visual'
+                archives, archive_errors = [], []
+                for document in state.get('documents', []):
+                    try:
+                        saved = save_snapshot(self.pipeline.paths, route=route, run_id='live',
+                            document=document['id'], label=Path(document['path']).name + ' · ' + datetime.now().strftime('%m-%d %H:%M:%S'))
+                        archives.append(saved['id'])
+                    except Exception as exc:
+                        archive_errors.append(str(exc) if isinstance(exc, (ValueError, OSError)) else type(exc).__name__)
+                self._update(job_id, debug_history_ids=archives, debug_history_errors=archive_errors)
             now = datetime.now().isoformat(timespec="seconds")
             status = state.get("processing_status", "completed")
             status = status if status in {"completed", "partial", "failed", "prepared"} else "completed"
-            # Large visual facts/receipts belong to the paginated result API,
+            # Knowledge / Visual facts and receipts belong to the paginated API,
             # not every 900ms job poll or an in-memory JSON copy.
-            result=({k:state.get(k) for k in ('recognizer','processing_status','summary','precision','recall','metric_note')}
-                    if state.get('recognizer') in {'multimodal', 'knowledge'} else state)
+            result=({k:state.get(k) for k in ('recognizer','route','processing_status','summary','precision','recall','metric_note')}
+                    if state.get('recognizer') in {'multimodal', 'visual', 'knowledge', 'document'} else state)
             self._update(
                 job_id,
                 status=status,

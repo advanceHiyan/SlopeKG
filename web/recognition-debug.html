@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>识别调试工作台 - SlopeKG</title><link rel="stylesheet" href="./pages.css?v=20261102-nav3"><link rel="stylesheet" href="./recognition-debug.css?v=20261102-audit1"></head>
+<body class="portal-body"><header class="site-header"><div class="site-header-inner"><a class="site-brand" href="./index.html">SlopeKG<small>识别过程与原始证据</small></a><nav class="site-nav"><a class="nav-debug active" href="./recognition-debug.html">识别调试</a><a href="./pdf-ingestion.html">PDF识别工作台</a><a href="./graph.html">正式图谱</a></nav></div></header>
+<main class="page-main debug-main">
+<div class="page-heading"><div><p class="eyebrow">RECOGNITION INSPECTOR</p><h1>识别调试工作台</h1><p>从一页原件追到一条候选，逐步检查文字、证据、模型输入输出和校验分支。</p></div><button id="refresh" class="button secondary">刷新记录</button></div>
+<p id="error" class="notice error" role="alert" hidden></p>
+<section class="method-section" aria-label="三类自动化识别方法">
+<div class="method-cards" id="methodCards">
+<button type="button" data-route="basic" aria-pressed="false"><strong>基读 Basic</strong><span>PDF文字、表格 → 本地OCR → 规则提取</span><small>本地运行，不调用大模型；产生基础图谱。</small></button>
+<button type="button" data-route="knowledge" aria-pressed="true"><strong>知联 Knowledge</strong><span>文字与OCR → 对象发现与关联 → 知识重组</span><small>模型读取文字，不读取原页图像；保留候选。</small></button>
+<button type="button" data-route="visual" aria-pressed="false"><strong>视读 Visual</strong><span>PDF原页图像 → 版面与区域细读 → 核验</span><small>模型直接读取图像；保留候选与未读区域。</small></button>
+</div><p id="routeSummary" class="muted" role="status"></p>
+</section>
+<nav class="debug-view-switch" aria-label="调试工作区"><button class="active" data-view="process">识别过程</button><button data-view="tests">数据集与测试点</button><button data-view="history">历史记录与对照</button></nav>
+<div id="processView">
+<section class="card debug-controls" aria-label="选择调试记录">
+<label>当前识别方法<select id="route"><option value="basic">基读 Basic</option><option value="knowledge" selected>知联 Knowledge</option><option value="visual">视读 Visual</option></select></label>
+<label>记录来源<select id="run"><option value="live">当前生产记录</option></select></label>
+<label class="document-control">资料<select id="document"><option value="">正在读取…</option></select></label>
+<div class="debug-status"><span id="runStatus">读取中</span><small id="version"></small></div>
+</section>
+<details class="card debug-launch" id="launchPanel"><summary>新建调试任务 · 保存完整模型输入输出</summary>
+<p id="launchHelp">选择方法与资料后运行。新模型任务保存提示词、请求正文、图像和供应商响应原文；历史记录未保存的内容会明确标为缺失。</p>
+<div id="modelLaunch"><div class="launch-grid"><label>资料<select id="inputFile"></select></label><label>模型<select id="model"></select></label><label>调用上限<input id="maxCalls" type="number" min="1" max="10000" value="64"></label><label>并发<input id="concurrency" type="number" min="1" max="16" value="6"></label><label id="ocrLabel">本地OCR补页<input id="ocrPages" type="number" min="0" max="1000" value="0"></label></div>
+<p id="endpoint" class="muted"></p><label class="check"><input id="recordInputs" type="checkbox" checked>保存完整调试记录（含原文、提示词、请求图像和模型回复）</label>
+<label class="check"><input id="allow" type="checkbox"><span id="allowText">允许把上述资料原文发送到所选模型接口</span></label></div>
+<div id="basicLaunch" hidden><p class="notice info">基读按原始资料目录运行，会更新基础图谱。下方资料选择仅用于查看记录，不会限制基读范围。可复用现有解析只重做规则抽取。</p><div class="launch-grid"><label>本次最多执行OCR页数<input id="basicOcr" type="number" min="0" max="1000" value="0"></label><label>OCR设备<select id="basicDevice"><option value="auto">自动（GPU优先）</option><option value="cpu">CPU</option><option value="gpu">GPU</option></select></label><label class="check"><input id="basicReuse" type="checkbox" checked>复用现有解析，只重新抽取</label></div><p class="muted">复用时不执行OCR；取消复用且OCR页数为0时，仍执行原生文字、表格解析和OCR任务排队。</p></div>
+<div class="debug-actions"><button id="prepare" class="button ghost" disabled>仅本地准备</button><button id="start" class="button" disabled>运行并记录</button><span id="job" aria-live="polite"></span></div>
+</details>
+<div class="debug-workspace">
+<aside class="card stage-sidebar"><h2>处理步骤</h2><nav id="stages" aria-label="识别步骤"></nav><p class="muted">只读取已保存记录。刷新、搜索、下载均不调用模型。</p></aside>
+<section class="card debug-content" aria-labelledby="stageTitle">
+<div class="debug-title"><div><h2 id="stageTitle">输入与参数</h2><p id="stageHelp" class="muted"></p></div><span id="recordCount" class="count-pill">0项</span></div>
+<p id="traceCoverage" class="notice" role="status" hidden></p>
+<div class="debug-filter"><label>物理页<input id="page" type="number" min="0" value="0" aria-label="筛选物理页"></label><label class="search-control">搜索<input id="search" type="search" placeholder="原文、对象、字段、错误或调用标识" aria-label="搜索中间记录"></label><label class="check"><input id="failures" type="checkbox">只看异常/待审</label><button id="filter" class="button ghost">筛选</button></div>
+<p id="recordNote" class="muted"></p>
+<div class="debug-actions"><button id="downloadStage" class="button ghost" disabled>下载本步骤全部记录</button><button id="pin" class="button ghost" disabled>固定当前页作对照</button><button id="compare" class="button ghost" disabled>与固定记录比较</button><label class="check"><input id="autoRefresh" type="checkbox">每3秒刷新</label></div>
+<div class="snapshot-controls"><label>历史记录名称<input id="snapshotLabel" placeholder="可选：问题、版本或改动说明" maxlength="160"></label><button id="saveSnapshot" class="button secondary" disabled>保存当前完整记录</button></div>
+<div id="comparison" hidden></div><div id="records" aria-live="polite"><p class="empty-state">选择一份资料，开始查看识别过程。</p></div>
+<div class="debug-pagination" aria-label="中间记录分批查看"><button id="prev" class="button ghost" disabled>上一批记录</button><span id="pageInfo" role="status"></span><button id="next" class="button ghost" disabled>下一批记录</button></div><p class="muted">这里每批显示25条中间记录；PDF原件翻页请使用右侧“PDF上一页／下一页”或原页窗口。</p>
+</section>
+<aside class="card source-panel"><div class="debug-title"><h2>原页与位置</h2><a id="openPdf" target="_blank" rel="noopener" hidden>打开PDF</a></div><div class="debug-filter"><label>PDF物理页<input id="previewPage" type="number" min="1" value="1"></label><button id="showPage" class="button ghost" disabled>查看原页</button></div>
+<label class="check"><input id="followRecord" type="checkbox" checked>自动跟随所选记录</label><p id="sourceDocumentName" class="muted"></p><p id="sourceBinding" class="notice info" role="status">选择记录后显示对应原页。</p><button id="returnToRecord" class="button secondary" hidden>返回所选记录原页</button>
+<div class="source-pagination" aria-label="PDF原件翻页"><button id="sourcePrev" class="button ghost" disabled>PDF上一页</button><span id="sourcePageInfo"></span><button id="sourceNext" class="button ghost" disabled>PDF下一页</button></div>
+<p id="sourceStatus" class="muted" role="status"></p><p id="sourceNote" class="muted">点击“查看原页”或记录中的“定位原页”，打开可放大的原页窗口并叠加来源边框。</p><div id="sourceCanvas" class="source-canvas" hidden><img id="sourceImage" alt="PDF原始物理页"><svg id="sourceOverlay" viewBox="0 0 1 1" preserveAspectRatio="none" aria-label="记录来源边框"></svg></div><p id="sourceError" class="notice error" role="alert" hidden></p>
+<details class="debug-guide"><summary>如何定位错误</summary><p>OCR文字就错了：检查OCR原文及坐标。原文正确但没进请求：检查分块与归属。请求完整但回复错误：检查模型原文。模型有返回却没进入候选：检查校验与拒绝。这里的覆盖数量和核验状态均不代表准确率。</p></details>
+</aside></div>
+</div>
+<section id="testsView" hidden>
+<div class="card test-selector"><div class="debug-title"><div><h2>数据集与测试点</h2><p class="muted">选择检查点后，检查已有预测或重新识别。答案只参与后面的检查，不发给识别模型。</p></div><button id="reloadDatasets" class="button ghost">刷新数据集</button></div>
+<div class="debug-filter"><label class="search-control">开放数据集<select id="dataset"></select></label><label class="search-control">筛选测试点<input id="pointSearch" type="search" placeholder="测试点、预期值、页码"></label><button id="selectPoints" class="button ghost">全选筛选项</button><button id="clearPoints" class="button ghost">清空选择</button></div>
+<p id="datasetNote" class="muted"></p><div id="testPoints" class="test-points"></div>
+</div>
+<div class="card test-execution"><h2>运行并保存</h2><div class="launch-grid"><label>记录名称<input id="testLabel" maxlength="160" placeholder="如：改分块后 · 检查路基宽度"></label><label>测试方式<select id="testMode"><option value="saved">检查已保存预测 · 0新API</option><option value="recognize">重新识别再检查 · 会调用模型</option></select></label><label>预测来源<select id="testSource"><option value="dataset">数据集对应的历史预测</option><option value="current">当前正在查看的记录</option></select></label></div>
+<p id="testSourceNote" class="notice info"></p>
+<div id="testModelControls" hidden><div class="launch-grid"><label>模型<select id="testModel"></select></label><label>识别范围<select id="testScope"><option value="whole_input">整份本次输入PDF · 保留上下文</option><option value="point_pages">只识别所选测试点来源页</option></select></label><label>调用上限<input id="testCalls" type="number" min="1" max="10000" value="64"></label><label>并发<input id="testConcurrency" type="number" min="1" max="16" value="6"></label><label id="testOcrLabel">知联OCR补页<input id="testOcr" type="number" min="0" max="1000" value="0"></label></div><p id="testEndpoint" class="muted"></p><p class="muted">选择哪些检查点只影响后面的检查。整份模式读取整个输入PDF；局部页模式可能缺少上下文，范围会写入记录。调用上限不等于输出token上限，输出上限仍按模型配置执行。</p><label class="check"><input id="testAllowExternal" type="checkbox">允许将该输入PDF原文或图像发送到所选模型接口</label></div>
+<div class="debug-actions"><button id="runTest" class="button" disabled>检查所选测试点并保存</button><span id="testSelectionCount" class="muted"></span></div><p id="testProgress" aria-live="polite" class="muted"></p>
+</div>
+<details class="card dataset-editor"><summary>把当前资料另存为开放测试数据集</summary><p class="muted">仅登记当前所选开放资料。每个测试点可以写预期说明；需要自动检查时，使用明确的字段equals/contains条件。未写条件的点进入人工复核。另存会创建新版本，保留旧定义。</p>
+<div class="debug-filter"><label class="search-control">数据集名称<input id="datasetName" maxlength="160"></label><button id="fillPointTemplate" class="button ghost">填入格式示例</button></div>
+<label>测试点JSON<textarea id="datasetJson" spellcheck="false" aria-label="测试点JSON"></textarea></label><label class="check"><input id="datasetOpen" type="checkbox">确认当前原件属于开放开发资料，不是隐藏或曾作为隐藏集的资料</label><button id="saveDataset" class="button secondary">保存新数据集版本</button><p id="datasetSaveStatus" class="muted"></p>
+</details></section>
+<section id="historyView" hidden><div class="card"><div class="debug-title"><div><h2>历史记录</h2><p class="muted">原件、配置、完整模型输入输出、中间结果及测试定义分别冻结保存。打开和导出均不重新调用模型。快照保存完成与识别处理完成分别显示。</p></div><button id="reloadHistory" class="button ghost">刷新历史</button></div><div class="debug-filter"><label>识别方法<select id="historyRoute"><option value="">全部方法</option><option value="basic">基读 Basic</option><option value="knowledge">知联 Knowledge</option><option value="visual">视读 Visual</option></select></label><label class="search-control">搜索记录<input id="historySearch" type="search" placeholder="名称、标签、数据集、状态或记录ID"></label><button id="searchHistory" class="button ghost">搜索</button></div><div id="historyList"></div><div class="debug-pagination"><button id="historyPrev" class="button ghost" disabled>上一批历史</button><span id="historyPage"></span><button id="historyNext" class="button ghost" disabled>下一批历史</button></div></div>
+<div class="card history-compare"><h2>两次记录对照</h2><p class="muted">固定左侧记录，再选择右侧记录。比较所选测试点的结果与命中事实；定义版本不同会明确提示。</p><div class="debug-filter"><label class="search-control">左侧记录ID<input id="compareLeft" readonly></label><label class="search-control">右侧记录ID<input id="compareRight" readonly></label><button id="compareHistory" class="button secondary">比较两次记录</button></div><div id="historyComparison"></div></div>
+</section>
+</main>
+<dialog id="pageDialog" aria-labelledby="pageDialogTitle"><div class="dialog-heading"><h2 id="pageDialogTitle">PDF原页</h2><button id="closePage" class="button ghost">关闭原页</button></div>
+<p id="pageDocumentName" class="muted"></p><div class="page-reader-toolbar"><button id="pdfPrev" class="button ghost" disabled>上一页</button><label>PDF物理页<input id="dialogPage" type="number" min="1" value="1"></label><button id="pdfGo" class="button secondary">跳转</button><span id="pdfPageInfo"></span><button id="pdfNext" class="button ghost" disabled>下一页</button><label>缩放<select id="pageZoom"><option value="width">适应宽度</option><option value="page">显示整页</option><option value="100">100%</option><option value="150">150%</option><option value="200">200%</option></select></label><a id="pageOriginalPdf" class="button ghost" target="_blank" rel="noopener">打开PDF对应页</a><a id="downloadPage" class="button ghost" download hidden>下载本页PNG</a></div>
+<p id="pdfBinding" class="notice info" role="status"></p><button id="pdfReturnToRecord" class="button secondary" hidden>返回所选记录原页</button>
+<p id="pdfStatus" class="muted" role="status"></p><p id="pdfError" class="notice error" role="alert" hidden></p><div id="pageReaderScroll" class="page-reader-scroll" aria-label="可滚动的PDF原页"><div id="pageDialogCanvas" class="source-canvas" hidden><img id="pageDialogImage" alt="PDF原页大图"><svg id="pageDialogOverlay" viewBox="0 0 1 1" preserveAspectRatio="none" aria-label="原页来源边框"></svg></div></div></dialog>
+<dialog id="historyDialog"><div class="dialog-heading"><div><p class="eyebrow">SAVED TEST RECORD</p><h2 id="historyTitle">历史记录</h2></div><button id="closeHistory" class="button ghost">关闭</button></div><p id="historyRecordInfo" class="muted"></p><div class="debug-actions"><button id="openHistoryProcess" class="button">单独打开完整过程</button><a id="exportHistory" class="button secondary">导出记录ZIP</a><label class="check">复用范围<select id="reuseScope"><option value="all">本次全部检查点</option><option value="pending">未匹配或待复核点</option><option value="local_fail">本地判为不通过的点</option></select></label><button id="reuseTest" class="button ghost">复用这些测试点再测</button><button id="copyHistoryLink" class="button ghost">复制独立链接</button></div><div id="historyResults"></div><details class="json-panel"><summary>本次完整测试定义与结果</summary><pre id="historyRaw"></pre></details>
+<section class="history-review"><h3>记录备注与复核</h3><div class="launch-grid"><label>记录名称<input id="historyRename" maxlength="160"></label><label>标签<input id="historyTags" placeholder="用逗号分隔，最多12个"></label><label>复核测试点<select id="reviewPoint"><option value="">整次记录备注</option></select></label><label>本地判定<select id="reviewVerdict"><option value="note">仅备注</option><option value="pending">待复核</option><option value="pass">通过</option><option value="fail">不通过</option><option value="not_applicable">不适用</option></select></label></div><textarea id="reviewNote" maxlength="8000" placeholder="写明问题、修改想法或判定依据。旧备注与判定会保留。" aria-label="复核说明"></textarea><button id="saveReview" class="button secondary">追加保存备注/复核</button><p id="historyReviewStatus" class="muted" role="status"></p><div id="reviewHistory"></div></section>
+</dialog>
+<dialog id="callDialog"><div class="dialog-heading"><div><p class="eyebrow">MODEL EXCHANGE</p><h2>大模型完整输入输出</h2></div><button id="closeCall" class="button ghost">关闭</button></div><p id="callNotes" class="notice"></p><div class="debug-actions"><button id="downloadCall" class="button">下载本次完整输入输出</button><button id="copyCall" class="button ghost">复制完整JSON</button></div><div id="callBody"></div></dialog>
+<div id="toast" role="status" hidden></div>
+<script src="./api.js?v=20261102"></script><script src="./recognition-debug.js?v=20261102-audit1"></script><script src="./recognition-debug-tests.js?v=20261102-audit1"></script><script src="./recognition-assessment-link.js?v=20261102-1"></script></body></html>

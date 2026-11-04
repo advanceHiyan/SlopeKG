@@ -4,9 +4,19 @@
 
 Git 仓库保留源码、测试和技术说明。`output/`、`outputs/` 下的 OCR 图片、解析中间数据、生成图谱、离线展示及交付归档不随 Git 上传；请使用本地原始资料运行下述流水线生成。移除 Git 跟踪不会删除本地已有成果。
 
-独立多模态识别入口已增加：`--recognizer multimodal --pdf <PDF路径> --model-profile config/models/deepseek.json`。默认`--recognizer legacy`仅运行本地basic；旧文字deep已于2026-10-25删除。新路线先由模型识别版面和语义切分，再按区域细读、放大、核验和查漏；结果独立保存，暂不自动写入正式图谱。[方案、运行方式和执行对照](docs/多模态识别流程方案与执行.md)说明OCR协作、模型切换、预算和当前验收边界。增加`--prepare-only`可只在本地准备清单，不调用模型。
+三条识别路线统一简称：**基读 Basic**（`basic`，本地规则解析）、**知联 Knowledge**（`knowledge`，全文对象关联）、**视读 Visual**（`visual`，原页图像识别）。类和函数入口、兼容名称见[识别路线与代码分层](docs/识别路线与代码分层.md)。`legacy`与`multimodal`分别保留为`basic`与`visual`的兼容别名；不重写历史结果或缓存。
+
+实验第四路 **整读 Document**（`document`）从原页与带坐标文字恢复完整段落、表格，再全文建立可重合资料组。v0.2按组提取后立即回原页复核，最后用紧凑索引检查跨组关系；结构有缺口才做受限修复。入口为[整读工作台](web/document-recognition.html)，CLI为`--recognizer document --pdf <PDF路径> --model-profile config/models/deepseek-knowledge.json`；可用`--document-settings <JSON路径>`配置容量。结果保存到`output/demo/document-recognition/`，`report.html`展示原图、恢复内容、分区、候选和完整调用记录。当前是短文档实验版，容量不足明确保留待处理项；不自动进入正式图谱。
+
+视读 Visual 入口：`--recognizer visual --pdf <PDF路径> --model-profile config/models/deepseek.json`。默认`--recognizer basic`仅运行本地基读；旧文字deep已于2026-10-25删除。视读先识别版面和语义切分，再按区域细读、放大、核验和查漏；结果独立保存，暂不自动写入正式图谱。[方案、运行方式和执行对照](docs/多模态识别流程方案与执行.md)说明OCR协作、模型切换、预算和当前验收边界。增加`--prepare-only`可只在本地准备清单，不调用模型。
 
 网页入口为[PDF识别工作台](web/pdf-ingestion.html)：选择已配置模型和资料目录内的PDF，可先做本地准备，再显式启动多模态识别；本地basic/OCR保留在独立操作区。结果支持状态筛选、分页、原文证据和PDF页码定位。自动核验通过仍需人工确认，不表示人工准确率或召回率。[识别路线与代码分层](docs/识别路线与代码分层.md)说明模块职责、独立复读、内容查漏和扩展方式。
+
+[识别调试工作台](web/recognition-debug.html)逐步展示三条路线已保存的页面、OCR原文、表格、分块、对象归属、知识重组、校验及最终候选。支持页码与全文搜索、原页坐标定位、异常筛选、完整记录下载及当前页快照对照。大模型调用单独展示完整system/prompt、实际请求参数与图片、供应商原始回复、校验前后结果及失败原因。新建调试任务默认开启`record_model_inputs`，记录保存在对应路线的`inputs/`、`exchanges/`和`debug-trace.json`；不包含鉴权请求头。读取和下载不调用模型，历史未保存的原始请求/响应会标为缺失，缓存查找重建的输入也会明确标注。页面仅接入当前生产记录及具名开放样例，不扫描评测目录。
+
+桌面启动器默认使用8766端口，会比对实际加载的后端代码及识别记录/数据集/历史接口；空闲旧服务会重载，正在运行的识别、规则或数据集任务不会被强制停止。调试页提示后端缺少接口时，重新打开桌面入口即可触发版本检查。
+
+调试页的“数据集与测试点”支持四份已开放资料的21个检查点、选测部分点、保存当前资料为自定义数据集，以及检查已有预测或在隔离目录重新识别后检查。测试定义与答案不进入识别请求；自动字段条件、绑定原预测的历史结论、本地人工复核分别记录。网页知联/视读任务开启完整留痕后自动存历史，基读或其他已有记录可手动保存。历史冻结在`output/demo/debug-history/`，含原件、模型输入输出、中间结果、配置、检查点和校验哈希；支持独立链接重开、备注/标签、追加复核、ZIP导出、两次测试对照，以及重选未匹配/待复核或本地判为不通过的点。旧数据集定义和旧备注不覆盖；没有保存的历史原文仍标明缺失。
 
 本项目是公路边坡多源多模态知识图谱的第一版工程 Demo。生产流水线不依赖人工种子，当前已实现：
 
@@ -45,7 +55,7 @@ pip install -r requirements.txt
 
 ## 运行流水线
 
-新增第三路“全文知识识别”：`/web/knowledge-recognition.html`。先发现全文对象，再关联非连续分块，重组为带原文证据的对象事实和关系；与 basic、多模态分别运行和保存结果。支持原生文字，图形未读页单独列出。使用方式与边界见[识别路线与代码分层](docs/识别路线与代码分层.md)。
+知联 Knowledge：`/web/knowledge-recognition.html`。先发现全文对象，再关联非连续分块，重组为带原文证据的对象事实和关系；与基读 Basic、视读 Visual 分别运行和保存结果。v3复用基读表格及已有OCR，聚齐证据后合批重组对象档案；默认总调用上限64、仅有限歧义复核，原文对齐与模型复核分开计数。图形未读页单独列出。使用方式与边界见[识别路线与代码分层](docs/识别路线与代码分层.md)。
 
 ### 会昌监测样例
 
@@ -106,6 +116,14 @@ PDF主流程和本地缓存重建现在会自动刷新图片目录，并将校�
 文字识别保留原始文本框，对紧邻、居中且较短的中文换行标签额外生成可追溯的拼接候选；图纸标题栏保留完整底部区域。当前固定对照集为11页、55项，覆盖9份PDF，其中新增3页为AI原页核对样本，尚未经独立人工复核。此结果只用于内部回归，不代表全库准确率或风险判断效果。
 
 ## 启动前后端 Demo
+
+本机桌面双击 **SlopeKG 一键启动**，会在后台启动服务，等待就绪后自动打开默认浏览器；服务已运行时直接打开页面。也可以运行：
+
+```powershell
+.\scripts\open_demo.ps1
+```
+
+后台启动日志位于 `output/demo/launcher.stdout.log` 和 `output/demo/launcher.stderr.log`。关闭浏览器后服务仍在后台运行，重启电脑后再次双击即可。
 
 一键启动：
 
@@ -289,7 +307,7 @@ python scripts/run_tests.py --suite all
 基础流程使用本地文字提取、表格、按需OCR和规则抽取，不调用外部模型。需要直接识读原图时，显式选择多模态路线：
 
 ```powershell
-python scripts/run_pipeline.py --recognizer multimodal --pdf "data/rawPDF/资料.pdf" --model-profile config/models/deepseek.json --prepare-only
+python scripts/run_pipeline.py --recognizer visual --pdf "data/rawPDF/资料.pdf" --model-profile config/models/deepseek.json --prepare-only
 ```
 
 `--prepare-only`只做本地准备；正式模型识别需去掉该参数。多模态候选独立保存，不自动写入正式图谱。DeepSeek等模型配置继续保留。

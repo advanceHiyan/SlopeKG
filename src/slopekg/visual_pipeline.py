@@ -15,7 +15,8 @@ from .visual_batching import compact, pack, audit_units, layout_anchors, verific
 from .visual_evidence import normalized, literal_supported, source_contains
 from .visual_runtime import VisualRuntime
 from .visual_review import VisualReviewer
-from .visual_sources import content_coverage, related_sources, unaccounted_content, fact_source_bindings
+from .visual_sources import content_coverage, related_sources, unaccounted_content, fact_source_bindings, recompose_dimension_field
+from .visual_planning import plan_window, future_call_reserve
 
 
 class VisualPipeline:
@@ -118,6 +119,7 @@ class VisualPipeline:
 
     async def _document(self, source: Path, prepare_only: bool, selected_pages: list[int] | None = None) -> dict:
         doc = VisualDocument(source, self.output_dir)
+        self.runtime.document_id = doc.id
         report = {"id": doc.id, "path": str(source), "source_sha256": doc.sha256,
                   "status": "prepared" if prepare_only else "partial", "pages": [], "facts": []}
         try:
@@ -178,9 +180,11 @@ class VisualPipeline:
                 end=min(offset+self.settings.window_pages,len(report['pages']))
                 window=report['pages'][offset:end]
                 layout_states=[s for s in window if 'card' not in s]
-                minimum=(4+int(self.settings.independent_review))*len(window)+1
-                if (end<len(report['pages']) and 'card' not in report['pages'][end]
-                        and self.settings.max_calls-self.calls>minimum):
+                remaining=self.settings.max_calls-self.calls
+                window_minimum=1+(4+int(self.settings.independent_review))*len(window)
+                affordable_future=future_call_reserve(report['pages'][end:],remaining,window_minimum,
+                    window_pages=self.settings.window_pages,independent_review=self.settings.independent_review)
+                if (affordable_future and end<len(report['pages']) and 'card' not in report['pages'][end]):
                     layout_states.append(report['pages'][end])
                 outcomes=await asyncio.gather(*(layout_page(s) for s in layout_states),return_exceptions=True)
                 for state,outcome in zip(layout_states,outcomes):
@@ -188,9 +192,27 @@ class VisualPipeline:
                         state['errors'].append('Layout failure: '+type(outcome).__name__)
                         state.setdefault('card',{'page':state['page'],'title':'','summary':'layout unresolved','blank':False,
                             'regions':[{'id':'unresolved','kind':'unknown','bbox':[0,0,1,1],'objects':[],'summary':'full-page recovery'}]})
-                assignments=await self._segment(doc,report,start=offset,stop=end,assignments=assignments)
-                report['active_window']=[window[0]['page'],window[-1]['page']]
-                await self._recognize_window(doc,report,assignments,window)
+                remaining=self.settings.max_calls-self.calls
+                current_minimum=1+len(window)+(2+int(self.settings.independent_review))*sum(bool(s['card']['regions']) for s in window)
+                reserve=future_call_reserve(report['pages'][end:],remaining,current_minimum,
+                    window_pages=self.settings.window_pages,independent_review=self.settings.independent_review)
+                plan=plan_window(window,remaining-reserve,
+                                 independent_review=self.settings.independent_review)
+                plan['future_window_reserved_calls']=reserve
+                report.setdefault('frontier_plans',[]).append(plan)
+                if not plan['minimum_cycle_fits']:
+                    for state in window:
+                        state['status']='partial'
+                        state['errors'].append('Insufficient remaining call budget for reading, independent review and coverage; no reading request sent')
+                    self._checkpoint(report)
+                    continue
+                self.runtime.reserve_calls(reserve)
+                try:
+                    assignments=await self._segment(doc,report,start=offset,stop=end,assignments=assignments)
+                    report['active_window']=[window[0]['page'],window[-1]['page']]
+                    await self._recognize_window(doc,report,assignments,window)
+                finally:
+                    self.runtime.reserve_calls(0)
             report.pop('active_window',None)
             report["facts"].sort(key=lambda f: (f["page"], f["region_id"], f["id"]))
             report["facts"] = consolidate(report["facts"])
@@ -402,23 +424,33 @@ class VisualPipeline:
 
     def _images(self, doc, number, region, rotation=0, reread=False, assignment=None, pixel_budget=None):
         # Bounded linked-page context, current overview and the original source crop.
-        has_context = self.settings.max_images >= 3 and number > 1
+        bounds=region['bbox'] if isinstance(region,dict) else region
+        anchor=(assignment or {}).get('source_context_page')
+        has_context=(self.settings.max_images>=3 and type(anchor) is int and anchor>0
+                     and anchor!=number and abs(anchor-number)<=self.settings.window_pages)
         pixels = (pixel_budget or self.settings.max_image_pixels) - 16384
         cap = self.settings.max_pixels_per_image
         related=[r for r in (assignment or {}).get("source_context_regions",[]) if abs(r["page"]-number)<=self.settings.window_pages]
         related=related[:max(0,self.settings.max_images-2-int(has_context))]
-        crop_pixels=min(cap,int(pixels*.55/max(1,len(related)+1)))
-        images = [doc.render(number, edge=self.settings.overview_edge, max_pixels=min(cap, int(pixels * .25))),
-                  doc.render(number, region, edge=self.settings.reread_edge if reread else self.settings.detail_edge,
+        details=[]
+        if isinstance(region,dict):
+            area=lambda b:max(0,b[2]-b[0])*max(0,b[3]-b[1])
+            candidates=[r for r in region.get('source_regions',[]) if r.get('bbox') and
+                        0<area(r['bbox'])<.6*area(region['bbox'])]
+            candidates.sort(key=lambda r:(r.get('kind') not in {'table','drawing','diagram','chart'},area(r['bbox'])))
+            details=candidates[:max(0,self.settings.max_images-2-int(has_context)-len(related))]
+        crop_pixels=min(cap,int(pixels*(.65 if has_context else .80)/max(1,len(related)+len(details)+1)))
+        images = [doc.render(number, edge=self.settings.overview_edge, max_pixels=min(cap, int(pixels * .20))),
+                  doc.render(number, bounds, edge=self.settings.reread_edge if reread else self.settings.detail_edge,
                              rotation=rotation, max_pixels=crop_pixels)]
         if has_context:
-            anchor = (assignment or {}).get("source_context_page", number - 1)
-            if anchor == number or abs(anchor-number)>self.settings.window_pages:
-                anchor = number - 1
-            images.insert(0, doc.render(anchor, edge=min(1600, self.settings.overview_edge), max_pixels=min(cap, int(pixels * .20))))
+            images.insert(0, doc.render(anchor, edge=min(1600, self.settings.overview_edge), max_pixels=min(cap, int(pixels * .15))))
         for context in related:
             images.append(doc.render(context['page'],context["bbox"],edge=self.settings.reread_edge if reread else self.settings.detail_edge,
                                      max_pixels=crop_pixels))
+        for detail in details:
+            images.append(doc.render(number,detail['bbox'],edge=self.settings.reread_edge,
+                                     rotation=rotation,max_pixels=crop_pixels))
         return images
 
 
@@ -439,7 +471,7 @@ class VisualPipeline:
                 context["repair_feedback"]=target["repair_feedback"]
             if "parent_bbox" in target:
                 context["recovery_geometry"]={k:target[k] for k in ("parent_bbox","issue_bbox")}
-            images = self._images(doc, number, target["bbox"], rotation, depth > 0, assignment)
+            images = self._images(doc, number, target, rotation, depth > 0, assignment)
             def validate(answer):
                 reading(answer)
                 return answer
@@ -455,6 +487,9 @@ class VisualPipeline:
                         "document_id": doc.id, "page": number, "source_sha256": doc.sha256,
                         "region_id": target["id"], "status": "pending", "reason": "awaiting_source_review"}
                 fact['source_bindings']=bindings[index]
+                recompose_dimension_field(fact)
+                if fact.get('original_model_field'):
+                    fact['id']=content_hash([fact['id'],fact['field']])[:24]
                 fact["section_scope"] = assignment.get("section_scope",target["id"].split(":zoom",1)[0])
                 fact["object_binding"] = "section_scoped_source_phrase"
                 anchor=doc.locate_quote(number,raw["quote"],target["bbox"]) if self.settings.use_native_text else None
@@ -486,7 +521,7 @@ class VisualPipeline:
             # on the same low-resolution artifact when a better view is available.
             # Shared high-resolution region preserves headers and conditions;
             # uncertainty recovery, rather than mandatory tight crops, zooms in.
-            review_images = self._images(doc, number, target["bbox"], rotation, True, assignment,
+            review_images = self._images(doc, number, target, rotation, True, assignment,
                                          pixel_budget=self.settings.max_image_pixels) if candidates else []
             independent=None
             if candidates and self.settings.independent_review:

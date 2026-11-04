@@ -71,7 +71,7 @@ test('external recognition uses the chosen model and bounded settings',async t=>
   await page.locator('#recognitionRun').click();
   await page.waitForFunction(()=>document.querySelector('#jobStatus').textContent==='部分完成');
   assert.equal(requests[0].model_profile,'provider');assert.equal(requests[0].allow_external,true);
-  assert.deepEqual(requests[0].visual_settings,{max_calls:37,model_concurrency:3});
+  assert.deepEqual(requests[0].visual_settings,{max_calls:37,model_concurrency:3,record_model_inputs:true});
   assert.doesNotMatch(await page.locator('#jobDetails').textContent(),/基础解析（不调用大模型）/);
 });
 

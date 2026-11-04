@@ -6,14 +6,39 @@ from .visual_evidence import literal_supported
 def canonical(value):
     return ''.join(unicodedata.normalize('NFC',value).casefold().split())
 
-def explicit_section_owners(doc):
+def ambiguous_entity_labels(doc):
+    """A shared short label is not a unique concrete section anchor.
+
+    Keep its candidate identity for review. Explicit children whose context names
+    this parent do not make a real parent ambiguous. No industry lexicon is used.
+    """
     entities=[e for e in doc['entities'] if e['kind']=='entity']
+    ambiguous=set()
+    for entity in entities:
+        labels=[n for n in [entity['name'],*entity['aliases']] if n.strip()]
+        other=[e for e in entities if e['id']!=entity['id']
+            and canonical(e.get('context','')) not in {canonical(n) for n in labels}
+            and canonical(entity['name'])!=canonical(e['name'])
+            and literal_supported(entity['name'].casefold(),e['name'].casefold())]
+        if not entity.get('context') and len(other)>=2:
+            ambiguous.add(entity['id'])
+    return ambiguous
+
+def explicit_section_owners(doc):
+    ambiguous=ambiguous_entity_labels(doc)
+    entities=[e for e in doc['entities'] if e['kind']=='entity' and e['id'] not in ambiguous]
     stack=[];result={}
     for unit in doc['units']:
         headings=[]
-        for line in unit['text'].splitlines():
+        # Numbered table rows are data, not section boundaries.
+        for line in ([] if unit.get('source') == 'pdf_table' else unit['text'].splitlines()):
             m=re.fullmatch(r'\s*(\d+(?:\.\d+)*)(?:[、.]?)[ \t]+([^\n]{2,180})\s*',line)
+            md=re.fullmatch(r'\s*(#{1,6})\s+(.{2,180})\s*',line)
             if m:headings.append((tuple(int(n) for n in m[1].split('.')),m[2]))
+            elif md:headings.append(((0,)*len(md[1]),md[2]))
+            elif len(line.strip()) <= 180 and any(canonical(line)==canonical(name)
+                    for e in entities for name in [e['name'],*e['aliases']]):
+                headings.append(((1,),line.strip()))
         if headings:
             rank,title=headings[-1];label=canonical(title);candidates=[]
             for e in entities:
@@ -22,7 +47,7 @@ def explicit_section_owners(doc):
                 if size:candidates.append((size,e['id']))
             best=max((size for size,_ in candidates),default=0)
             winners={key for size,key in candidates if size==best}
-            owner=next(iter(winners)) if len(rank)>1 and len(winners)==1 else None
+            owner=next(iter(winners)) if len(winners)==1 else None
             descriptive=bool(re.search(r'[\u4e00-\u9fff]{2}|[A-Za-z]{4}',title))
             boundary=(not candidates and descriptive) or (len(rank)>1 and len(winners)>1)
             if owner or boundary:

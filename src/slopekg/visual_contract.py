@@ -7,7 +7,7 @@ from typing import Any
 from .model_client import content_hash
 from .visual_evidence import field_parts_error
 
-VERSION = "visual-v12"
+VERSION = "visual-v14"
 ROLES = {"observation", "design", "recommendation", "calculation", "prediction", "simulation", "reference", "unknown"}
 REVIEW_CHECKS = ("object_supported","field_supported","value_supported","unit_supported","scope_supported",
                  "role_supported","qualifiers_supported","condition_supported","time_supported")

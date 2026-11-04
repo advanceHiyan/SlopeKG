@@ -2,9 +2,10 @@
 from .visual_batching import verification_batches
 from .visual_contract import FACT_KEYS, VERIFY, REVIEW_CHECKS, review_result
 from .visual_evidence import source_contains, literal_supported, field_is_supported, align_quote
-from .visual_sources import fact_quality_issues
+from .visual_sources import fact_quality_issues, fact_source_bindings, recompose_dimension_field
 from .visual_comparison import compare_independent, unresolved_differences
 import re
+from copy import deepcopy
 
 
 class VisualReviewer:
@@ -14,6 +15,12 @@ class VisualReviewer:
     async def review(self, doc, number, target, candidates, transcript, images, assignment,
                       support_context=(), table_source=False, checkpoint=None, independent_read=None):
         errors=[]
+        if independent_read is not None:
+            independent_read=deepcopy(independent_read)
+            bindings=fact_source_bindings(independent_read)
+            for index,fact in enumerate(independent_read.get('facts',[])):
+                fact['source_bindings']=bindings[index]
+                recompose_dimension_field(fact)
         originals={f["id"]:f for f in candidates}
         for fact in candidates:
             fact['independent_comparison']=compare_independent(fact,independent_read,candidates)

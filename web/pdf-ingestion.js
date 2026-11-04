@@ -90,13 +90,13 @@
     const result = job.result || {};
     const parsed = result.parsed || {};
     const knowledge = options.recognizer === 'knowledge';
-    const visual = options.recognizer === 'multimodal';
+    const visual = ['visual', 'multimodal'].includes(options.recognizer);
     const external = visual || knowledge;
     const limits = knowledge ? options.knowledge_settings : options.visual_settings;
     elements.details.innerHTML = [
       ["任务编号", job.id],
       ["开始时间", job.started_at || job.created_at || "等待中"],
-      ["处理模式", knowledge ? (options.prepare_only ? '全文知识 · 仅本地准备' : '全文知识 · 对象发现与知识重组') : visual ? (options.prepare_only ? '多模态 · 仅本地准备' : '多模态 · 原页读取与核验') : "基础解析（不调用大模型）"],
+      ["处理模式", knowledge ? (options.prepare_only ? '知联 Knowledge · 仅本地准备' : '知联 Knowledge · 对象发现与知识重组') : visual ? (options.prepare_only ? '视读 Visual · 仅本地准备' : '视读 Visual · 原页读取与核验') : "基读 Basic（不调用大模型）"],
       ["处理设置", external ? `${options.input_pdfs?.length || 0}份PDF / 上限${limits?.max_calls ?? (knowledge ? 160 : 200)}次调用 / 并发${limits?.model_concurrency ?? 1}` : `OCR最多 ${options.ocr_pages ?? 0} 页 / ${String(options.ocr_device || "auto").toUpperCase()} / 渲染并发 ${options.ocr_workers ?? 4} / 批量 ${options.ocr_batch_size || "自动"}`],
       external && result.summary ? ['候选结果', `${result.summary.facts ?? 0}条 / 自动通过${result.summary.verified_model ?? 0}条 / 待定${result.summary.pending ?? 0}条`] : null,
       parsed.ocr_device_counts && Object.keys(parsed.ocr_device_counts).length ? ["实际OCR设备", Object.entries(parsed.ocr_device_counts).map(([name, count]) => `${name}：${count}页`).join(" / ")] : null,

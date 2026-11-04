@@ -28,6 +28,11 @@ async function workspace(t){
         count:1,rows:[{entity_id:'one',object:'设备<script>bad()</script>',field:'pressure',value:'2.50',unit:'MPa',scope:'局部',role:'observation',condition:'cold',
           status:'verified_model',reason:'Source aligned',file_name:'匿名资料.pdf',source_path:'nested/匿名资料.pdf',evidence:[{page:7,quote:'Original value <img src=x onerror=bad()> 2.50 MPa'}]}],relations:[]}
     };
+    if(state.aligned&&p==='/api/knowledge-recognition'){
+      d[p].rows[0].status='source_aligned';d[p].summary={entities:2,facts:1,source_aligned:1,verified_model:0};
+      d[p].object_pages=[{entity_id:'one',child_ids:[],related_topic_ids:['two'],unresolved_fact_ids:[]}];
+      d[p].entities.push({id:'two',name:'主题<img src=x onerror=bad()>',fact_count:0,description:'共享主题',chunk_ids:[]});
+    }
     if(d[p])return route.fulfill({json:d[p]});
     if(p.startsWith('/web/')){const f=path.basename(p);return route.fulfill({contentType:f.endsWith('.js')?'text/javascript':f.endsWith('.css')?'text/css':'text/html',body:await readFile(path.join(__dirname,'../../web',f))});}
     return route.fulfill({status:404,body:'not found'});
@@ -48,7 +53,7 @@ test('third route prepares explicit files locally and requires model consent',as
   await page.locator('#allow').check();await page.locator('#run').click();
   await page.waitForFunction(()=>!document.querySelector('#prepare').disabled);
   assert.equal(requests[1].recognizer,'knowledge');assert.equal(requests[1].allow_external,true);
-  assert.deepEqual(requests[1].knowledge_settings,{max_calls:500,model_concurrency:4});
+  assert.deepEqual(requests[1].knowledge_settings,{max_calls:64,model_concurrency:6,ocr_pages:0,record_model_inputs:true});
   assert.equal('visual_settings' in requests[1],false);
 });
 
@@ -74,4 +79,18 @@ test('failed refresh removes stale data and disables running',async t=>{
   assert.equal(await page.locator('#metrics').textContent(),'');
   state.fail=false;await page.locator('#refresh').click();await page.locator('#files input').waitFor();
   await page.waitForFunction(()=>!document.querySelector('#prepare').disabled);
+});
+
+test('local alignment is distinct from model review and dossier links stay escaped',async t=>{
+  const {page,state}=await workspace(t);state.aligned=true;
+  await page.locator('#refresh').click();
+  await page.waitForFunction(()=>document.querySelector('#rows').textContent.includes('原文对齐 · 未独立复核'));
+  assert.match(await page.locator('#metrics').textContent(),/原文对齐/);
+  await page.locator('#entity').selectOption('one');
+  await page.locator('#dossier button').waitFor();
+  assert.equal(await page.locator('#dossier img,#dossier script').count(),0);
+  await page.locator('#dossier button').click();
+  await page.waitForFunction(()=>document.querySelector('#entity').value==='two');
+  await page.locator('#status').selectOption('source_aligned');
+  assert.equal(await page.locator('#ocrPages').inputValue(),'0');
 });

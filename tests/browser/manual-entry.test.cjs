@@ -49,6 +49,7 @@ async function workbench(t, name='risk', options={}) {
     return route.fulfill({status:404,json:{error:'not found'}});
   });
   await page.goto(`http://slopekg.test/web/${name}.html`);
+  if(name==='risk') await page.locator('.legacy-screening > summary').click();
   await page.locator(name==='risk'?'.manual-edit-toggle':'#toggleRuleForm').waitFor();
   return {page,state,requests};
 }

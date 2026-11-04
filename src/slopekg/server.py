@@ -38,8 +38,10 @@ from .monitoring import (
 from .inspection_history import HISTORY_INTERFACES, public_history_catalog, history_payload, history_source, history_interfaces
 from .monitoring_baseline import baseline_payload, baseline_interfaces
 from .pipeline import DemoPipeline
+from .recognition_routes import normalize_recognizer
 from .recognition import visual_job_options, profile_catalog, recognition_documents, recognition_payload
 from .knowledge_service import knowledge_job_options, knowledge_payload
+from .document_service import document_job_options, document_payload
 from .rule_extraction import RuleExtractionPipeline
 from .schema import INTERFACES, attribute_dictionary_payload, interface_payload, schema_payload
 from .storage import ensure_dir, read_json
@@ -256,6 +258,8 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             return
         for handler in (
+            self._get_assessment_debug,
+            self._get_standard_assessment,
             self._get_pipeline,
             self._get_rules,
             self._get_risk,
@@ -277,7 +281,13 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self.write_json({"error": "cross-origin request denied"}, status=HTTPStatus.FORBIDDEN)
             return
         parsed = urlparse(self.path)
+        if parsed.path.startswith('/api/recognition-debug/'):
+            from .debug_workspace_http import post_workspace_route
+            if post_workspace_route(self, parsed, PATHS):
+                return
         for handler in (
+            self._post_assessment_debug,
+            self._post_standard_assessment,
             self._post_manual,
             self._post_pipeline,
             self._post_rules,
@@ -301,7 +311,39 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             return
         self.write_json(state)
 
+    def _get_assessment_debug(self, parsed: Any) -> bool:
+        from .standard_assessment.debug_http import get_route
+        return get_route(self,parsed,PATHS)
+
+    def _post_assessment_debug(self, parsed: Any) -> bool:
+        from .standard_assessment.debug_http import post_route
+        return post_route(self,parsed,PATHS)
+
+    def _get_standard_assessment(self, parsed: Any) -> bool:
+        from .standard_assessment.http import get_route
+        return get_route(self, parsed, PATHS)
+
+    def _post_standard_assessment(self, parsed: Any) -> bool:
+        from .standard_assessment.http import post_route
+        return post_route(self, parsed, PATHS)
+
     def _get_pipeline(self, parsed: Any) -> bool:
+        if parsed.path == '/api/health':
+            from .service_runtime import service_health
+            self.write_json(service_health(PATHS))
+            return True
+        if parsed.path.startswith('/api/recognition-debug'):
+            from .recognition_debug import get_debug_route
+            return get_debug_route(self, parsed, PATHS)
+        if parsed.path == '/api/document-recognition':
+            try:
+                query=parse_qs(parsed.query)
+                self.write_json(document_payload(PATHS,document=query.get('document',[''])[0],
+                    stage=query.get('stage',['facts'])[0],offset=int(query.get('offset',['0'])[0]),
+                    limit=int(query.get('limit',['50'])[0])))
+            except (ValueError,TypeError) as exc:
+                self.write_json({'error':str(exc)},status=HTTPStatus.BAD_REQUEST)
+            return True
         if parsed.path == '/api/knowledge-recognition':
             try:
                 query = parse_qs(parsed.query)
@@ -759,17 +801,17 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         self.write_json({"error": "not found"}, status=HTTPStatus.NOT_FOUND)
 
     def pipeline_options(self, body: dict[str, Any]) -> dict[str, Any]:
-        recognizer=body.get('recognizer','legacy')
+        recognizer=normalize_recognizer(body.get('recognizer','basic'))
+        if recognizer=='document':return document_job_options(PATHS,body)
+        if 'document_settings' in body:raise ValueError('整读设置需要选择整读 Document')
         if recognizer=='knowledge':
             return knowledge_job_options(PATHS,body)
-        if recognizer=='multimodal':
+        if recognizer=='visual':
             if 'knowledge_settings' in body:
-                raise ValueError('全文知识设置需要knowledge路线')
+                raise ValueError('知识设置需要选择知联 Knowledge')
             return visual_job_options(PATHS,body)
-        if recognizer!='legacy':
-            raise ValueError('未知识别路线')
         if any(k in body for k in ('input_pdfs','model_profile','review_profile','visual_settings','knowledge_settings','prepare_only','allow_external')):
-            raise ValueError('多模态设置需要选择multimodal路线')
+            raise ValueError('模型设置需要选择知联 Knowledge 或视读 Visual')
         ocr_pages = max(0, min(1000, int(body.get("ocr_pages", 1000))))
         parse_mode = str(body.get("parse_mode", "basic")).strip().lower()
         if parse_mode != "basic" or any(k in body for k in ("use_llm", "llm_model")):
@@ -810,7 +852,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             pending = parse_pdf_uploads(content_type, raw)
             options = self.pipeline_options({
                 **automatic_basic_options(), **parse_upload_options(content_type, raw),
-                "recognizer": "legacy",
+                "recognizer": "basic",
                 "parse_mode": "basic", "reuse_parsed": False, "ocr_scope": "changed",
             })
         except (ValueError, TypeError, OverflowError) as exc:

@@ -4,13 +4,14 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>风险研判 - SlopeKG</title>
-  <link rel="stylesheet" href="./pages.css?v=20261020-1"/>
+  <link rel="stylesheet" href="./pages.css?v=20261102-nav3"/>
+  <link rel="stylesheet" href="./standard-assessment.css?v=20261031-1"/>
 </head>
 <body class="portal-body" data-page="risk">
   <header class="site-header">
     <div class="site-header-inner">
       <a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a>
-      <nav class="site-nav">
+      <nav class="site-nav"><a class="nav-debug" href="./recognition-debug.html">识别调试</a>
         <a href="./index.html">总览</a><a href="./pdf-ingestion.html">PDF解析</a>
         <a href="./slopes.html">边坡档案</a><a href="./graph.html">关系图谱</a>
         <a href="./rules.html">规则库</a><a href="./data-status.html">数据与接口</a>
@@ -21,11 +22,24 @@
   <main class="page-main">
     <div class="page-heading">
       <div>
-        <h1>宏观风险筛查与复核排序</h1>
-        <p>分别检查静态易发性、近期动态异常和暴露后果，再安排现场复核优先级。结果不是失稳概率，也不预测具体失稳时间。</p>
+        <h1>滑坡现状危险性评估</h1>
+        <p>使用已有资料，按 GB/T 40112—2021 整理证据、辅助判断和查表，交由人工复核。</p>
       </div>
-      <span class="badge pending">多轴筛查 v2</span>
+      <span class="badge pending">国标评估 · 待人工复核</span>
     </div>
+    <section class="card assessment-start" aria-label="国标评估">
+      <form id="assessmentStart">
+        <label>评估对象<select id="assessmentTarget" required><option value="">正在读取边坡…</option></select></label>
+        <label>资料时期<select id="assessmentPeriod"><option value="report">报告调查状态</option><option value="event2016">2016年雨季历史事件（仅适用来源）</option></select></label>
+        <button class="button" id="assessmentRun" type="submit">开始评估</button>
+      </form>
+      <p class="section-subtitle">系统先采用已有结论、查找相关资料；缺发育程度时，将相关原句发送到项目配置的 DeepSeek 服务，对照国标提出建议。你只需复核关键判断。</p>
+      <p id="assessmentStatus" role="status" aria-live="polite">选择对象开始。结果会注明资料时期、证据和待复核事项。</p>
+      <p><a href="./assessment-debug.html">查看PDF到风险评估的完整过程</a> · 从<a href="./recognition-debug.html">识别调试</a>选择记录，可绑定同一次识别快照。</p>
+    </section>
+    <section id="assessmentWorkspace" hidden></section>
+    <details class="legacy-screening" style="margin-top:24px">
+      <summary>查看辅助筛查与人工复核排序（P1—P4）</summary>
     <section class="card export-card" style="margin-bottom:16px">
       <div>
         <h2>导出风险研判离线版</h2>
@@ -64,9 +78,11 @@
       <h2>正式风险结论的边界</h2>
       <div id="riskBoundary" class="boundary-grid"><div class="loading">加载中…</div></div>
     </section>
+    </details>
   </main>
   <script src="./api.js?v=20261020-1"></script>
   <script src="./manual-entry.js?v=20261020-1"></script>
   <script src="./portal.js?v=20261020-1"></script>
+  <script src="./standard-assessment.js?v=20261102-trace1"></script>
 </body>
 </html>

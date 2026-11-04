@@ -3,6 +3,7 @@
 These test workflow/evidence invariants, never real model quality.
 """
 import copy
+from dataclasses import replace
 import json
 from pathlib import Path
 import tempfile
@@ -12,7 +13,7 @@ import fitz
 
 from slopekg import knowledge_prompts as prompts
 from slopekg.knowledge_document import prepare_document
-from slopekg.knowledge_pipeline import KnowledgePipeline, resolve_source_handle
+from slopekg.knowledge_pipeline import KnowledgePipeline as PipelineImplementation, resolve_source_handle
 from slopekg.visual_contract import ContractError
 from slopekg.knowledge_settings import KnowledgeSettings
 from slopekg.knowledge_service import knowledge_job_options, knowledge_payload
@@ -20,6 +21,16 @@ from slopekg.model_client import ModelError
 from slopekg.pipeline import DemoPipeline
 from slopekg.storage import write_json, read_json
 from tests.support import workspace_paths
+
+
+def KnowledgePipeline(*args, settings=None, **kwargs):
+    """Retain exhaustive-review contract regressions as an explicit mode.
+
+    The v3 default batching/selective-review path has separate mechanism tests.
+    """
+    settings = replace(settings or KnowledgeSettings(), review_mode='all',
+                       synthesis_batch_objects=1, max_review_calls=32)
+    return PipelineImplementation(*args, settings=settings, **kwargs)
 
 
 def document(path, name='Reactor A', other='Reactor B', sparse=False):
@@ -300,7 +311,10 @@ class KnowledgeWorkflowTests(unittest.TestCase):
             self.assertTrue({1, 5, 7} <= {u['page'] for u in read['source_spans']})
             self.assertEqual({f['value'] for f in doc['facts'] if f['status'] == 'verified_model'}, {'QA17', '2.50'})
             self.assertEqual(result['recognizer'], 'knowledge')
-            self.assertEqual(result['processing_status'], 'completed')
+            # The fixture leaves three background pages unassigned. Two valid
+            # recovered facts must not certify whole-source completeness.
+            self.assertEqual(result['processing_status'], 'partial')
+            self.assertEqual(doc['source_accounting']['pages_without_attribution'], [3,4,6])
             self.assertIsNone(result['precision'])
 
     def test_false_quotes_and_invented_numeric_values_cannot_be_promoted_by_agreeing_reviewer(self):
@@ -326,7 +340,8 @@ class KnowledgeWorkflowTests(unittest.TestCase):
             result=KnowledgePipeline(KnowledgeModel(),root/'out').run([pdf])
             doc=result['documents'][0]
             self.assertEqual(result['processing_status'],'partial')
-            self.assertEqual(doc['coverage']['text_processing_status'],'completed')
+            self.assertEqual(doc['coverage']['text_processing_status'],'partial')
+            self.assertEqual(doc['source_accounting']['pages_without_attribution'], [3,4,6])
             self.assertEqual(doc['coverage']['unread_graphics_pages'],[8])
 
     def test_new_domain_and_renamed_file_do_not_change_source_driven_workflow(self):

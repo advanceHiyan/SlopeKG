@@ -3,6 +3,35 @@ import re
 from .visual_evidence import literal_supported
 
 
+def recompose_dimension_field(fact):
+    """Keep an explicitly supplied measurement gloss in the candidate field.
+
+    This expands a short label, never drops a qualifier or infers a value.
+    Unrelated/conflicting quantities remain blocked by the original gate.
+    """
+    quantities={b.get('measurement',{}).get('quantity','').strip()
+                for b in fact.get('source_bindings',[]) if b.get('kind')=='dimension'}
+    if len(quantities)!=1:return
+    quantity=next(iter(quantities));field=fact.get('field','')
+    base=re.split(r'[（(]',quantity,maxsplit=1)[0].strip()
+    normalize=lambda s:re.sub(r'\s+','',s).casefold()
+    if quantity.endswith((')', '）')) and normalize(base)==normalize(field) and normalize(quantity)!=normalize(field):
+        fact['original_model_field']=field
+        fact['field']=quantity
+        fact['field_recomposition']='explicit_bound_measurement_quantity; semantic review still required'
+
+
+def dimension_semantic_issues(dimension, fact=None):
+    """A numeric label is a transcription until its measurement is specified."""
+    meaning=dimension.get('measurement')
+    if not isinstance(meaning,dict) or any(not isinstance(meaning.get(k),str) or not meaning[k].strip()
+                                         for k in ('object','quantity','basis')):
+        return ['dimension_meaning_unresolved']
+    if fact is not None and meaning['quantity'].strip()!=fact['field'].strip():
+        return ['dimension_field_not_recomposed']
+    return []
+
+
 def identifier_atoms(value):
     return set(re.findall(r'(?<![A-Za-z0-9])[A-Za-z]+[A-Za-z0-9.+-]*\d[A-Za-z0-9.+-]*|(?<!\d)\d{5,}(?!\d)', value))
 
@@ -15,6 +44,9 @@ def identity_supported(fact, fragments):
 
 def fact_quality_issues(fact, fragments):
     issues=[]
+    for binding in fact.get('source_bindings',[]):
+        if binding.get('kind')=='dimension':
+            issues.extend(dimension_semantic_issues(binding,fact))
     if not identity_supported(fact, fragments):
         issues.append('object_identifier_not_grounded')
     basis=fact.get('unit_basis','')
@@ -36,7 +68,11 @@ def content_coverage(answer):
                 result.append({'kind':'cell','table_index':ti,'row':cell['row'],'column':cell['column'],
                     'text':cell['text'],'bbox':table['bbox'],**_link(cell,answer['facts'])})
     for i,d in enumerate(answer.get('dimensions',[])):
-        result.append({'kind':'dimension','dimension_index':i,'text':d['text'],'bbox':d['bbox'],**_link(d,answer['facts'])})
+        link=_link(d,answer['facts'])
+        issues=[] if d.get('disposition')=='reference_only' else dimension_semantic_issues(d)
+        if issues:
+            link.update(accounted=False,semantic_issues=issues)
+        result.append({'kind':'dimension','dimension_index':i,'text':d['text'],'bbox':d['bbox'],**link})
     return result
 
 
@@ -60,6 +96,8 @@ def fact_source_bindings(answer):
         if dimension.get('disposition') != 'fact':
             continue
         binding={'kind':'dimension','dimension_index':di,'text':dimension['text'],'bbox':dimension['bbox']}
+        if 'measurement' in dimension:
+            binding['measurement']=dimension['measurement']
         for index in dimension.get('fact_indices',[]):
             result[index].append(dict(binding))
     return result

@@ -170,6 +170,24 @@ def frame(title,page,nav,content,js):
     return f'''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{escape(title)}</title><style>{CSS}</style><body data-page="{page}"><header><div class="sub">SlopeKG · 知联 Knowledge · 固定维护入口</div><h1>{escape(title)}</h1><nav><a href="知联流程详解.html">流程、参数与源码</a>　<a href="知联失败样例.html">开放失败样例全链路</a></nav><div class="sub">更新于 <span id="generated"></span> · 本次不调用模型API</div></header><div class="wrap"><aside>{nav_html}</aside><main>{content}<div class="card"><b>前端测试点与历史入口：</b><code>/web/recognition-debug.html</code> 的“数据集与测试点”可选测开放检查点；“历史记录与对照”可重新打开一次完整快照、导出ZIP、追加复核并选择异常点重测。数据集预期只进入检查器，不送给识别模型。桌面启动器会检查8766默认服务实际加载的版本与调试接口，空闲旧后端自动重载，运行中的任务不会被强制中断。自动字段规则、绑定原预测的历史结论和本地人工判定分开；不等于独立验收或整文档准确率。</div><div class="foot">构建：scripts/build_knowledge_debug_html.py · 本页从当前磁盘源码和允许列出的开放历史产物生成；历史产物、缓存和机制测试分别标注。</div></main></div><script src="assets/debug_data.js"></script><script>{COMMON_JS}\n{js}</script></body></html>'''
 
 def write_html(out,data):
+    real_comparison=''
+    if data.get('real_document_comparison'):
+        real_comparison='<section id="realDocumentComparison"><h2>真实单样本对比：归属改善，整读复核仍受阻</h2><p><a href="../20261103_真实资料双路对比/当前单样本对比.html">查看真实报告6页、24个测试点的知联/整读对照</a>。当前只完成这一份选页样本；其余三份未执行，不当作整份75页已验证。</p><p>定向原文核对：知联9项完整、12项部分、3项遗漏；整读19项完整、5项部分。包含待核候选，不是准确率或召回率。整读最终复核输入212,744字符，超过100,000字符，未发送；191条候选均待核，完整流程未通过。</p><p>此前整份解析出现约10GB工作集；已修正选页预处理，332条选页来源单元保持一致。最后收尾新增1次请求，峰值约158.4MiB。累计19次尝试含2次中断，用量缺失部分不算0。当前已停止扩测。</p></section>'
+    fourth=''
+    if data.get('document_route_experiment'):
+        experiment=data['document_route_experiment']
+        fourth='<section id="documentRoute"><h2>第四路整读：先恢复内容，再分组与归属</h2><p>原页图像与坐标文字 → 完整段落/表格 → 可重合资料组 → 分区审核 → 提取 → 原页核对及补证据。与下方知联旧流程分别保存。</p><p><a href="../20261103_第四路小测/第四路小测报告.html">查看4页开放合成资料的实际对照、修复和全部输入输出</a>。本轮共 '+str(experiment['new_generation_requests'])+' 次模型请求（含知联基线与修后复核），当前缓存回放0新API；HTML构建本身0 API。</p><p>知联目录已发现SYN-I；整读补回其遗漏事实并保留8～12人区间；复核补齐表头引文。两份文档仍为partial，不能据这次小测声称真实工程准确率或普遍优于知联。长文档分层规划与完整分批复核尚未实现。完整新模块已加入流程页源码选择器。</p></section>'
+    if data.get('document_v02'):
+        real_comparison=('<section id="documentV02"><h2>当前整读v0.2：流程跑通，尚未证明提速</h2>'
+            '<p><a href="../20261103_真实资料双路对比/精简版快速测试.html">查看同一真实6页的最新流程、原文核对、耗时和完整回包</a>。</p>'
+            '<p>原页恢复 → 有缺口才有限修复 → 全文可重合分组 → 每批提取后立即原页复核 → 紧凑索引跨组检查。'
+            '取消固定的独立分区审核，不再发送巨型全量复核。4批资料均完成复核，最大82,455字符；跨组索引87,100字符。'
+            'workflow_complete=true，文档仍partial：342条候选中221条待核、1条被否定。不是准确率或专业确认。</p>'
+            '<p>本轮16次尝试含1次中断；最终全缓存回放0次API。92项相关回归及最后16项第四路测试通过。'
+            '父对象、范围和计算/要求角色有所改善，但材料名冒充计算主体、共享资料重复提取及泛化复核仍存在。'
+            '候选数量增加不算提升，下一步应减少重复提取，不能继续堆固定审核层。当前源码含document_workflow。</p></section>'
+            +real_comparison.replace('真实单样本对比：归属改善，整读复核仍受阻','历史v0.1基线：归属改善，整读复核受阻'))
+        fourth=fourth.replace('第四路整读：先恢复内容，再分组与归属','历史v0.1合成小测：先恢复内容，再分组与归属')
     assessment_bridge='''<section class="card" id="pdfRiskBridge"><h2>从同一次识别继续到国标风险预评估</h2><p><a href="http://127.0.0.1:8766/web/recognition-debug.html">在识别调试工作台选定记录</a>，点击“衔接当前记录”，进入<a href="http://127.0.0.1:8766/web/assessment-debug.html">PDF到风险全过程</a>。绑定标识包括识别历史ID、PDF哈希、来源对象、时期工况、评估案例及版本；不按文件名或相同桩号猜测同一物理坡体。</p><p>识别候选 → 字段转换/未采用原因 → 对象时期工况校核 → 有效输入/来源选择 → 专业判断及实际模型I/O → 表15 → 表17 → 缺口/冲突/区间 → 人工复核和历史版本。每个规则输入可追溯识别事实及PDF原页，并可导出两段完整记录。</p><p>“衔接并自动预评估”只做本地整理与确定性查表，使用独立调试评估库。模型辅助需要明确允许发送相关片段；不把模型建议当专业签认。旧识别记录与人工修改均保留，读取本页不触发识别或评估。</p></section>'''
     workspace=''
     receipt=out/'workspace_import_receipt.json'
@@ -214,9 +232,11 @@ def write_html(out,data):
     all_stages='<details><summary>展开全部阶段对照（适合连续阅读）</summary><div class="scroll"><table><tr><th>阶段</th><th>输入</th><th>处理</th><th>失败边界</th></tr>'+''.join('<tr>'+''.join('<td>'+escape(str(s[k]))+'</td>' for k in [1,2,3,4])+'</tr>' for s in data['stages'])+'</table></div></details>'
     flow=flow.replace('<div id="stageDetail" class="stage card"></div>','<div id="stageDetail" class="stage card"></div>'+all_stages)
     walkthrough=guide_walkthrough(data)
-    flow=workspace+assessment_bridge+performance_policy_section(data)+flow+walkthrough+source_section()+notes_section()
+    flow=real_comparison+fourth+workspace+assessment_bridge+performance_policy_section(data)+flow+walkthrough+source_section()+notes_section()
     nav=[('overview','当前版本与边界'),('flow','执行顺序'),('params','精确参数与引擎'),('schema','数据结构'),('identity','目录与跨块归属'),('gates','门控与状态'),('budget','调用 / 缓存 / 重试'),('promptsSection','完整提示词'),('finish','完成与未完成'),('overfit','过拟合与缺陷'),('source','源码'),('notesSection','你的备注')]
     nav.insert(0,('maxPerformance','思考档位选择'))
+    if fourth:nav.insert(0,('documentRoute','第四路小测'))
+    if real_comparison:nav.insert(0,('realDocumentComparison','真实单样本对比'))
     nav.insert(-2,('guideWalkthrough','指南真实逐步案例'))
     nav.insert(-2,('ocrColumns','OCR行与双栏问题'))
     (out/'知联流程详解.html').write_text(frame('知联详细流程、精确参数与源码','flow',nav,flow,FLOW_JS),encoding='utf-8')
@@ -230,9 +250,11 @@ def write_html(out,data):
 <section id="diagnostics"><h2>6. 全部已保存诊断：未归属、隔离、错误、冲突与门控</h2><p>不是只挑成功输出。这里完整展开该版本保存的diagnostics/errors/source_accounting等字段。某字段不存在表示该版本未记录，不补成0。</p><div id="allDiagnostics"></div></section>
 <section id="assessment"><h2>7. 开放开发集判定依据</h2><p>以下来自预测冻结后的既有人工式AI原文核对；不是专业签认，不是全文件精确率/召回率。它只用于这几份已开放资料的debug。旧运行结果与新缓存记录分开看。</p><div id="allAssessments"></div></section>
 '''
-    cases=workspace+assessment_bridge+performance_policy_section(data)+cases+walkthrough+notes_section()
+    cases=real_comparison+fourth+workspace+assessment_bridge+performance_policy_section(data)+cases+walkthrough+notes_section()
     nav=[('scope','资料边界'),('choose','选择资料 / 版本'),('failuresSection','失败点'),('trace','阶段输入输出'),('pdfPanel','原页与证据追踪'),('facts','全部最终事实'),('diagnostics','完整诊断'),('assessment','开放集判定'),('notesSection','你的备注')]
     nav.insert(0,('maxPerformance','思考档位选择'))
+    if fourth:nav.insert(0,('documentRoute','第四路小测'))
+    if real_comparison:nav.insert(0,('realDocumentComparison','真实单样本对比'))
     nav.insert(-1,('guideWalkthrough','指南真实逐步案例'))
     nav.insert(-1,('ocrColumns','OCR行与双栏问题'))
     (out/'知联失败样例.html').write_text(frame('知联开放失败样例：输入、中间结果与输出','cases',nav,cases,CASE_JS),encoding='utf-8')

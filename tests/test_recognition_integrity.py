@@ -143,7 +143,9 @@ class RecognitionServiceTests(unittest.TestCase):
 
     def test_legacy_positional_arguments_remain_compatible(self):
         with patch('slopekg.legacy_pipeline.LegacyPipeline.run',return_value={'ok':True}) as legacy:
-            self.assertEqual(DemoPipeline(self.paths).run(0,False,parse_mode='basic'),{'ok':True})
+            result = DemoPipeline(self.paths).run(0,False,parse_mode='basic')
+            self.assertTrue(result['ok'])
+            self.assertEqual(result['route']['id'], 'basic')
         legacy.assert_called_once_with(0,False,parse_mode='basic')
         with self.assertRaises(ValueError):DemoPipeline(self.paths).run(0,recognizer='multimodal')
 

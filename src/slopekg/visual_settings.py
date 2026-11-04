@@ -25,10 +25,11 @@ class VisualSettings:
     crop_padding: float = .01
     allow_model_calls: bool = True
     independent_review: bool = True
+    record_model_inputs: bool = False
 
     def __post_init__(self):
         if any(type(getattr(self, k)) is not bool for k in
-               ('allow_model_calls','independent_review','use_native_text','use_existing_ocr','retry_failed')):
+               ('allow_model_calls','independent_review','use_native_text','use_existing_ocr','retry_failed','record_model_inputs')):
             raise ValueError("Visual switches must be boolean")
         for key in ("overview_edge", "detail_edge", "reread_edge"):
             if not 256 <= getattr(self, key) <= 10000:

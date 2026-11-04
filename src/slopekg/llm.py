@@ -4,6 +4,7 @@ import os
 from typing import Any
 
 from .config import ROOT
+from .model_limits import DEEPSEEK_MAX_OUTPUT_TOKENS
 
 
 # Official model/pricing documentation checked 2026-10-15. Legacy V4 Flash
@@ -12,7 +13,6 @@ DEFAULT_DEEPSEEK_MODEL = "deepseek-flash"
 DEEPSEEK_API_BASE = "https://api.deepseek.com"
 # DeepSeek V4.1 documents a 384K maximum output. Keep this provider-specific
 # limit in one place so callers do not silently use smaller, scattered values.
-DEEPSEEK_MAX_OUTPUT_TOKENS = 384 * 1024
 
 
 def deepseek_key_info() -> tuple[str | None, str | None]:

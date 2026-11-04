@@ -1,0 +1,13 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>整读 Document - SlopeKG</title><link rel="stylesheet" href="./pages.css?v=20261102-nav3"><link rel="stylesheet" href="./recognition.css?v=20261028">
+<style>pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:600px;overflow:auto}#records article{border-bottom:1px solid #d9e1e8;padding:16px 0}#records .source{white-space:pre-wrap}select,input{max-width:100%}</style></head>
+<body class="portal-body"><header class="site-header"><div class="site-header-inner"><a class="site-brand" href="./index.html">SlopeKG<small>资料、对象与可追溯知识</small></a><nav class="site-nav"><a href="./pdf-ingestion.html">PDF识别工作台</a><a href="./recognition-debug.html">其他路线调试</a></nav></div></header>
+<main class="page-main"><div class="page-heading"><div><h1>整读 Document · 实验第四路</h1><p>恢复完整段落和表格 → 形成可重合资料组 → 审核分组 → 提取 → 回原页核对。</p></div><button id="refresh" class="button secondary">刷新</button></div>
+<p class="notice info">当前适合短文档验证。整文规划或复核超出容量会明确留下待处理项；同模型复核不等于独立确认。</p>
+<section class="card recognition-card"><h2>选择资料与模型</h2><div class="recognition-controls"><label>模型<select id="model"></select></label><label>本次调用上限<input id="maxCalls" type="number" min="1" max="10000" value="24"></label></div>
+<p id="endpoint"></p><input id="searchFiles" type="search" placeholder="筛选PDF" aria-label="筛选PDF"><div id="files" class="recognition-files"></div>
+<label class="recognition-confirm"><input id="allow" type="checkbox">允许将所选PDF的原文和页面图像发送到上述模型接口</label><div class="action-row"><button id="prepare" class="button ghost" disabled>仅本地准备</button><button id="run" class="button" disabled>开始整读</button></div><p id="error" class="notice error" role="alert" hidden></p></section>
+<section class="card"><h2>任务与结果</h2><p id="job" aria-live="polite">尚未开始</p><p id="note"></p><div id="metrics" class="grid metrics-grid"></div>
+<div class="recognition-controls"><label>文档<select id="document"><option value="">全部文档</option></select></label><label>查看阶段<select id="stage"><option value="facts">最终候选</option><option value="blocks">恢复后的完整内容</option><option value="groups">可重合资料组</option><option value="claims">去重前全部陈述</option><option value="pages">原生文字及页面记录</option><option value="stages">执行阶段</option><option value="errors">失败记录</option></select></label></div>
+<div id="records"></div><div class="recognition-pagination"><button id="prev" class="button ghost">上一页</button><span id="pageInfo"></span><button id="next" class="button ghost">下一页</button></div></section>
+</main><script src="./api.js?v=20261028"></script><script src="./document-recognition.js?v=20261103"></script></body></html>

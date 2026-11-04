@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 from slopekg.jobs import PipelineJobManager, PdfDirectoryWatcher
 from slopekg.pipeline import DemoPipeline
 from slopekg.storage import read_jsonl, write_jsonl
+from slopekg.parsers import GEOMETRY_VERSION
 from tests.support import workspace_paths
 
 
@@ -54,6 +55,7 @@ class JobManagerTests(unittest.TestCase):
                 file.write_bytes(b"%PDF-cached")
             write_jsonl(paths.parsed_dir / "documents.jsonl", [
                 {"id": file.stem, "file_name": file.name,
+                 "geometry_version": GEOMETRY_VERSION,
                  "source_size_bytes": file.stat().st_size,
                  "source_mtime_ns": file.stat().st_mtime_ns}
                 for file in files

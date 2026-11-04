@@ -76,9 +76,10 @@
     if (busy || sending) return;
     sending = true; updateActions(); showError('');
     try {
+      // Visual uses its historical wire alias to work with already-running servers.
       const options = {recognizer:'multimodal', input_pdfs:[...selected], model_profile:model.value,
         prepare_only:prepared, allow_external:!prepared && allow.checked,
-        visual_settings:{max_calls:integer('recognitionMaxCalls',1,100000), model_concurrency:integer('recognitionConcurrency',1,32)}};
+        visual_settings:{max_calls:integer('recognitionMaxCalls',1,100000), model_concurrency:integer('recognitionConcurrency',1,32),record_model_inputs:true}};
       const response = await fetch('/api/pipeline/jobs', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(options)});
       const job = await response.json();
       if (!response.ok && response.status !== 409) throw new Error(job.error || `HTTP ${response.status}`);

@@ -689,7 +689,7 @@ class ModelTransportTests(unittest.TestCase):
 
     def test_provider_profiles_keep_their_distinct_thinking_and_token_controls(self):
         root = Path(__file__).resolve().parents[1]
-        for provider in ("deepseek","qwen","kimi"):
+        for provider in ("deepseek","deepseek-knowledge-max","qwen","kimi"):
             with self.subTest(provider=provider), tempfile.TemporaryDirectory() as directory:
                 profile = ModelProfile.load(root / f"config/models/{provider}.json")
                 captured = []
@@ -697,14 +697,17 @@ class ModelTransportTests(unittest.TestCase):
                     captured.append(payload)
                     return {"model":profile.model,"choices":[{"finish_reason":"stop","message":{"content":"{}"}}]}
                 image_path = Path(directory)/"image.png"; Image.new("RGB",(10,10)).save(image_path)
-                client = CompatibleVisionClient(profile, Path(directory), transport)
+                client = CompatibleVisionClient(profile, Path(directory), transport,
+                    token_counter=(lambda _:29) if provider=='kimi' else None)
                 with patch.object(client,"_key",side_effect=AssertionError("Offline transport must not read keys")):
                     client.complete(system="rules",prompt="read",images=[ImageInput(image_path,"page=1",10,10)])
                 payload = captured[0]
-                self.assertEqual(payload[profile.token_parameter],131072)
+                self.assertEqual(payload[profile.token_parameter],
+                    {'deepseek':393216,'deepseek-knowledge-max':393216,'qwen':131072,'kimi':1048576-29}[provider])
                 self.assertEqual(payload.get("reasoning_effort"),"xhigh" if provider=="qwen" else "max")
                 self.assertNotIn("api_key_file",json.dumps(payload))
-                if provider=="deepseek": self.assertEqual(payload["thinking"],{"type":"enabled"})
+                if provider in {"deepseek","deepseek-knowledge-max"}: self.assertEqual(payload["thinking"],{"type":"enabled"})
+                if provider=="deepseek-knowledge-max": self.assertNotIn("temperature",payload)
                 if provider=="qwen": self.assertTrue(payload["enable_thinking"])
 
     def test_incomplete_response_is_failure_and_profile_refuses_endpoint_mismatch(self):

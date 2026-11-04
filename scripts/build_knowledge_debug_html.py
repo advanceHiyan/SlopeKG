@@ -92,6 +92,7 @@ def collect_source():
     names=['knowledge_pipeline','knowledge_settings','knowledge_document','knowledge_batching','knowledge_directory',
            'knowledge_prompts','knowledge_claims','knowledge_composition','knowledge_attribution','knowledge_evidence',
            'knowledge_ownership','knowledge_roles','knowledge_tables','knowledge_recovery','knowledge_service',
+           'document_pipeline','document_settings','document_prompts','document_contract','document_workflow','document_service','document_render',
            'visual_runtime','visual_evidence','visual_contract','visual_batching','model_client','model_limits','parsers','ocr','provenance']
     files={n:source('src/slopekg/'+n+'.py') for n in names}
     files.update({
@@ -215,6 +216,18 @@ def main():
     OUT.mkdir(parents=True,exist_ok=True)
     data={'generated_at':datetime.now().astimezone().isoformat(),'source':collect_source(),'cases':collect_cases(),
           'policy':{'new_API_calls':0,'hidden_cases_included':0,'open_only':True},'stages':STAGES}
+    fourth=ROOT/'outputs/20261103_第四路小测/comparison.json'
+    if fourth.is_file():data['document_route_experiment']=read_json(fourth)
+    real_comparison=ROOT/'outputs/20261103_真实资料双路对比/survey_comparison.json'
+    if real_comparison.is_file():
+        comparison=read_json(real_comparison)
+        data['real_document_comparison']={k:comparison[k] for k in ('scope','counts','generation_attempts_including_interrupted',
+            'document_final_review_sent','document_final_review_prompt_chars','document_max_prompt_chars','resume_new_requests','resume_memory')}
+    simplified=ROOT/'outputs/20261103_整读流程精简/comparison.json'
+    if simplified.is_file():
+        comparison=read_json(simplified)
+        data['document_v02']={k:comparison[k] for k in ('scope','workflow_complete','document_status','summary',
+            'new_attempts_all_iterations','max_local_review_chars','cross_group_chars','tests','speedup_demonstrated')}
     profiles={}
     for name in ['deepseek-knowledge','deepseek-knowledge-max']:
         profile=read_json(ROOT/f'config/models/{name}.json')

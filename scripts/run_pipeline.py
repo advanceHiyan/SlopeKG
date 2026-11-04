@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 
 from slopekg.pipeline import DemoPipeline, PipelineAlreadyRunningError  # noqa: E402
+from slopekg.recognition_routes import RECOGNIZER_CHOICES, normalize_recognizer  # noqa: E402
 
 
 def main() -> None:
@@ -21,13 +22,14 @@ def main() -> None:
     parser.add_argument("--ocr-batch-size", type=int, default=0, help="OCR inference batch size; 0 selects 1 on CPU or 4 on GPU")
     parser.add_argument("--mode", choices=["basic"], default="basic", help="Local parsing/OCR and deterministic extraction")
     parser.add_argument("--reuse-parsed", action="store_true", help="Reuse PDF sidecars only if they still match current source files")
-    parser.add_argument("--recognizer", choices=["legacy", "multimodal", "knowledge"], default="legacy",
-                        help="Select basic, independent multimodal, or document-wide knowledge recognition")
-    parser.add_argument("--pdf", type=Path, action="append", help="Explicit PDF input; repeat for multiple files (knowledge/multimodal)")
-    parser.add_argument("--model-profile", type=Path, help="JSON endpoint/model/credential profile (knowledge/multimodal)")
+    parser.add_argument("--recognizer", choices=RECOGNIZER_CHOICES, default="basic",
+                        help="基读 Basic / 知联 Knowledge / 视读 Visual / 整读 Document; legacy and multimodal are compatibility aliases")
+    parser.add_argument("--pdf", type=Path, action="append", help="Explicit PDF input; repeat for multiple files (knowledge/visual/document)")
+    parser.add_argument("--model-profile", type=Path, help="JSON endpoint/model/credential profile (knowledge/visual/document)")
     parser.add_argument("--review-profile", type=Path, help="Optional separate model for source verification and coverage audit")
     parser.add_argument("--visual-settings", type=Path, help="JSON visual context/render/call budgets")
     parser.add_argument("--knowledge-settings", type=Path, help="JSON document-wide knowledge budgets (knowledge route only)")
+    parser.add_argument("--document-settings", type=Path, help="JSON reconstruction/dossier budgets (document route only)")
     parser.add_argument("--prepare-only", action="store_true", help="Inventory PDFs locally without any model/API/OCR execution")
     args = parser.parse_args()
     try:
@@ -45,15 +47,16 @@ def main() -> None:
             review_profile=args.review_profile,
             visual_settings=json.loads(args.visual_settings.read_text(encoding="utf-8-sig")) if args.visual_settings else None,
             knowledge_settings=json.loads(args.knowledge_settings.read_text(encoding="utf-8-sig")) if args.knowledge_settings else None,
+            document_settings=json.loads(args.document_settings.read_text(encoding="utf-8-sig")) if args.document_settings else None,
             prepare_only=args.prepare_only,
         )
     except (PipelineAlreadyRunningError, ValueError, FileNotFoundError) as exc:
         parser.error(str(exc))
     display = state
-    if args.recognizer in {"multimodal", "knowledge"}:
+    if normalize_recognizer(args.recognizer) in {"visual", "knowledge", "document"}:
         from slopekg.config import PATHS
-        display = {key: state[key] for key in ("recognizer", "processing_status", "summary", "precision", "recall", "metric_note")}
-        folder = 'knowledge-recognition' if args.recognizer == 'knowledge' else 'recognition'
+        display = {key: state[key] for key in ("recognizer", "route", "processing_status", "summary", "precision", "recall", "metric_note")}
+        folder = {'knowledge':'knowledge-recognition','document':'document-recognition'}.get(args.recognizer,'recognition')
         display["result_file"] = str(PATHS.output_dir / folder / "run.json")
         display["planning_estimates"] = [d.get("planning_estimate") for d in state["documents"]]
     print(json.dumps(display, ensure_ascii=False, indent=2))

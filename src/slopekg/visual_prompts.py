@@ -26,7 +26,7 @@ READ = """细读当前 target 区域。整页、相邻页和source_context_regio
 优先识别原文，然后结构化，不补全。输出：
 {"transcript":"完整可读原文，保留所有限定词与表头",
 "tables":[{"caption":"","bbox":[0,0,1,1],"cells":[{"row":0,"column":0,"row_span":1,"column_span":1,"header":"表头路径","text":"空单元格也保留"}]}],
-"dimensions":[{"text":"原始标注及单位","bbox":[0,0,1,1]}],
+"dimensions":[{"text":"原始标注及单位","bbox":[0,0,1,1],"measurement":{"object":"被测对象","quantity":"具体量义","basis":"图中测量部位、端点或方向；未确定留空"}}],
 "facts":[{"object":"原文具体对象；不确定写unknown","field":"属性","value":"原值/范围，禁止换算或猜测",
 "unit":"","qualifier":"约/局部/否定等原文限定","scope":"已确认对象的适用范围；原文未另限时写该原文对象，不自动扩大到全工程；对象/范围真不明才unknown",
 "role":"observation/design/recommendation/calculation/prediction/simulation/reference/unknown","condition":"","time":"",
@@ -45,7 +45,6 @@ value尽量为原文连续片段；时间、对象、原因和目的分别结构
 “符合以下要求”等不含具体要求的引导句只保留transcript，不单独制造facts；后续具体事实须继承经原文核实的上级限定。不能把引导句本身当作裁切错误反复补读。
 区域框是可纠正的阅读假设。句子、列举、单位或条件在裁图边缘中断时，以crop_boundary标记、注明需延伸的edges，不要只在同一截断残行内请求放大。
 fact_indices是本次facts数组中确实受该疑点影响的0起始索引；若仅有后续未读内容、现有事实并未受影响，可明确给空列表。不能因为疑点框较大就把全部事实视为有疑点。背景/透印不能冒充正文或事实。
-role区分断言性质：observation是资料报告的现状或观测；design是明确拟定的目标参数或设计要求；recommendation是建议；reference是文献/规范陈述；prediction是预测。对象用于设计不意味着其现有属性就是设计值。未确定时unknown，不按文档类型猜角色。
 """
 
 VERIFY = """你是另一轮原页核验。候选可能全部错误。逐条检查源图及对象、属性含义、范围、角色、单位、否定、限定和条件。
@@ -82,7 +81,7 @@ VERIFY += ROLE_GUIDANCE
 
 READ += """
 对象标识、材料代号和规格型号必须逐字保留；不能仅核数字主值而忽略对象内的编号。单价的unit保留币种，另填unit_basis为每单位工程量基准（如m³、km、工日），其逐字证据放support_quotes；不明确则空字符串，不猜。
-每个非空表格cell及dimension增加fact_indices（当前facts中0起始索引）和disposition：fact/reference_only/unresolved；reference_only必须有reason说明只是表头/元信息或为何不构成所需断言。数值读到了却未形成事实时标unresolved，不以转录成功冒充已抽取。
+每个非空表格cell及dimension增加fact_indices（当前facts中0起始索引）和disposition：fact/reference_only/unresolved；reference_only必须有reason说明只是表头/元信息或为何不构成所需断言。尺寸的measurement须明确对象、量义及测量依据，相应fact.field使用quantity；只读到数字而量义未明时保留dimensions并标unresolved，不以转录冒充已抽取。
 单元格fact_indices须对应同一表、行、列的断言，不按相同数字串建立关系；表注的限定必须随被约束事实保留。unit_basis应来自该行单位或确实适用的表头，不把整页统一赋某种单位。
 """
 VERIFY += """

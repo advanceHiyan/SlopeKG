@@ -1,4 +1,4 @@
-"""Local basic/OCR parsing and graph publication; no external model calls."""
+"""基读 Basic implementation (legacy compatibility module); no external model calls."""
 from __future__ import annotations
 
 from datetime import datetime
@@ -14,7 +14,7 @@ from .multimodal import build_multimodal_outputs
 from .manual import apply_slope_overrides
 from .ocr import OcrRunner, with_layout_groups
 from .geometry import project_ocr_boxes
-from .parsers import PdfParser, file_sha256
+from .parsers import PdfParser, file_sha256, GEOMETRY_VERSION
 from .quality import evaluate_automatic_pipeline
 from .queries import assess_graph, evaluate_risk_result
 from .schema import build_completeness, interface_payload, schema_payload
@@ -547,7 +547,7 @@ def mark_cached_ocr_tasks(tasks: list[dict[str, Any]], results: list[dict[str, A
 
 
 def source_file_matches_record(file: Path, record: dict[str, Any] | None) -> bool:
-    if not record:
+    if not record or record.get('geometry_version') != GEOMETRY_VERSION:
         return False
     stat = file.stat()
     if record.get("source_size_bytes") != stat.st_size or record.get("source_mtime_ns") != stat.st_mtime_ns:

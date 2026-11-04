@@ -40,18 +40,40 @@ function Test-PortListening {
     }
 }
 
-if (Test-PortListening -LocalPort $Port) {
-    try {
-        $null = Invoke-WebRequest -UseBasicParsing -Uri $StatusUrl -TimeoutSec 2
-        Write-Host "SlopeKG demo already running:"
-        Write-Host "  $Url"
-        exit 0
-    } catch {
-        Write-Host "Port $Port is already in use, but it is not responding as SlopeKG demo."
-        Write-Host "Use another port, for example:"
-        Write-Host "  .\scripts\start_demo.ps1 -Port 8767"
-        exit 1
+$ProbeScript = Join-Path $PSScriptRoot "check_demo_service.py"
+$ServiceState = (& $Python $ProbeScript --port $Port | ConvertFrom-Json)
+if ($LASTEXITCODE -ne 0 -or $null -eq $ServiceState.state) {
+    throw "Cannot verify the SlopeKG service on port $Port. No process was stopped."
+}
+if ($ServiceState.state -eq "ready") {
+    Write-Host "SlopeKG is running with the current code and debug APIs: $Url"
+    exit 0
+}
+if ($ServiceState.state -in @("busy", "unknown", "degraded")) {
+    throw "$($ServiceState.reason) (port $Port). No process was stopped."
+}
+if ($ServiceState.state -eq "stale") {
+    $ServicePid = [int]$ServiceState.pid
+    $Listener = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction Stop |
+        Where-Object { $_.OwningProcess -eq $ServicePid } | Select-Object -First 1
+    $Owner = Get-CimInstance Win32_Process -Filter "ProcessId = $ServicePid" -ErrorAction Stop
+    $ExpectedPython = (Get-Command $Python -ErrorAction Stop).Source
+    if ($null -eq $Listener -or $Owner.ExecutablePath -ne $ExpectedPython -or
+        $Owner.CommandLine -notmatch 'serve_demo\.py' -or
+        $Owner.CommandLine -notmatch "--port\s+$Port(?:\s|$)") {
+        throw "The old process identity could not be confirmed. No process was stopped."
     }
+    # The probe checked ordinary/rule jobs, isolated tests and the shared lock.
+    # Recheck immediately before stopping the identified idle server.
+    $Recheck = (& $Python $ProbeScript --port $Port | ConvertFrom-Json)
+    if ($Recheck.state -ne "stale" -or $Recheck.pid -ne $ServicePid) {
+        throw "Service state changed during validation. No process was stopped."
+    }
+    Write-Host "Reloading the idle SlopeKG service on port $Port to load current code..."
+    Stop-Process -Id $ServicePid -ErrorAction Stop
+    Wait-Process -Id $ServicePid -Timeout 5 -ErrorAction SilentlyContinue
+} elseif (Test-PortListening -LocalPort $Port) {
+    throw "Port $Port is occupied by an unrecognized service. No process was stopped."
 }
 
 if ($RunPipeline) {

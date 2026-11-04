@@ -51,7 +51,8 @@ def main():
     parser.add_argument('stage', choices=['freeze','knowledge','basic','multimodal'])
     parser.add_argument('--pdf', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--profile', type=Path, default=ROOT/'config/models/deepseek-knowledge.json')
+    parser.add_argument('--profile', type=Path, default=ROOT/'config/models/deepseek-knowledge.json',
+        help='Choose a profile for the task; deepseek-knowledge-max enables optional max thinking')
     parser.add_argument('--max-calls', type=int, default=500)
     parser.add_argument('--concurrency', type=int, default=3)
     args = parser.parse_args()

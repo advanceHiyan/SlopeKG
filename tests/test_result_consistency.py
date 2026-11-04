@@ -14,6 +14,7 @@ from slopekg.manual import save_slope_override
 from slopekg.pipeline import DemoPipeline, graph_matches_documents, mark_cached_ocr_tasks, source_file_matches_record
 from slopekg.risk_evaluation import evaluate_risk_screening
 from slopekg.storage import write_json, write_jsonl
+from slopekg.parsers import GEOMETRY_VERSION
 from tests.support import workspace_paths, sample_graph
 from scripts import run_pipeline
 
@@ -83,16 +84,26 @@ class ResultConsistencyTests(unittest.TestCase):
     def test_unchanged_stat_with_wrong_hash_does_not_reuse_old_parse(self):
         file = self.paths.root / "sample.pdf"
         file.write_bytes(b"new source")
-        record = {"source_size_bytes": file.stat().st_size, "source_mtime_ns": file.stat().st_mtime_ns, "source_sha256": "old"}
+        record = {"source_size_bytes": file.stat().st_size, "source_mtime_ns": file.stat().st_mtime_ns,
+                  "source_sha256": "old", "geometry_version": GEOMETRY_VERSION}
         self.assertFalse(source_file_matches_record(file, record))
 
     def test_valid_parse_cache_is_reused(self):
         self.paths.raw_dir.mkdir(parents=True)
         file = self.paths.raw_dir / "sample.pdf"
         file.write_bytes(b"same source")
-        write_jsonl(self.paths.parsed_dir / "documents.jsonl", [{"id": "doc", "file_name": file.name, "source_size_bytes": file.stat().st_size, "source_mtime_ns": file.stat().st_mtime_ns}])
+        write_jsonl(self.paths.parsed_dir / "documents.jsonl", [{"id": "doc", "file_name": file.name,
+            "source_size_bytes": file.stat().st_size, "source_mtime_ns": file.stat().st_mtime_ns,
+            "geometry_version": GEOMETRY_VERSION}])
         write_jsonl(self.paths.parsed_dir / "pages.jsonl", [{"id": "page", "document_id": "doc"}])
         self.assertEqual(DemoPipeline(self.paths).load_parsed_documents()["changed_document_ids"], [])
+
+    def test_legacy_geometry_is_not_mistaken_for_a_current_parse(self):
+        file=self.paths.root/'anonymous.pdf';file.write_bytes(b'unchanged source')
+        record={'source_size_bytes':file.stat().st_size,'source_mtime_ns':file.stat().st_mtime_ns}
+        self.assertFalse(source_file_matches_record(file,record))
+        record['geometry_version']=GEOMETRY_VERSION
+        self.assertTrue(source_file_matches_record(file,record))
 
 
     def test_missing_ocr_cache_is_retried_but_successful_blank_page_is_not(self):

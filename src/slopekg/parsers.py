@@ -8,6 +8,8 @@ from typing import Any, Callable
 
 from pypdf import PdfReader
 
+GEOMETRY_VERSION = 'display-pdf-points-2'
+
 
 @dataclass(frozen=True)
 class PdfParseResult:
@@ -62,12 +64,21 @@ class PdfParser:
         file: Path,
         text_sample_pages: int | None = None,
         page_callback: Callable[[int], None] | None = None,
+        *,
+        generic: bool = False,
+        selected_pages: list[int] | None = None,
     ) -> PdfParseResult:
         reader = PdfReader(str(file))
+        if selected_pages is not None:
+            if (not isinstance(selected_pages,list) or not selected_pages
+                    or any(type(n) is not int or not 1<=n<=len(reader.pages) for n in selected_pages)):
+                raise ValueError('Selected pages must be physical page numbers inside the source')
+            if text_sample_pages is not None:raise ValueError('Cannot mix selected pages and leading-page sampling')
+        selected = set(selected_pages) if selected_pages is not None else None
         source_stat = file.stat()
         doc_id = doc_id_for(file)
         rel_path = str(file.relative_to(self.root))
-        kind = infer_doc_kind(file.name)
+        kind = "通用资料" if generic else infer_doc_kind(file.name)
         page_limit = len(reader.pages) if text_sample_pages is None else min(len(reader.pages), text_sample_pages)
         documents = [
             {
@@ -78,7 +89,9 @@ class PdfParser:
                 "kind": kind,
                 "pages": len(reader.pages),
                 "parser": "pymupdf_layout+pypdf_fallback",
-                "parse_scope": "full" if text_sample_pages is None else f"sample:{page_limit}",
+                "geometry_version": GEOMETRY_VERSION,
+                "parse_scope": ('pages:'+','.join(map(str,sorted(selected))) if selected is not None
+                                else "full" if text_sample_pages is None else f"sample:{page_limit}"),
                 "source_size_bytes": source_stat.st_size,
                 "source_mtime_ns": source_stat.st_mtime_ns,
                 "source_sha256": file_sha256(file),
@@ -95,7 +108,7 @@ class PdfParser:
             for index, pypdf_page in enumerate(reader.pages):
                 page_no = index + 1
                 page_id = f"{doc_id}_p{page_no:04d}"
-                if index >= page_limit:
+                if index >= page_limit or selected is not None and page_no not in selected:
                     pages.append(skipped_page(page_id, doc_id, file.name, page_no))
                     if page_callback:
                         page_callback(page_no)
@@ -124,6 +137,9 @@ class PdfParser:
                         "page": page_no,
                         "width": round(layout["width"], 2),
                         "height": round(layout["height"], 2),
+                        "rotation": layout.get("rotation", 0),
+                        "rotation_matrix": layout.get("rotation_matrix"),
+                        "geometry_version": GEOMETRY_VERSION,
                         "orientation": classification["orientation"],
                         "text_chars": len(compact),
                         "text_sampled": True,
@@ -152,13 +168,14 @@ class PdfParser:
                             "page": page_no,
                             "text": text,
                             "bbox": block.get("bbox"),
+                            "bbox_coordinate_frame": "display_pdf_points",
                             "block_type": block.get("block_type", "text"),
                             "extractor": layout["extractor"],
                             "reading_order": block_index,
                         }
                     )
 
-                if classification["page_type"] == "table":
+                if generic or classification["page_type"] == "table":
                     tables.extend(extract_tables(plumber_doc, index, doc_id, page_id, page_no))
 
                 if classification["needs_ocr"]:
@@ -218,6 +235,7 @@ def extract_layout_page(fitz_doc: Any, index: int, pypdf_page: Any) -> dict[str,
     if fitz_doc is not None:
         try:
             page = fitz_doc.load_page(index)
+            import fitz
             raw_blocks = page.get_text("blocks", sort=True)
             blocks = []
             for raw in raw_blocks:
@@ -225,7 +243,10 @@ def extract_layout_page(fitz_doc: Any, index: int, pypdf_page: Any) -> dict[str,
                     continue
                 text = clean_text(raw[4])
                 if text:
-                    blocks.append({"text": text, "bbox": [round(float(v), 2) for v in raw[:4]], "block_type": "text"})
+                    displayed = fitz.Rect(raw[:4]) * page.rotation_matrix
+                    displayed &= page.rect
+                    box = [round(float(v), 2) for v in displayed] if not displayed.is_empty else None
+                    blocks.append({"text": text, "bbox": box, "block_type": "text"})
             try:
                 drawings = len(page.get_cdrawings()) if hasattr(page, "get_cdrawings") else len(page.get_drawings())
             except Exception:
@@ -235,6 +256,8 @@ def extract_layout_page(fitz_doc: Any, index: int, pypdf_page: Any) -> dict[str,
                 "blocks": blocks,
                 "width": float(page.rect.width),
                 "height": float(page.rect.height),
+                "rotation": page.rotation,
+                "rotation_matrix": list(page.rotation_matrix),
                 "image_count": len(page.get_images(full=True)),
                 "drawing_count": drawings,
                 "extractor": "pymupdf",
@@ -249,12 +272,16 @@ def extract_layout_page(fitz_doc: Any, index: int, pypdf_page: Any) -> dict[str,
         text = clean_text(pypdf_page.extract_text() or "")
         width = float(pypdf_page.mediabox.width)
         height = float(pypdf_page.mediabox.height)
+        rotation = int(pypdf_page.get('/Rotate', 0)) % 360
+        if rotation in {90, 270}:
+            width, height = height, width
         blocks = [{"text": text, "bbox": None, "block_type": "page_text"}] if text else []
         return {
             "text": text,
             "blocks": blocks,
             "width": width,
             "height": height,
+            "rotation": rotation,
             "image_count": 0,
             "drawing_count": 0,
             "extractor": "pypdf_fallback",

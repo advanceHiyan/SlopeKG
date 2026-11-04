@@ -5,7 +5,7 @@
   "model": "deepseek-flash",
   "api_key_file": ".secrets/deepseek_api_key.txt",
   "token_parameter": "max_tokens",
-  "max_output_tokens": 16384,
-  "timeout_seconds": 240,
+  "max_output_tokens": 393216,
+  "timeout_seconds": 600,
   "request_options": {"thinking": {"type": "disabled"}, "temperature": 0.2}
 }

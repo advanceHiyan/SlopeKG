@@ -73,6 +73,11 @@ def verification_batches(candidates: list[dict], budget: int, crop_slots: int, *
     """Batch by distinct evidence images and text capacity, not one image per fact."""
     result=[]
     for part in pack(candidates,budget):
+        if shared_region:
+            # Every item sees the same source images. Text capacity, rather
+            # than a second arbitrary fact-count cap, determines the batch.
+            result.append(part)
+            continue
         batch=[]
         boxes=set()
         for fact in part:
