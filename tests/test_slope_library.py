@@ -30,32 +30,39 @@ class SlopeLibraryTests(unittest.TestCase):
                        'unit': 'm', 'role': 'observed', 'status': 'ok',
                        'evidence': {'physical_page': 1, 'quote': 'height 10 m', 'locator': 'body'}}]}]}
 
+    def confirm_first(self, name='测试边坡'):
+        item=lib.catalog(self.paths)['unassigned'][0]
+        return lib.bind(self.paths,{'binding_id':item['id'],'revision':item['revision'],'name':name,
+            'actor':'tester','reason':'checked original identity','confirmed':True})['slope']
+
     def test_rerun_and_refresh_do_not_duplicate_or_depend_on_assessment(self):
         run = self.run_data()
         with patch('slopekg.standard_assessment.agent_bridge.validate_submission', side_effect=AssertionError('No assessment')):
             a=lib.ingest(self.paths,run);b=lib.ingest(self.paths,run)
         self.assertEqual(a['snapshots'], b['snapshots'])
         catalog=lib.catalog(self.paths)
-        self.assertEqual(len(catalog['slopes']), 1)
+        self.assertEqual(len(catalog['slopes']), 0)
         self.assertEqual(len(catalog['snapshots']), 1)
-        d=lib.detail(self.paths,slope_id=catalog['slopes'][0]['id'])
+        slope=self.confirm_first()
+        d=lib.detail(self.paths,slope_id=slope['id'])
         self.assertEqual(d['sources'][0]['versions'][0]['object']['facts'][0]['admission'], 'candidate')
         run['run_id']='run-2';run['documents'][0]['facts'][0]['value']=11
         lib.ingest(self.paths,run)
         self.assertEqual(len(lib.catalog(self.paths)['slopes']),1)
-        self.assertEqual(len(lib.detail(self.paths,slope_id=catalog['slopes'][0]['id'])['sources'][0]['versions']),2)
+        self.assertEqual(len(lib.detail(self.paths,slope_id=slope['id'])['sources'][0]['versions']),2)
 
     def test_cross_document_identity_requires_confirmation_and_keeps_history(self):
         lib.ingest(self.paths,self.run_data())
+        slope=self.confirm_first()
         lib.ingest(self.paths,self.run_data('design.pdf',run_id='run-2'))
-        slopes=lib.catalog(self.paths)['slopes'];self.assertEqual(len(slopes),2)
-        source=lib.detail(self.paths,slope_id=slopes[0]['id'])['sources'][0]
-        body={'binding_id':source['id'],'revision':0,'slope_id':slopes[1]['id'],
+        catalog=lib.catalog(self.paths);self.assertEqual(len(catalog['slopes']),1)
+        source=catalog['unassigned'][0]
+        body={'binding_id':source['id'],'revision':0,'slope_id':slope['id'],'target_revision':1,
               'actor':'tester','reason':'matched source identity','confirmed':True}
         with self.assertRaises(ValueError):lib.bind(self.paths,{**body,'confirmed':False})
         result=lib.bind(self.paths,body)
         self.assertEqual(len(result['sources']),2)
-        self.assertEqual(sum(len(s['history']) for s in result['sources']),1)
+        self.assertEqual(sum(len(s['history']) for s in result['sources']),2)
         with self.assertRaises(ValueError):lib.bind(self.paths,body)
 
     def test_changed_source_blocks_new_import_but_archived_original_survives(self):
@@ -69,8 +76,8 @@ class SlopeLibraryTests(unittest.TestCase):
         run=self.run_data();doc=run['documents'][0]
         doc['facts'][0]['evidence']['document_id']='foreign'
         doc['facts'][0]['evidence']['physical_page']=2
-        lib.ingest(self.paths,run);slope=lib.catalog(self.paths)['slopes'][0]
-        fact=lib.detail(self.paths,slope_id=slope['id'])['sources'][0]['versions'][0]['object']['facts'][0]
+        lib.ingest(self.paths,run);source=lib.catalog(self.paths)['unassigned'][0]
+        fact=lib.detail(self.paths,binding_id=source['id'])['sources'][0]['versions'][0]['object']['facts'][0]
         self.assertEqual(fact['admission'],'withheld');self.assertEqual(len(fact['issues']),2)
 
     def test_document_visual_and_knowledge_objects_are_adapted(self):
@@ -83,7 +90,8 @@ class SlopeLibraryTests(unittest.TestCase):
                     doc['entities']=[{'id':'e1','name':'另一边坡','kind':'entity'}]
                     doc['facts'][0]['entity_id']='e1'
                 self.assertEqual(lib.ingest(self.paths,run)['status'],'stored')
-        self.assertEqual(len(lib.catalog(self.paths)['slopes']),3)
+        self.assertEqual(len(lib.catalog(self.paths)['slopes']),0)
+        self.assertEqual(len(lib.catalog(self.paths)['unassigned']),3)
 
     def test_slope_under_project_keeps_child_scope_and_photo_is_not_a_slope(self):
         run=self.run_data();doc=run['documents'][0]
@@ -95,11 +103,12 @@ class SlopeLibraryTests(unittest.TestCase):
                            {'id':'photo','name':'图5-1 测试边坡现场照','type':'照片'}]
         doc['facts'].append({**doc['facts'][0],'id':'f2','object':'part','field':'坡脚现状'})
         lib.ingest(self.paths,run);catalog=lib.catalog(self.paths)
-        self.assertEqual(len(catalog['slopes']),1)
-        detail=lib.detail(self.paths,slope_id=catalog['slopes'][0]['id'])
+        self.assertEqual(len(catalog['slopes']),0)
+        pending=next(s for s in catalog['unassigned'] if s['label']=='测试边坡')
+        detail=lib.detail(self.paths,binding_id=pending['id'])
         self.assertEqual(len(detail['sources']),3)
         self.assertIn('坡脚',[s['label'] for s in detail['sources']])
-        self.assertEqual(len(catalog['unassigned']),3)
+        self.assertEqual(len(catalog['unassigned']),4)
         root=next(s for s in detail['sources'] if s['label']=='测试边坡')
         moved=lib.bind(self.paths,{'binding_id':root['id'],'revision':0,'name':'核对后的边坡',
             'confirmed':True,'actor':'tester','reason':'same surveyed slope','include_related':True,

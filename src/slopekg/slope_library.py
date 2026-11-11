@@ -65,6 +65,8 @@ def database(paths):
         ''')
         if 'group_id' not in {row[1] for row in db.execute('PRAGMA table_info(bindings)')}:
             db.execute("ALTER TABLE bindings ADD COLUMN group_id TEXT NOT NULL DEFAULT ''")
+        from .slope_identity import schema
+        schema(db)
         with db:
             yield db
     finally:
@@ -77,9 +79,26 @@ def legacy_slopes(paths):
 
 
 def _seed_legacy(db, paths):
+    from .slope_identity import seed
     for row in legacy_slopes(paths):
         db.execute('INSERT OR IGNORE INTO slopes VALUES(?,?,?,?)',
                    (row['id'], row.get('label') or row.get('name') or row['id'], 'legacy', now()))
+        seed(db, row)
+
+
+def legacy_fields(paths, slope_id, nodes=None):
+    """Read the existing published fields without migrating or approving them."""
+    node = (nodes if nodes is not None else {s['id']: s for s in legacy_slopes(paths)}).get(slope_id)
+    if not node:
+        return []
+    labels = {'slope_id':'既有业务标识（可能为自动生成编号）', 'source_alias':'原资料名称',
+              'route_code_cache':'路线', 'start_station_raw':'起点桩号', 'end_station_raw':'终点桩号',
+              'side':'左右侧', 'slope_length_m':'坡长（米）', 'slope_height_raw':'坡高原值',
+              'slope_gradient_raw':'坡度原值', 'material_nature':'物质类型', 'slope_structure_code':'坡体结构',
+              'slope_aspect_deg':'坡向（度）', 'vegetation_condition':'植被记录',
+              'source_disagreements':'既有来源分歧', 'review_status':'既有核对状态'}
+    return [{'field': k, 'label': label, 'value': node.get('props', {}).get(k)} for k, label in labels.items()
+            if node.get('props', {}).get(k) not in (None, '', [], {})]
 
 
 def _is_slope(label, kind='', parent=''):
@@ -295,6 +314,8 @@ def _ingest_document(paths, run, doc, route, run_id):
             fact['admission'] = 'withheld' if fact['issues'] else 'candidate'
     payload = {'document_id': doc['id'], 'name': source.name, 'source_sha256': sha,
         'route': route, 'run_id': run_id, 'status': doc.get('status', run.get('processing_status')),
+        'recognized_at': run.get('started_at', run.get('built_at', '')),
+        'document_date': doc.get('document_date', ''),
         'selection': doc.get('selection', {}), 'selected_pages': doc.get('selected_pages', []),
         'errors': [*run.get('errors', []), *doc.get('errors', [])], 'coverage': doc.get('coverage', {}),
         'objects': objects, 'figures': assets,
@@ -316,24 +337,16 @@ def _ingest_document(paths, run, doc, route, run_id):
         db.execute('INSERT OR IGNORE INTO sources VALUES(?,?,?)', (sha, source.name, target.stat().st_size))
         db.execute('INSERT OR IGNORE INTO snapshots VALUES(?,?,?,?,?,?)',
                    (snapshot_id, route, run_id, sha, now(), encoded(payload)))
-        roots = {}
         for obj in objects:
-            root = _root_object(obj, objects)
-            if root and root['key'] not in roots:
-                root_binding = _binding_id(sha, root, objects)
-                old = db.execute('SELECT slope_id FROM bindings WHERE id=?', (root_binding,)).fetchone()
-                slope_id = old['slope_id'] if old else 'slope-'+uuid.uuid4().hex[:16]
-                if not old:
-                    db.execute('INSERT INTO slopes VALUES(?,?,?,?)', (slope_id, root['label'], 'pending', now()))
-                roots[root['key']] = slope_id
-        for obj in objects:
-            # Source-local identity is stable across reruns; different PDFs never merge by name.
+            # Save source-local observations first. Only a reviewed binding may
+            # resolve an actual slope; a new recognition never creates a master.
             binding = _binding_id(sha, obj, objects)
             existing = db.execute('SELECT id FROM bindings WHERE id=?', (binding,)).fetchone()
             if not existing:
                 root = _root_object(obj, objects)
-                slope_id = roots.get(root['key']) if root else None
                 group_id = _binding_id(sha, root, objects) if root else binding
+                known = db.execute('SELECT slope_id FROM bindings WHERE id=?', (group_id,)).fetchone()
+                slope_id = known['slope_id'] if known else None
                 db.execute('INSERT INTO bindings(id,source_hash,label,slope_id,revision,group_id) VALUES(?,?,?,?,0,?)',
                            (binding, sha, obj['label'], slope_id, group_id))
             db.execute('INSERT OR IGNORE INTO records VALUES(?,?,?,?)',
@@ -367,7 +380,17 @@ def catalog(paths, *, snapshot='', run_id='', route=''):
                   LEFT JOIN records r ON r.binding_id=b.id
                   WHERE s.identity_status!='pending' OR b.id IS NOT NULL
                   GROUP BY s.id ORDER BY (count(r.id)>0) DESC,s.created_at DESC,s.name''')]
-        pending = [dict(r) for r in db.execute('SELECT * FROM bindings WHERE slope_id IS NULL ORDER BY label')]
+        pending_objects = [dict(r) for r in db.execute('SELECT * FROM bindings WHERE slope_id IS NULL ORDER BY label')]
+        groups = {}
+        for item in pending_objects:
+            groups.setdefault(item['group_id'] or item['id'], []).append(item)
+        pending = [{**next((r for r in members if r['id'] == group), members[0]),
+                    'source_objects': len(members)} for group, members in groups.items()]
+        from .slope_identity import profile
+        legacy = {s['id']: s for s in legacy_slopes(paths)}
+        for row in rows:
+            row['identity'] = profile(db, row['id'])
+            row['legacy_fields'] = len(legacy_fields(paths, row['id'], legacy))
         snapshots = [dict(r) for r in db.execute('SELECT id,route,run_id,source_hash,created_at FROM snapshots ORDER BY created_at DESC')]
         selected = {r['id'] for r in snapshots if (snapshot and r['id'] == snapshot) or
                     (run_id and r['run_id'] == run_id and (not route or r['route'] == route))}
@@ -377,7 +400,7 @@ def catalog(paths, *, snapshot='', run_id='', route=''):
             slope_ids = {r[0] for r in db.execute('SELECT slope_id FROM bindings WHERE id IN ('+
                           ','.join('?' for _ in bindings)+')', tuple(bindings))} if bindings else set()
             rows = [r for r in rows if r['id'] in slope_ids]
-            pending = [r for r in pending if r['id'] in bindings]
+            pending = [r for r in pending if r['id'] in bindings or any(m['id'] in bindings for m in groups.get(r['group_id'], []))]
         receipts = [json.loads(r[0]) for r in db.execute('SELECT payload FROM intakes WHERE run_id=?'+
                     (' AND route=?' if route else '')+' ORDER BY id DESC LIMIT 10',
                     (run_id, route) if route else (run_id,))] if run_id else []
@@ -390,8 +413,12 @@ def detail(paths, *, slope_id='', binding_id=''):
     with database(paths) as db:
         _seed_legacy(db, paths)
         slope = db.execute('SELECT * FROM slopes WHERE id=?', (slope_id,)).fetchone() if slope_id else None
-        bindings = [dict(r) for r in db.execute('SELECT * FROM bindings WHERE '+
-                    ('slope_id=?' if slope_id else 'id=?'), (slope_id or binding_id,))]
+        if slope_id:
+            bindings = [dict(r) for r in db.execute('SELECT * FROM bindings WHERE slope_id=?', (slope_id,))]
+        else:
+            selected = db.execute('SELECT * FROM bindings WHERE id=?', (binding_id,)).fetchone()
+            bindings = [dict(r) for r in db.execute('SELECT * FROM bindings WHERE group_id=? AND slope_id IS ? ORDER BY (id=?) DESC,id',
+                        (selected['group_id'], selected['slope_id'], selected['group_id']))] if selected else []
         if not slope and not bindings:
             raise KeyError('找不到这份边坡档案或待归属资料')
         sources = []
@@ -411,49 +438,95 @@ def detail(paths, *, slope_id='', binding_id=''):
                             e['image_url'] = '/api/slope-library/page?source='+row['source_hash']+'&page='+str(page)
                 versions.append({'id': row['snapshot_id'], 'route': row['route'], 'run_id': row['run_id'],
                     'created_at': row['created_at'], 'document': snap['name'], 'object': obj,
+                    'recognized_at': snap.get('recognized_at', ''), 'document_date': snap.get('document_date', ''),
                     'errors': snap['errors'], 'figures': snap['figures'],
                     'document_id': snap['document_id'],
                     'pdf_url': '/api/slope-library/source?source='+row['source_hash']})
             history = [json.loads(r[0]) for r in db.execute('SELECT payload FROM history WHERE binding_id=? ORDER BY id DESC', (binding['id'],))]
-            sources.append({**binding, 'versions': versions, 'history': history})
-        return {'slope': dict(slope) if slope else None, 'sources': sources}
+            from .slope_identity import profile, source_identity, compare
+            identity_issues = []
+            identity_ready = False
+            if binding['slope_id']:
+                master = profile(db, binding['slope_id'])
+                observed = source_identity(db, binding)
+                identity_issues = [*observed['conflicts'], *compare(observed['attributes'], master['attributes'])[1]]
+                latest = history[0] if history else {}
+                if latest.get('target_revision') != master['revision']:
+                    identity_issues.append('边坡身份资料已更新或缺少核对版本，请重新核对归属')
+                if latest.get('source_identity') != observed['attributes']:
+                    identity_issues.append('来源身份线索已变化或未留核对记录，请重新核对归属')
+                fresh = (latest.get('target_revision') == master['revision'] and
+                         latest.get('source_identity') == observed['attributes'])
+                acknowledged = bool(latest.get('conflict_reason')) and fresh
+                identity_ready = bool(history) and fresh and (not identity_issues or acknowledged)
+            sources.append({**binding, 'versions': versions, 'history': history,
+                            'identity_ready': identity_ready, 'identity_issues': identity_issues})
+        from .slope_identity import profile
+        return {'slope': dict(slope) if slope else None, 'sources': sources,
+                'identity': profile(db, slope_id) if slope else None,
+                'legacy_fields': legacy_fields(paths, slope_id) if slope else []}
 
 
 def bind(paths, body):
-    actor, reason = str(body.get('actor', '')).strip(), str(body.get('reason', '')).strip()
-    if not actor or not reason or body.get('confirmed') is not True:
-        raise ValueError('请填写核对人、归属依据，并确认是同一处边坡')
+    from .slope_identity import (IdentityConflict, reviewer, source_identity, proposals, profile,
+                                 validate_attributes, save_profile, compare, MATCHING_VERSION)
+    actor, reason = reviewer(body)
     with database(paths) as db:
+        db.execute('BEGIN IMMEDIATE')
         _seed_legacy(db, paths)
         old = db.execute('SELECT * FROM bindings WHERE id=?', (body.get('binding_id'),)).fetchone()
         if not old:
             raise KeyError('找不到待核对来源')
         if type(body.get('revision')) is not int or old['revision'] != body['revision']:
-            raise ValueError('归属已被其他操作修改，请刷新后再核对')
+            raise IdentityConflict('归属已被其他操作修改，请刷新后再核对')
         related = [old]
         if body.get('include_related') is True and old['group_id']:
             related = db.execute('SELECT * FROM bindings WHERE group_id=? AND slope_id IS ?',
                                   (old['group_id'], old['slope_id'])).fetchall()
             expected = body.get('related_revisions', {})
             if not isinstance(expected, dict) or any(expected.get(r['id']) != r['revision'] for r in related):
-                raise ValueError('同一来源边坡的子对象已变化，请刷新后核对完整范围')
+                raise IdentityConflict('同一来源边坡的子对象已变化，请刷新后核对完整范围')
         target = body.get('slope_id', '')
-        if not target:
+        source = source_identity(db, old)
+        candidates = proposals(db, source, target_id=target)
+        decision = {'matching_version': MATCHING_VERSION, 'source_identity': source['attributes']}
+        if body.get('release') is True:
+            target = None
+            decision['action'] = 'release_source_identity'
+        elif not target:
             label = str(body.get('name', '')).strip()
             if not label or len(label) > 250:
                 raise ValueError('请填写实际边坡名称或编号')
-            target = 'slope-'+uuid.uuid4().hex[:16]
+            attrs = validate_attributes(body.get('identity', {}))
+            conflicts = [*source['conflicts'], *compare(source['attributes'], attrs)[1]]
+            if conflicts and not (body.get('conflict_confirmed') is True and str(body.get('conflict_reason', '')).strip()):
+                raise IdentityConflict('新身份与来源存在冲突：'+'；'.join(conflicts)+'。请填写处理依据并明确确认')
+            duplicate_source = {'label': label, 'attributes': attrs}
+            duplicates = [r for r in proposals(db, duplicate_source) if r['rank'] >= 70 and not r['conflicts']]
+            if duplicates and not (body.get('distinct_confirmed') is True and str(body.get('distinct_reason', '')).strip()):
+                raise IdentityConflict('已有相似边坡，请优先关联；确为不同边坡时请填写区分依据并明确确认')
+            target = 'slope-'+uuid.uuid4().hex
             db.execute('INSERT INTO slopes VALUES(?,?,?,?)', (target, label, 'confirmed', now()))
-        elif not db.execute('SELECT id FROM slopes WHERE id=?', (target,)).fetchone():
-            raise KeyError('目标边坡不存在')
-        db.execute("UPDATE slopes SET identity_status='confirmed' WHERE id=?", (target,))
+            save_profile(db, target, {**body, 'revision': 0, 'attributes': attrs, 'name': label})
+            decision.update(action='create_and_confirm_identity', distinct_reason=body.get('distinct_reason', ''),
+                            conflicts=conflicts, conflict_reason=body.get('conflict_reason', ''), target_revision=1)
+        else:
+            identity = profile(db, target)
+            if type(body.get('target_revision')) is not int or body['target_revision'] != identity['revision']:
+                raise IdentityConflict('目标边坡身份已变化，请重新查看身份后再确认归属')
+            candidate = next(r for r in candidates if r['slope_id'] == target)
+            conflicts = [*source['conflicts'], *candidate['conflicts']]
+            if conflicts and not (body.get('conflict_confirmed') is True and str(body.get('conflict_reason', '')).strip()):
+                raise IdentityConflict('身份存在冲突：'+'；'.join(conflicts)+'。请核对原页并填写处理依据后明确确认')
+            decision.update(action='confirm_source_identity', matches=candidate['reasons'], conflicts=conflicts,
+                            conflict_reason=body.get('conflict_reason', ''), target_revision=identity['revision'])
         for item in related:
             db.execute('UPDATE bindings SET slope_id=?,revision=revision+1 WHERE id=?', (target, item['id']))
             history = {'at': now(), 'actor': actor, 'reason': reason, 'from_slope': item['slope_id'],
-                       'to_slope': target, 'revision': item['revision']+1, 'action': 'confirm_source_identity',
+                       'to_slope': target, 'revision': item['revision']+1, **decision,
                        'related_objects': len(related)}
             db.execute('INSERT INTO history(binding_id,created_at,payload) VALUES(?,?,?)', (item['id'], now(), encoded(history)))
-    return detail(paths, slope_id=target)
+    return detail(paths, slope_id=target) if target else detail(paths, binding_id=body['binding_id'])
 
 
 def source_file(paths, source_hash):
