@@ -1,5 +1,13 @@
 (function(){
   const api=window.SlopeKGApi,debug=window.SlopeKGDebug;if(!api||!debug)return;
+  // Recognition's main exit is a persistent slope dossier. The historical
+  // assessment pages remain reachable through their existing saved links.
+  const library=document.createElement('section');library.className='card';library.id='recognitionLibraryBridge';
+  library.innerHTML='<h2>保存到边坡资料库</h2><p>按边坡归集原件、识别候选和图片，再核对资料归属。评估不影响本次资料保存。</p><a class="button secondary">打开本次资料 / 重试入库</a>';
+  document.querySelector('main').append(library);
+  function libraryContext(){const c=debug.context(),a=library.querySelector('a');a.href=window.SlopeKGNav.withReturn('./slope-library.html?'+new URLSearchParams({route:c.route,run:c.run_id||'live',document:c.document||''}));}
+  window.addEventListener('debugcontextchange',libraryContext);window.addEventListener('debughistorychange',libraryContext);libraryContext();
+  if(new URLSearchParams(location.search).get('legacy_assessment')!=='1')return;
   const host=document.createElement('section');host.className='card';host.id='recognitionAssessmentBridge';
   host.innerHTML='<h2>继续到国标风险预评估</h2><p>绑定当前识别快照，检查对象、时期和工况，自动执行可用的表15/17；缺口、冲突及专业判断分别展示。模型辅助需另行允许。</p><a id="recognitionToAssessment" class="button secondary">衔接当前记录，查看PDF到风险全过程</a><p id="recognitionAssessmentState" role="status"></p><div id="recognitionAssessmentCases"></div>';
   document.querySelector('main').append(host);let generation=0;

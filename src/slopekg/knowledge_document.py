@@ -97,7 +97,7 @@ def ensure_full_page_ocr(parsed, tasks, selected, digest, path, min_chars):
     manifest=parsed['documents'][0]
     for page in parsed['pages']:
         number=page['page']
-        if number not in selected:
+        if number not in selected or page.get('page_type') == 'drawing':
             continue
         chars=sum(len(re.sub(r'\s+','',b['text'])) for b in parsed['text_blocks'] if b['page']==number)
         if chars>=min_chars or not (page.get('drawing_count',0) or page.get('image_count',0)):
@@ -133,6 +133,8 @@ def prepare_document(path: Path, settings, *, parsed_dir=None, root=None, assets
     local = local if local.get('source_sha256') == digest else {}
     tasks.update({t['id']: t for t in local.get('tasks', [])
                   if t.get('source_sha256') == digest and t['page'] in selected})
+    drawing_pages = {p['page'] for p in parsed['pages'] if p.get('page_type') == 'drawing'}
+    tasks = {key: task for key, task in tasks.items() if task['page'] not in drawing_pages}
     ensure_full_page_ocr(parsed,tasks,selected,digest,path,settings.min_page_chars)
     ocr = [r for r in [*parsed.get('ocr_results', []), *local.get('rows', [])]
            if r.get('source_sha256') == digest and r.get('task_id') in tasks
@@ -167,6 +169,13 @@ def prepare_document(path: Path, settings, *, parsed_dir=None, root=None, assets
     table_count = 0
     for number in sorted(by_page):
         page = by_page[number]
+        if page.get('page_type') == 'drawing':
+            from .recognition_scope import figure
+            doc.setdefault('archived_figures', []).append(figure(number, [0, 0, 1, 1], kind='drawing'))
+            doc['pages'].append({'page': number, 'status': 'archived_figure', 'native_chars': 0,
+                'width': page.get('width'), 'height': page.get('height'), 'graphics_unread': False,
+                'ocr_pending': False, 'full_page_ocr_pending': False, 'ocr_regions_processed': []})
+            continue
         blocks = sorted((b for b in parsed['text_blocks'] if b['page'] == number),
                         key=lambda b: b.get('reading_order', 0))
         tables = [t for t in parsed['tables'] if t['page'] == number and t.get('rows') and not t.get('error')]

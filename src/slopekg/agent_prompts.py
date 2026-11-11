@@ -52,6 +52,18 @@ assessment.json也完成后，再运行check_outputs。它除了格式检查，�
 真实未知、真实冲突和不适用不必消除；不能为了获得等级修改事实或删除备选。最终报告明确区分
 “已得到待复核候选”“已识别但未成为适用输入”“原资料缺失或存在冲突”。'''
 
+LEGACY_ASSESSMENT_TASK = TASK
+# The original task is retained for reading/replaying historical assessment runs.
+# New recognition tasks have a source-library delivery contract only.
+from .recognition_scope import INSTRUCTION
+SYSTEM += INSTRUCTION
+TASK = TASK.split('\n5. 阅读assessment-contract.json', 1)[0] + INSTRUCTION + '''
+5. outputs/figures.json：{"figures":[{"document_id":"原件id","page":物理页,
+"bbox":[0到1的左,上,右,下],"caption":"明确图题或空字符串","kind":"photo/drawing/diagram/sketch"}]}。
+只记录位置和明确图题。无图片时提交空figures；仅有图片时objects和facts允许为空，coverage记录归档完成。
+不输出assessment.json，不判断标准适用性、风险等级或评估表。你的交付直接存入边坡资料库。
+'''
+
 DELIVERY_REPAIR = '''本次任务尚有交接校验问题。继续当前会话，核对下列诊断对应的事实、对象和原页，
 只修改有原文依据的归属、引用、范围表达或仍需补读的选定页，保留已正确的结果。
 同一滑坡跨 PDF 的依据，按各原件分别交付来源案例；不能把另一份 PDF 的值或页码挂到本件。

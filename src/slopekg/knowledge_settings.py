@@ -1,7 +1,7 @@
 """Budgets for domain-independent, document-wide knowledge recognition."""
 from dataclasses import dataclass
 
-VERSION = 'knowledge-v3.8'
+VERSION = 'knowledge-v3.9'
 
 
 @dataclass(frozen=True)

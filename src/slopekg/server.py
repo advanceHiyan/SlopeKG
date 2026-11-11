@@ -266,6 +266,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self._get_rules,
             self._get_risk,
             self._get_graph,
+            self._slope_library,
             self._dossier_recognition,
             self._get_manual,
             self._get_schema,
@@ -292,6 +293,7 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self._post_assessment_workspace,
             self._post_assessment_debug,
             self._post_standard_assessment,
+            self._slope_library,
             self._dossier_recognition,
             self._post_manual,
             self._post_pipeline,
@@ -557,6 +559,10 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
                 self.write_json(slope_override_record(slope_id))
             return True
         return False
+
+    def _slope_library(self, parsed: Any) -> bool:
+        from .slope_library_http import route
+        return route(self, parsed, PATHS)
 
     def _dossier_recognition(self, parsed: Any) -> bool:
         if parsed.path != "/api/dossier-recognition":

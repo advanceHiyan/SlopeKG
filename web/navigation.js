@@ -36,7 +36,7 @@
     ['index.html', '总览'],
     ['pdf-library.html', '资料管理'],
     ['recognition-methods.html', '识别方法'],
-    ['slopes.html', '边坡档案'],
+    ['slope-library.html', '边坡资料库'],
     ['graph.html', '关系图谱'],
     ['slope-assessment.html', '风险研判'],
   ];

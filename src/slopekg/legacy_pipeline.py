@@ -317,8 +317,12 @@ class LegacyPipeline:
         }
         graph["meta"]["dependencies"] = dependency_report()
         effective_graph = apply_slope_overrides(graph, self.paths)
-        completeness, risk_screening = assess_graph(effective_graph, self.paths)
-        risk_evaluation = evaluate_risk_result(risk_screening, self.paths)
+        recognition_only = getattr(self, 'recognition_only', False)
+        if recognition_only:
+            completeness = build_completeness(effective_graph)
+        else:
+            completeness, risk_screening = assess_graph(effective_graph, self.paths)
+            risk_evaluation = evaluate_risk_result(risk_screening, self.paths)
         graph["meta"]["completeness"] = completeness["summary"]
         self.write_graph_outputs(graph, parse_mode=parse_mode, activate=activate)
         write_json(self.paths.schema_json, schema_payload())
@@ -333,14 +337,16 @@ class LegacyPipeline:
         if activate:
             write_jsonl(self.paths.extracted_dir / "property_assertions.jsonl", graph.get("property_assertions", []))
         write_json(self.paths.output_dir / f"evaluation.{parse_mode}.json", evaluation)
-        ensure_dir(self.paths.output_dir / "risk")
-        write_json(self.paths.output_dir / "risk" / f"screening.{parse_mode}.json", risk_screening)
-        write_json(self.paths.output_dir / "risk" / f"evaluation.{parse_mode}.json", risk_evaluation)
+        if not recognition_only:
+            ensure_dir(self.paths.output_dir / "risk")
+            write_json(self.paths.output_dir / "risk" / f"screening.{parse_mode}.json", risk_screening)
+            write_json(self.paths.output_dir / "risk" / f"evaluation.{parse_mode}.json", risk_evaluation)
         if activate:
             write_json(self.paths.completeness_json, completeness)
             write_json(self.paths.evaluation_json, evaluation)
-            write_json(self.paths.output_dir / "risk" / "screening.json", risk_screening)
-            write_json(self.paths.output_dir / "risk" / "evaluation.json", risk_evaluation)
+            if not recognition_only:
+                write_json(self.paths.output_dir / "risk" / "screening.json", risk_screening)
+                write_json(self.paths.output_dir / "risk" / "evaluation.json", risk_evaluation)
         return graph, evaluation
 
     def write_graph_outputs(self, graph: dict[str, Any], *, parse_mode: str, activate: bool) -> None:
@@ -444,6 +450,11 @@ class LegacyPipeline:
         )
         write_json(self.paths.state_json, state)
         write_json(self.paths.basic_state_json, state)
+        if getattr(self, 'recognition_only', False):
+            state.update(workflow='recognition_to_library', assessment_status='not_requested')
+            write_json(self.paths.state_json, state)
+            write_json(self.paths.basic_state_json, state)
+            return state
         standalone_path = self.paths.output_dir / "share" / "SlopeKG_成果展示_离线版.html"
         effective_graph = apply_slope_overrides(graph, self.paths)
         export_result = export_standalone_html(

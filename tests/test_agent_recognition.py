@@ -1,4 +1,5 @@
 """Fifth-route transport, admission, dispatch and evidence isolation contracts."""
+import hashlib
 import io
 import json
 from pathlib import Path
@@ -157,6 +158,22 @@ class AgentContracts(unittest.TestCase):
             self.assertTrue((root/'control/stop.request.json').exists())
             self.assertEqual(agent_workspace(paths,run_id='agent-old')['run_id'],'agent-old')
 
+    def test_call_receipts_only_link_model_payloads_still_on_disk(self):
+        with TemporaryDirectory() as td:
+            paths = workspace_paths(Path(td))
+            root = paths.output_dir/'agent-recognition/runs/agent-old'
+            dump(paths.output_dir/'agent-recognition/run.json',
+                 {'run_id': 'agent-old', 'run_directory': str(root), 'processing_status': 'completed'})
+            exchanges = root/'control/exchanges'
+            dump(exchanges/'0001.request.json', {'model': 'example'})
+            dump(exchanges/'receipts.json', [
+                {'number': 1, 'request_file': '0001.request.json', 'response_file': '0001.response.sse'},
+                {'number': 2, 'status': 'complete'},
+            ])
+            rows = agent_payload(paths, stage='calls')['rows']
+            self.assertEqual([row['record']['number'] for row in rows], [1, 2])
+            self.assertEqual([row['artifacts'] for row in rows], [['control/exchanges/0001.request.json'], []])
+
     def test_stop_during_preparation_does_not_start_sdk(self):
         with TemporaryDirectory() as td:
             root=Path(td);paths=workspace_paths(root);dump(root/'model.json',profile().__dict__)
@@ -196,7 +213,12 @@ class AgentContracts(unittest.TestCase):
                 self.assertEqual(sent['max_tokens'],393216)
                 self.assertNotIn('max_completion_tokens',sent)
                 self.assertEqual(captured[0].get_header('Authorization'),'Bearer private-test-secret')
-                self.assertNotIn('private-test-secret',''.join(p.read_text() for p in (Path(td)/'audit').iterdir()))
+                audit = Path(td)/'audit'
+                self.assertEqual({p.name for p in audit.iterdir()}, {'0001.receipt.json', 'receipts.json'})
+                receipt = json.loads((audit/'0001.receipt.json').read_text(encoding='utf-8'))
+                self.assertEqual(receipt['request_sha256'], hashlib.sha256(captured[0].data).hexdigest())
+                self.assertEqual(receipt['truncated'], finish == 'length')
+                self.assertNotIn('private-test-secret',''.join(p.read_text() for p in audit.iterdir()))
 
     def fixture(self,root):
         manifest={'documents':[{'document_id':'d','selected_physical_pages':[2],

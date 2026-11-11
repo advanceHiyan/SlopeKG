@@ -101,6 +101,8 @@ class VisualPipeline:
 
 
     def _finish(self, result: dict) -> dict:
+        from .recognition_scope import IMAGE_POLICY
+        result['image_policy'] = IMAGE_POLICY
         docs = result["documents"]
         states = [d["status"] for d in docs]
         result["processing_status"] = ("prepared" if result["prepare_only"] and all(s == "prepared" for s in states)
@@ -458,6 +460,14 @@ class VisualPipeline:
         number = state["page"]
         entry = {"id": target["id"], "bbox": target["bbox"], "status": "partial", "depth": depth}
         state["regions"].append(entry)
+        if target.get('kind') == 'drawing':
+            from .recognition_scope import figure
+            asset = figure(number, target['bbox'], caption=target.get('summary', ''), kind='drawing')
+            report.setdefault('archived_figures', []).append(asset)
+            # No reader, blind reader or verifier receives a drawing target.
+            entry.update(status='completed', archive_only=True, archived_figure=asset)
+            self._checkpoint(report)
+            return entry
         try:
             evidence = hints
             if len(compact(hints)) > self.settings.max_prompt_chars // 4:
@@ -618,14 +628,17 @@ class VisualPipeline:
                         return answer
                     audit = await self._ask_async("audit", AUDIT,
                         {"document_id": doc.id, "sha256": doc.sha256, "page": number,
-                         "all_regions": [{"id": r["id"], "bbox": r["bbox"], "status": r["status"]} for r in state["regions"]],
+                         "all_regions": [{"id": r["id"], "bbox": r["bbox"], "status": r["status"],
+                                          "archive_only": r.get('archive_only', False)} for r in state["regions"]],
                          "readings": shard, "shard_count": len(shards),
                          "unassigned_geometric_anchors_in_readings":True,
                          "shard_note": "readings按part拆分：transcript以offset连续切片；table_cell凭table_index/row/column关联；fact_status标记断言是否通过。其它分片缺席不等于未读或漏提，不能因此重读整页。只核对本分片可判断的问题，同时检查all_regions几何上未覆盖的区域。"},
                         [doc.render(number, edge=self.settings.reread_edge,
                                     max_pixels=min(self.settings.max_pixels_per_image, self.settings.max_image_pixels - 8192))], validate)
                     audits.append(audit)
-                missing = [r for a in audits for r in a["missing_regions"]]
+                archived = [r['bbox'] for r in state['regions'] if r.get('archive_only')]
+                missing = [r for a in audits for r in a["missing_regions"]
+                           if not any(inside(r['bbox'], box) for box in archived)]
                 unmapped=unaccounted_content(state['regions'])
                 if unmapped:
                     missing += [{'bbox':c['bbox'],'reason':'Source cell/dimension has no explicit fact link or reference-only disposition'} for c in unmapped]

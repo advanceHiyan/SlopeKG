@@ -1,7 +1,7 @@
 """Loopback-only DSH transport: project credentials stay outside the agent.
 
-The gateway records complete provider requests/responses and enforces the
-provider output ceiling on every generation, including SDK auxiliary calls.
+The gateway records call receipts and enforces the provider output ceiling
+on every generation, including SDK auxiliary calls.
 """
 from __future__ import annotations
 
@@ -108,8 +108,6 @@ class AgentGateway(AbstractContextManager):
     def forward(self, handler, payload, receipt):
         started = time.monotonic()
         number = receipt['number']
-        request_file = self.audit_dir / f'{number:04d}.request.json'
-        response_file = self.audit_dir / f'{number:04d}.response.sse'
         payload.pop('max_completion_tokens', None)
         payload.pop('max_output_tokens', None)
         payload['max_tokens'] = self.profile.max_output_tokens
@@ -118,13 +116,12 @@ class AgentGateway(AbstractContextManager):
         # These are non-model diagnostics from DSH; do not upload local logs.
         payload.pop('dsh_session_log', None)
         payload.pop('dsh_plugin_packages', None)
-        dump(request_file, payload)
+        body = json.dumps(payload, ensure_ascii=False).encode('utf-8')
         receipt.update(requested_max_output_tokens=payload['max_tokens'],
-                       request_sha256=hashlib.sha256(request_file.read_bytes()).hexdigest(),
-                       request_file=request_file.name, response_file=response_file.name,
+                       request_sha256=hashlib.sha256(body).hexdigest(),
                        usage=None, finish_reasons=[], stream_done=False)
         request = urllib.request.Request(self.profile.base_url.rstrip('/') + '/chat/completions',
-            data=json.dumps(payload, ensure_ascii=False).encode('utf-8'), method='POST',
+            data=body, method='POST',
             headers={'Authorization': 'Bearer ' + self._key, 'Content-Type': 'application/json'})
         sent_headers = False
         try:
@@ -136,32 +133,30 @@ class AgentGateway(AbstractContextManager):
                 handler.end_headers()
                 handler.close_connection = True
                 sent_headers = True
-                with response_file.open('wb') as raw:
-                    while True:
-                        line = upstream.readline()
-                        if not line:
-                            break
-                        raw.write(line)
-                        raw.flush()
-                        handler.wfile.write(line)
-                        handler.wfile.flush()
-                        if line.startswith(b'data:'):
-                            data = line[5:].strip()
-                            if data == b'[DONE]':
-                                receipt['stream_done'] = True
-                                continue
-                            try:
-                                event = json.loads(data)
-                            except ValueError:
-                                receipt['malformed_sse'] = True
-                                continue
-                            if event.get('usage'):
-                                receipt['usage'] = event['usage']
-                            if event.get('model'):
-                                receipt['response_model'] = event['model']
-                            for choice in event.get('choices', []):
-                                if choice.get('finish_reason'):
-                                    receipt['finish_reasons'].append(choice['finish_reason'])
+                while True:
+                    line = upstream.readline()
+                    if not line:
+                        break
+                    handler.wfile.write(line)
+                    handler.wfile.flush()
+                    if not line.startswith(b'data:'):
+                        continue
+                    data = line[5:].strip()
+                    if data == b'[DONE]':
+                        receipt['stream_done'] = True
+                        continue
+                    try:
+                        event = json.loads(data)
+                    except ValueError:
+                        receipt['malformed_sse'] = True
+                        continue
+                    if event.get('usage'):
+                        receipt['usage'] = event['usage']
+                    if event.get('model'):
+                        receipt['response_model'] = event['model']
+                    for choice in event.get('choices', []):
+                        if choice.get('finish_reason'):
+                            receipt['finish_reasons'].append(choice['finish_reason'])
                 reasons = receipt['finish_reasons']
                 receipt['status'] = ('complete' if receipt['stream_done'] and reasons
                     and all(v in {'stop', 'tool_calls'} for v in reasons)
@@ -169,9 +164,9 @@ class AgentGateway(AbstractContextManager):
                 receipt['truncated'] = any(v in {'length', 'max_tokens'} for v in reasons)
         except urllib.error.HTTPError as exc:
             receipt.update(status='http_error', http_status=exc.code)
-            response_file.write_bytes(exc.read())
+            exc.close()
             if not sent_headers:
-                handler.reject(exc.code, 'Provider request failed; retained in the private run audit')
+                handler.reject(exc.code, 'Provider request failed; see the call receipt')
         except (OSError, ValueError) as exc:
             receipt.update(status='transport_error', error_type=type(exc).__name__)
             if not sent_headers:

@@ -13,6 +13,26 @@ class DemoPipeline(BasicPipeline):
     def run(self, *args, recognizer="basic", input_pdfs=None, model_profile=None, review_profile=None,
             visual_settings=None, knowledge_settings=None, document_settings=None, agent_settings=None,
             prepare_only=False, resume_from=None, page_selections=None, **options):
+        result = self._recognize(*args, recognizer=recognizer, input_pdfs=input_pdfs,
+            model_profile=model_profile, review_profile=review_profile, visual_settings=visual_settings,
+            knowledge_settings=knowledge_settings, document_settings=document_settings,
+            agent_settings=agent_settings, prepare_only=prepare_only, resume_from=resume_from,
+            page_selections=page_selections, **options)
+        if not prepare_only:
+            from .recognition_scope import IMAGE_POLICY
+            result['image_policy'] = IMAGE_POLICY
+            from .slope_library import ingest
+            import sqlite3
+            try:
+                result['slope_library'] = ingest(self.paths, result, route=normalize_recognizer(recognizer))
+            except (OSError, ValueError, sqlite3.Error) as exc:
+                result['slope_library'] = {'status': 'failed', 'errors': [str(exc)],
+                    'message': '识别结果已保存，资料入库失败，可从原任务重试'}
+        return result
+
+    def _recognize(self, *args, recognizer="basic", input_pdfs=None, model_profile=None, review_profile=None,
+            visual_settings=None, knowledge_settings=None, document_settings=None, agent_settings=None,
+            prepare_only=False, resume_from=None, page_selections=None, **options):
         if any(key in options for key in ('use_llm', 'llm_model')):
             raise ValueError("旧文字deep参数已移除；多模态模型请使用model_profile")
         recognizer = normalize_recognizer(recognizer)

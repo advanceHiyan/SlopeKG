@@ -7,4 +7,5 @@ from .legacy_pipeline import LegacyPipeline
 
 
 class BasicPipeline(LegacyPipeline):
-    """基读 Basic; identical parsing and publication behavior to LegacyPipeline."""
+    """Local recognition publishes source data; assessment is a later operation."""
+    recognition_only = True

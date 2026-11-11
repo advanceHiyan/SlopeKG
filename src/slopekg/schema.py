@@ -167,6 +167,7 @@ INTERFACES: list[dict[str, Any]] = [
     {"path": "/api/export/risk-standalone", "method": "POST", "status": "implemented", "domain": "export", "description": "按自定义文件名导出含筛查结果、证据和交互功能的单文件风险研判HTML"},
     {"path": "/api/slopes", "method": "GET", "status": "implemented", "domain": "slope", "description": "边坡列表及当前基础档案"},
     {"path": "/api/slopes/{slope_id}", "method": "GET", "status": "implemented", "domain": "slope", "description": "单边坡、邻接节点、关系和证据"},
+    {"path": "/api/slope-library", "method": "GET/POST", "status": "implemented", "domain": "slope", "description": "识别来源入库、边坡资料归属核对、原件与候选版本查询"},
     {"path": "/api/dossier-recognition", "method": "GET/POST", "status": "implemented", "domain": "slope", "description": "查询、关联智能识别资料，核对原页后写入所选静态字段"},
     {"path": "/api/manual/schema", "method": "GET", "status": "implemented", "domain": "manual", "description": "人工补录字段、规则字段及可执行运算符白名单"},
     {"path": "/api/manual/slopes/{slope_id}", "method": "GET/POST/DELETE", "status": "implemented", "domain": "manual", "description": "查询、保存或撤销单边坡人工补录；人工层独立于PDF自动结果"},

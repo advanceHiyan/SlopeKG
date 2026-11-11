@@ -78,16 +78,19 @@ class PipelineJobManager:
             now = datetime.now().isoformat(timespec="seconds")
             status = state.get("processing_status", "completed")
             status = status if status in {"completed", "partial", "failed", "prepared", "cancelled"} else "completed"
+            library = state.get('slope_library') or {}
+            if library.get('status') in {'failed', 'partial'} and status == 'completed':
+                status = 'partial'
             # Knowledge / Visual facts and receipts belong to the paginated API,
             # not every 900ms job poll or an in-memory JSON copy.
-            result=({k:state.get(k) for k in ('recognizer','route','processing_status','summary','precision','recall','metric_note')}
+            result=({k:state.get(k) for k in ('recognizer','route','processing_status','summary','precision','recall','metric_note','slope_library')}
                     if state.get('recognizer') in {'multimodal', 'visual', 'knowledge', 'document', 'agent'} else state)
             self._update(
                 job_id,
                 status=status,
                 progress=100,
                 stage=state.get("publication_stage", status) if status != "completed" else "completed",
-                message=state.get("processing_message") or (
+                message=library.get('message') or state.get("processing_message") or (
                     {'completed':'Agent识别完成，结果保留为待核候选','partial':'Agent部分完成，请查看缺口',
                      'prepared':'资料已准备，可开始识别','cancelled':'任务已停止，已生成文件保留',
                      'failed':'Agent运行失败，请查看记录'}.get(status,self.completion_message)

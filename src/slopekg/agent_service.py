@@ -194,8 +194,15 @@ def agent_payload(paths, *, document='', stage='facts', offset=0, limit=50, run_
     elif run:
         root = run_root(paths,run)
         if stage=='calls':
-            rows=[{'document_id':'','record':r,'artifacts':['control/exchanges/'+r[k] for k in ('request_file','response_file') if r.get(k)]}
-                  for r in read_json(root/'control/exchanges/receipts.json',[])]
+            exchanges = root/'control/exchanges'
+            saved = {p.name for p in exchanges.iterdir() if p.is_file()} if exchanges.is_dir() else set()
+            rows = [
+                {'document_id': '', 'record': receipt, 'artifacts': [
+                    'control/exchanges/'+name for key in ('request_file', 'response_file')
+                    if isinstance(name := receipt.get(key), str) and name in saved
+                ]}
+                for receipt in read_json(exchanges/'receipts.json', [])
+            ]
         elif stage=='tools':
             log=root/'control/tool_calls.jsonl'
             if log.exists():
@@ -211,8 +218,10 @@ def agent_payload(paths, *, document='', stage='facts', offset=0, limit=50, run_
             'control/delivery-check.json','control/delivery-repair.json'] if (root/p).exists()]
         artifacts += [p.relative_to(root).as_posix() for p in sorted((root/'control/resume-drafts').glob('*')) if p.is_file()]
         artifacts += [p.relative_to(root).as_posix() for p in sorted((root/'control/delivery-repair-drafts').glob('*')) if p.is_file()]
+    from .slope_library import receipt_for_run
     return {k:run.get(k) for k in ('summary','usage','elapsed_seconds','metric_note','run_id','started_at','finished_at',
-        'settings','model','run_directory','assessment','resumed_from','delivery_repair_attempted')} | {
+        'settings','model','run_directory','assessment','resumed_from','delivery_repair_attempted','workflow','image_policy')} | {
+        'slope_library': receipt_for_run(paths, run.get('run_id', '')),
         'processing_status':run.get('processing_status','not_generated'),
         'can_resume':bool(docs) and can_resume(run),
         'documents':[{k:d.get(k) for k in ('id','name','status','selection')} for d in docs],

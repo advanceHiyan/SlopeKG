@@ -89,3 +89,10 @@ VERIFY += """
 每条候选的source_bindings给出本次读取明确关联的表格单元格（table_index/row/column/跨度/原值/表头路径/表名）或尺寸位置；这些关联也可能错。必须回图核对行列、表头、对象、单位和表注是否适用于该断言，不能仅因相同数值存在而通过。表头路径属于读取假设，不是独立证据。
 independent_comparison列出同一逐字主引句下、同一属性的两次结构化差异。措辞不同不自动判错；critical_fields表示数字、单位或编号冲突。对其中每个字段在verdict里返回difference_resolutions:{"字段名":{"decision":"candidate_supported/independent_supported/unresolved","reason":"根据原图定位及关系作出的具体解释"}}。只有重新核原图确认候选且全部原有检查也通过，才可candidate_supported；不按多数投票。无法明确解决则uncertain，保留原始两份读取，不改写候选冒充一致。
 """
+
+from .recognition_scope import INSTRUCTION
+SYSTEM += INSTRUCTION
+LAYOUT += INSTRUCTION
+READ += INSTRUCTION
+VERIFY += INSTRUCTION
+AUDIT += INSTRUCTION

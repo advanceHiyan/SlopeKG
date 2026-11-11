@@ -77,6 +77,8 @@ class DocumentPipeline:
         if self.progress_callback:self.progress_callback(0,stage,message)
 
     def _save(self,result):
+        from .recognition_scope import IMAGE_POLICY
+        result['image_policy'] = IMAGE_POLICY
         result['receipts']=list(self.runtime.receipts)
         result['environment_variables_used']=sorted({v for r in result['receipts'] for v in r.get('environment_variables_used',[])})
         docs=result['documents'];facts=[f for d in docs for f in d['facts']]
@@ -196,7 +198,18 @@ class DocumentPipeline:
             if page.get('issues'):
                 doc['repair_queue'].append({'stage':'reconstruction','page':page['page'],'reason':page['issues']})
         doc['blocks']=[b for page in doc['pages'] for b in page['blocks']]
-        blocks=doc['blocks'];context={'blocks':[wire_block(b) for b in blocks]}
+        from .recognition_scope import figure
+        doc['archived_figures'] = [figure(b['page'], b['bbox'], caption=b['text'])
+                                   for b in doc['blocks'] if b['kind'] == 'figure']
+        # Original reconstruction stays in doc['blocks']; illustration text is
+        # not input to grouping, extraction or reconciliation.
+        blocks=[b for b in doc['blocks'] if b['kind'] != 'figure' and
+                '图片仅归档' not in b.get('exclusion_proposed', '')]
+        if not blocks:
+            doc.update(status='completed', workflow_complete=True, facts=[], relations=[],
+                       coverage={'content_blocks': 0, 'archived_figures': len(doc['archived_figures'])})
+            return
+        context={'blocks':[wire_block(b) for b in blocks]}
         if not fits(prompts.ZONE,context,replace(self.settings,max_images=12)):
             raise ContractError('Full document zoning exceeds capacity; no source truncation')
         proposed=self._ask(result,doc,'document_zone',prompts.ZONE,context,[],lambda a:zone_plan(a,blocks))

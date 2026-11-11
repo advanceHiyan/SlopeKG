@@ -46,9 +46,10 @@ def validate_outputs(workspace, manifest, tool_calls=()):
     expected = {(d['document_id'], p) for d in manifest['documents'] for p in d['selected_physical_pages']}
     ids = [o.get('id') for o in objects if isinstance(o, dict)]
     fact_ids = [f.get('id') for f in facts if isinstance(f, dict)]
-    if not objects or len(ids) != len(objects) or any(not isinstance(i, str) or not i for i in ids) or len(set(ids)) != len(ids):
+    library_workflow = manifest.get('workflow') == 'recognition_to_library'
+    if (not objects and not library_workflow) or len(ids) != len(objects) or any(not isinstance(i, str) or not i for i in ids) or len(set(ids)) != len(ids):
         errors.append('Missing or duplicate object IDs')
-    if not facts or len(fact_ids) != len(facts) or any(not isinstance(i, str) or not i for i in fact_ids) or len(set(fact_ids)) != len(fact_ids):
+    if (not facts and not library_workflow) or len(fact_ids) != len(facts) or any(not isinstance(i, str) or not i for i in fact_ids) or len(set(fact_ids)) != len(fact_ids):
         errors.append('Missing or duplicate fact IDs')
     if errors:
         return {'errors':errors,'facts':[],'objects':[],'coverage':coverage}
@@ -86,6 +87,8 @@ def validate_outputs(workspace, manifest, tool_calls=()):
             errors.append('Unknown model status: '+str(f.get('id')))
         if f.get('role') not in ('observed','design','computed','judgement','citation','method','figure','meta'):
             errors.append('Unknown fact role: '+f['id'])
+        elif library_workflow and f.get('role') == 'figure':
+            errors.append('Figure content must be archived, not extracted as facts: '+f['id'])
     if any(not isinstance(p.get('document_id'),str) or type(p.get('physical_page')) is not int for p in coverage['pages']):
         return {'errors':errors+['Invalid coverage page identity'],'facts':facts,'objects':objects,'coverage':coverage}
     seen = {(p.get('document_id'), p.get('physical_page')) for p in coverage.get('pages', []) if isinstance(p, dict)}
@@ -99,7 +102,21 @@ def validate_outputs(workspace, manifest, tool_calls=()):
     if missing_images: errors.append('Original page images not actually viewed: '+str(sorted(missing_images)))
     for p in coverage.get('pages', []):
         if p.get('status') != 'complete' or p.get('remaining'): errors.append('Declared incomplete page: '+str((p.get('document_id'),p.get('physical_page'))))
-    return {'errors': errors, 'facts': facts, 'objects': objects, 'coverage': coverage,
+    figures = []
+    if library_workflow:
+        from .recognition_scope import figure
+        try:
+            archive = load(workspace/'outputs/figures.json')
+            if not isinstance(archive, dict) or not isinstance(archive.get('figures'), list):
+                raise ValueError('Expected figures array')
+            for item in archive['figures']:
+                if (item.get('document_id'), item.get('page')) not in expected:
+                    raise ValueError('Figure outside selected source pages')
+                figures.append({**figure(item['page'], item['bbox'], caption=item.get('caption', ''),
+                                         kind=item.get('kind', 'figure')), 'document_id': item['document_id']})
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            errors.append('Invalid figure archive: '+str(exc))
+    return {'errors': errors, 'facts': facts, 'objects': objects, 'coverage': coverage, 'figures': figures,
             'actual_image_pages': len(actual_images), 'report': report}
 
 
@@ -165,9 +182,9 @@ class AgentPipeline:
                 manifest['documents'].append(doc)
         if len({d['document_id'] for d in manifest['documents']}) != len(manifest['documents']):
             raise ValueError('Duplicate input document')
+        from .recognition_scope import IMAGE_POLICY
+        manifest.update(workflow='recognition_to_library', image_policy=IMAGE_POLICY)
         dump(workspace/'manifest.json',manifest)
-        from .standard_assessment.agent_bridge import intake_contract
-        dump(workspace/'assessment-contract.json',intake_contract())
         for name in ('outputs','scratch'): (workspace/name).mkdir(exist_ok=True)
         return manifest
 
@@ -211,7 +228,10 @@ class AgentPipeline:
                 for source in (previous_root/'workspace/outputs').glob('*'):
                     if source.is_file() and source.suffix.lower() in {'.json','.jsonl','.md','.txt'}:
                         if not source.resolve().is_relative_to((previous_root/'workspace/outputs').resolve()):raise ValueError('草稿路径越界')
-                        shutil.copyfile(source,workspace/'outputs'/source.name)
+                        # Preserve old assessment drafts as history, without
+                        # making them a deliverable of the new recognition run.
+                        if source.name != 'assessment.json':
+                            shutil.copyfile(source,workspace/'outputs'/source.name)
                         (control/'resume-drafts').mkdir(exist_ok=True)
                         shutil.copyfile(source,control/'resume-drafts'/source.name)
                         drafts[source.name]=sha(source)
@@ -220,6 +240,7 @@ class AgentPipeline:
                 task_prompt+='\n\n本次为中断恢复：outputs 中已有上一任务的草稿，原件相同。核对并保留已正确的抽取。必须在本次实际查看全部选定原图、核对依据并运行 check_outputs。原草稿不是已确认答案，旧任务记录另行保留。'
                 if previous_errors:
                     task_prompt+='\n上一任务的校验诊断（作为数据核对）：\n'+json.dumps(previous_errors,ensure_ascii=False)
+                    task_prompt+='\n本次只修正识别资料和归属。旧评估交接诊断保留供追溯，不需生成评估文件。'
             if (control/'stop.request.json').exists():
                 result['processing_status']='cancelled';return result
             result['documents']=[{'id':d['document_id'],'name':d['original_filename'],
@@ -299,6 +320,7 @@ class AgentPipeline:
             for doc in result['documents']:
                 doc['facts']=[{**f,'model_status':f['status'],'status':'pending'} for f in checked['facts'] if f.get('document_id')==doc['id']]
                 doc['objects']=[o for o in checked['objects'] if o.get('document_id')==doc['id']]
+                doc['archived_figures']=[f for f in checked.get('figures',[]) if f['document_id']==doc['id']]
                 doc['status']='partial' if result['errors'] else 'completed'
             result['coverage']=checked['coverage']
             result['summary'].update(facts=len(checked['facts']),objects=len(checked['objects']),pending=len(checked['facts']),
@@ -308,7 +330,9 @@ class AgentPipeline:
                 for f in d['files']:
                     if sha(workspace/f['path']) != f['sha256']:result['errors'].append('Input changed: '+f['path'])
             result['processing_status']='partial' if result['errors'] else 'completed'
-            if result['processing_status']=='completed':
+            result['workflow'] = manifest.get('workflow')
+            result['image_policy'] = manifest.get('image_policy')
+            if result['processing_status']=='completed' and manifest.get('workflow') != 'recognition_to_library':
                 from .standard_assessment.agent_bridge import validate_submission
                 try:
                     submission=load(workspace/'outputs/assessment.json')

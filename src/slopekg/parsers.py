@@ -8,7 +8,7 @@ from typing import Any, Callable
 
 from pypdf import PdfReader
 
-GEOMETRY_VERSION = 'display-pdf-points-2'
+GEOMETRY_VERSION = 'display-pdf-points-3-archive-drawings'
 
 
 @dataclass(frozen=True)
@@ -23,8 +23,8 @@ class PdfParseResult:
 class PdfParser:
     """Page-adaptive PDF parser.
 
-    Native text is preferred. OCR is scheduled only for scanned pages or
-    drawings whose native text layer is insufficient. Every native block keeps
+    Native text is preferred. OCR is scheduled for scanned or mixed text pages;
+    engineering drawings are archived without interpretation. Every native block keeps
     its bounding box so extracted facts can link back to page evidence.
     """
 
@@ -152,10 +152,18 @@ class PdfParser:
                         "ocr_region": classification.get("ocr_region"),
                         "table_candidate": classification["table_candidate"],
                         "is_scanned_or_drawing": classification["page_type"] in {"scanned", "drawing"},
+                        "image_policy": 'archive_figures_recognize_scanned_tables_v1',
+                        "archived_figures": ([{'page': page_no, 'bbox': [0, 0, 1, 1],
+                            'kind': 'drawing', 'status': 'archived_without_interpretation'}]
+                            if classification['page_type'] == 'drawing' else []),
                         "extraction_error": layout.get("error"),
                     }
                 )
 
+                # Engineering drawings are retained as source pages. Do not
+                # expose their labels/dimensions to Basic's field extractor.
+                if classification['page_type'] == 'drawing':
+                    continue
                 for block_index, block in enumerate(layout["blocks"], start=1):
                     text = clean_text(block["text"])
                     if not text:
@@ -321,7 +329,9 @@ def classify_page(
     drawing_signal = kind in {"施工图", "勘察报告"} and text_chars < 200 and drawing_count >= 20
     scanned_signal = text_chars < 20 and image_count > 0 and drawing_count < 10
 
-    if drawing_signal:
+    if table_candidate:
+        page_type = "table"
+    elif drawing_signal:
         page_type = "drawing"
     elif scanned_signal:
         page_type = "scanned"
@@ -345,11 +355,11 @@ def classify_page(
         ocr_priority = 80 if kind == "规范" else 70
         processing_strategy = ["render_300dpi", "ocr_full_page", "layout_rebuild"]
     elif page_type == "drawing":
-        needs_ocr = text_chars < 120
+        needs_ocr = False
         ocr_region = "title_block" if needs_ocr else None
         ocr_reason = "drawing_native_text_insufficient" if needs_ocr else None
         ocr_priority = 60 if needs_ocr else 0
-        processing_strategy = ["native_layout", "drawing_metadata", "ocr_title_block"] if needs_ocr else ["native_layout", "drawing_metadata"]
+        processing_strategy = ["archive_source_page_only"]
     elif page_type == "mixed" and text_chars < 120:
         needs_ocr = True
         ocr_region = "full_page"

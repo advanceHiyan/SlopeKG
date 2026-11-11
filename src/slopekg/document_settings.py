@@ -1,7 +1,7 @@
 """Whole-document reconstruction and overlapping dossiers: experimental fourth route."""
 from dataclasses import dataclass
 
-VERSION = 'document-v0.2'
+VERSION = 'document-v0.3'
 
 
 @dataclass(frozen=True)

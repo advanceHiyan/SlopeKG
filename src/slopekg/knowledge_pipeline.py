@@ -164,7 +164,7 @@ class KnowledgePipeline:
                 result['documents'].append(doc)
                 self.runtime.document_id = doc['id']
                 self._save(result)
-                if not prepare_only:
+                if not prepare_only and doc['units']:
                     try:
                         await self._recognize(doc, result)
                     except Exception as exc:
@@ -189,6 +189,8 @@ class KnowledgePipeline:
             return result
 
     def _save(self, result):
+        from .recognition_scope import IMAGE_POLICY
+        result['image_policy'] = IMAGE_POLICY
         facts = [f for d in result['documents'] for f in d['facts']]
         relations = [f for d in result['documents'] for f in d['relations']]
         result['summary'] = {'documents': len(result['documents']),
@@ -873,6 +875,9 @@ class KnowledgePipeline:
     @staticmethod
     def _finish_document(doc, prepared):
         doc['source_accounting']=source_accounting(doc)
+        archived = {p['page'] for p in doc['pages'] if p['status'] == 'archived_figure'}
+        doc['source_accounting']['pages_without_attribution'] = [p for p in
+            doc['source_accounting']['pages_without_attribution'] if p not in archived]
         sparse = [p['page'] for p in doc['pages'] if p.get('graphics_unread') or p['status'] == 'unread_graphics']
         complete = bool(doc['chunks'] and doc['entities']) and all(
             entry['status'] == 'completed' for stage in ('discovery_batches', 'attribution_batches', 'synthesis_jobs') for entry in doc[stage])
@@ -882,6 +887,8 @@ class KnowledgePipeline:
         complete = complete and all(j['status']=='completed' for j in doc.get('review_jobs',[]))
         complete = complete and all(j['status']=='completed' for j in doc.get('recovery_jobs',[]))
         complete = complete and not doc['source_accounting']['pages_without_attribution']
+        if archived and len(archived) == len(doc['pages']) and not doc['errors']:
+            complete = True
         doc['coverage'] = {'total_pages': doc['source_page_count'],
             'selected_pages': doc.get('selection', {}).get('selected_pages', []),
             'unselected_pages': doc.get('selection', {}).get('unselected_pages', []),
@@ -893,7 +900,8 @@ class KnowledgePipeline:
             'pages_without_object_attribution':doc['source_accounting']['pages_without_attribution'],
             'unread_graphics_pages': sparse, 'text_processing_status': 'prepared' if prepared else 'completed' if complete else 'partial',
             'attributed_chunks': sum(c['attribution_status'] == 'completed' for c in doc['chunks']),
-            'total_chunks': len(doc['chunks']), 'note': '原文处理覆盖不是人工事实召回率；图形页未走本路线读取。'}
+            'total_chunks': len(doc['chunks']), 'archived_figure_pages': sorted(archived),
+            'note': '正文和扫描表继续识别；图片仅归档。覆盖不是人工事实召回率。'}
         doc['coverage']['references_not_independently_organized'] = len(doc['references'])
         if hashlib.sha256(Path(doc['path']).read_bytes()).hexdigest() != doc['source_sha256']:
             doc['errors'].append('source_changed')

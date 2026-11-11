@@ -5,7 +5,7 @@
   const toolNames={list_files:'查看工作区文件',read_text:'读取资料文字',search_text:'搜索证据',view_image:'查看原图或裁图',write_text:'写入识别报告',write_json:'保存结构化结果',check_outputs:'检查交付文件'};
   const query=new URLSearchParams(location.search);
   if(!query.size){try{const saved=JSON.parse(sessionStorage.getItem('slopekg-agent-context')||'{}');if(saved.url){const u=new URL(saved.url,location.href);for(const [k,v] of u.searchParams)query.set(k,v);}}catch(_){}}
-  const selected=new Set(query.getAll('file'));let profiles=[],files=[],runs=[],runId=query.get('run')||'',draft=query.get('new')==='1',tab=['chat','trace','results','calls','assessment'].includes(query.get('tab'))?query.get('tab'):'auto',resultStage=['facts','objects','coverage','errors'].includes(query.get('stage'))?query.get('stage'):'facts',documentId=query.get('document')||'',offset=Math.max(0,Number(query.get('offset'))||0),traceOffset=-1;
+  const selected=new Set(query.getAll('file'));let profiles=[],files=[],runs=[],runId=query.get('run')||'',draft=query.get('new')==='1',tab=['chat','trace','results','calls','assessment','library'].includes(query.get('tab'))?query.get('tab'):'auto',resultStage=['facts','objects','coverage','errors'].includes(query.get('stage'))?query.get('stage'):'facts',documentId=query.get('document')||'',offset=Math.max(0,Number(query.get('offset'))||0),traceOffset=-1;
   let sourceToRestore=query.get('source')||'',pageToRestore=Number(query.get('page'))||0,restoreScroll=true;
   function taskUrl(){const q=new URLSearchParams({run:runId,tab,stage:resultStage,document:documentId,offset:String(offset)});if($('pageSelect').value)q.set('source',$('pageSelect').value);if(!document.querySelector('.workspace').classList.contains('evidence-hidden'))q.set('evidence','1');return '/web/pdf-ingestion.html?'+q;}
   function remember() {
@@ -44,17 +44,17 @@
   function history(){ const html=runs.map(r=>`<button data-run="${esc(r.run_id)}" class="${!draft&&r.run_id===runId?'active':''}" title="${esc(r.title)}"><strong>${esc(r.title)}</strong><small><span>${shortDate(r.started_at)}</span><span>${esc(stateNames[r.processing_status]||r.processing_status)}</span></small></button>`).join('')||'<p class="muted small">暂无任务，添加资料开始。</p>';if(html!==historySignature){$('history').innerHTML=html;historySignature=html;} }
   function welcome(){if(selected.size)return `<div class="welcome"><div class="agent-avatar">▤</div><h2>已选 ${selected.size} 份资料</h2><p>在下方填写识别重点，确认资料发送范围后开始。<br>结果会按对象和原文证据保存。</p><button class="primary" data-choose>核对资料与发送范围</button></div>`;return '<div class="welcome"><div class="agent-avatar">✦</div><h2>让资料里的信息，变得清楚。</h2><p>添加 PDF，告诉 Agent 识别重点。<br>它会自行阅读、查找、放大原图，整理对象与证据。</p><button class="primary" data-choose>选择资料</button></div>';}
   function dossierLink() {
-    if (!['completed', 'partial'].includes(current.processing_status) || !current.summary?.facts) return '';
-    const params = new URLSearchParams({ recognition_run: runId });
-    if (documentId) params.set('recognition_document', documentId);
-    return `<p><a class="button secondary" href="${esc(assessmentUrl('./slopes.html?' + params))}">关联识别资料到边坡档案</a></p>`;
+    if (!['completed', 'partial', 'failed', 'cancelled'].includes(current.processing_status)) return '';
+    const params = new URLSearchParams({ route:'agent', run: runId });
+    if (documentId) params.set('document', documentId);
+    return `<p>${esc(current.slope_library?.message||'已有识别记录可保存到边坡资料库。')}</p>${current.slope_library?.errors?.length?'<p class="error-banner">部分来源尚未入库，打开资料库查看原因并重试。</p>':''}<p><a class="button secondary" href="${esc(assessmentUrl('./slope-library.html?' + params))}">查看已入库资料 / 核对归属</a></p>`;
   }
   function recoveryAction() {
     if (!current.can_resume) return '';
     const waiting = pendingResume?.source === runId;
     return `<p>${current.delivery_repair_attempted ? 'Agent 已尝试修正，仍有问题需要核对。' : '已保存原页、候选和本次校验问题。'}
-      可从这些草稿继续处理，通过后自动交接风险评估。</p>
-      <button type="button" class="button secondary" data-resume ${waiting || busy || sending ? 'disabled' : ''}>${waiting ? '正在启动接续任务…' : '继续修正并交接'}</button>
+      可从这些草稿继续识别，已有资料可先保存到边坡资料库。</p>
+      <button type="button" class="button secondary" data-resume ${waiting || busy || sending ? 'disabled' : ''}>${waiting ? '正在启动接续任务…' : '继续识别与核对'}</button>
       ${resumeError ? `<p role="alert">${esc(resumeError)}</p>` : ''}`;
   }
   function errorLabel(error) {
@@ -62,7 +62,9 @@
       .replace(/^Fact\/evidence document mismatch:/, '原文引用属于另一份 PDF：')
       .replace(/^Unknown fact role:/, '事实类别未通过校验：');
   }
+  function libraryHTML(){return `<section class="assessment-handoff"><h3>识别结果 → 边坡资料库</h3><p>识别完成后先保存原件、候选事实和图片，再按实际边坡核对归属。</p>${dossierLink()}<p class="small muted">资料库保留不同来源和识别版本。字段值仍待核对，图片仅归档；扫描表的文字、勾选项和数值继续识别。</p>${recoveryAction()}</section>`;}
   function assessmentHTML(){
+    if(current.workflow==='recognition_to_library')return libraryHTML();
     const status = current.processing_status;
     if (status !== 'completed') {
       const errors = workspace.errors || [];
@@ -114,7 +116,7 @@
     return html;
   }
   function resultsHTML(){
-    const controls=tab==='results'?`<div class="result-toolbar"><select id="resultStage" aria-label="结果类型">${[['facts','候选事实'],['objects','对象与关系'],['coverage','逐页覆盖'],['errors','缺口与错误']].map(([k,l])=>`<option value="${k}" ${k===resultStage?'selected':''}>${l}</option>`).join('')}</select><select id="resultDocument" aria-label="筛选结果文档"><option value="">全部文档</option>${(current.documents||[]).map(d=>`<option value="${esc(d.id)}" ${d.id===documentId?'selected':''}>${esc(d.name)}</option>`).join('')}</select></div>`:'<p class="muted small">逐次模型请求、原始响应和实际用量。大文件可直接下载完整内容。</p>';
+    const controls=tab==='results'?`<div class="result-toolbar"><select id="resultStage" aria-label="结果类型">${[['facts','候选事实'],['objects','对象与关系'],['coverage','逐页覆盖'],['errors','缺口与错误']].map(([k,l])=>`<option value="${k}" ${k===resultStage?'selected':''}>${l}</option>`).join('')}</select><select id="resultDocument" aria-label="筛选结果文档"><option value="">全部文档</option>${(current.documents||[]).map(d=>`<option value="${esc(d.id)}" ${d.id===documentId?'selected':''}>${esc(d.name)}</option>`).join('')}</select></div>`:'<p class="muted small">查看每次模型调用的用量、耗时和截断状态。新任务只保存调用回执。</p>';
     const records=(current.rows||[]).map(({document_id,record:r,artifacts:links})=>{
       if (tab === 'results' && resultStage === 'coverage') {
         const document = (current.documents || []).find(item => item.id === document_id);
@@ -126,7 +128,7 @@
           ${remaining.length ? `<ul>${remaining.map(item => `<li>${esc(item)}</li>`).join('')}</ul>` : ''}
           ${source ? `<div class="record-links"><button data-source="${esc(source.path)}">核对原文 · 第 ${esc(r.physical_page)} 页</button></div>` : ''}</article>`;
       }
-      if(tab==='calls')return `<article class="record-card"><div class="call-header"><b class="call-number">#${String(r.number).padStart(3,'0')}</b><span class="status">${r.status==='complete'?'完整响应':esc(r.status)}</span></div><p class="muted small">${shortDate(r.started_at)} · ${r.elapsed_seconds??'—'} 秒</p><p>输入 ${number(r.usage?.prompt_tokens)} · 输出 ${number(r.usage?.completion_tokens)}</p><div class="record-links">${(links||[]).map(p=>`<button data-file="${esc(p)}">${p.endsWith('request.json')?'查看完整请求':'查看原始响应'}</button><a href="${artifact(p)}" target="_blank" rel="noopener" download>下载</a>`).join('')}</div><details><summary>调用回执</summary><pre>${esc(JSON.stringify(r,null,2))}</pre></details></article>`;
+      if(tab==='calls')return `<article class="record-card"><div class="call-header"><b class="call-number">#${String(r.number).padStart(3,'0')}</b><span class="status">${r.status==='complete'?'调用完成':esc(r.status)}</span></div><p class="muted small">${shortDate(r.started_at)} · ${r.elapsed_seconds??'—'} 秒</p><p>输入 ${number(r.usage?.prompt_tokens)} · 输出 ${number(r.usage?.completion_tokens)}</p><div class="record-links">${(links||[]).map(p=>`<button data-file="${esc(p)}">${p.endsWith('request.json')?'查看完整请求':'查看原始响应'}</button><a href="${artifact(p)}" target="_blank" rel="noopener" download>下载</a>`).join('')}</div><details><summary>调用回执</summary><pre>${esc(JSON.stringify(r,null,2))}</pre></details></article>`;
       const evidence=Array.isArray(r.evidence)?r.evidence:[r.evidence].filter(Boolean),quote=evidence.map(v=>v.quote).filter(Boolean).join('\n');
       const object=(current.documents||[]).flatMap(d=>d.objects||[]).find(o=>o.id===r.object);
       const title=[r.object_name||object?.name||r.name||r.object||r.id||document_id,r.field,typeof r.value==='object'?JSON.stringify(r.value):r.value,r.unit].filter(v=>v!==undefined&&v!==null&&v!=='').join(' · ');
@@ -145,8 +147,8 @@
     $('taskTitle').textContent=draft?'新建智能识别任务':(current.documents||[]).map(d=>d.name.replace(/\.pdf$/i,'')).join('、')||'选择资料，开始识别';$('taskTitle').title=$('taskTitle').textContent;
     $('runStatus').textContent=draft?'新任务':stateNames[current.processing_status]||'新任务';$('runStatus').className='status '+(current.processing_status||'');
     document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelector('.task-more>summary').textContent=tab==='trace'?'执行轨迹 ▾':tab==='calls'?'模型调用 ▾':'过程详情';
-    const recovery=tab!=='assessment'&&current.can_resume?`<section class="assessment-handoff"><h3>评估交接待处理</h3>${recoveryAction()}</section>`:'';
-    const html=draft||!current.run_id?welcome():summary()+recovery+(tab==='assessment'?assessmentHTML():tab==='chat'||tab==='trace'?traceHTML():resultsHTML());
+    const recovery=tab!=='assessment'&&current.can_resume?`<section class="assessment-handoff"><h3>识别待处理</h3>${recoveryAction()}</section>`:'';
+    const html=draft||!current.run_id?welcome():summary()+recovery+(tab==='library'?libraryHTML():tab==='assessment'?assessmentHTML():tab==='chat'||tab==='trace'?traceHTML():resultsHTML());
     if(signature!==html){const feed=$('feed'),wasBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<70,oldTop=feed.scrollTop;const open=[...feed.querySelectorAll('details[open]')].map((d)=>d.parentElement?.querySelector('h3')?.textContent);feed.innerHTML=html;signature=html;for(const d of feed.querySelectorAll('details'))if(open.includes(d.parentElement?.querySelector('h3')?.textContent)&&d.parentElement?.querySelector('h3'))d.open=true;feed.scrollTop=active(current.processing_status)&&wasBottom?feed.scrollHeight:oldTop;}
     const u=current.usage||{};$('usage').textContent=current.run_id&&!draft?`输入 ${number(u.prompt_tokens)} · 输出 ${number(u.completion_tokens)}`:'过程与结果自动保存';$('usage').title=`缓存命中 ${number(u.prompt_cache_hit_tokens)} · 新输入 ${number(u.prompt_cache_miss_tokens)}`;
     $('activity').textContent=globalJob.stage==='agent_repair'?'Agent 正在修正交接问题':workspace.active?`正在执行第 ${workspace.active.step} 步 · 已请求 ${current.summary?.calls||0} 次`:`Agent 自主处理中 · 已请求 ${current.summary?.calls||0} 次`;
@@ -160,7 +162,7 @@
     if(pageToRestore){const match=pages.find(p=>p.page===pageToRestore&&(!documentId||p.path.includes(documentId)));if(match){$('pageSelect').value=match.path;pageToRestore=0;document.querySelector('.workspace').classList.remove('evidence-hidden');}}
     $('pageCount').textContent=pages.length?`${pages.length} 页`:'';image();
     $('outputFiles').innerHTML=(workspace.files||[]).map(f=>`<button data-file="${esc(f.path)}"><i class="file-icon">▤</i><span>${esc(f.name)}<small>${(f.bytes/1024).toFixed(1)} KB · ${f.path.includes('/scratch/')?'中间文件':'交付文件'}</small></span></button>`).join('')||'<p class="muted small">Agent 生成的报告、事实和裁图会显示在这里。</p>';
-    const names={root:'本次任务目录',inputs:'原页与辅助文字',outputs:'识别结果',trace:'Agent 消息与操作',exchanges:'模型完整输入输出'};
+    const names={root:'本次任务目录',inputs:'原页与辅助文字',outputs:'识别结果',trace:'Agent 消息与操作',exchanges:'模型调用回执'};
     $('storagePaths').innerHTML=Object.entries(workspace.storage||{}).map(([k,v])=>`<dt>${names[k]||esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
     $('auditLinks').innerHTML=(current.artifacts||[]).map(p=>`<a href="${artifact(p)}" target="_blank" rel="noopener">${esc(label(p))} ↗</a>`).join('');
   }
@@ -170,7 +172,7 @@
     if(pendingResume){
       const next=runs.find(r=>r.resumed_from===pendingResume.source&&!pendingResume.known.has(r.run_id));
       if(next){
-        if(runId===pendingResume.source){runId=next.run_id;tab='assessment';offset=0;traceOffset=-1;documentId='';}
+        if(runId===pendingResume.source){runId=next.run_id;tab='library';offset=0;traceOffset=-1;documentId='';}
         pendingResume=null;
       }else if(job.id===pendingResume.jobId&&!['queued','running'].includes(job.status)){
         if(runId===pendingResume.source)resumeError=job.error||'接续未能启动，请检查原资料后再试。';
@@ -178,7 +180,7 @@
       }
     }
     if(!draft&&!runId)runId=list.latest_id||'';
-    if(!draft&&runId){const query=new URLSearchParams({run:runId,stage:tab==='calls'?'calls':resultStage,document:documentId,offset:String(offset),limit:'30'});const [data,trace]=await Promise.all([getJson('/api/agent-recognition?'+query),getJson('/api/agent-recognition/workspace?'+new URLSearchParams({run:runId,offset:String(traceOffset),limit:'40'}))]);if(seq!==revision)return;current=data;workspace=trace;if(tab==='auto')tab=active(current.processing_status)?'chat':'results';side();}
+    if(!draft&&runId){const query=new URLSearchParams({run:runId,stage:tab==='calls'?'calls':resultStage,document:documentId,offset:String(offset),limit:'30'});const [data,trace]=await Promise.all([getJson('/api/agent-recognition?'+query),getJson('/api/agent-recognition/workspace?'+new URLSearchParams({run:runId,offset:String(traceOffset),limit:'40'}))]);if(seq!==revision)return;current=data;workspace=trace;if(tab==='auto')tab=active(current.processing_status)?'chat':'library';side();}
     render();error();
   }catch(e){if(seq===revision)error('读取失败：'+e.message);}finally{if(seq===revision)timer=setTimeout(refresh,busy?1600:6000);}}
   function choose(){if(!$('filesDialog').open)$('filesDialog').showModal();}
@@ -187,7 +189,7 @@
     window.history.replaceState(null, '', url);
     document.querySelector('.method-nav a.active').href = location.href;
   }
-  async function start(prepareOnly){if(busy||sending)return;sending=true;updateActions();error();try{const j=await requestJson('/api/pipeline/jobs',{method:'POST',body:{recognizer:'agent',input_pdfs:[...selected],model_profile:$('model').value,prepare_only:prepareOnly,allow_external:!prepareOnly&&$('allow').checked,agent_settings:{record_model_inputs:true,task_instruction:$('instruction').value}}});draft=false;tab='chat';runId='';offset=0;traceOffset=-1;documentId='';signature='';busy=true;current={processing_status:'preparing'};$('feed').innerHTML='<p class="muted">任务已启动，正在准备资料…</p>';await refresh();}catch(e){error(e.status===409?'已有任务运行，完成或停止后再开始。':e.message);}finally{sending=false;updateActions();}}
+  async function start(prepareOnly){if(busy||sending)return;sending=true;updateActions();error();try{const j=await requestJson('/api/pipeline/jobs',{method:'POST',body:{recognizer:'agent',input_pdfs:[...selected],model_profile:$('model').value,prepare_only:prepareOnly,allow_external:!prepareOnly&&$('allow').checked,agent_settings:{task_instruction:$('instruction').value}}});draft=false;tab='chat';runId='';offset=0;traceOffset=-1;documentId='';signature='';busy=true;current={processing_status:'preparing'};$('feed').innerHTML='<p class="muted">任务已启动，正在准备资料…</p>';await refresh();}catch(e){error(e.status===409?'已有任务运行，完成或停止后再开始。':e.message);}finally{sending=false;updateActions();}}
   async function resume(){
     if(busy||sending||pendingResume||!current.can_resume)return;
     const source=runId,known=new Set(runs.map(r=>r.run_id));

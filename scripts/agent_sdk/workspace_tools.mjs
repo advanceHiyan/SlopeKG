@@ -91,7 +91,7 @@ export async function apply(ctx) {
       const text=a.jsonl?(Array.isArray(a.value)?a.value:[a.value]).map(v=>JSON.stringify(v)).join('\n')+'\n':JSON.stringify(a.value,null,2)+'\n';
       await fs.writeFile(p,text,{encoding:'utf8',flag:a.append?'a':'w'});return {path:a.path,bytes:Buffer.byteLength(text),append:!!a.append};
     },jsonOutput,false);
-  register('check_outputs','Run the final recognition admission checks and the read-only assessment trial. Fix only issues supported by the original pages. True missing evidence, conflicts and inapplicability are valid results.',{},async()=>{
+  register('check_outputs','Check recognition deliverables and figure locations before storage in the slope library. Fix only issues supported by the original pages. Missing evidence and conflicts must remain explicit.',{},async()=>{
     const checked=await checkDelivery({python:process.env.SLOPEKG_ASSESSMENT_PYTHON,
       script:process.env.SLOPEKG_ASSESSMENT_PREVIEW_SCRIPT,workspace:root,audit});
     const folder=path.join(path.dirname(audit),'assessment-previews');

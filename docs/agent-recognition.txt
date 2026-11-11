@@ -1,3 +1,10 @@
+当前流程（2026-11-11）
+  新识别任务先保存到边坡资料库，不要求 assessment.json，不自动执行风险评估。
+  正文和扫描表继续识别；PDF 内的照片、剖面图、示意图和计算草图只归档。
+  新任务只保存模型调用回执，避免重复保存包含大量图片的原始请求；既有原始日志不删除。
+  资料入库、原件版本及人工归属核对见 docs/slope-library.md。
+  下文有关自动评估交接和评估草稿的说明仅用于历史任务兼容路径。
+
 第五路：自主 Agent（DSH SDK）
 
 产品界面名称：智能识别。保留独立任务工作区，与资料管理、风险预评估
@@ -18,7 +25,7 @@
   judgment表示Agent选择作为候选采用，reference表示仅参考、不参与查表，决定及理由均由Agent提交。
   案例存在 output/demo/assessment-debug/assessment.sqlite，提交回执在同目录intake/，
   冻结PDF/识别事实/Agent提交在 output/demo/debug-history/h_*/prediction/；每次任务
-  control/assessment-receipt.json 记录自动衔接结果。完整模型输入输出仍在该任务control/exchanges/。
+  control/assessment-receipt.json 记录自动衔接结果。模型调用回执在该任务的 control/exchanges/。
   POST /api/agent-recognition/assessment 或任务中的“重试接收”只重试数据接收，不重跑模型；相同数据复用同一案例。
   scope可省略或为null，沿用案例范围；结构化scope可覆盖对象、时期、工况。
   文字scope也原样保存，但范围未结构化时不擅自归入本期整体、不自动用于查表。
@@ -98,7 +105,8 @@
   在“操作轨迹”点任一步查看完整参数与返回；“模型调用”查看完整请求和SSE原文。
   “资料与产物”可打开原页、翻页和查看生成文件；展开“过程保存在哪里”可复制实际目录。
   大请求按流传输；大于2MiB的文件提供完整打开/下载，不以截断文本冒充完整输入输出。
-  control/exchanges包含逐次原始输入、原始SSE响应、usage、最大输出上限和截断结果。
+  新任务的 control/exchanges 只保存调用回执，含实际用量、耗时、请求哈希、最大输出上限和截断状态。
+  历史任务中仍在磁盘上的原始请求或响应可从工作台查看。
   token分输入、缓存命中、新输入、输出列出；缺失usage会明确计数，绝不估造。
   所有模型调用使用模型支持的最大输出上限；DeepSeek Flash本轮为393216，长度截断或流未完成均报失败。
   本轮开放18页试验：outputs/20261107_第五路Agent。基线与新预测单独冻结；不读取隐藏验收资料。

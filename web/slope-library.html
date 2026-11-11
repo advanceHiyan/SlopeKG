@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>边坡资料库 - SlopeKG</title><link rel="stylesheet" href="./pages.css"><link rel="stylesheet" href="./navigation.css"><link rel="stylesheet" href="./slope-library.css"></head>
+<body class="portal-body"><header class="site-header"></header><main class="page-main library-main">
+<div class="page-heading"><div><p class="eyebrow">资料整理</p><h1>边坡资料库</h1><p>识别资料先入库，按实际边坡归集。原文、候选值和图片留在同一份档案里。</p></div><a class="button" href="./pdf-ingestion.html?new=1">＋ 识别新资料</a></div>
+<section id="intake" class="card" hidden></section><p id="message" role="status"></p>
+<div class="library-summary" id="counts"></div>
+<div class="library-layout"><aside class="card library-list"><div class="library-filters"><input id="search" type="search" placeholder="搜索边坡名称、编号或桩号" aria-label="搜索边坡"><select id="filter" aria-label="档案筛选"><option value="all">全部边坡</option><option value="pending">归属待核对</option><option value="unassigned">尚未归属的资料</option></select></div><div id="rows" aria-label="边坡档案列表"></div></aside>
+<section id="detail" class="card library-detail" aria-live="polite"><div class="library-empty"><h2>选择一处边坡</h2><p>查看来源文件、识别候选、原页和归属核对记录。</p></div></section></div>
+<p class="small muted"><a href="./slopes.html">查看既有边坡字段档案</a> · 风险识别将在资料归属核对后从边坡档案取用证据。</p>
+</main>
+<dialog id="bindDialog"><form id="bindForm"><h2>核对资料归属</h2><p id="bindSource"></p><label>归入边坡<select id="bindTarget" required></select></label><label id="newNameLabel" hidden>新边坡名称<input id="newName" maxlength="250"></label><label class="confirm"><input id="includeRelated" type="checkbox" checked>同时归入本来源边坡中有明确父子关系的对象，保留各自范围。</label><label>核对人<input id="actor" required maxlength="100" autocomplete="name"></label><label>归属依据<textarea id="reason" required placeholder="例如：原件中的路线、桩号范围、左右侧及边坡编号一致"></textarea></label><label class="confirm"><input id="confirm" type="checkbox" required>已对照原页，确认是同一处边坡。此操作仅核对资料归属。</label><p id="bindError" role="alert"></p><div class="action-row"><button id="cancel" type="button" class="button secondary">取消</button><button type="submit" class="button">保存归属</button></div></form></dialog>
+<dialog id="evidenceDialog"><button id="closeEvidence" class="button secondary">关闭原页</button><a id="fullEvidence" target="_blank" rel="noopener">打开完整原页</a><img id="evidenceImage" alt="归档 PDF 原页"><p id="evidenceQuote"></p></dialog>
+<script src="./navigation.js"></script><script src="./api.js"></script><script src="./slope-library.js"></script></body></html>

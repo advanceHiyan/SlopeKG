@@ -19,6 +19,9 @@ def check_delivery(workspace, audit):
     if checked['errors']:
         return {'ok': False, 'stage': 'recognition', 'recognition': recognition,
                 'errors': checked['errors']}
+    if manifest.get('workflow') == 'recognition_to_library':
+        return {'ok': True, 'stage': 'ready', 'recognition': recognition, 'errors': [],
+                'slope_library': {'status': 'ready_to_store', 'figures': len(checked.get('figures', []))}}
     try:
         result = preview_submission(PATHS, workspace)
     except (OSError, ValueError, KeyError, TypeError) as exc:
