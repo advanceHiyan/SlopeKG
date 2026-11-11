@@ -8,6 +8,7 @@ import uuid
 from typing import Any
 
 from .config import PATHS, DemoPaths
+from .dossier_recognition import overlay as apply_recognition_values, records as recognition_records
 from .storage import read_json, read_jsonl, write_json, write_jsonl
 from .manual_contract import (MANUAL_FIELD_SPECS, FIELD_SPECS, DYNAMIC_FIELDS, RULE_FIELD_SPECS,
                               RULE_FIELDS, RULE_OPERATORS, manual_schema)
@@ -58,11 +59,17 @@ def delete_slope_override(slope_id: str, paths: DemoPaths = PATHS) -> bool:
 def apply_slope_overrides(graph: dict[str, Any], paths: DemoPaths = PATHS) -> dict[str, Any]:
     result = deepcopy(graph)
     records = read_json(paths.slope_overrides_json, {"records": {}}).get("records", {})
+    reviewed = recognition_records(paths)
     applied = 0
     for node in result.get("nodes", []):
-        if node.get("type") != "Slope" or node.get("id") not in records:
+        if node.get("type") != "Slope":
             continue
-        record = records[node["id"]]
+        slope_id = node["id"]
+        if slope_id in reviewed:
+            apply_recognition_values(node.setdefault("props", {}), reviewed[slope_id])
+        record = records.get(slope_id)
+        if record is None:
+            continue
         applied += 1
         values = deepcopy(record.get("fields", {}))
         props = node.setdefault("props", {})

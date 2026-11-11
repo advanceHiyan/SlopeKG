@@ -11,18 +11,30 @@ class DemoPipeline(BasicPipeline):
     """Dispatch Basic / Knowledge / Visual / Document; accept historical aliases."""
 
     def run(self, *args, recognizer="basic", input_pdfs=None, model_profile=None, review_profile=None,
-            visual_settings=None, knowledge_settings=None, document_settings=None, prepare_only=False, **options):
+            visual_settings=None, knowledge_settings=None, document_settings=None, agent_settings=None,
+            prepare_only=False, resume_from=None, page_selections=None, **options):
         if any(key in options for key in ('use_llm', 'llm_model')):
             raise ValueError("旧文字deep参数已移除；多模态模型请使用model_profile")
         recognizer = normalize_recognizer(recognizer)
+        if recognizer != 'agent' and (resume_from is not None or page_selections is not None):
+            raise ValueError('接续选页设置需要选择自主 Agent')
         if recognizer == "basic":
-            if any(v is not None for v in (input_pdfs, model_profile, review_profile, visual_settings, knowledge_settings, document_settings)) or prepare_only:
+            if any(v is not None for v in (input_pdfs, model_profile, review_profile, visual_settings, knowledge_settings, document_settings, agent_settings)) or prepare_only:
                 raise ValueError("模型参数需要选择知联、视读或整读")
             return self.run_basic(*args, **options)
         if args:
             raise ValueError("模型路线参数必须显式命名")
         if options.get('parse_mode', 'basic') != 'basic' or options.get('reuse_parsed'):
             raise ValueError("基读 Basic 的缓存选项不能混用模型路线")
+        if recognizer == 'agent':
+            if any(v is not None for v in (visual_settings,knowledge_settings,document_settings,review_profile)):
+                raise ValueError('自主 Agent 不能混用其他路线或复核模型设置')
+            from .agent_service import run_agent_recognition
+            return {**run_agent_recognition(self.paths,input_pdfs=input_pdfs,model_profile=model_profile,
+                agent_settings=agent_settings,prepare_only=prepare_only,progress_callback=options.get('progress_callback'),
+                resume_from=resume_from,page_selections=page_selections),
+                'route':recognition_route('agent').payload()}
+        if agent_settings is not None:raise ValueError('自主设置需要选择自主 Agent')
         if recognizer == 'document':
             if visual_settings is not None or knowledge_settings is not None:
                 raise ValueError('整读 Document 不能混用其他路线设置')

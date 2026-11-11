@@ -29,6 +29,7 @@ class DemoPaths:
     cache_dir: Path = CACHE_DIR
     web_dir: Path = WEB_DIR
     attribute_dictionary_file: Path = ATTRIBUTE_DICTIONARY_FILE
+    assessment_test_only: bool = False
 
     @property
     def graph_json(self) -> Path:

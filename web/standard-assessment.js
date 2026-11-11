@@ -4,7 +4,10 @@
   let current=null,busy=false,workspaceMode='main';
   const status=document.querySelector('#assessmentStatus'),workspace=document.querySelector('#assessmentWorkspace');
   const labels={development:'发育程度',harm:'危害程度',assessment_basis:'灾情/险情',deaths:'死亡人数',threatened_people:'受威胁人数',direct_loss_wan:'直接经济损失（万元）',potential_loss_wan:'可能直接经济损失（万元）',observations:'观察记录',geological_context:'地质环境',fs:'稳定系数 Fs',fst:'安全系数 Fst',reference:'原报告参考结论',body_mean_angle:'滑体平均坡度',hazard_type:'灾害类型'};
-  const origin={basic:'基读原文记录',knowledge:'知联原文记录',visual:'视读原文记录',manual:'人工提供',manual_transcription:'原件核对转录',llm:'模型建议',rule:'规则推导'};
+  const origin={
+    ...Object.fromEntries(Object.entries(window.SlopeKGNav.methodLabels).map(([id,label])=>[id,`${label} 原文记录`])),
+    manual:'人工提供',manual_transcription:'原件核对转录',llm:'模型建议',rule:'规则推导',
+  };
   const unit=u=>({person:'人','10k_CNY':'万元',deg:'°','1':''})[u]??u;
   const val=v=>v==null?'未知':v.kind==='enum'?v.label:v.kind==='number'?`${v.value} ${unit(v.unit)}`:v.kind==='interval'?`${v.lower??'…'}—${v.upper??'…'} ${unit(v.unit)}`:v.text??JSON.stringify(v);
   const args=()=>({contract_version:version,case_id:current.case.case_id,expected_resolution_version:current.case.resolution_version,...(workspaceMode==='debug'?{workspace:'debug'}:{})});

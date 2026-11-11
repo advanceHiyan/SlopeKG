@@ -1,25 +1,27 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>识别调试工作台 - SlopeKG</title><link rel="stylesheet" href="./pages.css?v=20261102-nav3"><link rel="stylesheet" href="./recognition-debug.css?v=20261102-audit1"></head>
-<body class="portal-body"><header class="site-header"><div class="site-header-inner"><a class="site-brand" href="./index.html">SlopeKG<small>识别过程与原始证据</small></a><nav class="site-nav"><a class="nav-debug active" href="./recognition-debug.html">识别调试</a><a href="./pdf-ingestion.html">PDF识别工作台</a><a href="./graph.html">正式图谱</a></nav></div></header>
+<title>识别调试工作台 - SlopeKG</title><link rel="stylesheet" href="./pages.css?v=20261102-nav3"><link rel="stylesheet" href="./recognition-debug.css?v=20261109-ui1"><link rel="stylesheet" href="./navigation.css?v=20261109-ui1"></head>
+<body class="portal-body"><header class="site-header"><div class="site-header-inner"><a class="site-brand" href="./index.html">SlopeKG<small>识别过程与原始证据</small></a><nav class="site-nav"><a class="nav-debug active" href="./recognition-debug.html">识别调试</a><a href="./recognition-methods.html">识别方法</a><a href="./graph.html">正式图谱</a></nav></div></header>
 <main class="page-main debug-main">
-<div class="page-heading"><div><p class="eyebrow">RECOGNITION INSPECTOR</p><h1>识别调试工作台</h1><p>从一页原件追到一条候选，逐步检查文字、证据、模型输入输出和校验分支。</p></div><button id="refresh" class="button secondary">刷新记录</button></div>
+<div class="page-heading"><div><p class="eyebrow">开发工具</p><h1>识别过程检查</h1><p>从一页原件追到一条候选，逐步检查文字、证据、模型输入输出和校验分支。</p></div><button id="refresh" class="button secondary">刷新记录</button></div>
 <p id="error" class="notice error" role="alert" hidden></p>
-<section class="method-section" aria-label="三类自动化识别方法">
+<details class="method-section method-explanation"><summary>识别方法说明</summary>
 <div class="method-cards" id="methodCards">
 <button type="button" data-route="basic" aria-pressed="false"><strong>基读 Basic</strong><span>PDF文字、表格 → 本地OCR → 规则提取</span><small>本地运行，不调用大模型；产生基础图谱。</small></button>
 <button type="button" data-route="knowledge" aria-pressed="true"><strong>知联 Knowledge</strong><span>文字与OCR → 对象发现与关联 → 知识重组</span><small>模型读取文字，不读取原页图像；保留候选。</small></button>
 <button type="button" data-route="visual" aria-pressed="false"><strong>视读 Visual</strong><span>PDF原页图像 → 版面与区域细读 → 核验</span><small>模型直接读取图像；保留候选与未读区域。</small></button>
+<button type="button" data-route="document" aria-pressed="false"><strong>整读 Document</strong><span>内容恢复 → 重合分区 → 分批提取与原页复核</span><small>沿一条候选追查来源、上下文和模型交互。</small></button>
 </div><p id="routeSummary" class="muted" role="status"></p>
-</section>
+</details>
 <nav class="debug-view-switch" aria-label="调试工作区"><button class="active" data-view="process">识别过程</button><button data-view="tests">数据集与测试点</button><button data-view="history">历史记录与对照</button></nav>
 <div id="processView">
 <section class="card debug-controls" aria-label="选择调试记录">
-<label>当前识别方法<select id="route"><option value="basic">基读 Basic</option><option value="knowledge" selected>知联 Knowledge</option><option value="visual">视读 Visual</option></select></label>
+<label>当前识别方法<select id="route"><option value="basic">基读 Basic</option><option value="knowledge" selected>知联 Knowledge</option><option value="visual">视读 Visual</option><option value="document">整读 Document</option></select></label>
 <label>记录来源<select id="run"><option value="live">当前生产记录</option></select></label>
 <label class="document-control">资料<select id="document"><option value="">正在读取…</option></select></label>
 <div class="debug-status"><span id="runStatus">读取中</span><small id="version"></small></div>
 </section>
+<section id="documentOverview" class="card" hidden aria-label="整读运行范围与结果"></section>
 <details class="card debug-launch" id="launchPanel"><summary>新建调试任务 · 保存完整模型输入输出</summary>
 <p id="launchHelp">选择方法与资料后运行。新模型任务保存提示词、请求正文、图像和供应商响应原文；历史记录未保存的内容会明确标为缺失。</p>
 <div id="modelLaunch"><div class="launch-grid"><label>资料<select id="inputFile"></select></label><label>模型<select id="model"></select></label><label>调用上限<input id="maxCalls" type="number" min="1" max="10000" value="64"></label><label>并发<input id="concurrency" type="number" min="1" max="16" value="6"></label><label id="ocrLabel">本地OCR补页<input id="ocrPages" type="number" min="0" max="1000" value="0"></label></div>
@@ -61,7 +63,7 @@
 <div class="debug-filter"><label class="search-control">数据集名称<input id="datasetName" maxlength="160"></label><button id="fillPointTemplate" class="button ghost">填入格式示例</button></div>
 <label>测试点JSON<textarea id="datasetJson" spellcheck="false" aria-label="测试点JSON"></textarea></label><label class="check"><input id="datasetOpen" type="checkbox">确认当前原件属于开放开发资料，不是隐藏或曾作为隐藏集的资料</label><button id="saveDataset" class="button secondary">保存新数据集版本</button><p id="datasetSaveStatus" class="muted"></p>
 </details></section>
-<section id="historyView" hidden><div class="card"><div class="debug-title"><div><h2>历史记录</h2><p class="muted">原件、配置、完整模型输入输出、中间结果及测试定义分别冻结保存。打开和导出均不重新调用模型。快照保存完成与识别处理完成分别显示。</p></div><button id="reloadHistory" class="button ghost">刷新历史</button></div><div class="debug-filter"><label>识别方法<select id="historyRoute"><option value="">全部方法</option><option value="basic">基读 Basic</option><option value="knowledge">知联 Knowledge</option><option value="visual">视读 Visual</option></select></label><label class="search-control">搜索记录<input id="historySearch" type="search" placeholder="名称、标签、数据集、状态或记录ID"></label><button id="searchHistory" class="button ghost">搜索</button></div><div id="historyList"></div><div class="debug-pagination"><button id="historyPrev" class="button ghost" disabled>上一批历史</button><span id="historyPage"></span><button id="historyNext" class="button ghost" disabled>下一批历史</button></div></div>
+<section id="historyView" hidden><div class="card"><div class="debug-title"><div><h2>历史记录</h2><p class="muted">原件、配置、完整模型输入输出、中间结果及测试定义分别冻结保存。打开和导出均不重新调用模型。快照保存完成与识别处理完成分别显示。</p></div><button id="reloadHistory" class="button ghost">刷新历史</button></div><div class="debug-filter"><label>识别方法<select id="historyRoute"><option value="">全部方法</option><option value="document">整读 Document</option><option value="basic">基读 Basic</option><option value="knowledge">知联 Knowledge</option><option value="visual">视读 Visual</option></select></label><label class="search-control">搜索记录<input id="historySearch" type="search" placeholder="名称、标签、数据集、状态或记录ID"></label><button id="searchHistory" class="button ghost">搜索</button></div><div id="historyList"></div><div class="debug-pagination"><button id="historyPrev" class="button ghost" disabled>上一批历史</button><span id="historyPage"></span><button id="historyNext" class="button ghost" disabled>下一批历史</button></div></div>
 <div class="card history-compare"><h2>两次记录对照</h2><p class="muted">固定左侧记录，再选择右侧记录。比较所选测试点的结果与命中事实；定义版本不同会明确提示。</p><div class="debug-filter"><label class="search-control">左侧记录ID<input id="compareLeft" readonly></label><label class="search-control">右侧记录ID<input id="compareRight" readonly></label><button id="compareHistory" class="button secondary">比较两次记录</button></div><div id="historyComparison"></div></div>
 </section>
 </main>
@@ -74,4 +76,4 @@
 </dialog>
 <dialog id="callDialog"><div class="dialog-heading"><div><p class="eyebrow">MODEL EXCHANGE</p><h2>大模型完整输入输出</h2></div><button id="closeCall" class="button ghost">关闭</button></div><p id="callNotes" class="notice"></p><div class="debug-actions"><button id="downloadCall" class="button">下载本次完整输入输出</button><button id="copyCall" class="button ghost">复制完整JSON</button></div><div id="callBody"></div></dialog>
 <div id="toast" role="status" hidden></div>
-<script src="./api.js?v=20261102"></script><script src="./recognition-debug.js?v=20261102-audit1"></script><script src="./recognition-debug-tests.js?v=20261102-audit1"></script><script src="./recognition-assessment-link.js?v=20261102-1"></script></body></html>
+<script src="./navigation.js?v=20261109-ui1"></script><script src="./api.js?v=20261102"></script><script src="./recognition-debug.js?v=20261109-ui1"></script><script src="./document-debug.js?v=20261109-ui1"></script><script src="./recognition-debug-tests.js?v=20261109-ui1"></script><script src="./recognition-assessment-link.js?v=20261102-1"></script></body></html>

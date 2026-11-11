@@ -166,10 +166,43 @@ def performance_policy_section(data):
         '<a href="'+escape(policy['official_thinking_docs'])+'">DeepSeek官方思考参数</a>。本HTML构建新增API仍为0；上面的6次是单独参数调试，不属于4份失败样例的新预测。</p></section>')
 
 def frame(title,page,nav,content,js):
+    content = ('<section class="card" id="documentFrontend"><h2>第四路整读前端调试</h2>'
+        '<p><a href="http://127.0.0.1:8766/web/recognition-debug.html?route=document&amp;run=open-document-survey&amp;stage=facts">打开整读调试工作台 · 已保存开放报告第22–27页</a>。'
+        '点击候选中的“沿这条候选追查”，依次检查原始PDF与解析行、内容恢复与分区、提取、原页复核、跨组审计和最终记录。'
+        '每次交互可展开完整提示词、精确请求、图像、供应商原始响应及校验结果；分组覆盖表列出实际带入与缺席的来源块。</p>'
+        '<p>浏览与导出均为0新API。选页样例共342条候选、221条待核；流程完成与质量状态分开。'
+        '新任务从运行面板启动，读取所选PDF整份文件；页面筛选只用于浏览。可保存历史快照和检查已有预测，第四路测试点面板暂不支持独立重跑。</p></section>') + content
     nav_html=''.join(f'<a href="#{k}">{escape(v)}</a>' for k,v in nav)
     return f'''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{escape(title)}</title><style>{CSS}</style><body data-page="{page}"><header><div class="sub">SlopeKG · 知联 Knowledge · 固定维护入口</div><h1>{escape(title)}</h1><nav><a href="知联流程详解.html">流程、参数与源码</a>　<a href="知联失败样例.html">开放失败样例全链路</a></nav><div class="sub">更新于 <span id="generated"></span> · 本次不调用模型API</div></header><div class="wrap"><aside>{nav_html}</aside><main>{content}<div class="card"><b>前端测试点与历史入口：</b><code>/web/recognition-debug.html</code> 的“数据集与测试点”可选测开放检查点；“历史记录与对照”可重新打开一次完整快照、导出ZIP、追加复核并选择异常点重测。数据集预期只进入检查器，不送给识别模型。桌面启动器会检查8766默认服务实际加载的版本与调试接口，空闲旧后端自动重载，运行中的任务不会被强制中断。自动字段规则、绑定原预测的历史结论和本地人工判定分开；不等于独立验收或整文档准确率。</div><div class="foot">构建：scripts/build_knowledge_debug_html.py · 本页从当前磁盘源码和允许列出的开放历史产物生成；历史产物、缓存和机制测试分别标注。</div></main></div><script src="assets/debug_data.js"></script><script>{COMMON_JS}\n{js}</script></body></html>'''
 
 def write_html(out,data):
+    agent_trial=data.get('agent_trial')
+    fifth=''
+    if agent_trial:
+        fifth=('<section id="agentRoute"><h2>第五路：自主 Agent（DSH SDK）开放试跑</h2>'
+            '<p><b>当前前端：</b>智能识别保留第五路专门工作区，与资料管理、其他方法共享导航。已完成任务默认显示结果，原页按需展开；风险预评估返回时保留任务与原页。执行轨迹和模型调用位于过程详情，识别调试位于更多菜单的开发工具。技术来源保留于源码文档。新任务不限调用次数和整任务时长，可主动停止并保留文件。下方18页历史试跑的160次/40分钟设置是当时冻结参数。</p>'
+            '<p>由Agent自己安排阅读、裁图、搜索、跨页追踪和分批整理。项目只提供资料工具、交付契约和本地结构核查。独立会话、项目密钥、运行时版本预检。</p>'
+            '<p><b>运行时归属：</b>2026-11-09将已验证的DSH 0.1.2-alpha.1、配套SDK和Node独立复制到SlopeKG项目内，程序文件逐项核验；不再从EasyCAE或个人DSH安装目录加载。升级先验证再切换，保留项目内可用版本。此迁移不改变下方历史试跑结果，也不构成新的语义验收。</p>'
+            '<p><b>国标接入：</b>新任务由Agent自主提交outputs/assessment.json，决定对象、时期、工况、标准输入、推断依据及缺口；完成后自动形成来源快照及预评估案例。接口校验结构与引用，不按字段关键词重判。原始提交、表15/17、缺口及复核版本可在PDF工作台继续查看。旧任务可接收原始事实，未提交的评估语义明确留缺；全部候选待复核。接口为/api/assessment-debug/agent-submit，契约为/api/assessment-debug/agent-contract。</p>'
+            '<p><a href="http://127.0.0.1:8766/web/agent-recognition.html">打开第五路本机试验入口</a> · '
+            '<a href="../20261107_第五路Agent/verification.json">完整试跑核验记录</a> · '
+            '<a href="../20261107_第五路Agent/试跑结果.html">结果、缺口与升级说明</a> · '
+            '<a href="../20261107_第五路Agent/开放检查点复核.json">开放检查点复核</a></p>'
+            '<p>本轮只覆盖原开放包4份18页。全部模型请求、原始响应和工具轨迹留存；所有事实作为待核候选，不冒充专业签认或整份PDF准确率。</p>'
+            '<details><summary>本轮状态、用量、冻结与核验</summary><pre>'+escape(json.dumps(agent_trial,ensure_ascii=False,indent=2))+'</pre></details></section>')
+        if (trial:=data.get('agent_risk_trial')):
+            fifth=fifth.replace('</section>', '<div class="card"><b>第五路接边坡风险 · 开放调试</b>'
+                '<p>两份工程体例模拟巡查档案按不同资料时点独立实跑，另复用真实W6开放选页。'
+                f'实际{trial["actual_model_requests"]}次模型请求；核对后隔离回放，现状候选{trial["standard_matches"]}/{trial["case_count"]}、'
+                f'动态筛查{trial["dynamic_matches"]}/{trial["case_count"]}符合预设。该历史测试发现异常漏提示及第五路入口不支持；入口限制已在后续接入改造解除，动态筛查问题仍单独保留。'
+                '这是风险逻辑诊断，未验证未来预测。'
+                '<a href="../20261107_DSH边坡风险测试/第五路边坡风险测试报告.html">查看证据、失败定位与回放对照</a>。</p></div></section>',1)
+        if (direct:=data.get('agent_assessment_direct')):
+            fifth=fifth.replace('</section>', '<div class="card"><b>2026-11-09 · 第五路输出直接参与评估</b>'
+                '<p>'+escape(direct['conclusion'])+'</p>'
+                '<p>check_outputs增加现有接收层和表15/17的真实只读试算，按输入反馈采用或排除原因；'
+                'Agent依据原文处理结构表达，保留缺失和冲突。旧结果不改写，临时试算不写正式库。'
+                '<a href="../20261109_第五路直接评估/第五路直接评估复测报告.html#photo-comparison">查看原始 PDF 与实际前端结果截图对照</a>。</p></div></section>',1)
     real_comparison=''
     if data.get('real_document_comparison'):
         real_comparison='<section id="realDocumentComparison"><h2>真实单样本对比：归属改善，整读复核仍受阻</h2><p><a href="../20261103_真实资料双路对比/当前单样本对比.html">查看真实报告6页、24个测试点的知联/整读对照</a>。当前只完成这一份选页样本；其余三份未执行，不当作整份75页已验证。</p><p>定向原文核对：知联9项完整、12项部分、3项遗漏；整读19项完整、5项部分。包含待核候选，不是准确率或召回率。整读最终复核输入212,744字符，超过100,000字符，未发送；191条候选均待核，完整流程未通过。</p><p>此前整份解析出现约10GB工作集；已修正选页预处理，332条选页来源单元保持一致。最后收尾新增1次请求，峰值约158.4MiB。累计19次尝试含2次中断，用量缺失部分不算0。当前已停止扩测。</p></section>'
@@ -188,7 +221,18 @@ def write_html(out,data):
             '候选数量增加不算提升，下一步应减少重复提取，不能继续堆固定审核层。当前源码含document_workflow。</p></section>'
             +real_comparison.replace('真实单样本对比：归属改善，整读复核仍受阻','历史v0.1基线：归属改善，整读复核受阻'))
         fourth=fourth.replace('第四路整读：先恢复内容，再分组与归属','历史v0.1合成小测：先恢复内容，再分组与归属')
-    assessment_bridge='''<section class="card" id="pdfRiskBridge"><h2>从同一次识别继续到国标风险预评估</h2><p><a href="http://127.0.0.1:8766/web/recognition-debug.html">在识别调试工作台选定记录</a>，点击“衔接当前记录”，进入<a href="http://127.0.0.1:8766/web/assessment-debug.html">PDF到风险全过程</a>。绑定标识包括识别历史ID、PDF哈希、来源对象、时期工况、评估案例及版本；不按文件名或相同桩号猜测同一物理坡体。</p><p>识别候选 → 字段转换/未采用原因 → 对象时期工况校核 → 有效输入/来源选择 → 专业判断及实际模型I/O → 表15 → 表17 → 缺口/冲突/区间 → 人工复核和历史版本。每个规则输入可追溯识别事实及PDF原页，并可导出两段完整记录。</p><p>“衔接并自动预评估”只做本地整理与确定性查表，使用独立调试评估库。模型辅助需要明确允许发送相关片段；不把模型建议当专业签认。旧识别记录与人工修改均保留，读取本页不触发识别或评估。</p></section>'''
+    if data.get('document_failure_trace'):
+        real_comparison=('<section id="documentFailureTrace"><h2>整读失败样例：原始PDF到最终记录</h2>'
+            '<p><a href="../20261103_真实资料双路对比/第四路失败样例详解.html">展开4个真实失败样例的完整证据链</a>：'
+            '原始75页PDF可直接查看；每例列出相关原生行、内容重建、实际分组与批次上下文、模型原始提取、原页复核、跨组检查及最终候选。'
+            '模型原始回答与程序校验结果分别展示，提供完整输入及供应商回包。仅整理已保存的开放结果，新增API为0。</p></section>'+real_comparison)
+    assessment_bridge='''<section class="card" id="pdfRiskBridge"><h2>从同一次识别继续到国标风险预评估</h2><p><a href="http://127.0.0.1:8766/web/recognition-debug.html">在识别调试工作台选定记录</a>，点击“衔接当前记录”，进入<a href="http://127.0.0.1:8766/web/assessment-debug.html">PDF到风险全过程</a>。绑定标识包括识别历史ID、PDF哈希、来源对象、时期工况、评估案例及版本；不按文件名或相同桩号猜测同一物理坡体。</p><p>识别候选 → 字段转换/未采用原因 → 对象时期工况校核 → 有效输入/来源选择 → 专业判断及实际模型I/O → 表15 → 表17 → 缺口/冲突/区间 → 人工复核和历史版本。每个规则输入可追溯识别事实及PDF原页，并可导出两段完整记录。</p><p>“衔接并自动预评估”只做本地整理与确定性查表，使用独立调试评估库。模型辅助需要明确允许发送相关片段；不把模型建议当专业签认。旧识别记录与人工修改均保留，读取本页不触发识别或评估。</p><p>有多份资料时，可从预评估页点“归入边坡档案”，到<a href="http://127.0.0.1:8766/web/slope-assessment.html">边坡评估工作台</a>确认同一滑坡体，选择同期同工况资料组证。每次评估保存所用快照、原页与版本。前端可补充原文证据、纠正数值并查看旧值。</p></section>'''
+    workbench_report = '20261109_边坡评估前端验收/验收记录.html'
+    if (out.parent / workbench_report).is_file():
+        assessment_bridge = assessment_bridge.removesuffix('</section>') + (
+            f'<p><a href="../{workbench_report}">查看内置浏览器模拟验收</a>。两份模拟 PDF 经第五路实际识别，'
+            '在页面完成同坡组证、原页补证、纠错、重算与模拟复核。验收记录保留修复前后的结果和历史版本。</p></section>'
+        )
     workspace=''
     receipt=out/'workspace_import_receipt.json'
     if receipt.is_file():
@@ -232,9 +276,10 @@ def write_html(out,data):
     all_stages='<details><summary>展开全部阶段对照（适合连续阅读）</summary><div class="scroll"><table><tr><th>阶段</th><th>输入</th><th>处理</th><th>失败边界</th></tr>'+''.join('<tr>'+''.join('<td>'+escape(str(s[k]))+'</td>' for k in [1,2,3,4])+'</tr>' for s in data['stages'])+'</table></div></details>'
     flow=flow.replace('<div id="stageDetail" class="stage card"></div>','<div id="stageDetail" class="stage card"></div>'+all_stages)
     walkthrough=guide_walkthrough(data)
-    flow=real_comparison+fourth+workspace+assessment_bridge+performance_policy_section(data)+flow+walkthrough+source_section()+notes_section()
+    flow=fifth+real_comparison+fourth+workspace+assessment_bridge+performance_policy_section(data)+flow+walkthrough+source_section()+notes_section()
     nav=[('overview','当前版本与边界'),('flow','执行顺序'),('params','精确参数与引擎'),('schema','数据结构'),('identity','目录与跨块归属'),('gates','门控与状态'),('budget','调用 / 缓存 / 重试'),('promptsSection','完整提示词'),('finish','完成与未完成'),('overfit','过拟合与缺陷'),('source','源码'),('notesSection','你的备注')]
     nav.insert(0,('maxPerformance','思考档位选择'))
+    if fifth:nav.insert(0,('agentRoute','第五路自主试跑'))
     if fourth:nav.insert(0,('documentRoute','第四路小测'))
     if real_comparison:nav.insert(0,('realDocumentComparison','真实单样本对比'))
     nav.insert(-2,('guideWalkthrough','指南真实逐步案例'))
@@ -250,9 +295,10 @@ def write_html(out,data):
 <section id="diagnostics"><h2>6. 全部已保存诊断：未归属、隔离、错误、冲突与门控</h2><p>不是只挑成功输出。这里完整展开该版本保存的diagnostics/errors/source_accounting等字段。某字段不存在表示该版本未记录，不补成0。</p><div id="allDiagnostics"></div></section>
 <section id="assessment"><h2>7. 开放开发集判定依据</h2><p>以下来自预测冻结后的既有人工式AI原文核对；不是专业签认，不是全文件精确率/召回率。它只用于这几份已开放资料的debug。旧运行结果与新缓存记录分开看。</p><div id="allAssessments"></div></section>
 '''
-    cases=real_comparison+fourth+workspace+assessment_bridge+performance_policy_section(data)+cases+walkthrough+notes_section()
+    cases=fifth+real_comparison+fourth+workspace+assessment_bridge+performance_policy_section(data)+cases+walkthrough+notes_section()
     nav=[('scope','资料边界'),('choose','选择资料 / 版本'),('failuresSection','失败点'),('trace','阶段输入输出'),('pdfPanel','原页与证据追踪'),('facts','全部最终事实'),('diagnostics','完整诊断'),('assessment','开放集判定'),('notesSection','你的备注')]
     nav.insert(0,('maxPerformance','思考档位选择'))
+    if fifth:nav.insert(0,('agentRoute','第五路自主试跑'))
     if fourth:nav.insert(0,('documentRoute','第四路小测'))
     if real_comparison:nav.insert(0,('realDocumentComparison','真实单样本对比'))
     nav.insert(-1,('guideWalkthrough','指南真实逐步案例'))

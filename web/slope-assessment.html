@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>边坡评估工作台 · SlopeKG</title>
+  <link rel="stylesheet" href="./pages.css?v=20261102-nav3"/>
+  <link rel="stylesheet" href="./navigation.css?v=20261109-workbench"/>
+  <link rel="stylesheet" href="./slope-assessment.css?v=20261110-history"/>
+</head>
+<body class="portal-body">
+  <header class="site-header"></header>
+  <main class="page-main slope-workbench">
+    <div class="page-heading">
+      <div>
+        <p class="workbench-kicker">GB/T 40112—2021 · 滑坡现状危险性评估</p>
+        <h1>风险研判</h1>
+        <p>选边坡、选资料、开始评估。页面会显示本次结论和还缺哪些证据。</p>
+      </div>
+      <div class="workbench-actions">
+        <a class="button" id="wsIngest" href="./pdf-ingestion.html">上传或识别 PDF</a>
+        <a class="button ghost" href="./risk.html?legacy=1">原有评估与筛查</a>
+      </div>
+    </div>
+    <div id="wsTestBanner" class="notice" hidden>模拟验收工作区。本页的资料、评估和人工复核仅用于本次测试。</div>
+    <div id="wsNotice" class="notice workbench-notice" role="status" aria-live="polite" hidden></div>
+    <div id="wsSourceHint" class="notice info" hidden></div>
+    <div class="workbench-layout">
+      <aside class="card workbench-sidebar" aria-label="查找边坡">
+        <div class="workbench-bar">
+          <h2>边坡档案</h2>
+          <button type="button" id="wsNewSlope" class="button small secondary" data-action="new-slope">新建边坡</button>
+        </div>
+        <label for="wsSlopeSearch">搜索边坡</label>
+        <input id="wsSlopeSearch" type="search" placeholder="输入名称、编号或位置"/>
+        <label for="wsSlopeSelect">评估对象</label>
+        <select id="wsSlopeSelect" disabled><option value="">正在读取档案…</option></select>
+        <p id="wsSlopeCount" class="workbench-muted"></p>
+      </aside>
+      <div id="wsDossier" class="workbench-stack">
+        <section class="card detail-empty">正在读取边坡和资料…</section>
+      </div>
+    </div>
+  </main>
+  <dialog id="wsDialog" class="workbench-dialog" aria-labelledby="wsDialogTitle">
+    <form id="wsActionForm">
+      <header class="workbench-bar">
+        <h2 id="wsDialogTitle"></h2>
+        <button type="button" class="button small ghost" data-action="close-dialog">取消</button>
+      </header>
+      <div id="wsDialogBody" class="workbench-form"></div>
+      <p id="wsDialogError" class="notice error" role="alert" hidden></p>
+      <footer class="workbench-actions">
+        <button type="button" class="button ghost" data-action="refresh-case" id="wsDialogRefresh" hidden>刷新当前案例</button>
+        <button type="submit" class="button" id="wsDialogSubmit">保存</button>
+      </footer>
+    </form>
+  </dialog>
+  <script src="./navigation.js?v=20261109-workbench"></script>
+  <script src="./api.js?v=20261028"></script>
+  <script src="./slope-assessment.js?v=20261110-history"></script>
+</body>
+</html>

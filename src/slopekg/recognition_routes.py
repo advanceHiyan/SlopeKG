@@ -26,6 +26,7 @@ ROUTES = (
     RecognitionRoute('knowledge', '知联', 'Knowledge'),
     RecognitionRoute('visual', '视读', 'Visual', ('multimodal',)),
     RecognitionRoute('document', '整读', 'Document'),
+    RecognitionRoute('agent', '自主', 'Agent'),
 )
 RECOGNIZER_CHOICES = tuple(name for route in ROUTES for name in (route.id, *route.aliases))
 
@@ -34,7 +35,7 @@ def recognition_route(value='basic'):
     for route in ROUTES:
         if value == route.id or value in route.aliases:
             return route
-    raise ValueError('请选择基读 Basic、知联 Knowledge、视读 Visual 或整读 Document')
+    raise ValueError('请选择基读 Basic、知联 Knowledge、视读 Visual、整读 Document 或自主 Agent')
 
 
 def normalize_recognizer(value='basic'):

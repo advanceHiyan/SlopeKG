@@ -1,85 +1,16 @@
 <!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PDF解析 - SlopeKG</title>
-    <link rel="stylesheet" href="./pages.css?v=20261102-nav3" />
-    <link rel="stylesheet" href="./recognition.css?v=20261018" />
-  </head>
-  <body class="portal-body" data-page="pdf-ingestion">
-    <header class="site-header"><div class="site-header-inner">
-      <a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a>
-      <nav class="site-nav"><a class="nav-debug" href="./recognition-debug.html">识别调试</a><a href="./index.html">总览</a><a class="active" href="./pdf-ingestion.html">PDF解析</a><a href="./slopes.html">边坡档案</a><a href="./graph.html">关系图谱</a><a href="./rules.html">规则库</a><a href="./data-status.html">数据与接口</a><a href="./risk.html">风险研判</a></nav>
-    </div></header>
-    <main class="page-main">
-      <div class="page-heading"><div><h1>PDF识别工作台</h1><p>基读 Basic、视读 Visual 与知联 Knowledge分别运行。先看来源与待定项，再决定哪些内容可信。</p><a href="./recognition-debug.html?route=basic">调试基读 Basic</a> · <a href="./recognition-debug.html?route=knowledge">调试知联 Knowledge</a> · <a href="./recognition-debug.html?route=visual">调试视读 Visual</a></div><button id="refreshBtn" class="button secondary" type="button">刷新状态</button></div>
-      <div class="notice info"><a href="./document-recognition.html">第四路：整读 Document（实验）</a>先恢复连续内容，再形成可重合资料组并核对归属。</div>
-      <div class="notice info">上传的PDF保存在项目原始资料目录，该目录不会提交到 Git。系统不依赖人工种子即可运行；“已上传”不等于“已解析”，请以任务完成状态和文档清单为准。</div>
-
-      <section id="ingestMetrics" class="grid metrics-grid"><div class="loading">加载中…</div></section>
-
-      <section class="card recognition-card" aria-labelledby="recognitionHeading">
-        <div class="card-title-row"><div><h2 id="recognitionHeading">视读 Visual</h2><p class="section-subtitle">直接读取原页图像，适用于正文、扫描页、表格和工程图。结果保留在候选区。</p></div><span class="badge pending">独立路线 · 候选结果</span></div>
-        <div class="recognition-controls">
-          <label>读取模型<select id="recognitionModel"><option value="">加载中…</option></select></label>
-          <label>调用上限<input id="recognitionMaxCalls" type="number" min="1" max="100000" value="500" /></label>
-          <label>模型并发<input id="recognitionConcurrency" type="number" min="1" max="32" value="2" /></label>
-        </div>
-        <p id="recognitionEndpoint" class="form-help" aria-live="polite">正在读取本地模型配置…</p>
-        <label class="recognition-confirm"><input id="recognitionAllowExternal" type="checkbox" />允许把下方勾选PDF的原文及页面图像发送到上述模型接口</label>
-        <div class="recognition-doc-head"><strong>选择本次资料 <span id="recognitionSelectedCount">0份</span></strong><input id="recognitionFileSearch" type="search" aria-label="筛选视读资料" placeholder="按文件名或目录筛选" /></div>
-        <div id="recognitionFiles" class="recognition-files" aria-label="视读输入资料">正在加载资料…</div>
-        <div class="action-row"><button id="recognitionPrepare" class="button ghost" disabled>仅本地准备</button><button id="recognitionRun" class="button" disabled>识别所选PDF</button></div>
-        <p class="form-help">本地准备不调用模型。识别按调用上限停止，不保证用完上限就读完；自动通过不代表人工确认，也不会自动写入现有图谱。</p>
-        <p id="recognitionError" class="notice error" hidden role="alert"></p>
-      </section>
-
-      <section class="grid ingest-layout">
-        <div class="card">
-          <h2>添加资料与基读 Basic</h2>
-          <div id="dropZone" class="pdf-drop-zone" tabindex="0" role="button" aria-label="选择或拖入PDF文件">
-            <strong>拖入PDF，或点击选择文件</strong>
-            <span>支持多文件；单个文件不超过256 MB，本次请求不超过512 MB</span>
-            <input id="pdfInput" type="file" accept="application/pdf,.pdf" multiple hidden />
-          </div>
-          <div id="selectedFiles" class="selected-files"><div class="detail-empty">尚未选择文件。</div></div>
-          <details open class="legacy-controls"><summary>基读 Basic</summary>
-          <div class="ingest-options">
-            <label><span>本次最多执行OCR页数</span><input id="ocrPages" type="number" min="0" max="1000" value="1000" /></label>
-            <label><span>OCR计算设备</span><select id="ocrDevice"><option value="auto">自动（GPU优先）</option><option value="gpu">仅GPU</option><option value="cpu">仅CPU</option></select></label>
-            <label><span>页面渲染并发</span><input id="ocrWorkers" type="number" min="1" max="16" value="4" /></label>
-            <label><span>GPU批量页数</span><input id="ocrBatchSize" type="number" min="0" max="32" value="0" /></label>
-            <label class="check-option"><input id="forceOcr" type="checkbox" /><span>重新执行已处理过的OCR任务</span></label>
-          </div>
-          <p class="form-help">批量页数为0时自动选择：CPU逐页、GPU每批4页。页面渲染可并发；单张GPU采用批量推理，避免重复加载多个模型撑爆显存。OCR值为0时仍会完成逐页分类并生成待处理队列。</p>
-          <div class="action-row"><button id="uploadOnlyBtn" class="button" type="button" disabled>上传并基读更新</button><button id="rerunBtn" class="button ghost" type="button">基读全部资料</button><button id="reextractBtn" class="button ghost" type="button">基于现有文本重新抽取</button></div>
-          <p class="form-help">基读 Basic在本地运行并更新图谱；知联 Knowledge和视读 Visual可在统一识别调试入口运行，分别保留候选结果。</p>
-          </details>
-        </div>
-
-        <aside class="card job-card">
-          <div class="card-title-row"><h2>处理任务</h2><span id="jobStatus" class="badge">暂无任务</span></div>
-          <div class="job-progress-head"><strong id="jobPercent">0%</strong><span id="jobStage">等待开始</span></div>
-          <div class="job-progress-track" role="progressbar" aria-label="PDF处理进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="jobProgressBar"></span></div>
-          <p id="jobMessage" class="job-message">选择PDF上传，或重新解析目录中的全部资料。</p>
-          <div id="jobDetails" class="detail-list compact"><div class="detail-row"><small>说明</small>任务在后台运行，离开本页面不会中断。</div></div>
-          <div id="jobError" class="notice error" hidden></div>
-        </aside>
-      </section>
-
-      <section class="card recognition-card" aria-labelledby="recognitionResultsHeading">
-        <div class="card-title-row"><div><h2 id="recognitionResultsHeading">最近一次视读结果</h2><p id="recognitionResultNote" class="section-subtitle">暂无结果；不将自动通过数量换算成人工准确率。</p></div><select id="recognitionStatusFilter" aria-label="筛选候选状态"><option value="">全部候选</option><option value="verified_model">自动核验通过</option><option value="pending">待定</option><option value="rejected">已拒绝</option></select></div>
-        <div id="recognitionMetrics" class="grid metrics-grid"></div>
-        <div class="table-wrap"><table class="data-table"><thead><tr><th>来源</th><th>对象 / 范围</th><th>字段 / 值</th><th>状态与证据</th></tr></thead><tbody id="recognitionRows"><tr><td colspan="4">暂无结果。</td></tr></tbody></table></div>
-        <div class="recognition-pagination"><button id="recognitionPrev" class="button ghost" disabled>上一页</button><span id="recognitionPageInfo">0条</span><button id="recognitionNext" class="button ghost" disabled>下一页</button></div>
-      </section>
-
-      <section class="card" style="margin-top:16px">
-        <div class="card-title-row"><div><h2>PDF资料与解析状态</h2><p class="section-subtitle">逐份显示页型、原生文本块、表格和OCR队列；缺失项会明确标记。</p></div><span id="documentSummary" class="badge">加载中</span></div>
-        <div class="table-wrap"><table class="data-table document-table"><thead><tr><th>文件</th><th>大小</th><th>类型 / 页数</th><th>逐页策略</th><th>抽取产物</th><th>状态</th></tr></thead><tbody id="documentRows"><tr><td colspan="6">加载中…</td></tr></tbody></table></div>
-      </section>
-    <p id="artifactVersion" class="notice" aria-live="polite">正在核对成果版本…</p></main>
-    <script src="./api.js?v=20260714-1"></script><script src="./pdf-ingestion.js?v=20261028-names"></script><script src="./recognition.js?v=20261028-names"></script>
-  </body>
-</html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>智能识别 · SlopeKG</title><link rel="stylesheet" href="./agent-workspace.css?v=20261109-ui1"><link rel="stylesheet" href="./navigation.css?v=20261109-ui1"></head>
+<body><div class="workspace evidence-hidden">
+<aside class="sidebar" aria-label="智能识别任务">
+<div class="workspace-label">智能识别<small>资料 · 对象 · 原文证据</small></div><button id="newTask" class="new-task">＋ 新建识别任务</button>
+<div class="sidebar-label">识别记录 <button id="refresh" class="icon-button" aria-label="刷新记录">↻</button></div><nav id="history" class="history" aria-label="历史识别任务"><p class="muted">正在读取记录…</p></nav>
+<div class="sidebar-bottom"><a href="./pdf-library.html">资料管理</a><a href="./recognition-debug.html">开发工具 · 识别调试</a></div></aside>
+<main class="conversation"><nav class="method-nav" aria-label="识别方法"></nav><header class="task-header"><button id="toggleTasks" class="icon-button mobile-only" aria-label="切换历史任务">☰</button><div><p class="eyebrow">智能识别 · 第五路</p><h1 id="taskTitle">选择资料，开始识别</h1></div><div class="header-actions"><span id="runStatus" class="status">新任务</span><button id="toggleEvidence" class="icon-button" aria-label="切换资料面板">▤</button></div></header>
+<nav class="tabs" aria-label="任务视图"><button data-tab="results">识别结果</button><button data-tab="chat">对话与进展</button><button data-tab="assessment">风险预评估</button><details class="task-more"><summary>过程详情</summary><div><button data-tab="trace">执行轨迹</button><button data-tab="calls">模型调用</button></div></details></nav><div id="error" class="error-banner" role="alert" hidden></div><section id="feed" class="feed"></section><div id="finishedActions" class="finished-actions" hidden><span>已保存的识别结果 · 待复核</span><button data-new-task>＋ 新建任务</button></div>
+<footer class="composer-wrap" id="taskComposer"><div id="runningBar" class="running-bar" hidden><span><i class="pulse"></i> <span id="activity">正在处理资料</span></span><button id="stop" class="stop-button">■ 停止任务</button></div><div id="selectedChips" class="selected-chips"></div>
+<div class="composer"><textarea id="instruction" rows="2" maxlength="20000" aria-label="本次识别要求" placeholder="填写本次识别重点，例如：按边坡和危岩体整理参数，保留原文位置…"></textarea><div class="composer-actions"><div><button id="chooseFiles" class="attach-button">＋ 资料 <span id="selectedCount"></span></button><select id="model" aria-label="识别模型"></select></div><div><button id="prepare" class="text-button" disabled>仅准备资料</button><button id="run" class="send-button" disabled aria-label="开始智能识别">开始识别 ↑</button></div></div></div><div class="composer-meta"><span>任务和结果自动保存 · 可随时停止</span><span id="usage">过程与结果自动保存</span></div></footer></main>
+<aside id="evidence" class="evidence" aria-label="资料与产物"><div class="evidence-heading"><h2>资料与产物</h2><span id="pageCount" class="muted"></span><button id="closeEvidence" class="icon-button panel-close" aria-label="关闭资料面板">×</button></div><div class="side-tabs"><button id="showSources" class="active">原始资料</button><button id="showOutputs">生成文件</button></div>
+<div id="sourcePanel"><label class="field-label" for="pageSelect">原页预览</label><select id="pageSelect"><option value="">选择历史任务后查看原页</option></select><div class="page-controls"><button id="pagePrev" aria-label="上一张原页">←</button><span id="pagePosition">—</span><button id="pageNext" aria-label="下一张原页">→</button></div><p id="sourceQuote" class="source-quote" hidden></p><div id="imageBox" class="image-box"><p>原图、裁图与定位信息<br>会保留在这里</p></div><a id="fullImage" class="small-link" target="_blank" rel="noopener" hidden>打开完整原图 ↗</a></div><div id="outputPanel" hidden><div id="outputFiles" class="file-list"></div></div>
+<details class="storage"><summary>过程保存在哪里？</summary><p>每次任务都有独立目录，离开页面不会中断后台任务。</p><dl id="storagePaths"></dl><div id="auditLinks"></div></details><p class="evidence-note">识别结果为待核候选。点击事实的原页证据，可核对对象、数值与上下文。</p></aside></div>
+<dialog id="filesDialog"><form method="dialog" class="dialog-heading"><div><h2>选择本次资料</h2><p>可多选，Agent 会自主安排阅读顺序。</p></div><button class="icon-button" aria-label="关闭资料选择">×</button></form><div class="file-search"><input id="searchFiles" type="search" placeholder="搜索文件名或目录" aria-label="筛选PDF"><button id="upload" class="secondary">上传 PDF</button><input id="uploadInput" type="file" accept=".pdf,application/pdf" multiple hidden></div><div id="files" class="pick-files"></div><p id="uploadStatus" class="muted" role="status"></p><p id="endpoint" class="muted"></p><label class="consent"><input id="allow" type="checkbox">允许将所选 PDF 的原文和页面图像发送到上述模型接口</label><div class="dialog-footer"><span id="dialogCount">已选 0 份</span><button id="confirmFiles" class="primary">使用所选资料</button></div></dialog>
+<dialog id="detailDialog" class="detail-dialog"><form method="dialog" class="dialog-heading"><h2 id="detailTitle">完整记录</h2><button class="icon-button" aria-label="关闭完整记录">×</button></form><div id="detailBody"></div></dialog><script src="./navigation.js?v=20261109-ui1"></script><script src="./api.js?v=20261028"></script><script src="./agent-recognition.js?v=20261110-delivery-recovery"></script></body></html>

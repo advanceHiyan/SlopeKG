@@ -12,6 +12,9 @@ def get_route(handler,parsed,paths):
         op=parsed.path.removeprefix(PREFIX)
         if op=='catalog':
             result=debug_flow.catalog(paths,{'route':v('route','knowledge'),'run_id':v('run_id','live'),'document':v('document')})
+        elif op=='agent-contract':
+            from .agent_bridge import intake_contract
+            result=intake_contract()
         elif op in {'flow','records','export'}:
             workspace=v('workspace','debug')
             if workspace not in {'main','debug'}:raise ValueError('无效评估工作区')
@@ -38,10 +41,13 @@ def get_route(handler,parsed,paths):
 
 
 def post_route(handler,parsed,paths):
-    if parsed.path!=PREFIX+'prepare':return False
+    if parsed.path not in {PREFIX+'prepare',PREFIX+'agent-submit'}:return False
     try:
         body=handler.read_json_body()
         if not isinstance(body,dict):raise ValueError('请求必须为对象')
-        handler.write_json(debug_flow.prepare(paths,body))
+        if parsed.path==PREFIX+'agent-submit':
+            from .agent_bridge import submit
+            handler.write_json(submit(paths,body))
+        else:handler.write_json(debug_flow.prepare(paths,body))
     except (OSError,ValueError,TypeError,KeyError) as exc:handler.write_json({'error':str(exc)},status=409)
     return True

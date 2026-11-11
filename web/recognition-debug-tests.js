@@ -17,9 +17,9 @@
     debug.rememberContext();
   }
   function controls(){
-    const fresh=el('testMode').value==='recognize',source=testSource(),basic=source?.route==='basic';el('testModelControls').hidden=!fresh||basic;
+    const fresh=el('testMode').value==='recognize',source=testSource(),basic=['basic','document'].includes(source?.route);el('testModelControls').hidden=!fresh||basic;
     el('testOcrLabel').hidden=source?.route!=='knowledge';
-    el('testSourceNote').textContent=source?`本次检查方法：${debug.routeLabel(source.route)} · 来源：${el('testSource').value==='current'?'当前正在查看的记录':'数据集绑定的历史预测'}。${fresh&&basic?'基读暂不支持独立重跑测试；请先在识别过程运行基读，再检查保存的预测。':'切换顶部方法后，选择“当前正在查看的记录”才会改用该方法进行检查。'}`:'请选择数据集或当前资料。';
+    el('testSourceNote').textContent=source?`本次检查方法：${debug.routeLabel(source.route)} · 来源：${el('testSource').value==='current'?'当前正在查看的记录':'数据集绑定的历史预测'}。${fresh&&basic?'此方法暂不支持在测试点面板独立重跑；请先在“识别过程”新建任务，再检查保存的预测。':'切换顶部方法后，选择“当前正在查看的记录”才会改用该方法进行检查。'}`:'请选择数据集或当前资料。';
     el('runTest').disabled=testBusy||!selected.size||!source?.document||(fresh&&(!el('testAllowExternal').checked||basic));
     el('runTest').textContent=fresh?'重新识别所选测试点并保存':'检查所选测试点并保存';
     el('testSelectionCount').textContent=`已选${selected.size} / ${selectedDataset()?.points.length||0}点`;

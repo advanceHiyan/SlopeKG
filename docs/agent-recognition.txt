@@ -1,0 +1,109 @@
+第五路：自主 Agent（DSH SDK）
+
+产品界面名称：智能识别。保留独立任务工作区，与资料管理、风险预评估
+共享导航和任务返回上下文。第三方技术来源见 docs/third-party-components.txt。
+主界面不显示 DSH 品牌宣传；SDK、运行时归属和原始运行记录如实保留。
+
+国标预评估接入（agent-v0.4）
+  PDF → DSH自主识别与分析 → outputs/assessment.json → 不可变来源快照
+  → 现有国标事实仓/表15/17 → 缺口与冲突 → 人工复核和版本。
+  Agent自己选择对象、时期、工况、数据量义及适用性；程序不按中文字段名猜测映射。
+  API GET /api/assessment-debug/agent-contract 提供数据契约；POST /api/assessment-debug/agent-submit
+  接收 run_id、document、可选 expected_recognition_hash 和 submission，返回案例链接。
+  新任务在 workspace/assessment-contract.json 读取相同契约，写入 outputs/assessment.json，完成后自动接入。
+  cases可为空（不适用材料）；输入允许扩展字段、独立scope、推断理由、缺口、冲突，全部保留。
+  引用需指向该文档真实事实ID，已知时期需日期及依据。模型自称确认不构成人工签认。
+  接收层兼容“人/度/万元/元”等明确单位及null对象表示，保留原值与转换记录；未知数值无需补造事实引用。
+  同一时期和工况按日期与工况代码比较，引用列表或说明文字不同不会误判成不同时期。
+  judgment表示Agent选择作为候选采用，reference表示仅参考、不参与查表，决定及理由均由Agent提交。
+  案例存在 output/demo/assessment-debug/assessment.sqlite，提交回执在同目录intake/，
+  冻结PDF/识别事实/Agent提交在 output/demo/debug-history/h_*/prediction/；每次任务
+  control/assessment-receipt.json 记录自动衔接结果。完整模型输入输出仍在该任务control/exchanges/。
+  POST /api/agent-recognition/assessment 或任务中的“重试接收”只重试数据接收，不重跑模型；相同数据复用同一案例。
+  scope可省略或为null，沿用案例范围；结构化scope可覆盖对象、时期、工况。
+  文字scope也原样保存，但范围未结构化时不擅自归入本期整体、不自动用于查表。
+  check_outputs会向Agent返回对应提示，由Agent根据证据决定是否补充结构化范围，不指定答案。
+  v0.4：check_outputs同时在临时数据库运行真实接收转换和表15/17，逐输入返回采用状态、
+  对象/时期/工况/角色/单位/来源支持、缺口和冲突。Agent可根据原文修正结构并重试，
+  真实缺失、冲突及不适用可以保留；不能为了出等级改值、隐去备选或丢掉范围限定。
+  scope示例改为对象结构；影响区原始记录归属与评估对象分别保留，覆盖关系须有来源依据。
+  试算不调用模型、不写正式评估库，临时数据库自动移除。每次回执保存在
+  control/assessment-previews/*.json，最终实际提交再独立试算，保存final-assessment-preview.json。
+  输入文件哈希、规则哈希及代码版本均在试算回执中；原始识别事实与提交不由接收程序改写。
+  工作台“资料与产物”可打开历次试算。旧任务结果不会自动重写；重试接收仍不重跑模型。
+  对照复测见outputs/20261109_第五路直接评估/第五路直接评估复测报告.html；不以软件测试数或模型自查声称工程准确率。
+  历史v0.3接入证据见outputs/20261107_Agent国标接入/交付核验.json：两份4页软件试验资料，107事实、6案例。
+  本次自动交接最初被scope文字类型阻断，修复后重放交接成功；原始提交未人工改写，交接新增模型调用0。
+  这不是一次全程无错误的自动验收；六个案例仍缺完整适用输入，未输出确定等级，不代表工程准确率。
+  Windows状态文件原子替换遇到短暂拒绝访问会重试，旧完整JSON持续可读。
+  CLI可用 --resume-run 接续失败/部分完成/已取消任务的草稿，必须重新提供相同PDF或输入包。
+  新会话重新看全部选定原图并自主核验，初始草稿哈希和副本保存在control/resume-drafts；原失败运行不改写。
+  v0.5：check_outputs 与结束检查共用事实、对象、证据、覆盖及评估契约检查。
+  交接有结构或覆盖问题时，同一任务会先尝试接续修正一次，保留原草稿和前后检查回执。
+  仍未通过时，在原任务的「风险预评估」点「继续修正并交接」，确认沿用原选页和发送地址。
+  接续从旧草稿建立独立任务，校验原件哈希。纯接收失败可直接重试接收，无需重新识别。
+  同一滑坡的多份 PDF 分别交付来源案例，各自保留原页。进入评估工作台后核对同坡、时期和工况再合用。
+  旧任务也能进入国标页面并保留全部事实；没有assessment.json的旧结果只接收为待整理资料，
+  不由接口补造滑坡适用性、日期或标准等级。已有数值并不保证具备完整评估依据。
+
+入口
+  主入口：/web/pdf-ingestion.html；原 /web/agent-recognition.html 继续可用。
+  左侧历史任务/路线切换，中间对话/操作轨迹/结果/调用，右侧原页与生成文件。
+  旧基读、视读上传管理移至 /web/pdf-library.html；其他路线独立调试入口保留。
+  常规CLI：D:/environment/Anaconda/envs/slopekg/python.exe scripts/run_pipeline.py --recognizer agent --pdf <PDF完整路径> --model-profile config/models/deepseek-knowledge-max.json
+  开放资料包：D:/environment/Anaconda/envs/slopekg/python.exe scripts/run_agent_recognition.py --input-pack <包目录>
+  启动预检：上条命令追加 --preflight-only；只准备资料则追加 --prepare-only。
+  第五路默认 max_calls=null、timeout_seconds=null，不限制调用次数和整任务时长。
+  网页不再提交次数或时限；命令行仍可显式指定限制，以兼容旧调用方。
+  网页“停止任务”通知本次SDK关闭，已有消息、响应和文件保留，状态记为cancelled，不冒充完成。
+  单次网络请求超时、供应商上下文限制、最大输出token和截断检测继续适用。
+  输入框可填写本次识别重点；作为用户补充要求保存到冻结的完整任务提示词，不覆盖通用规则。
+
+资料流
+  PDF选定物理页 -> 原页PNG＋辅助原生文字＋带哈希的manifest
+  -> 独立DSH SDK会话，自主选择阅读顺序、搜索、裁图、跨页追踪与分批写入
+  -> objects.json / facts.jsonl / coverage.json / report.md
+  -> 本地格式、对象引用、页码、实际看图与输入哈希核查 -> 待核候选。
+  没有固定的语义发现—归属—重组流水线。格式检查不是语义验真，未直接写主图谱。
+  原始来源图、完整提示词、实际请求（含图像）、供应商SSE原文、SDK事件和工具操作均保留。
+
+隔离与密钥
+  配置：.private/agent-runtime/runtime.json。DSH_HOME、HOME、USERPROFILE、APPDATA、缓存和临时目录均在本次control目录。
+  自带独立配套Node、DSH SDK与运行时：.private/agent-runtime/releases/dsh-0.1.2-alpha.1/Runtime/。
+  程序来自此前验证过的0.1.2-alpha.1文件，逐文件独立复制并核验SHA-256，不使用链接或共享安装目录。
+  EasyCAE与个人DSH的配置、密钥、会话均未复制；来源路径只保存在迁移审计记录，不是运行依赖。
+  payload-manifest.json记录文件清单及哈希；迁移证据在outputs/20261109_DSH项目独立运行时/。
+  项目密钥由Python宿主从模型profile读取，仅用于向固定官方端点鉴权。
+  SDK环境的DEEPSEEK_API_KEY是一次性本机转发凭证，DEEPSEEK_BASE_URL指向回环网关；没有把项目真密钥交给模型或写入请求日志。
+  工具只能读任务目录，只能写outputs/scratch；使用规范路径及链接真实目标检查。无通用shell、任意代码、外网浏览或个人会话工具。
+  这是工具权限与状态目录隔离，不是操作系统账号或虚拟机隔离。
+
+兼容DSH更新
+  公共边界是DeepSeekHarness.start/run/close，以及dsh-tools和本地attachment插件的公开接口。
+  项目运行时独立存放；个人客户端与EasyCAE的更新、移动不会替换本项目运行文件。
+  runtime.json记录node、modules、expected_version，SDK与runtime必须同版本且符合已选版本。
+  每次运行都先执行握手与七项工具注册检查；网关再次拒绝未授权的模型工具。
+  版本、能力检查和实际参数写入control/compatibility.json及protocol.json。
+  升级步骤：保留旧配置及可用安装 -> 指定候选配套SDK/runtime和expected_version -> 运行--preflight-only及scripts/agent_sdk/test_tools.mjs -> 用固定开放包真实回归 -> 再将候选作为默认。
+  回退：恢复项目内last-known-good.json指向的完整发布目录。失败候选保留日志，不修改已验证目录来硬补兼容。
+  2026-11-09仅迁移相同程序版本并解除外部目录依赖；SDK真实启动、工具注册和本地机制验证不等于新的识别质量验收。
+  已实测版本为0.1.2-alpha.1。未来版本仍需上述实测，不承诺未知接口变化自动兼容。
+
+输出
+  默认output/demo/agent-recognition/runs/<run_id>，每次单独目录。
+  run.json为最新结果索引，历史workspace/control不覆盖。
+  history目录保留被新任务替换的历史索引，包括之前发布的开放18页试跑。
+  workspace/inputs是原图与辅助文字；workspace/scratch是裁图/中间文件；workspace/outputs是交付。
+  control/events.jsonl保存DSH消息、流式事件和工具输入/返回；control/tool_calls.jsonl是资料工具审计。
+  在“操作轨迹”点任一步查看完整参数与返回；“模型调用”查看完整请求和SSE原文。
+  “资料与产物”可打开原页、翻页和查看生成文件；展开“过程保存在哪里”可复制实际目录。
+  大请求按流传输；大于2MiB的文件提供完整打开/下载，不以截断文本冒充完整输入输出。
+  control/exchanges包含逐次原始输入、原始SSE响应、usage、最大输出上限和截断结果。
+  token分输入、缓存命中、新输入、输出列出；缺失usage会明确计数，绝不估造。
+  所有模型调用使用模型支持的最大输出上限；DeepSeek Flash本轮为393216，长度截断或流未完成均报失败。
+  本轮开放18页试验：outputs/20261107_第五路Agent。基线与新预测单独冻结；不读取隐藏验收资料。
+
+验证
+  PYTHONPATH=src 后运行 python -m unittest tests.test_agent_recognition tests.test_recognition_routes。
+  按runtime.json的node执行 scripts/agent_sdk/test_tools.mjs，验证路径/链接越界拒绝、输入只读、工具白名单、裁图和附件接口。
+  上述软件测试不代替真实资料质量对照。

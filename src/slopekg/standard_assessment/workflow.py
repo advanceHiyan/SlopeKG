@@ -294,7 +294,10 @@ class AssessmentWorkflow:
                 raise ValueError('缺等级或存在阻断冲突，不能确认结果')
             if result['rule_snapshot_hash']!=self.rules_hash:raise ValueError('规则已变化，先重算再确认')
             if request.get('context_reviewed') is not True:raise ValueError('需确认已复核环境、诱因及适用范围')
-            decision.update(context_reviewed=True,professional_acceptance=True,rule_snapshot_hash=self.rules_hash)
+            decision.update(context_reviewed=True,professional_acceptance=not case.get('test_only', False),
+                            rule_snapshot_hash=self.rules_hash)
+            if case.get('test_only'):
+                decision['software_test'] = True
         else:
             target=self.store.get('fact_assertion',request['target_id'],db)
             if target['fact_id'] not in {f['fact_id'] for f in self._facts(case,db)}:raise ValueError('active case fact required')

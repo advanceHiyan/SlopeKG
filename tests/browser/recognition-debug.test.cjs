@@ -168,6 +168,7 @@ test('old backend 404 identifies a service-version problem and recovers after re
 test('three methods switch steps and launch scope without mixing local and model options',async t=>{
   const {page,requests}=await workspace(t);
   await page.locator('#launchPanel summary').click();
+  await page.locator('.method-explanation summary').click();
   await page.locator('[data-route=visual]').click();
   assert.equal(await page.locator('#model').inputValue(),'deepseek');
   assert.equal(await page.locator('#ocrLabel').isVisible(),false);

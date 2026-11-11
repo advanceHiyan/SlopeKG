@@ -144,14 +144,15 @@ def applicability(fact: dict, case: dict) -> dict:
             # canonical cross-document identity remains a separate mapping issue.
             checks[dim] = "compatible" if a.get("source_object_ref") == b.get("source_object_ref") else "incompatible"
         elif dim == "time":
-            if a == b:
+            same_known = a.get('kind') not in {None,'unknown'} and a.get('kind') == b.get('kind') and all(a.get(k) is not None and a.get(k)==b.get(k) for k in ('start','end'))
+            if a == b or same_known:
                 checks[dim] = "unresolved" if a.get("kind") == "unknown" else "compatible"
             elif a.get("kind") == "not_applicable":
                 checks[dim] = "compatible"
             else:
                 checks[dim] = "unresolved" if "unknown" in {a.get("kind"), b.get("kind")} else "incompatible"
         else:
-            if a.get("code") == "not_applicable" or a == b and a.get("code") != "unspecified":
+            if a.get("code") == "not_applicable" or a.get('code') == b.get('code') and a.get("code") not in {None,"unspecified"}:
                 checks[dim] = "compatible"
             elif "unspecified" in {a.get("code"), b.get("code")}:
                 checks[dim] = "unresolved"

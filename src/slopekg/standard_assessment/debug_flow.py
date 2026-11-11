@@ -65,9 +65,13 @@ def source_data(paths,request):
     for p in doc.get('pages',[]) if isinstance(doc.get('pages'),list) else []:
         if isinstance(p,dict) and p.get('page'):page_texts.setdefault(p['page'],'')
     dates=list(dict.fromkeys(d for text in [*page_texts.values(),*(str(f.get('time','')) for f in raw)] for d in source_dates(text)))
-    return {'run':run,'folder':folder,'doc':doc,'source':source,'sha256':digest,'raw':raw,'units':units,
+    result = {'run':run,'folder':folder,'doc':doc,'source':source,'sha256':digest,'raw':raw,'units':units,
             'subjects':subjects,'page_texts':page_texts,'dates':dates,'route':route,'run_id':run_id,
             'document':document,'run_hash':hashlib.sha256(encoded(run).encode()).hexdigest()}
+    if route == 'agent':
+        from .agent_bridge import subjects as agent_subjects
+        result['subjects'] = agent_subjects(result)
+    return result
 
 
 def source_context(data):
@@ -100,9 +104,15 @@ def prepare(paths,request):
     if requested_hash and requested_hash!=data['run_hash']:raise ValueError('识别结果已变化，请刷新后衔接，不能混合两次结果')
     subject=next((s for s in data['subjects'] if s['id']==request.get('subject_id')),None)
     if subject is None:raise ValueError('请选择该识别记录中实际存在的对象')
+    if data['route']=='agent' and subject['kind']=='agent_proposal' and not data['run_id'].startswith('history-'):
+        from .agent_bridge import submit
+        receipt=submit(paths,request)
+        selected=next(row for row in receipt['cases'] if row['proposal_id']==subject['id'])
+        stored=service(paths).get_case(selected['case_id'])
+        return {'case':stored['case'],'result':stored['results'][-1],'reused':receipt.get('reused',False),'new_model_requests':0}
     date=request.get('assessment_date','');scenario=request.get('scenario','unspecified')
-    if date and date not in data['dates']:raise ValueError('请选择来源记录中已有的日期；缺少时期时保留未知，不补造日期')
-    if scenario not in {'natural','rainstorm','unspecified'}:raise ValueError('无效工况')
+    if data['route'] != 'agent' and date and date not in data['dates']:raise ValueError('请选择来源记录中已有的日期；缺少时期时保留未知，不补造日期')
+    if data['route'] != 'agent' and scenario not in {'natural','rainstorm','unspecified'}:raise ValueError('无效工况')
     original_context=source_context(data)
     original_run_hash=data['run_hash']
     # All downstream records bind to a frozen recognition history, never live
@@ -113,6 +123,9 @@ def prepare(paths,request):
         data=source_data(paths,{'route':data['route'],'run_id':'history-'+meta['id'],'document':meta['document_id']})
     frozen_context=source_context(data)
     meta=get_record(paths,data['run_id'].removeprefix('history-'))
+    if data['route'] == 'agent':
+        from .agent_bridge import prepare as prepare_agent
+        return prepare_agent(data, request, paths, meta, original_context, original_run_hash)
     target_ref='source-object:'+data['doc']['id']+':'+subject['id']
     scope={'subject':{'source_object_ref':target_ref,'object_kind':'landslide_body' if subject['supported'] else 'unconfirmed_object'},
            'time':{'kind':'instant' if date else 'unknown','raw':date or '来源时期尚未明确','start':date or None,'end':date or None},
@@ -262,6 +275,15 @@ def flow(paths,case_id,result_id=None,workspace='debug'):
         records['gaps'].append({'record_type':'scope_unresolved','scope':case['scope'],
             'reason':'本次对象时期或工况仍未明确；即使存在查表格值，也仅可作带此待核前提的候选，不视为已具备可靠适用输入。'})
     link='./recognition-debug.html?'+urlencode({**lineage.get('source_context',{}),'run':lineage.get('source_context',{}).get('run_id',''),'stage':'facts','assessment_case':case_id}) if lineage else None
+    if case.get('agent_proposal'):
+        proposal=case['agent_proposal']
+        records['source'].append({'record_type':'agent_submission','proposal':proposal,'submission':case.get('agent_submission')})
+        records['scope'].insert(0,{'record_type':'agent_applicability','proposal':proposal['applicability']})
+        records['judgment'].insert(0,{'record_type':'agent_analysis','execution_status':'agent_submitted',
+            'analysis':proposal.get('analysis'),'inputs':proposal.get('inputs'),
+            'note':'第五路自主分析；完整模型输入输出在原Agent工作台。未另调判断模型。'})
+        records['gaps'].extend({'record_type':'agent_'+kind,'original_record':value} for kind in ('gaps','conflicts') for value in proposal.get(kind,[]))
+        link='./pdf-ingestion.html?'+urlencode({'run':lineage.get('agent_run_id','')})
     if not lineage:records['source'].append({'record_type':'recognition_history_unbound','reason':'此既有案例尚未关联识别历史；现有评估输入、规则及复核可读，上游识别过程不补造。'})
     return _clean({'case':case,'workspace':workspace,'selected_result':result,'results':results,'facts':facts,'contexts':data['contexts'],
                    'stages':[{'id':key,'label':label,'count':len(records[key])} for key,label in STAGES],

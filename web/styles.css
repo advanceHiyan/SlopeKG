@@ -375,17 +375,8 @@ input[type="search"]:focus {
 .graph-panel {
   min-width: 0;
   display: grid;
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-rows: auto auto 1fr;
   overflow: hidden;
-}
-
-.graph-data-warning {
-  padding: 9px 16px;
-  color: #78551c;
-  background: #fff7e2;
-  border-bottom: 1px solid #ead29a;
-  font-size: 12px;
-  line-height: 1.45;
 }
 
 .topbar {

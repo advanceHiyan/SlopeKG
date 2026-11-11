@@ -14,24 +14,19 @@ function metric(value, label) {
 }
 
 async function dashboard() {
-  const [status, completeness, interfaces, monitoring] = await Promise.all([
+  const [status, monitoring] = await Promise.all([
     api.getJson("/api/status", {}),
-    api.getJson("/api/completeness", { summary: {}, reports: [] }),
-    api.getJson("/api/interfaces", { interfaces: [], status_counts: {} }),
     api.getJson("/api/monitoring/catalog", { series: [] }),
   ]);
   const graph = status.graph || {};
-  const summary = completeness.summary || {};
-  const reserved = (interfaces.interfaces || []).filter((item) => !item.status.startsWith("implemented")).length;
+  const slopes = graph.node_type_counts?.Slope ?? 0;
   document.querySelector("#dashboardMetrics").innerHTML = [
-    metric(summary.slopes ?? graph.node_type_counts?.Slope ?? 0, "候选边坡"),
+    metric(slopes, "候选边坡"),
     metric(graph.nodes ?? "-", "图谱节点"),
-    metric(percent(summary.average_risk_data_completeness), "风险数据平均完整度"),
-    metric(reserved, "待接入/待确认接口"),
   ].join("");
   document.querySelector("#dashboardBoundary").innerHTML = [
     ["实例数据", `${status.parsed?.documents ?? 0}份PDF、${status.parsed?.pages ?? 0}页已进入逐页自适应解析`],
-    ["实体状态", `${summary.slopes ?? graph.node_type_counts?.Slope ?? 0}个候选边坡，边界和编号可继续现场复核`],
+    ["实体状态", `${slopes}个候选边坡，边界和编号可继续现场复核`],
     ["动态数据", monitoring.series?.length ? `会昌${monitoring.files}表历史监测已接入；字段与测点归属待核。近期气象、巡检和养护仍待接入。` : "监测、近期气象、巡检和养护接口已预留但未接入"],
     ["风险能力", "仅提供就绪检查，不输出正式风险等级"],
   ].map(([name, value]) => `<div class="detail-row"><small>${name}</small>${value}</div>`).join("");
@@ -72,47 +67,98 @@ function setupStandaloneExport() {
   });
 }
 
-let slopeState = { slopes: [], reports: [], selected: null };
+const slopeState = { slopes: [], reports: new Map(), manualSchema: null, selected: null, detailRequest: 0 };
+const operationalSlopeFields = new Set([
+  "overall_slope_deformation_severity", "deformation_observation", "groundwater", "rainfall",
+  "protection_condition", "maintenance", "exposure",
+]);
+const dossierGroups = [
+  ["static", "静态资料", "位置、几何、地质和已有稳定性分析。"],
+  ["operational", "近期与业务数据", "含近期巡检、地下水、降雨、设施现状、养护及暴露后果。资料时效按实际记录核对。"],
+];
+
+function slopeFieldGroups(report) {
+  const groups = { static: [], operational: [], other: [] };
+  for (const item of report?.fields || []) {
+    if (item.code === "risk_rules") continue;
+    if (["risk_required", "scenario_required"].includes(item.requirement)) {
+      groups[operationalSlopeFields.has(item.code) ? "operational" : "static"].push(item);
+    } else groups.other.push(item);
+  }
+  return groups;
+}
+
+function slopeFieldCount(items) {
+  return items.length ? `${items.filter(item => item.status === "available").length}/${items.length}` : "—";
+}
+
+function slopeDisplayName(slope) {
+  return slope.label || slope.props?.source_alias || slope.props?.slope_id || "未命名边坡";
+}
 
 async function slopesPage() {
-  const [slopes, completeness] = await Promise.all([
+  const [slopes, completeness, manualSchema] = await Promise.all([
     api.getJson("/api/slopes", { rows: [] }),
     api.getJson("/api/completeness", { reports: [] }),
+    api.getJson("/api/manual/schema").catch(() => null),
   ]);
   slopeState.slopes = slopes.rows || [];
-  slopeState.reports = completeness.reports || [];
+  slopeState.reports = new Map((completeness.reports || []).map(report => [report.slope_id, report]));
+  slopeState.manualSchema = manualSchema;
   document.querySelector("#slopeSearch").addEventListener("input", renderSlopeRows);
-  document.querySelector("#readinessFilter").addEventListener("change", renderSlopeRows);
+  document.querySelector("#slopeDataFilter").addEventListener("change", renderSlopeRows);
   renderSlopeRows();
+  const query = new URLSearchParams(window.location.search);
+  document.querySelector("#dossierRecognitionHint").hidden = !query.get("recognition_run");
+  const slopeId = query.get("slope_id");
+  if (slopeState.slopes.some(slope => slope.id === slopeId)) await loadSlopeDetail(slopeId);
 }
 
 function renderSlopeRows() {
   const q = document.querySelector("#slopeSearch").value.trim().toLowerCase();
-  const filter = document.querySelector("#readinessFilter").value;
-  const reports = new Map(slopeState.reports.map((row) => [row.slope_id, row]));
-  const rows = slopeState.slopes.filter((slope) => {
-    const report = reports.get(slope.id) || {};
-    const matches = `${slope.label} ${JSON.stringify(slope.props || {})}`.toLowerCase().includes(q);
-    return matches && (filter === "all" || report.risk_readiness === filter);
-  });
+  const filter = document.querySelector("#slopeDataFilter").value;
   const body = document.querySelector("#slopeRows");
-  body.innerHTML = rows.map((slope) => {
+  body.innerHTML = slopeState.slopes.map((slope) => {
     const props = slope.props || {};
-    const report = reports.get(slope.id) || {};
-    return `<tr data-slope-id="${api.escapeHtml(slope.id)}"><td><strong>${api.escapeHtml(props.slope_id || slope.label)}</strong><br/><small>${api.escapeHtml(props.source_alias || "")}</small></td><td>${api.escapeHtml(`${props.start_station_raw || "?"}～${props.end_station_raw || "?"} ${props.side || ""}`)}</td><td>${api.escapeHtml(props.slope_length_m ?? "缺失")} m</td><td><div class="progress"><span style="width:${percent(report.risk_data_completeness)}"></span></div><small>${percent(report.risk_data_completeness)}</small></td><td>${badge(report.risk_readiness || "not_ready")}</td></tr>`;
-  }).join("") || `<tr><td colspan="5">没有匹配的边坡。</td></tr>`;
-  body.querySelectorAll("tr[data-slope-id]").forEach((row) => row.addEventListener("click", () => loadSlopeDetail(row.dataset.slopeId, row)));
+    const groups = slopeFieldGroups(slopeState.reports.get(slope.id));
+    const matches = `${slope.label} ${JSON.stringify(props)}`.toLowerCase().includes(q);
+    if (!matches || (filter !== "all" && !groups[filter]?.some(item => item.status !== "available"))) return "";
+    return `<tr data-slope-id="${api.escapeHtml(slope.id)}" class="${slopeState.selected === slope.id ? "selected" : ""}">
+      <td><button class="slope-name" type="button">${api.escapeHtml(slopeDisplayName(slope))}</button>
+        ${props.slope_id ? `<small>系统编号 ${api.escapeHtml(props.slope_id)}</small>` : ""}</td>
+      <td>${props.slope_length_m == null ? "缺失" : `${api.escapeHtml(props.slope_length_m)} m`}</td><td>${slopeFieldCount(groups.static)}</td><td>${slopeFieldCount(groups.operational)}</td></tr>`;
+  }).join("") || `<tr><td colspan="4">没有匹配的边坡。</td></tr>`;
+  body.querySelectorAll("tr[data-slope-id]").forEach((row) => row.addEventListener("click", () => loadSlopeDetail(row.dataset.slopeId)));
 }
 
-async function loadSlopeDetail(slopeId, rowElement) {
-  document.querySelectorAll("tr[data-slope-id]").forEach((row) => row.classList.toggle("selected", row === rowElement));
+async function loadSlopeDetail(slopeId) {
+  slopeState.selected = slopeId;
+  const request = ++slopeState.detailRequest;
+  document.querySelectorAll("tr[data-slope-id]").forEach((row) => row.classList.toggle("selected", row.dataset.slopeId === slopeId));
   const detail = document.querySelector("#slopeDetail");
-  detail.innerHTML = "加载中…";
-  const payload = await api.getJson(`/api/slopes/${encodeURIComponent(slopeId)}`, null);
+  detail.textContent = "加载中…";
+  try {
+    const payload = await api.getJson(`/api/slopes/${encodeURIComponent(slopeId)}`);
+    if (request === slopeState.detailRequest) renderSlopeDetail(detail, payload);
+  } catch (error) {
+    if (request === slopeState.detailRequest) detail.textContent = `档案读取失败。重新选择该边坡可重试。${error.message}`;
+  }
+}
+
+function renderSlopeDetail(detail, payload, savedMessage = "") {
   const slope = payload.slope;
   const props = slope.props || {};
-  const report = payload.completeness || { fields: [] };
-  const missing = (report.fields || []).filter((item) => item.status !== "available");
+  const groups = slopeFieldGroups(payload.completeness);
+  const manualFields = new Set(slopeState.manualSchema?.slope_fields?.map(spec => spec.code));
+  const manualCode = { stability: "stability_factor", exposure: "consequence_level" };
+  const fieldGrid = items => `<div class="field-grid">${items.map(item => {
+    const action = item.status === "available" ? "" : manualFields.has(manualCode[item.code] || item.code)
+      ? "可在上方人工录入" : "需从来源资料或业务数据补齐";
+    const label = item.status === "interface_reserved" ? "暂无可用记录" : api.statusLabel(item.status);
+    const value = ({ slope_height_m: props.slope_height_raw, slope_gradient_deg: props.slope_gradient_raw })[item.code] || item.value;
+    return `<div class="field-item"><strong>${api.escapeHtml(item.label_zh)}</strong>${badge(item.status, label)}
+      ${action ? `<br/><small>${action}</small>` : value != null ? `<br/><small>${api.escapeHtml(typeof value === "object" ? JSON.stringify(value) : value)}</small>` : ""}</div>`;
+  }).join("")}</div>`;
   const relatedCounts = (payload.related_nodes || []).reduce((acc, node) => { acc[node.type] = (acc[node.type] || 0) + 1; return acc; }, {});
   const parameterNames = {unit_weight: "重度", cohesion: "黏聚力", friction_angle: "内摩擦角"};
   const parameterTables = (payload.related_nodes || []).filter(node => node.type === "MaterialParameterSet").map(node => {
@@ -120,8 +166,19 @@ async function loadSlopeDetail(slopeId, rowElement) {
     return `<details class="detail-block"><summary>${api.escapeHtml(p.source_file || "计算参数")} · 第${api.escapeHtml(p.source_page)}页</summary><p>历史报告取值，非实时测量；适用断面与工况需核验。</p><div class="table-wrap"><table class="data-table"><thead><tr><th>材料</th><th>状态</th><th>参数</th><th>数值</th></tr></thead><tbody>${(p.parameters || []).map(v => `<tr><td>${api.escapeHtml(v.material)}</td><td>${api.escapeHtml(v.condition)}</td><td>${api.escapeHtml(parameterNames[v.parameter] || v.parameter)}</td><td>${api.escapeHtml(v.value)} ${api.escapeHtml(v.unit)}</td></tr>`).join("")}</tbody></table></div></details>`;
   }).join("");
   detail.className = "";
-  detail.innerHTML = `<h3>${api.escapeHtml(props.slope_id || slope.label)}</h3>
+  detail.innerHTML = `<h3>${api.escapeHtml(slopeDisplayName(slope))}</h3>
+    ${props.slope_id ? `<p><small>系统编号 ${api.escapeHtml(props.slope_id)}</small></p>` : ""}
     <p>${badge(props.entity_resolution_status)} ${badge(props.review_status)}</p>
+    <div class="action-row"><button type="button" class="button secondary manual-edit-toggle">人工录入</button>
+      <a class="button ghost" href="./slope-assessment.html?slope_id=${encodeURIComponent(slope.id)}">本边坡的资料、评估与历史</a></div>
+    <p>可录入表单支持的字段。近期观测须填写日期。坐标、岩性、地层需从来源资料入库。</p>
+    ${savedMessage ? `<p role="status">${api.escapeHtml(savedMessage)}</p>` : ""}
+    <div class="manual-editor" hidden></div>
+    <section class="detail-block" data-dossier-recognition>
+      <h3>已关联的识别资料</h3>
+      <button type="button" class="button secondary small" disabled>关联识别资料</button>
+      <p role="status" aria-live="polite"></p><div class="dossier-linked-sources"></div>
+    </section>
     <div class="detail-list">
       <div class="detail-row"><small>原资料名称</small>${api.escapeHtml(props.source_alias || "缺失")}</div>
       <div class="detail-row"><small>边坡端点坐标</small>${api.escapeHtml(JSON.stringify(props.start_coordinate || "未确定"))}<br/>${api.escapeHtml(JSON.stringify(props.end_coordinate || "未确定"))}</div>
@@ -131,9 +188,25 @@ async function loadSlopeDetail(slopeId, rowElement) {
     </div>
     ${parameterTables ? `<h3 style="margin-top:18px">已提取的材料计算参数</h3>${parameterTables}` : ""}
     ${(props.source_disagreements || []).length ? `<h3>来源分歧待核</h3><p>保留不同取值及出处。当前字段值尚未据此裁决；须先核对是否同一对象、范围和工况。</p>${props.source_disagreements.map(issue => `<details class="detail-block"><summary>${api.escapeHtml(issue.field)}</summary>${issue.alternatives.map(option => `<p>原文候选：${api.escapeHtml(JSON.stringify(option.value))}；来源：${api.escapeHtml(option.sources.map(source => `第${source.page ?? "?"}页（${source.source_file || "来源待核"}）`).join("；"))}</p>`).join("")}</details>`).join("")}` : ""}
-    <h3 style="margin-top:18px">缺失或待接入（${missing.length}）</h3>
-    <div class="field-grid">${missing.map((item) => `<div class="field-item"><strong>${api.escapeHtml(item.label_zh)}</strong>${badge(item.status)}<br/><small>${api.escapeHtml(item.requirement || "")}${item.interface ? ` · ${api.escapeHtml(item.interface)}` : ""}</small></div>`).join("")}</div>
+    ${dossierGroups.map(([key, title, description]) => `<details class="detail-block" open><summary>${title} · 已有 ${slopeFieldCount(groups[key])}</summary>
+      <p>${description}</p>${groups[key].length ? fieldGrid(groups[key]) : "<p>检查项暂不可读。</p>"}</details>`).join("")}
+    ${groups.other.length ? `<details class="detail-block"><summary>其他档案字段</summary>${fieldGrid(groups.other)}</details>` : ""}
     <p style="margin-top:16px"><a href="./graph.html">在关系图谱中查看</a></p>`;
+  const editor = detail.querySelector(".manual-editor");
+  async function refresh(message, anchor) {
+    const refreshed = await api.getJson(`/api/slopes/${encodeURIComponent(slope.id)}`);
+    slopeState.slopes = slopeState.slopes.map(row => row.id === slope.id ? refreshed.slope : row);
+    slopeState.reports.set(slope.id, refreshed.completeness);
+    renderSlopeRows();
+    if (detail.contains(editor)) {
+      renderSlopeDetail(detail, refreshed, message);
+      detail.querySelector(anchor)?.focus({ preventScroll: true });
+    }
+  }
+  window.SlopeKGManual.mountSlopeEditor(detail, { slope_id: slope.id }, slopeState.manualSchema, result =>
+    refresh(result.status === "saved" ? "已保存人工记录，档案已更新。" : "已撤销人工值，档案已更新。", ".manual-edit-toggle"));
+  window.SlopeKGDossierRecognition.mount(detail.querySelector("[data-dossier-recognition]"), slope, slopeDisplayName(slope),
+    message => refresh(message, "[data-dossier-recognition] button"));
 }
 
 async function dataStatusPage() {

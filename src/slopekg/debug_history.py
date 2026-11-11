@@ -79,7 +79,7 @@ def get_record(paths, record_id):
 def list_records(paths, *, q='', route='', offset=0, limit=30):
     if offset < 0 or not 1 <= limit <= 100 or len(q) > 300:
         raise ValueError('历史分页或筛选参数无效')
-    if route not in ('', 'basic', 'knowledge', 'visual'):
+    if route not in ('', 'basic', 'knowledge', 'visual', 'document', 'agent'):
         raise ValueError('无效识别方法')
     root = paths.output_dir / 'debug-history'
     rows = []
@@ -147,7 +147,7 @@ def capture_snapshot(paths, record_id, *, route, run_id, document):
     source_digest = digest(source_copy)
     if source_digest != expected_source_digest or source_digest != digest(source):
         raise ValueError('保存时原件发生变化，快照未发布')
-    refs = _call_refs(paths, run, origin, doc) if route != 'basic' else []
+    refs = _call_refs(paths, run, origin, doc) if route not in {'basic', 'agent'} else []
     keys = {r['id'] for r in refs}
     copied = []
     for key in keys:
@@ -236,11 +236,16 @@ def seal_record(paths, record_id, *, run, extra=None):
         source_sha256=run['documents'][0]['source_sha256'], processing_status=run.get('processing_status'), **(extra or {}))
 
 
-def save_snapshot(paths, *, route, run_id, document, label):
+def save_snapshot(paths, *, route, run_id, document, label, agent_submission=None, agent_intake_origin=None):
     meta = create_record(paths, label=label, route=route, mode='snapshot')
     record_id = meta['id']
     try:
         run, _ = capture_snapshot(paths, record_id, route=route, run_id=run_id, document=document)
+        if agent_submission is not None:
+            if route != 'agent': raise ValueError('仅第五路接收 Agent 提交')
+            run['assessment_submission'] = agent_submission
+            if agent_intake_origin: run['agent_intake_origin'] = agent_intake_origin
+            write_json(record_dir(paths, record_id) / 'prediction/run.json', run)
         seal_record(paths, record_id, run=run)
         return update_record(paths, record_id, status='completed', progress=100, finished_at=now(), message='完整快照已保存')
     except Exception as exc:

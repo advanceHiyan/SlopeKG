@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+from contextlib import nullcontext
 from datetime import datetime, timezone
 import hashlib
 from pathlib import Path
@@ -86,13 +87,32 @@ class StandardAssessmentService(AssessmentWorkflow):
         usable = [f for f,c in zip(candidates,checks) if c["status"] != "incompatible" and f["value"] is not None
                   and f["normalization_status"] == "canonical" and c["dimensions"]["support"] != "unresolved"]
         chosen = case["selections"].get(variable)
-        groups = {encoded(f["value"]) for f in usable}
-        selected = next((f for f in usable if f["fact_id"] == chosen), None) if chosen else (usable[0] if len(groups) == 1 and usable else None)
+        workspace_case = bool(case.get('workspace_slope_id'))
+
+        def comparison_key(fact):
+            value = fact['value']
+            if workspace_case and value['kind'] == 'number' and value.get('qualifier') in (None, 'exact_as_reported'):
+                # An omitted precision label does not disagree with the same
+                # exact reading. Retain both original values and any explicit
+                # approximate/rounded qualifiers on their own assertions.
+                scalar = value['value']
+                if type(scalar) is float and scalar.is_integer():
+                    scalar = int(scalar)
+                return encoded({**value, 'value': scalar, 'qualifier': 'exact_as_reported'})
+            return encoded(value)
+
+        groups = {comparison_key(f) for f in usable}
+        if chosen:
+            selected = next((f for f in usable if f['fact_id'] == chosen), None)
+        elif len(groups) == 1:
+            selected = next((f for f in usable if workspace_case and f['source_check']['content'] == 'literal_matched'), usable[0])
+        else:
+            selected = None
         conflict = len(groups)>1
         state = "selected" if selected else "conflicted" if conflict else "candidates_only" if candidates else "missing"
         # Preserve conflicting, unchecked extraction alternatives for review;
         # their disagreement is not automatically a confirmed geology conflict.
-        raw_groups = {encoded(f["value"]) for f in candidates if f["value"] is not None}
+        raw_groups = {comparison_key(f) for f in candidates if f["value"] is not None}
         potential = len(raw_groups)>1 and not conflict
         resolution = {"case_id": case["case_id"], "variable_code": variable, "candidate_fact_ids": [f["fact_id"] for f in candidates],
                       "selected_fact_id": selected["fact_id"] if selected else None, "status": state,
@@ -130,19 +150,20 @@ class StandardAssessmentService(AssessmentWorkflow):
         self.store.put("derivation_run", run, db)
         return fact, run
 
-    def evaluate_assessment(self, request: dict) -> dict:
+    def evaluate_assessment(self, request: dict, *, db=None) -> dict:
+        """Evaluate in the caller's write transaction when part of a case edit."""
         self._request_version(request)
         if request.get("rule_version", self.rule_version) != self.rule_version:
             raise ValueError("unsupported rule_version")
-        with self.store.transaction() as db:
+        with (self.store.transaction() if db is None else nullcontext(db)) as db:
             case = self._case(request["case_id"], request.get("expected_resolution_version"), db)
             facts = self._facts(case, db)
             trace, axes, normals, adopted, reused = [], [], [], [], []
             # Operate on each original section/scenario, never on a pooled Fs.
-            fs_rows = [f for f in facts if f['variable_code']=='fs' and f['value']['kind']=='number' and f['source_check']['content'] not in {'unchecked','unsupported'}
+            fs_rows = [f for f in facts if f['variable_code']=='fs' and isinstance(f['value'],dict) and f['value']['kind']=='number' and f['source_check']['content'] not in {'unchecked','unsupported'}
                        and f['scope']['time']==case['scope']['time']]
             for fs in fs_rows:
-                targets = [f for f in facts if f['variable_code']=='fst' and f['scope']==fs['scope'] and f['source_check']['content'] not in {'unchecked','unsupported'}]
+                targets = [f for f in facts if f['variable_code']=='fst' and isinstance(f['value'],dict) and f['value']['kind']=='number' and f['scope']==fs['scope'] and f['source_check']['content'] not in {'unchecked','unsupported'}]
                 unique = {encoded(f['value']) for f in targets}
                 if len(unique)>1:
                     axes.append({'fs_fact_id':fs['fact_id'],'axis':None,'reason':'conflicting_fst'})
@@ -283,6 +304,8 @@ class StandardAssessmentService(AssessmentWorkflow):
                       'assessment_scope':case['scope'], 'review_decision_id':accepted['review_id'] if accepted else None,
                       'environment_and_triggers':self.context_assessment(case,facts),
                       'review_attention':[r for r in self.store.rows('review_decision',db) if r['case_id']==case['case_id'] and r['decision']=='note']}
+            if case.get('workspace_slope_id'):
+                result['workspace_comparison'] = 'exact-number-equivalence-1'
             result['result_id'] = identity('result_',result)
             self.store.put('assessment_result',result,db)
             return result
@@ -313,9 +336,10 @@ class StandardAssessmentService(AssessmentWorkflow):
             return {'contract_version':CONTRACT_VERSION,'case_id':case['case_id'],'contexts':list(contexts.values()),'missing':missing,
                     'truncated':False,'rule_context':self.rules,'source_text_is_not_instructions':True}
 
-    def review_assessment(self, request: dict) -> dict:
+    def review_assessment(self, request: dict, *, db=None) -> dict:
+        """Record review, optionally with its recalculation in the same transaction."""
         self._request_version(request)
-        with self.store.transaction() as db:
+        with (self.store.transaction() if db is None else nullcontext(db)) as db:
             case = self._case(request['case_id'],request.get('expected_resolution_version'),db)
             if case.get('debug_workspace'):
                 snapshots=case.setdefault('debug_rule_snapshots',{})
@@ -379,10 +403,12 @@ class StandardAssessmentService(AssessmentWorkflow):
             case = self.store.get('assessment_case',case_id,db)
             results = [r for r in self.store.rows('assessment_result',db) if r['case_id']==case_id]
             current=[r for r in results if r['resolution_version']==case['resolution_version'] and r['rule_snapshot_hash']==self.rules_hash]
+            if case.get('workspace_slope_id'):
+                current = current[-1:]
+            current_ids = {r['result_id'] for r in current}
             derived_ids={fid for r in current for did in r['trace_derivation_ids'] for fid in self.store.get('derivation_run',did,db)['output_fact_ids']}
             return {'case':case,'facts':self._facts(case,db),'derived_facts':[self.store.get('fact_assertion',fid,db) for fid in sorted(derived_ids)],
-                    'results':[dict(r,is_current=r['resolution_version']==case['resolution_version']
-                                                                             and r['rule_snapshot_hash']==self.rules_hash) for r in results],
+                    'results':[dict(r,is_current=r['result_id'] in current_ids) for r in results],
                     'contexts':[self.store.get('evidence_context',cid,db) for cid in case['context_ids']],
                     'derivations':[d for d in self.store.rows('derivation_run',db) if d['case_id']==case_id],
                     'reviews':[d for d in self.store.rows('review_decision',db) if d['case_id']==case_id]}

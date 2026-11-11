@@ -23,7 +23,27 @@ OPEN_RUNS = {
     'open-paper': ('开放论文 · 历史实发', 'outputs/20261031_固定回归与隐藏盲验/baseline/pdf_01015fc12c9f8a74/knowledge/run.json'),
     'open-guide': ('开放指南 · 历史实发', 'outputs/20261031_固定回归与隐藏盲验/baseline/pdf_113cb4d072120fd7/knowledge_environment_recovery/run.json'),
 }
+DOCUMENT_OPEN_RUNS = {
+    'open-document-survey': ('开放勘察报告 · 整读 v0.2 · 物理页22–27 · 缓存回放',
+        'outputs/20261103_整读流程精简/run_final_ui/run.json'),
+}
+
 STAGES = {
+    'agent': [('input', '输入与参数', '第五路自主 Agent 的冻结输入。'),
+        ('pages', '逐页覆盖', '所选原页及覆盖。'), ('units', '原生辅助文字', '原生文字不是独立验真。'),
+        ('facts', '识别候选', '完整 Agent 原始提交。')],
+    'document': [
+        ('input', '输入、范围与进度', '区分整份PDF、选页输入、流程完成和候选待审；查看实际保存的版本及参数。'),
+        ('native', '原始解析行', 'PDF原生文字及坐标，尚未经过模型重排；点击记录可对照原页。'),
+        ('blocks', '内容恢复', '查看重排后的完整段落和表格，以及它们引用的原始解析行。'),
+        ('groups', '重合分区与链接', '查看各资料组的主体、正文、上下文和跨页结构链接；允许重合。'),
+        ('repairs', '结构修复与待办', '保留修复前后记录，区分已经修复与仍待处理的缺口。'),
+        ('claims', '提取陈述', '查看合并去重前的陈述；沿候选追查可查看提取当时的模型输出。'),
+        ('reviews', '分批原页复核', '查看逐条复核、修正与补充；同模型支持不是独立确认。'),
+        ('audit', '跨组审计', '只读身份索引的跨组审计及其标记，不等于重新核对全部原文。'),
+        ('calls', '大模型完整输入输出', '完整提示词、图像、请求参数、供应商响应、解析和校验对象。'),
+        ('facts', '最终候选与追查', '选择一条候选，贯通原页、解析、恢复、分区、提取、复核和最终结果。'),
+        ('errors', '失败与未完成项', '执行错误、容量阻塞及仍待修复项，不能用流程跑完代替质量通过。')],
     'knowledge': [('input', '输入与参数', '查看本次文件、代码版本、设置和处理范围。'),
         ('pages', '逐页覆盖', '区分原生文字、扫描图、未读图形和待OCR页面。'),
         ('ocr', 'OCR识别原文', 'OCR就是从图片读文字；保留识别内容、坐标和置信度。'),
@@ -85,15 +105,19 @@ def _store(paths, route, run_id):
     if run_id.startswith('history-'):
         from .debug_history import history_store
         return history_store(paths, route, run_id)
+    if route == 'agent':
+        from .standard_assessment.agent_bridge import recognition_store
+        return recognition_store(paths, run_id)
     if run_id != 'live':
-        if route != 'knowledge' or run_id not in OPEN_RUNS:
+        choices = OPEN_RUNS if route == 'knowledge' else DOCUMENT_OPEN_RUNS if route == 'document' else {}
+        if run_id not in choices:
             raise ValueError('无效开放记录')
-        run_path = paths.root / OPEN_RUNS[run_id][1]
+        run_path = paths.root / choices[run_id][1]
         return _read(run_path, paths.root), run_path.parent
     if route == 'basic':
         state = _read(paths.basic_state_json, paths.root)
         return {**state, 'documents': _jsonl(paths, 'documents')}, paths.output_dir
-    folder = paths.output_dir / ('knowledge-recognition' if route == 'knowledge' else 'recognition')
+    folder = paths.output_dir / {'knowledge': 'knowledge-recognition', 'document': 'document-recognition'}.get(route, 'recognition')
     return _read(folder / 'run.json', paths.root), folder
 
 
@@ -139,13 +163,16 @@ def debug_catalog(paths, route='knowledge', run_id='live'):
     if run_id.startswith('history-') and not any('history-' + r['id'] == run_id for r in history):
         from .debug_history import get_record
         history.insert(0, get_record(paths, run_id.removeprefix('history-')))
-    return {'route': route, 'run_id': run_id,
+    choices = OPEN_RUNS if route == 'knowledge' else DOCUMENT_OPEN_RUNS if route == 'document' else {}
+    return {'route': route, 'run_id': run_id, 'schema_version': run.get('schema_version'),
+        'summary': run.get('summary', {}),
         'runs': [{'id': 'live', 'label': '当前生产记录'}] + ([{'id': k, 'label': v[0]}
-            for k, v in OPEN_RUNS.items() if (paths.root / v[1]).is_file()] if route == 'knowledge' else [])
+            for k, v in choices.items() if (paths.root / v[1]).is_file()])
             + [{'id': 'history-' + r['id'], 'label': '历史 · ' + r['label']}
                for r in history if r['route'] == route and r.get('snapshot_ready')],
         'documents': [{'id': d['id'], 'name': Path(d.get('original_source_path', d['path'])).name,
-            'status': d.get('status'), 'pages': d.get('source_page_count', d.get('pages', 0))
+            'status': d.get('status'), 'selection': d.get('selection'), 'workflow_complete': d.get('workflow_complete'),
+            'pages': d.get('source_page_count', d.get('pages', 0))
                 if not isinstance(d.get('pages'), list) else d.get('source_page_count', len(d['pages']))}
             for d in _documents(paths, run, run_id)],
         'status': run.get('processing_status', run.get('status', 'not_generated')),
@@ -228,6 +255,11 @@ def _page_numbers(value):
 
 
 def _records(paths, run, folder, doc, route, stage):
+    if route == 'agent':
+        return doc.get(stage, []) if stage != 'input' else [doc]
+    if route == 'document' and stage != 'calls':
+        from .document_debug import document_rows
+        return document_rows(run, doc, stage)
     if stage == 'input':
         return [{'id': 'run', **{k: v for k, v in run.items() if k not in {'documents', 'receipts'}},
                  'document': {k: v for k, v in doc.items() if k not in {
@@ -406,6 +438,9 @@ def get_debug_route(handler, parsed, paths):
             result = debug_catalog(paths, common['route'], common['run_id'])
         elif parsed.path == '/api/recognition-debug/call':
             result = debug_call(paths, **common, key=value('key'))
+        elif parsed.path == '/api/recognition-debug/document-trace':
+            from .document_debug import document_trace
+            result = document_trace(paths, **common, claim_id=value('claim'))
         elif parsed.path == '/api/recognition-debug/image':
             path = debug_image(paths, **common, key=value('key'), index=int(value('index', '0')))
             content = path.read_bytes()

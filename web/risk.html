@@ -6,13 +6,13 @@
   <title>风险研判 - SlopeKG</title>
   <link rel="stylesheet" href="./pages.css?v=20261102-nav3"/>
   <link rel="stylesheet" href="./standard-assessment.css?v=20261031-1"/>
-</head>
+<link rel="stylesheet" href="./navigation.css?v=20261109-ui1"></head>
 <body class="portal-body" data-page="risk">
   <header class="site-header">
     <div class="site-header-inner">
       <a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a>
       <nav class="site-nav"><a class="nav-debug" href="./recognition-debug.html">识别调试</a>
-        <a href="./index.html">总览</a><a href="./pdf-ingestion.html">PDF解析</a>
+        <a href="./index.html">总览</a><a href="./pdf-ingestion.html">智能识别</a>
         <a href="./slopes.html">边坡档案</a><a href="./graph.html">关系图谱</a>
         <a href="./rules.html">规则库</a><a href="./data-status.html">数据与接口</a>
         <a class="active" href="./risk.html">风险研判</a>
@@ -27,6 +27,7 @@
       </div>
       <span class="badge pending">国标评估 · 待人工复核</span>
     </div>
+    <p><a class="button secondary" href="./slope-assessment.html">打开边坡评估工作台</a></p>
     <section class="card assessment-start" aria-label="国标评估">
       <form id="assessmentStart">
         <label>评估对象<select id="assessmentTarget" required><option value="">正在读取边坡…</option></select></label>
@@ -80,7 +81,7 @@
     </section>
     </details>
   </main>
-  <script src="./api.js?v=20261020-1"></script>
+  <script src="./navigation.js?v=20261109-ui1"></script><script src="./api.js?v=20261020-1"></script>
   <script src="./manual-entry.js?v=20261020-1"></script>
   <script src="./portal.js?v=20261020-1"></script>
   <script src="./standard-assessment.js?v=20261102-trace1"></script>

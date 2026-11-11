@@ -224,6 +224,21 @@ def main():
         data['real_document_comparison']={k:comparison[k] for k in ('scope','counts','generation_attempts_including_interrupted',
             'document_final_review_sent','document_final_review_prompt_chars','document_max_prompt_chars','resume_new_requests','resume_memory')}
     simplified=ROOT/'outputs/20261103_整读流程精简/comparison.json'
+    failure_trace=ROOT/'outputs/20261103_真实资料双路对比/details/build_receipt.json'
+    if failure_trace.is_file():data['document_failure_trace']=read_json(failure_trace)
+    agent_trial=ROOT/'outputs/20261107_第五路Agent/verification.json'
+    if agent_trial.is_file():data['agent_trial']=read_json(agent_trial)
+    agent_risk=ROOT/'outputs/20261107_DSH边坡风险测试/测试摘要.json'
+    if agent_risk.is_file():
+        r=read_json(agent_risk)
+        assert r['hidden_scope_used'] is False
+        data['agent_risk_trial']={k:r[k] for k in ('scope','actual_model_requests','standard_matches','dynamic_matches',
+                                                  'case_count','direct_agent_entry','future_forecast_validated')}
+    agent_direct=ROOT/'outputs/20261109_第五路直接评估/核验汇总.json'
+    if agent_direct.is_file():
+        direct=read_json(agent_direct)
+        assert direct['hidden_used'] is False
+        data['agent_assessment_direct']=direct
     if simplified.is_file():
         comparison=read_json(simplified)
         data['document_v02']={k:comparison[k] for k in ('scope','workflow_complete','document_status','summary',

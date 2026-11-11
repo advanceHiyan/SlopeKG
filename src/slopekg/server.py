@@ -42,6 +42,7 @@ from .recognition_routes import normalize_recognizer
 from .recognition import visual_job_options, profile_catalog, recognition_documents, recognition_payload
 from .knowledge_service import knowledge_job_options, knowledge_payload
 from .document_service import document_job_options, document_payload
+from .agent_service import agent_job_options, agent_payload, agent_artifact
 from .rule_extraction import RuleExtractionPipeline
 from .schema import INTERFACES, attribute_dictionary_payload, interface_payload, schema_payload
 from .storage import ensure_dir, read_json
@@ -258,12 +259,14 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             return
         for handler in (
+            self._get_assessment_workspace,
             self._get_assessment_debug,
             self._get_standard_assessment,
             self._get_pipeline,
             self._get_rules,
             self._get_risk,
             self._get_graph,
+            self._dossier_recognition,
             self._get_manual,
             self._get_schema,
             self._get_assets,
@@ -286,8 +289,10 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             if post_workspace_route(self, parsed, PATHS):
                 return
         for handler in (
+            self._post_assessment_workspace,
             self._post_assessment_debug,
             self._post_standard_assessment,
+            self._dossier_recognition,
             self._post_manual,
             self._post_pipeline,
             self._post_rules,
@@ -310,6 +315,14 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             self.write_json({"error": str(exc)}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
             return
         self.write_json(state)
+
+    def _get_assessment_workspace(self, parsed: Any) -> bool:
+        from .standard_assessment.workspace_http import get_route
+        return get_route(self, parsed, PATHS)
+
+    def _post_assessment_workspace(self, parsed: Any) -> bool:
+        from .standard_assessment.workspace_http import post_route
+        return post_route(self, parsed, PATHS)
 
     def _get_assessment_debug(self, parsed: Any) -> bool:
         from .standard_assessment.debug_http import get_route
@@ -335,6 +348,43 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
         if parsed.path.startswith('/api/recognition-debug'):
             from .recognition_debug import get_debug_route
             return get_debug_route(self, parsed, PATHS)
+        if parsed.path == '/api/agent-recognition/artifact':
+            try:
+                query=parse_qs(parsed.query)
+                target=agent_artifact(PATHS,query.get('path',[''])[0],query.get('run',[''])[0])
+                remaining=target.stat().st_size
+                self.send_response(HTTPStatus.OK)
+                media={'.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp'}.get(target.suffix.lower(),'text/plain; charset=utf-8')
+                self.send_header('Content-Type',media)
+                self.send_header('X-Content-Type-Options','nosniff')
+                self.send_header('Content-Length',str(remaining))
+                self.end_headers()
+                with target.open('rb') as stream:
+                    while remaining:
+                        chunk=stream.read(min(1024*1024,remaining))
+                        if not chunk:break
+                        self.wfile.write(chunk)
+                        remaining-=len(chunk)
+            except (BrokenPipeError,ConnectionResetError):pass
+            except (OSError,ValueError) as exc:self.write_json({'error':str(exc)},status=HTTPStatus.BAD_REQUEST)
+            return True
+        if parsed.path == '/api/agent-recognition':
+            try:
+                query=parse_qs(parsed.query)
+                self.write_json(agent_payload(PATHS,document=query.get('document',[''])[0],
+                    stage=query.get('stage',['facts'])[0],offset=int(query.get('offset',['0'])[0]),
+                    limit=int(query.get('limit',['50'])[0]),run_id=query.get('run',[''])[0]))
+            except (ValueError,TypeError) as exc:self.write_json({'error':str(exc)},status=HTTPStatus.BAD_REQUEST)
+            return True
+        if parsed.path in {'/api/agent-recognition/runs','/api/agent-recognition/workspace'}:
+            try:
+                from .agent_service import agent_runs,agent_workspace
+                query=parse_qs(parsed.query)
+                self.write_json(agent_runs(PATHS) if parsed.path.endswith('/runs') else agent_workspace(PATHS,
+                    run_id=query.get('run',[''])[0],offset=int(query.get('offset',['-1'])[0]),
+                    limit=int(query.get('limit',['40'])[0]),event=query.get('event',[None])[0]))
+            except (OSError,ValueError,TypeError) as exc:self.write_json({'error':str(exc)},status=HTTPStatus.BAD_REQUEST)
+            return True
         if parsed.path == '/api/document-recognition':
             try:
                 query=parse_qs(parsed.query)
@@ -508,6 +558,33 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
             return True
         return False
 
+    def _dossier_recognition(self, parsed: Any) -> bool:
+        if parsed.path != "/api/dossier-recognition":
+            return False
+        from . import dossier_recognition
+
+        try:
+            if self.command == "GET":
+                query = parse_qs(parsed.query)
+                slope_id = (query.get("slope_id") or [""])[0]
+                run_id = (query.get("run") or [""])[0]
+                payload = (dossier_recognition.dossier(PATHS, slope_id) if slope_id
+                           else dossier_recognition.available_runs(PATHS, run_id))
+            else:
+                body = self.read_json_body()
+                if not isinstance(body, dict) or body.get("operation") not in ("link", "adopt"):
+                    raise ValueError("请选择关联资料或写入档案")
+                action = dossier_recognition.link if body["operation"] == "link" else dossier_recognition.adopt
+                payload = action(PATHS, body)
+            self.write_json(payload)
+        except KeyError as exc:
+            self.write_json({"error": str(exc)}, status=HTTPStatus.NOT_FOUND)
+        except (dossier_recognition.DossierConflict, OSError) as exc:
+            self.write_json({"error": str(exc)}, status=HTTPStatus.CONFLICT)
+        except (TypeError, ValueError) as exc:
+            self.write_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+        return True
+
 
     def _get_schema(self, parsed: Any) -> bool:
         if parsed.path == "/api/schema":
@@ -658,6 +735,20 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
 
 
     def _post_pipeline(self, parsed: Any) -> bool:
+        if parsed.path == '/api/agent-recognition/assessment':
+            try:
+                from .agent_service import intake_assessments
+                body=self.read_json_body()
+                if not isinstance(body,dict):raise ValueError('请求必须为对象')
+                self.write_json(intake_assessments(PATHS,str(body.get('run_id',''))))
+            except (OSError,ValueError,TypeError) as exc:self.write_json({'error':str(exc)},status=HTTPStatus.BAD_REQUEST)
+            return True
+        if parsed.path == '/api/agent-recognition/stop':
+            try:
+                from .agent_service import stop_agent
+                self.write_json(stop_agent(PATHS,str(self.read_json_body().get('run_id',''))))
+            except (OSError,ValueError,TypeError) as exc:self.write_json({'error':str(exc)},status=HTTPStatus.BAD_REQUEST)
+            return True
         if parsed.path == "/api/documents/upload":
             self.handle_pdf_upload()
             return True
@@ -802,6 +893,8 @@ class SlopeKGHandler(SimpleHTTPRequestHandler):
 
     def pipeline_options(self, body: dict[str, Any]) -> dict[str, Any]:
         recognizer=normalize_recognizer(body.get('recognizer','basic'))
+        if recognizer=='agent':return agent_job_options(PATHS,body)
+        if 'agent_settings' in body or 'resume_run' in body:raise ValueError('自主设置需要选择自主 Agent')
         if recognizer=='document':return document_job_options(PATHS,body)
         if 'document_settings' in body:raise ValueError('整读设置需要选择整读 Document')
         if recognizer=='knowledge':

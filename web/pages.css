@@ -37,6 +37,7 @@ a { color: inherit; }
 .notice.info { border-color: #bfc8e9; background: #f0f3ff; color: #34427e; }
 .grid { display: grid; gap: 16px; }
 .grid.metrics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+#dashboardMetrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .grid.risk-metrics { grid-template-columns: repeat(6, minmax(0, 1fr)); margin-bottom: 16px; }
 .grid.two-col { grid-template-columns: minmax(0, 1.5fr) minmax(320px, .8fr); }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; box-shadow: 0 2px 8px rgba(32,57,61,.04); }
@@ -56,6 +57,27 @@ a { color: inherit; }
 .data-table th { color: var(--muted); font-weight: 700; background: #f8fafb; position: sticky; top: 0; }
 .data-table tr[data-slope-id] { cursor: pointer; }
 .data-table tr[data-slope-id]:hover, .data-table tr.selected { background: var(--accent-soft); }
+.slope-name {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.slope-name:hover { text-decoration: underline; }
+.dossier-review-dialog { width: min(900px, calc(100% - 24px)); max-height: 90vh; overflow: auto; border: 1px solid var(--line); border-radius: 12px; padding: 20px; color: var(--ink); }
+.dossier-review-dialog::backdrop { background: #13242d70; }
+.dossier-review-content { display: grid; gap: 10px; }
+.dossier-review-content > label { display: block; }
+.dossier-review-content > label > :is(select, textarea, input:not([type=checkbox])) { display: block; width: 100%; }
+.dossier-review-dialog [role=alert] { color: var(--danger); }
+.dossier-review-dialog td { min-width: 80px; }
+.dossier-review-dialog td:last-child { min-width: 180px; }
 .badge { display: inline-flex; border: 1px solid var(--line); padding: 2px 7px; border-radius: 999px; background: #fff; color: var(--muted); font-size: 11px; white-space: nowrap; }
 .badge.available, .badge.implemented, .badge.approved, .badge.ready_for_rule_engine { color: var(--accent); border-color: #9dd0c8; background: #edf9f6; }
 .badge.missing, .badge.not_ready, .badge.reserved_blocked { color: var(--danger); border-color: #e5aeb6; background: var(--danger-soft); }

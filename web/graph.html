@@ -6,11 +6,11 @@
     <title>关系图谱 - SlopeKG</title>
     <link rel="stylesheet" href="./pages.css?v=20261102-nav3" />
     <link rel="stylesheet" href="./styles.css?v=20260727-2" />
-  </head>
+  <link rel="stylesheet" href="./navigation.css?v=20261109-ui1"></head>
   <body>
     <header class="site-header"><div class="site-header-inner">
       <a class="site-brand" href="./index.html">SlopeKG<small>公路边坡风险知识图谱</small></a>
-      <nav class="site-nav"><a class="nav-debug" href="./recognition-debug.html">识别调试</a><a href="./index.html">总览</a><a href="./pdf-ingestion.html">PDF解析</a><a href="./slopes.html">边坡档案</a><a class="active" href="./graph.html">关系图谱</a><a href="./rules.html">规则库</a><a href="./data-status.html">数据与接口</a><a href="./risk.html">风险研判</a></nav>
+      <nav class="site-nav"><a class="nav-debug" href="./recognition-debug.html">识别调试</a><a href="./index.html">总览</a><a href="./pdf-ingestion.html">智能识别</a><a href="./slopes.html">边坡档案</a><a class="active" href="./graph.html">关系图谱</a><a href="./rules.html">规则库</a><a href="./data-status.html">数据与接口</a><a href="./risk.html">风险研判</a></nav>
     </div></header>
     <div class="app-shell graph-page-shell">
       <aside class="sidebar">
@@ -26,11 +26,10 @@
       </aside>
       <main class="graph-panel">
         <header class="topbar"><div><div id="routeSummary" class="eyebrow">正在读取路线范围</div><h2 id="viewTitle">边坡中心图谱</h2></div><div class="topbar-actions"><div class="zoom-controls"><span id="zoomValue" class="zoom-value">100%</span><button id="zoomFitBtn" type="button" onclick="window.slopeKgZoomFit && window.slopeKgZoomFit()">适配</button><button id="zoomCenterBtn" type="button" onclick="window.slopeKgCenterSelected && window.slopeKgCenterSelected()">定位</button></div><button id="resetBtn" type="button">重置视图</button><a href="/output/demo/share/SlopeKG_成果展示_离线版.html" download>离线HTML</a><a href="/output/demo/graph/demo.graphml" download>GraphML</a><a href="/output/demo/web/data/demo_graph.json" download>JSON</a></div></header>
-        <section class="graph-data-warning">当前为历史资料基线图谱。黄色“待审核”、缺失字段和未知设施状态不会被视为已确认事实。</section>
         <section class="metrics" id="metrics"></section><section class="canvas-wrap"><svg id="graphSvg" role="img" aria-label="知识图谱"></svg><div id="emptyState" class="empty-state" hidden>没有匹配的节点</div></section>
       </main>
       <aside class="detail-panel"><div class="section-title">详情</div><div id="detail" class="detail-content"><p>选择一个节点查看属性、关系和证据。</p></div></aside>
     </div>
-    <script src="./app.js?v=20260727-2"></script>
+    <script src="./navigation.js?v=20261109-ui1"></script><script src="./app.js?v=20260727-2"></script>
   </body>
 </html>

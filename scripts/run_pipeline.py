@@ -30,6 +30,7 @@ def main() -> None:
     parser.add_argument("--visual-settings", type=Path, help="JSON visual context/render/call budgets")
     parser.add_argument("--knowledge-settings", type=Path, help="JSON document-wide knowledge budgets (knowledge route only)")
     parser.add_argument("--document-settings", type=Path, help="JSON reconstruction/dossier budgets (document route only)")
+    parser.add_argument("--agent-settings", type=Path, help="JSON DSH Agent run controls (agent route only)")
     parser.add_argument("--prepare-only", action="store_true", help="Inventory PDFs locally without any model/API/OCR execution")
     args = parser.parse_args()
     try:
@@ -48,15 +49,16 @@ def main() -> None:
             visual_settings=json.loads(args.visual_settings.read_text(encoding="utf-8-sig")) if args.visual_settings else None,
             knowledge_settings=json.loads(args.knowledge_settings.read_text(encoding="utf-8-sig")) if args.knowledge_settings else None,
             document_settings=json.loads(args.document_settings.read_text(encoding="utf-8-sig")) if args.document_settings else None,
+            agent_settings=json.loads(args.agent_settings.read_text(encoding="utf-8-sig")) if args.agent_settings else None,
             prepare_only=args.prepare_only,
         )
     except (PipelineAlreadyRunningError, ValueError, FileNotFoundError) as exc:
         parser.error(str(exc))
     display = state
-    if normalize_recognizer(args.recognizer) in {"visual", "knowledge", "document"}:
+    if normalize_recognizer(args.recognizer) in {"visual", "knowledge", "document", "agent"}:
         from slopekg.config import PATHS
         display = {key: state[key] for key in ("recognizer", "route", "processing_status", "summary", "precision", "recall", "metric_note")}
-        folder = {'knowledge':'knowledge-recognition','document':'document-recognition'}.get(args.recognizer,'recognition')
+        folder = {'knowledge':'knowledge-recognition','document':'document-recognition','agent':'agent-recognition'}.get(args.recognizer,'recognition')
         display["result_file"] = str(PATHS.output_dir / folder / "run.json")
         display["planning_estimates"] = [d.get("planning_estimate") for d in state["documents"]]
     print(json.dumps(display, ensure_ascii=False, indent=2))

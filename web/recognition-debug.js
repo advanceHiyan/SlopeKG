@@ -4,18 +4,19 @@
   const el = id => document.getElementById(id);
   const labels = {completed:'完成',prepared:'仅本地准备',partial:'部分完成',failed:'失败',pending:'待审',rejected:'拒绝',
     running:'执行中',started:'已发起',queued:'排队中',source_aligned:'原文对齐 · 未独立复核',verified_model:'模型核验通过',
-    not_generated:'尚未生成',native_text:'原生文字',ocr_text:'OCR文字',unread_graphics:'图形待读',blank:'空白/无可用文字'};
+    model_supported:'模型支持 · 未独立复核',not_generated:'尚未生成',native_text:'原生文字',ocr_text:'OCR文字',unread_graphics:'图形待读',blank:'空白/无可用文字'};
   let catalog = null, stage = 'input', rows = [], offset = 0, total = 0, generation = 0, catalogBusy=false;
   let activeCall = null, pinned = null, busy = false, profiles = [], files = [], pollTimer, refreshTimer, searchTimer, callGeneration=0;
   let pageRequest=0,pageController=null,pageBlobUrl=null,currentPreviewPage=1,previewBox=null,recordsBusy=false;
   let selectedRecord=null,loadedPreview=null,previewMode='record';
   let recordsContext=null;
-  const routeLabels={basic:'基读 Basic',knowledge:'知联 Knowledge',visual:'视读 Visual'};
-  const methodModels={knowledge:'deepseek-knowledge',visual:'deepseek'};
+  const routeLabels=window.SlopeKGNav?.methodLabels
+    ?? Object.fromEntries(Array.from(el('route').options, option => [option.value, option.text]));
+  const methodModels={knowledge:'deepseek-knowledge',visual:'deepseek',document:'deepseek-knowledge'};
   const query = new URLSearchParams(location.search);
   // Plain navigation links restore the last workspace in this tab. Explicit links win.
   if(!query.size){try{const saved=JSON.parse(sessionStorage.getItem('slopekg-debug-context')||'{}');for(const [k,v] of Object.entries(saved))query.set(k,v);}catch(_){}}
-  if (['knowledge','visual','basic'].includes(query.get('route'))) el('route').value = query.get('route');
+  if (['knowledge','visual','basic','document'].includes(query.get('route'))) el('route').value = query.get('route');
   if(query.get('run')&&query.get('run')!=='live')el('run').add(new Option(query.get('run'),query.get('run'),true,true));
   stage=query.get('stage')||'input';
   if(query.has('q'))el('search').value=query.get('q');
@@ -25,7 +26,7 @@
   new ResizeObserver(()=>document.documentElement.style.setProperty('--header-height',`${header.getBoundingClientRect().height}px`)).observe(header);
   function rememberContext(){
     const value={route:el('route').value,run:el('run').value||'live',document:el('document').value,stage,q:el('search').value,page:el('page').value,offset:String(offset),
-      tab:document.querySelector('[data-view].active')?.dataset.view||query.get('tab')||'process'};
+      tab:document.querySelector('[data-view].active')?.dataset.view||query.get('tab')||'process',...(window.SlopeKGNav?.returnTo?{return_to:window.SlopeKGNav.returnTo}:{})};
     try{sessionStorage.setItem('slopekg-debug-context',JSON.stringify(value));}catch(_){}
     history.replaceState(null,'',`?${new URLSearchParams(value)}`);
   }
@@ -35,7 +36,9 @@
     el('modelLaunch').hidden=basic;el('basicLaunch').hidden=!basic;el('ocrLabel').hidden=route!=='knowledge';
     el('prepare').hidden=basic;el('start').textContent=basic?'运行基读 · 更新基础图谱':'运行并记录';
     el('launchPanel').querySelector('summary').textContent=`新建${routeLabels[route]}任务 · ${basic?'本地解析与规则抽取':'保存完整模型输入输出'}`;
-    el('allowText').textContent=route==='visual'?'允许把上述资料原文和页面图像发送到所选模型接口':'允许把上述资料原文发送到所选模型接口（不发送原页图像）';
+    el('allowText').textContent=['visual','document'].includes(route)?'允许把上述资料原文和页面图像发送到所选模型接口':'允许把上述资料原文发送到所选模型接口（不发送原页图像）';
+    el('recordInputs').checked=route==='document'||el('recordInputs').checked;
+    el('launchHelp').textContent=route==='document'?'新任务处理所选PDF整份文件，页面筛选只影响查看，不限制运行范围。默认保存完整模型交互；开放历史样例只读，不会重新发送。':'选择方法与资料后运行。新模型任务保存提示词、请求正文、图像和供应商响应原文；历史缺失保持缺失。';
     if(chooseModel&&profiles.some(p=>p.id===methodModels[route]))el('model').value=methodModels[route];
     endpoint();
   }
@@ -139,6 +142,7 @@
       el('routeSummary').textContent=`当前：${routeLabels[el('route').value]} · 本次记录${data.documents.length}份资料 · ${data.stages.length}个处理步骤 · 可打开${data.runs.filter(r=>r.id.startsWith('history-')).length}条独立历史。${el('route').value==='basic'?'本方法没有大模型调用。':'模型输入输出请进入左侧对应步骤；旧记录未保存的请求不会补造。'}`;
       rememberContext();
       window.dispatchEvent(new Event('debugcontextchange'));
+      window.dispatchEvent(new CustomEvent('debugcatalogloaded',{detail:data}));
       if(el('document').value){el('openPdf').href=sourceLink();el('openPdf').hidden=false;await loadRecords();}
       else clearRecords('当前没有记录。可新建调试任务，或从“记录来源”选择已开放样例。');
     }catch(e){if(current!==generation)return;catalogBusy=false;catalog=null;el('document').innerHTML='<option value="">记录读取失败</option>';el('runStatus').textContent='暂不可读';el('version').textContent='';el('showPage').disabled=true;renderStages();clearRecords('记录读取失败，请刷新。');error(describeError(e));}
@@ -187,6 +191,7 @@
       if(trace)el('traceCoverage').textContent=trace.calls?`整份资料保存了${trace.calls}次调用记录；输入文件 ${trace.saved_inputs}/${trace.calls}，原始交互文件 ${trace.saved_raw_exchanges}/${trace.calls}（文件可能仅有请求，是否收到响应见详情）。${trace.saved_raw_exchanges<trace.calls?'部分历史仅有解析/校验后的缓存结果，不能当作模型原话；缺失原始响应无法补回。':'可打开每次调用检查完整请求和原始响应。'}`:'未发现可归属到此资料的已保存调用；请结合处理状态检查是否仅完成本地准备。';
       recordsBusy=false;recordsContext=viewContext;selectedRecord=previousSelection;renderRecords();syncRecordPreview();error();
       window.dispatchEvent(new Event('debugrecordstatechange'));
+      window.dispatchEvent(new CustomEvent('debugrecordsloaded',{detail:{rows,stage,catalog}}));
       if(reveal){el('records').scrollIntoView({block:'start'});toast(`已切换到第${Math.floor(offset/25)+1}/${Math.ceil(total/25)}批记录`);}
     }catch(e){if(current!==generation)return;recordsBusy=false;clearRecords('中间记录暂不可读');el('recordNote').textContent='';error(e.message);window.dispatchEvent(new Event('debugrecordstatechange'));}
   }
@@ -253,7 +258,7 @@
       const data=await getJson(path);if(!el('callDialog').open||currentCall!==callGeneration)return;activeCall=data;
       el('callNotes').textContent=(data.notes||[]).join('\n')||'供应商响应在JSON解析与校验之前保存。请求正文不含鉴权请求头。';
       const inp=data.input,cache=data.cache;
-      el('callBody').innerHTML=`<p class="muted">调用标识 ${esc(key)}</p><div class="call-columns"><section><h3>模型输入</h3>${panel('系统提示词 · system',inp?.system,true)}${panel('完整用户提示词 · prompt',inp?.prompt,true)}${panel('模型配置与图片清单',inp?{model:inp.model,images:inp.images,input_capture:inp.input_capture}:null)}</section><section><h3>模型输出</h3>${panel('校验前解析对象 · raw_answer / invalid_answer',cache?.raw_answer??cache?.invalid_answer,true)}${panel('校验后的结果 · answer',cache?.answer,true)}${panel('调用回执、用量和失败原因',cache?{status:cache.status,error:cache.error,receipt:cache.receipt,attempts:cache.attempts}:null)}</section></div>`;
+      el('callBody').innerHTML=`<p class="muted">调用标识 ${esc(key)}</p><div class="call-columns"><section><h3>模型输入</h3>${panel('系统提示词 · system',inp?.system,true)}${panel('完整用户提示词 · prompt',inp?.prompt,true)}${panel('模型配置与图片清单',inp?{model:inp.model,images:inp.images,input_capture:inp.input_capture}:null)}</section><section><h3>模型输出</h3>${panel(el('route').value==='document'?'缓存保留的解析对象 · 可能含校验改写':'校验前解析对象 · raw_answer / invalid_answer',cache?.raw_answer??cache?.invalid_answer??cache?.answer?._document_raw,true)}${panel('校验后的结果 · answer',cache?.answer?._document_validated??cache?.answer,true)}${panel('调用回执、用量和失败原因',cache?{status:cache.status,error:cache.error,receipt:cache.receipt,attempts:cache.attempts}:null)}</section></div>`;
       for(const img of data.image_previews||[])el('callBody').insertAdjacentHTML('beforeend',`<details class="json-panel"><summary>已保存输入图像 ${img.index+1} · ${esc(img.label)}</summary>${img.available?`<img class="model-image" alt="已保存请求图像 ${img.index+1}" src="${esc(img.url)}">`:'历史未保存该图像文件'}</details>`);
       for(const [i,attempt] of (data.exchange?.attempts||[]).entries()){
         const response=attempt.response,choices=response?.choices||[],message=choices[0]?.message;
@@ -281,7 +286,7 @@
     for(const [id,r] of before)if(!after.has(id))changes.push({id,change:'当前页未出现',before:r});
     el('comparison').hidden=false;el('comparison').innerHTML=`固定：${esc(pinned.label)}<br>当前：${esc(el('route').value+' / '+el('run').value+' / '+stage)}<br>仅比较所显示这一页记录：${changes.length}项差异。不同筛选或翻页会影响此对照。${panel('查看完整差异',changes)}`;
   }
-  function launchActions() {const basic=el('route').value==='basic',valid=!busy&&(basic||!!el('inputFile').value&&!!el('model').value);el('prepare').disabled=!valid;el('start').disabled=!valid||!basic&&!el('allow').checked;for(const id of ['route','inputFile','model','maxCalls','concurrency','ocrPages','recordInputs','allow','basicOcr','basicDevice','basicReuse'])el(id).disabled=busy;for(const b of document.querySelectorAll('[data-route]'))b.disabled=busy;el('basicOcr').disabled=busy||el('basicReuse').checked;el('basicDevice').disabled=busy||el('basicReuse').checked;}
+  function launchActions() {const basic=el('route').value==='basic',valid=!busy&&(basic||!!el('inputFile').value&&!!el('model').value);el('prepare').disabled=!valid;el('start').disabled=!valid||!basic&&!el('allow').checked;for(const id of ['route','inputFile','model','maxCalls','concurrency','ocrPages','recordInputs','allow','basicOcr','basicDevice','basicReuse'])el(id).disabled=busy;for(const b of document.querySelectorAll('[data-route]'))b.disabled=busy;el('basicOcr').disabled=busy||el('basicReuse').checked;el('basicDevice').disabled=busy||el('basicReuse').checked;el('recordInputs').disabled=busy||el('route').value==='document';}
   function endpoint() {const p=profiles.find(p=>p.id===el('model').value);el('endpoint').textContent=p?`${p.model} · ${p.endpoint}`:'暂无可用模型';launchActions();}
   async function loadLaunch() {
     const results=await Promise.allSettled([getJson('/api/recognition/profiles'),getJson('/api/recognition/documents')]);
@@ -301,7 +306,8 @@
       if(route==='basic')body={recognizer:route,ocr_pages:integer('basicOcr',0,1000),ocr_device:el('basicDevice').value,reuse_parsed:el('basicReuse').checked};
       else{const settings={max_calls:integer('maxCalls',1,10000),model_concurrency:integer('concurrency',1,16),record_model_inputs:el('recordInputs').checked};
         if(route==='knowledge')settings.ocr_pages=integer('ocrPages',0,1000);
-        body={recognizer:route,input_pdfs:[el('inputFile').value],model_profile:el('model').value,prepare_only:prepared,allow_external:!prepared&&el('allow').checked,[route==='knowledge'?'knowledge_settings':'visual_settings']:settings};}
+        if(route==='document')settings.record_model_inputs=true;
+        body={recognizer:route,input_pdfs:[el('inputFile').value],model_profile:el('model').value,prepare_only:prepared,allow_external:!prepared&&el('allow').checked,[{knowledge:'knowledge_settings',document:'document_settings'}[route]||'visual_settings']:settings};}
       await requestJson('/api/pipeline/jobs',{method:'POST',body});
       el('run').value='live';clearTimeout(pollTimer);await pollJob();
     }catch(e){busy=false;launchActions();if(e.status===409){toast('已有任务运行中，正在跟踪该任务');await pollJob();}else error(e.message);}
@@ -332,13 +338,13 @@
   el('pdfReturnToRecord').onclick=()=>selectedRecord&&selectRecord(selectedRecord.index,{force:true,open:true});
   el('pageZoom').onchange=resizePage;window.addEventListener('resize',()=>{if(el('pageDialog').open)resizePage();});
   el('pin').onclick=()=>{pinned={rows:structuredClone(rows),label:`${el('route').value} / ${el('run').value} / ${stage} / 第${offset+1}项起`};el('compare').disabled=false;toast('已固定当前页记录；刷新或换记录后可比较');};el('compare').onclick=compare;
-  el('autoRefresh').onchange=()=>{clearInterval(refreshTimer);if(el('autoRefresh').checked)refreshTimer=setInterval(()=>{if(!el('callDialog').open&&!el('pageDialog').open&&!recordsBusy)loadRecords();},3000);};
+  el('autoRefresh').onchange=()=>{clearInterval(refreshTimer);if(el('autoRefresh').checked)refreshTimer=setInterval(()=>{if(!el('callDialog').open&&!el('pageDialog').open&&!document.querySelector('#documentTrace[open]')&&!recordsBusy)loadRecords();},3000);};
   el('closeCall').onclick=()=>el('callDialog').close();el('callDialog').addEventListener('close',()=>{callGeneration++;});el('downloadCall').onclick=()=>activeCall&&download(`model-exchange-${activeCall.cache_key}.json`,activeCall);el('copyCall').onclick=()=>activeCall&&copy(activeCall);
   el('prepare').onclick=()=>start(true);el('start').onclick=()=>start(false);el('model').onchange=()=>{el('allow').checked=false;endpoint();};el('allow').onchange=launchActions;
   el('basicReuse').onchange=launchActions;
   window.addEventListener('beforeunload',()=>{clearTimeout(pollTimer);clearInterval(refreshTimer);pageController?.abort();if(pageBlobUrl)URL.revokeObjectURL(pageBlobUrl);});
   window.SlopeKGDebug={context:()=>({route:el('route').value,run_id:el('run').value||'live',document:recordsReady()?el('document').value:''}),profiles:()=>profiles,
-    toast,error,panel,describeError,refresh:loadCatalog,rememberContext,routeLabel:r=>routeLabels[r]||r,initialView:query.get('tab'),
+    toast,error,panel,describeError,refresh:loadCatalog,rememberContext,showCall,showPage,download,routeLabel:r=>routeLabels[r]||r,initialView:query.get('tab'),
     openSource:async(source,{targetStage='input',q='',page=0}={})=>{
       el('route').value=source.route;el('allow').checked=false;methodUI({chooseModel:true});el('run').innerHTML='';el('run').add(new Option(source.run_id,source.run_id,true,true));stage=targetStage;offset=0;el('search').value=q;el('page').value=String(page);el('failures').checked=false;
       await loadCatalog({reset:true});if(source.document&&catalog?.documents.some(d=>d.id===source.document)){el('document').value=source.document;await loadRecords();}

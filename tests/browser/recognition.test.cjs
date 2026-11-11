@@ -44,7 +44,7 @@ async function workspace(t) {
     }
     return route.fulfill({status:404,body:'not found'});
   });
-  await page.goto('http://slopekg.test/web/pdf-ingestion.html');
+  await page.goto('http://slopekg.test/web/recognition-methods.html');
   await page.locator('#recognitionFiles input').waitFor();
   return {page,requests,state};
 }

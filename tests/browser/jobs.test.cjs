@@ -35,7 +35,7 @@ async function jobPage(t, kind, failure, initialStatus = 'running') {
     }
     return route.fulfill({ status: 404, body: 'Not found' });
   });
-  await page.goto(`http://slopekg.test/web/${kind === 'rules' ? 'rule-sources' : 'pdf-ingestion'}.html`);
+  await page.goto(`http://slopekg.test/web/${kind === 'rules' ? 'rule-sources' : 'pdf-library'}.html`);
   return { page, state };
 }
 
