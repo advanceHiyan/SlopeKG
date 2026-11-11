@@ -79,18 +79,6 @@ def orientation_candidates(text: str) -> list[dict[str, Any]]:
     return output
 
 
-def missing_orientations(samples: list[dict[str, Any]], planes: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    known = {(plane_role(str(p.get("name", ""))), p.get("dip_direction"), p.get("dip_angle")) for p in planes}
-    missing = []
-    for sample in samples:
-        for item in orientation_candidates(re.sub(r"\s+", " ", str(sample.get("text", "")))):
-            if item['station_hint'] and sample.get('station_context') and item['station_hint'] != sample['station_context']:
-                continue
-            if item["role"] and (item["role"], item["dip_direction"], item["dip_angle"]) not in known:
-                missing.append({**item, "document_id": sample.get("document_id"), "page": sample.get("page")})
-    return missing
-
-
 def material_mentions(text: str) -> list[dict[str, Any]]:
     """Keep cover/fill/sliding-bed roles separate from slope-body mentions."""
     output = []

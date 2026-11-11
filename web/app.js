@@ -198,40 +198,10 @@ function bindEvents() {
     render();
   });
 
-  const runPipelineButton = $("#runPipelineBtn");
-  if (runPipelineButton) runPipelineButton.addEventListener("click", runPipeline);
   window.slopeKgZoomFit = () => fitGraphView();
   window.slopeKgCenterSelected = () => centerSelectedNode();
   bindGraphNavigation();
   bindViewportShortcuts();
-}
-
-async function runPipeline() {
-  const button = $("#runPipelineBtn");
-  const msg = $("#pipelineMessage");
-  const ocrPages = Number($("#ocrPages").value || 0);
-  button.disabled = true;
-  msg.textContent = "正在解析 PDF、渲染 OCR 页并生成图谱...";
-  try {
-    const response = await fetch("/api/pipeline/run", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ocr_pages: ocrPages, parse_mode: "basic" }),
-    });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
-    state.status = payload;
-    state.graph = await fetchGraph();
-    state.ocrTasks = await fetchParsedRows("ocr_tasks");
-    const allTypes = [...new Set(state.graph.nodes.map((n) => n.type))];
-    state.enabledTypes = new Set(allTypes);
-    msg.textContent = `完成：${payload.parsed.pages} 页元信息，${payload.parsed.text_blocks} 个文本块，${payload.parsed.ocr_tasks} 个 OCR 任务。`;
-    render();
-  } catch (error) {
-    msg.textContent = `运行失败：${error.message}`;
-  } finally {
-    button.disabled = false;
-  }
 }
 
 function render() {
@@ -674,13 +644,6 @@ function clientToLocal(clientX, clientY) {
   if (!svg) return null;
   const box = svg.getBoundingClientRect();
   return { x: clientX - box.left, y: clientY - box.top };
-}
-
-function worldToLocal(point) {
-  return {
-    x: point.x * state.view.scale + state.view.x,
-    y: point.y * state.view.scale + state.view.y,
-  };
 }
 
 function graphBounds(nodes, layout) {
