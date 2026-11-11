@@ -151,10 +151,10 @@ test('all five recognition methods share names, selection and the fifth route ta
   });
   await page.goto('http://slopekg.test/web/index.html');
   await page.locator('.app-nav').getByRole('link', { name: '识别方法', exact: true }).click();
-  const names = ['基读 Basic', '知联 Knowledge', '视读 Visual', '整读 Document', '智能识别'];
+  const names = ['基读 Basic', '知联 Knowledge（暂时归档）', '视读 Visual（暂时归档）', '整读 Document', '智能识别'];
   const methods = page.locator('.method-nav');
-  const method = name => methods.getByRole('link', { name, exact: true });
-  assert.equal(await method('视读 Visual').getAttribute('aria-current'), 'page');
+  const method = name => methods.getByRole('link', { name: names.find(label => label.startsWith(name)), exact: true });
+  assert.equal(await method('基读 Basic').getAttribute('aria-current'), 'page');
   await page.evaluate(() => sessionStorage.setItem('slopekg-agent-context', JSON.stringify({
     url: '/web/pdf-ingestion.html?run=saved-task&tab=results',
   })));

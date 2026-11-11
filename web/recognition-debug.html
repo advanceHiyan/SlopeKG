@@ -8,15 +8,15 @@
 <details class="method-section method-explanation"><summary>识别方法说明</summary>
 <div class="method-cards" id="methodCards">
 <button type="button" data-route="basic" aria-pressed="false"><strong>基读 Basic</strong><span>PDF文字、表格 → 本地OCR → 规则提取</span><small>本地运行，不调用大模型；产生基础图谱。</small></button>
-<button type="button" data-route="knowledge" aria-pressed="true"><strong>知联 Knowledge</strong><span>文字与OCR → 对象发现与关联 → 知识重组</span><small>模型读取文字，不读取原页图像；保留候选。</small></button>
-<button type="button" data-route="visual" aria-pressed="false"><strong>视读 Visual</strong><span>PDF原页图像 → 版面与区域细读 → 核验</span><small>模型直接读取图像；保留候选与未读区域。</small></button>
+<button type="button" data-route="knowledge" aria-pressed="true"><strong>知联 Knowledge（暂时归档）</strong><span>文字与OCR → 对象发现与关联 → 知识重组</span><small>模型读取文字，不读取原页图像；保留候选。</small></button>
+<button type="button" data-route="visual" aria-pressed="false"><strong>视读 Visual（暂时归档）</strong><span>PDF原页图像 → 版面与区域细读 → 核验</span><small>模型直接读取图像；保留候选与未读区域。</small></button>
 <button type="button" data-route="document" aria-pressed="false"><strong>整读 Document</strong><span>内容恢复 → 重合分区 → 分批提取与原页复核</span><small>沿一条候选追查来源、上下文和模型交互。</small></button>
 </div><p id="routeSummary" class="muted" role="status"></p>
 </details>
 <nav class="debug-view-switch" aria-label="调试工作区"><button class="active" data-view="process">识别过程</button><button data-view="tests">数据集与测试点</button><button data-view="history">历史记录与对照</button></nav>
 <div id="processView">
 <section class="card debug-controls" aria-label="选择调试记录">
-<label>当前识别方法<select id="route"><option value="basic">基读 Basic</option><option value="knowledge" selected>知联 Knowledge</option><option value="visual">视读 Visual</option><option value="document">整读 Document</option></select></label>
+<label>当前识别方法<select id="route"><option value="basic">基读 Basic</option><option value="knowledge" selected>知联 Knowledge（暂时归档）</option><option value="visual">视读 Visual（暂时归档）</option><option value="document">整读 Document</option></select></label>
 <label>记录来源<select id="run"><option value="live">当前生产记录</option></select></label>
 <label class="document-control">资料<select id="document"><option value="">正在读取…</option></select></label>
 <div class="debug-status"><span id="runStatus">读取中</span><small id="version"></small></div>
@@ -63,7 +63,7 @@
 <div class="debug-filter"><label class="search-control">数据集名称<input id="datasetName" maxlength="160"></label><button id="fillPointTemplate" class="button ghost">填入格式示例</button></div>
 <label>测试点JSON<textarea id="datasetJson" spellcheck="false" aria-label="测试点JSON"></textarea></label><label class="check"><input id="datasetOpen" type="checkbox">确认当前原件属于开放开发资料，不是隐藏或曾作为隐藏集的资料</label><button id="saveDataset" class="button secondary">保存新数据集版本</button><p id="datasetSaveStatus" class="muted"></p>
 </details></section>
-<section id="historyView" hidden><div class="card"><div class="debug-title"><div><h2>历史记录</h2><p class="muted">原件、配置、完整模型输入输出、中间结果及测试定义分别冻结保存。打开和导出均不重新调用模型。快照保存完成与识别处理完成分别显示。</p></div><button id="reloadHistory" class="button ghost">刷新历史</button></div><div class="debug-filter"><label>识别方法<select id="historyRoute"><option value="">全部方法</option><option value="document">整读 Document</option><option value="basic">基读 Basic</option><option value="knowledge">知联 Knowledge</option><option value="visual">视读 Visual</option></select></label><label class="search-control">搜索记录<input id="historySearch" type="search" placeholder="名称、标签、数据集、状态或记录ID"></label><button id="searchHistory" class="button ghost">搜索</button></div><div id="historyList"></div><div class="debug-pagination"><button id="historyPrev" class="button ghost" disabled>上一批历史</button><span id="historyPage"></span><button id="historyNext" class="button ghost" disabled>下一批历史</button></div></div>
+<section id="historyView" hidden><div class="card"><div class="debug-title"><div><h2>历史记录</h2><p class="muted">原件、配置、完整模型输入输出、中间结果及测试定义分别冻结保存。打开和导出均不重新调用模型。快照保存完成与识别处理完成分别显示。</p></div><button id="reloadHistory" class="button ghost">刷新历史</button></div><div class="debug-filter"><label>识别方法<select id="historyRoute"><option value="">全部方法</option><option value="document">整读 Document</option><option value="basic">基读 Basic</option><option value="knowledge">知联 Knowledge（暂时归档）</option><option value="visual">视读 Visual（暂时归档）</option></select></label><label class="search-control">搜索记录<input id="historySearch" type="search" placeholder="名称、标签、数据集、状态或记录ID"></label><button id="searchHistory" class="button ghost">搜索</button></div><div id="historyList"></div><div class="debug-pagination"><button id="historyPrev" class="button ghost" disabled>上一批历史</button><span id="historyPage"></span><button id="historyNext" class="button ghost" disabled>下一批历史</button></div></div>
 <div class="card history-compare"><h2>两次记录对照</h2><p class="muted">固定左侧记录，再选择右侧记录。比较所选测试点的结果与命中事实；定义版本不同会明确提示。</p><div class="debug-filter"><label class="search-control">左侧记录ID<input id="compareLeft" readonly></label><label class="search-control">右侧记录ID<input id="compareRight" readonly></label><button id="compareHistory" class="button secondary">比较两次记录</button></div><div id="historyComparison"></div></div>
 </section>
 </main>

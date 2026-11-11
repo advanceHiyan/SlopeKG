@@ -18,14 +18,14 @@
   const returnTo = localPage(params.get('return_to') || '');
   const methods = [
     ['basic', 'recognition-methods.html?method=basic', '基读 Basic'],
-    ['knowledge', 'knowledge-recognition.html', '知联 Knowledge'],
-    ['visual', 'recognition-methods.html?method=visual', '视读 Visual'],
+    ['knowledge', 'knowledge-recognition.html', '知联 Knowledge（暂时归档）'],
+    ['visual', 'recognition-methods.html?method=visual', '视读 Visual（暂时归档）'],
     ['document', 'document-recognition.html', '整读 Document'],
     ['agent', 'pdf-ingestion.html', '智能识别'],
   ];
   const methodLabels = Object.fromEntries(methods.map(([id, , label]) => [id, label]));
   const currentMethod = page === 'recognition-methods.html'
-    ? (params.get('method') === 'basic' ? 'basic' : 'visual')
+    ? (params.get('method') === 'visual' ? 'visual' : 'basic')
     : methods.find(([, file]) => file === page)?.[0];
   window.SlopeKGNav = { localPage, withReturn, returnTo, methodLabels, currentMethod };
   const oldBack = document.getElementById('recognitionBack');
@@ -79,6 +79,12 @@
         a.setAttribute('aria-current', 'page');
       }
       methodNav.append(a);
+    }
+    if (['knowledge', 'visual'].includes(currentMethod)) {
+      const notice = document.createElement('p');
+      notice.className = 'notice';
+      notice.textContent = '本路线暂时归档：保留历史记录和已有功能，暂不安排功能更新。新资料请优先使用智能识别、整读或基读。';
+      methodNav.after(notice);
     }
   }
   document.addEventListener('click', event => {
